@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { AntiplateletQuestion } from '../data/antiplateletQuizData';
 import { ChemicalStructure, ExamModeStatus, RankingItem } from '../types/reviewModule';
 import { StructureDragDropMatch } from './StructureDragDropMatch';
-import { QuestionStructureSidePanel } from './QuestionStructureSidePanel';
 import {
   ChevronDown,
   ChevronUp,
@@ -252,7 +251,6 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
 
     return matched;
   }, [question, allSectionStructures, allModuleStructures]);
-  const showSidePanel = structuresToAnalyze.length > 0 && question.type !== 'matching';
 
   // Helper to render the comprehensive statement-by-statement table
   const renderSubStatementsTable = () => {
@@ -492,18 +490,20 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
         <div className="flex items-start gap-3 flex-1 min-w-0">
           {/* Question Number Badge */}
           <span className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 min-w-[34px] h-[30px] rounded-md flex items-center justify-center font-mono font-bold text-xs shrink-0 mt-0.5 shadow-xs px-2">
-            {question.questionNumberLabel || `Q${question.id}`}
+            {question.questionNumberLabel
+              ? question.questionNumberLabel.startsWith('Question ')
+                ? `Q${question.questionNumberLabel.replace('Question ', '')}`
+                : question.questionNumberLabel
+              : `Q${question.id}`}
           </span>
 
           {/* Question Stem Text */}
           <div className="space-y-1.5 flex-1 min-w-0">
-            {question.category && (
-              <div className="flex items-center gap-2">
-                <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {question.category}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                {question.category || 'Pharmacology Review'}
+              </span>
+            </div>
             <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 leading-snug">
               {question.questionStem}
             </h3>
@@ -573,17 +573,9 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 2. QUESTION BODY (WORKSPACE & OPTIONAL SIDE STRUCTURE PANEL)        */}
+      {/* 2. QUESTION BODY                                                   */}
       {/* ------------------------------------------------------------------ */}
-      <div
-        className={
-          showSidePanel
-            ? 'p-4 sm:p-5 lg:flex lg:flex-row lg:items-start gap-6'
-            : 'p-4 sm:p-5 space-y-4'
-        }
-      >
-        {/* Main Content Area */}
-        <div className={showSidePanel ? 'flex-1 min-w-0 space-y-4' : 'space-y-4'}>
+      <div className="p-4 sm:p-5 space-y-4">
           {/* MATCHING TYPE */}
           {question.type === 'matching' && question.matchingTargets && (
             <StructureDragDropMatch
@@ -898,113 +890,12 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
             </div>
           )}
 
-          {/* On Mobile Screens: Render side panel directly below statements if space is narrow */}
-          {showSidePanel && (
-            <div className="block lg:hidden pt-2">
-              <QuestionStructureSidePanel
-                structures={structuresToAnalyze}
-                allModuleStructures={allModuleStructures || allSectionStructures}
-                hideDrugName={hideDrugNames}
-                examModeActive={examModeActive}
-                onInspectStructure={onInspectStructure}
-                questionNumberLabel={question.questionNumberLabel}
-                globalActivePharmacophores={globalActivePharmacophores}
-                globalHoveredPharmacophoreId={globalHoveredPharmacophoreId}
-                focusMatchingOnly={focusMatchingOnly}
-              />
-            </div>
-          )}
-
-          {/* ACCORDION EXPANDED CONTENT INSIDE LEFT COLUMN (When side panel is active & not in active Exam Mode) */}
-          {showSidePanel && isOpen && !examModeActive && (
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-4 animate-slideDown">
-              {/* For Multiple Choice: Correct Choice Banner + All Option Explanations */}
-              {question.type === 'multiple-choice' &&
-                question.correctIndex !== undefined && (
-                  <div className="space-y-2.5">
-                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-lg text-xs text-emerald-950 dark:text-emerald-200">
-                      <span className="font-bold uppercase tracking-wider block text-[11px] text-emerald-700 dark:text-emerald-400 mb-1">
-                        Correct Answer:
-                      </span>
-                      <div className="font-semibold text-sm">
-                        {question.options
-                          ? question.options[question.correctIndex]
-                          : ''}
-                      </div>
-                    </div>
-
-                    {question.optionExplanations &&
-                      question.optionExplanations.length > 0 && (
-                        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-1.5 text-xs">
-                          <span className="font-bold uppercase tracking-wider text-[10px] text-slate-500 block">
-                            Option-by-Option Breakdown:
-                          </span>
-                          {question.optionExplanations.map((exp, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-start gap-2 text-slate-700 dark:text-slate-300"
-                            >
-                              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 shrink-0">
-                                {String.fromCharCode(65 + idx)}:
-                              </span>
-                              <span>{exp}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                  </div>
-                )}
-
-              {/* For Sub-Statements: True/False Table with Rationale & User Choices */}
-              {question.type === 'sub-statements' &&
-                question.subStatements &&
-                renderSubStatementsTable()}
-
-              {/* Medicinal Chemistry / MOA In-Depth Explanation Box */}
-              <div className="p-4 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/60 rounded-xl text-xs text-slate-700 dark:text-slate-300 space-y-2">
-                <div className="flex items-center gap-1.5 font-bold text-blue-950 dark:text-blue-200">
-                  <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span>Medicinal Chemistry / MOA Rationale:</span>
-                </div>
-                <p className="leading-relaxed">{question.overallExplanation}</p>
-              </div>
-
-              {/* High-Yield Exam Pearl */}
-              {question.highYieldPearl && (
-                <div className="p-3 bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs text-amber-950 dark:text-amber-200 flex items-start gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="block font-semibold">High-Yield Takeaway:</strong>
-                    <span>{question.highYieldPearl}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Right Side Structure Reference Panel (Visible on Desktop lg: screens sticky to the side) */}
-        {showSidePanel && (
-          <div className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-20 self-start">
-            <QuestionStructureSidePanel
-              structures={structuresToAnalyze}
-              allModuleStructures={allModuleStructures || allSectionStructures}
-              hideDrugName={hideDrugNames}
-              examModeActive={examModeActive}
-              onInspectStructure={onInspectStructure}
-              questionNumberLabel={question.questionNumberLabel}
-              globalActivePharmacophores={globalActivePharmacophores}
-              globalHoveredPharmacophoreId={globalHoveredPharmacophoreId}
-              focusMatchingOnly={focusMatchingOnly}
-            />
-          </div>
-        )}
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* 3. ACCORDION EXPANDED CONTENT (When no side panel is shown)        */}
+      {/* 3. ACCORDION EXPANDED CONTENT (ANSWER KEY & EXPLANATIONS)          */}
       {/* ------------------------------------------------------------------ */}
-      {!showSidePanel && isOpen && !examModeActive && (
+      {isOpen && !examModeActive && (
         <div className="p-4 sm:p-5 bg-slate-50/80 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 space-y-4 animate-slideDown">
           {/* For Matching Questions: Full Solution Key Table */}
           {question.type === 'matching' && question.matchingTargets && (
@@ -1070,16 +961,40 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
             </div>
           )}
 
-          {/* For Multiple Choice: Correct Choice Banner */}
+          {/* For Multiple Choice: Correct Choice Banner + Option Explanations */}
           {question.type === 'multiple-choice' &&
             question.correctIndex !== undefined && (
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-lg text-xs text-emerald-950 dark:text-emerald-200">
-                <span className="font-bold uppercase tracking-wider block text-[11px] text-emerald-700 dark:text-emerald-400 mb-1">
-                  Correct Answer:
-                </span>
-                <div className="font-semibold text-sm">
-                  {question.options ? question.options[question.correctIndex] : ''}
+              <div className="space-y-2.5">
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-lg text-xs text-emerald-950 dark:text-emerald-200">
+                  <span className="font-bold uppercase tracking-wider block text-[11px] text-emerald-700 dark:text-emerald-400 mb-1">
+                    Correct Answer:
+                  </span>
+                  <div className="font-semibold text-sm">
+                    {question.options
+                      ? question.options[question.correctIndex]
+                      : ''}
+                  </div>
                 </div>
+
+                {question.optionExplanations &&
+                  question.optionExplanations.length > 0 && (
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-1.5 text-xs">
+                      <span className="font-bold uppercase tracking-wider text-[10px] text-slate-500 block">
+                        Option-by-Option Breakdown:
+                      </span>
+                      {question.optionExplanations.map((exp, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-2 text-slate-700 dark:text-slate-300"
+                        >
+                          <span className="font-mono font-bold text-slate-900 dark:text-slate-100 shrink-0">
+                            {String.fromCharCode(65 + idx)}:
+                          </span>
+                          <span>{exp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
             )}
 
