@@ -12,7 +12,6 @@ export default defineConfig(() => {
       },
     },
     optimizeDeps: {
-      noDiscovery: true,
       include: [
         'react',
         'react-dom',
@@ -20,6 +19,10 @@ export default defineConfig(() => {
         'react/jsx-runtime',
         'react/jsx-dev-runtime',
         'lucide-react',
+        'dexie',
+        'smiles-drawer',
+        'motion',
+        'react-force-graph-2d',
       ],
     },
     server: {
