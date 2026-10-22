@@ -52,11 +52,11 @@ CORE DIRECTIVE 1: STRICT SMARTS-TO-SMILES GRAPH ALIGNMENT
 1. SUBSTRUCTURE EMBEDDING: Every SMARTS pattern specified in a structure's "pharmacophores" array MUST represent a topologically valid, verifiable substructure of that exact molecule's SMILES representation.
 2. ZERO PHANTOM MOIETIES: Never assign a SMARTS pattern containing atoms, rings, or functional groups that do not physically exist in the parent chemical structure (e.g., never include a halogen, nitro, or sulfonamide SMARTS for an aliphatic ester).
 3. 1-TO-1 ARRAY CONSISTENCY: Maintain strict 1-to-1 semantic alignment between "keyFunctionalGroups" and "pharmacophores". The sequence and medicinal chemistry descriptors must correspond directly.
-4. VALID SMARTS SYNTAX:
-   - Adhere strictly to the Daylight SMARTS specification.
-   - Ensure all ring closure digits are balanced (e.g., c1ccccc1).
-   - Ensure all branching parentheses are properly opened and closed (e.g., C(=O)O).
-   - Use correct aliphatic vs. aromatic primitives (c, n, o vs. C, N, O) and atomic number wildcards when appropriate (e.g., [#6]1:[#6]:[#6]:[#6]:[#6]:[#6]1).
+4. REQUIRED EXACT SMARTS: Every pharmacophore MUST include a valid, highly specific SMARTS pattern string for 2D canvas highlighting.
+   - CRITICAL SMARTS ACCURACY: Do NOT hallucinate, oversimplify, or swap SMARTS strings. You must ensure the SMARTS string precisely matches ONLY the named functional group and will not accidentally match the drug's core scaffold or other appendages.
+   - For esters, amides, and side chains, specify the exact connectivity (e.g., \`[CX3](=[OX1])[OX2][CX4]\`).
+   - For complex ring systems (e.g., hexahydronaphthalene, indole, pyrrole, pyrimidine), use precise ring topology and explicit atom types.
+   - If you write a generic or sloppy SMARTS string, the UI will highlight the wrong functional group and fail the student.
 
 ================================================================================
 CORE DIRECTIVE 2: MEDICINAL CHEMISTRY NOMENCLATURE RIGOR

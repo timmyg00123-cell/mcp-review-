@@ -171,11 +171,11 @@ CORE DIRECTIVE 1: STRICT SMARTS-TO-SMILES GRAPH ALIGNMENT
 1. SUBSTRUCTURE EMBEDDING: Every SMARTS pattern specified in a structure's "pharmacophores" array MUST represent a topologically valid, verifiable substructure of that exact molecule's SMILES representation.
 2. ZERO PHANTOM MOIETIES: Never assign a SMARTS pattern containing atoms, rings, or functional groups that do not physically exist in the parent chemical structure (e.g., never include a halogen, nitro, or sulfonamide SMARTS for an aliphatic ester).
 3. 1-TO-1 ARRAY CONSISTENCY: Maintain strict 1-to-1 semantic alignment between "keyFunctionalGroups" and "pharmacophores". The sequence and medicinal chemistry descriptors must correspond directly.
-4. VALID SMARTS SYNTAX:
-   - Adhere strictly to the Daylight SMARTS specification.
-   - Ensure all ring closure digits are balanced (e.g., c1ccccc1).
-   - Ensure all branching parentheses are properly opened and closed (e.g., C(=O)O).
-   - Use correct aliphatic vs. aromatic primitives (c, n, o vs. C, N, O) and atomic number wildcards when appropriate (e.g., [#6]1:[#6]:[#6]:[#6]:[#6]:[#6]1).
+4. REQUIRED EXACT SMARTS: Every pharmacophore MUST include a valid, highly specific SMARTS pattern string for 2D canvas highlighting.
+   - CRITICAL SMARTS ACCURACY: Do NOT hallucinate, oversimplify, or swap SMARTS strings. You must ensure the SMARTS string precisely matches ONLY the named functional group and will not accidentally match the drug's core scaffold or other appendages.
+   - For esters, amides, and side chains, specify the exact connectivity (e.g., \`[CX3](=[OX1])[OX2][CX4]\`).
+   - For complex ring systems (e.g., hexahydronaphthalene, indole, pyrrole, pyrimidine), use precise ring topology and explicit atom types.
+   - If you write a generic or sloppy SMARTS string, the UI will highlight the wrong functional group and fail the student.
 
 ================================================================================
 CORE DIRECTIVE 2: MEDICINAL CHEMISTRY NOMENCLATURE RIGOR
@@ -244,10 +244,10 @@ Chemist Directives:
    - "keyFunctionalGroups": Key functional groups present (e.g. ["Carboxylic acid (-COOH)", "Piperidine 2° basic amine", "Butyl sulfonamide (-SO2-nBu)"]).
    - "pharmacophores": Array of discrete pharmacophore groups.
      CRITICAL: You MUST use specific medicinal chemistry nomenclature for functional groups and pharmacophores (e.g., '1,4-dihydropyridine ring', 'butyryloxymethyl ester', 'ortho-chlorophenyl group'). ABSOLUTELY DO NOT use generic terms like 'DRUG Core', 'Main Scaffold', or 'Active Moiety'.
-     For every pharmacophore identified, you MUST provide its valid SMARTS pattern string so the frontend cheminformatics renderer can highlight the exact atoms on the 2D canvas.
+     For every pharmacophore identified, you MUST provide its valid, highly specific SMARTS pattern string so the frontend cheminformatics renderer can highlight the exact atoms on the 2D canvas.
      Each item in "pharmacophores" MUST include:
      * "name": Specific medicinal chemistry nomenclature (e.g. "1,4-Dihydropyridine ring", "Butyryloxymethyl ester", "Ortho-chlorophenyl group"). NEVER use "DRUG Core", "Main Scaffold", or "Active Moiety".
-     * "smarts": The exact SMARTS string pattern for this functional group/moiety (e.g., "[#6]1[#6]=[#6][#7][#6]=[#6]1", "C(=O)OCC(=O)C", "c1c(Cl)cccc1") so the frontend cheminformatics renderer can highlight the exact atoms on the 2D canvas.
+     * "smarts": CRITICAL: Must be a highly specific, chemically accurate SMARTS string that matches ONLY this exact functional group. Do not use overly generic patterns (like a simple 'C' or 'O') that will trigger false-positive highlights on the main molecular core.
      * "description": A brief note on its purpose, receptor binding interaction, and functional contribution.
      * "id": Unique slug identifier (e.g. "dihydropyridine_ring", "butyryloxymethyl_ester", "ortho_chlorophenyl").
      * "purpose": Rigorous explanation of its molecular role, binding interaction (e.g. ionic salt bridge, RGD mimicry, hydrophobic pocket anchor), and functional contribution.
@@ -257,6 +257,12 @@ Chemist Directives:
    - "cid": PubChem Compound ID (CID) if identifiable.
    - "mw": Molecular weight in g/mol if explicitly stated on the slide/document.
    - "logP": LogP or XLogP value (lipophilicity) if explicitly stated on the slide/document.
+3. 1-TO-1 ARRAY CONSISTENCY: Maintain strict 1-to-1 semantic alignment between "keyFunctionalGroups" and "pharmacophores".
+4. REQUIRED EXACT SMARTS: Every pharmacophore MUST include a valid, highly specific SMARTS pattern string for 2D canvas highlighting.
+   - CRITICAL SMARTS ACCURACY: Do NOT hallucinate, oversimplify, or swap SMARTS strings. You must ensure the SMARTS string precisely matches ONLY the named functional group and will not accidentally match the drug's core scaffold or other appendages.
+   - For esters, amides, and side chains, specify the exact connectivity (e.g., \`[CX3](=[OX1])[OX2][CX4]\`).
+   - For complex ring systems (e.g., hexahydronaphthalene, indole, pyrrole, pyrimidine), use precise ring topology and explicit atom types.
+   - If you write a generic or sloppy SMARTS string, the UI will highlight the wrong functional group and fail the student.
 
 ================================================================================
 ROLE 2 (The Transcriptionist) — FOR EACH BLOCK'S "questions" ARRAY:
@@ -378,7 +384,7 @@ export const MEDCHEM_QUIZ_RESPONSE_SCHEMA = {
                       },
                       smarts: {
                         type: 'STRING',
-                        description: 'The exact SMARTS string pattern for this functional group/moiety (e.g., "[#6]1[#6]=[#6][#7][#6]=[#6]1", "C(=O)OCC(=O)C", "c1c(Cl)cccc1") so the frontend cheminformatics renderer can highlight the exact atoms on the 2D canvas.',
+                        description: 'CRITICAL: Must be a highly specific, chemically accurate SMARTS string that matches ONLY this exact functional group. Do not use overly generic patterns (like a simple \'C\' or \'O\') that will trigger false-positive highlights on the main molecular core.',
                       },
                       description: {
                         type: 'STRING',
