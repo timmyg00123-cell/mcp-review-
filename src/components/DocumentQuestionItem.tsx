@@ -3,7 +3,6 @@ import { AntiplateletQuestion } from '../data/antiplateletQuizData';
 import { ChemicalStructure, ExamModeStatus, RankingItem } from '../types/reviewModule';
 import { StructureDragDropMatch } from './StructureDragDropMatch';
 import { QuestionStructureSidePanel } from './QuestionStructureSidePanel';
-import { StructureAwareQuestionStem } from './StructureAwareQuestionStem';
 import {
   ChevronDown,
   ChevronUp,
@@ -492,25 +491,18 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
       <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/80 flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           {/* Question Number Badge */}
-          <span className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 min-w-[34px] h-[30px] rounded-md flex items-center justify-center font-mono font-bold text-xs shrink-0 mt-0.5 shadow-xs">
-            Q{question.id}
+          <span className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 min-w-[34px] h-[30px] rounded-md flex items-center justify-center font-mono font-bold text-xs shrink-0 mt-0.5 shadow-xs px-2">
+            {question.questionNumberLabel || `Q${question.id}`}
           </span>
 
           {/* Question Stem Text */}
-          <div className="space-y-2 flex-1">
-            {((question.displayed_structure_entity_ids && question.displayed_structure_entity_ids.length > 0) ||
-              Boolean(question.hide_drug_name_show_structure_for)) && (
-              <StructureAwareQuestionStem
-                displayed_structure_entity_ids={question.displayed_structure_entity_ids}
-                targetEntityId={
-                  Array.isArray(question.hide_drug_name_show_structure_for)
-                    ? question.hide_drug_name_show_structure_for[0]
-                    : question.hide_drug_name_show_structure_for
-                }
-                blindDrugName={Boolean(question.hide_drug_name_show_structure_for)}
-                examModeActive={examModeActive}
-                structures={structuresToAnalyze}
-              />
+          <div className="space-y-1.5 flex-1 min-w-0">
+            {question.category && (
+              <div className="flex items-center gap-2">
+                <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  {question.category}
+                </span>
+              </div>
             )}
             <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 leading-snug">
               {question.questionStem}
