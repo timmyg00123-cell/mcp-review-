@@ -1796,6 +1796,14 @@ function AppContent() {
             allModules={modules}
             structureImageBg={structureImageBg}
             onUpdateStructureImageBg={handleUpdateStructureImageBg}
+            structureImageDarkBg={structureImageDarkBg}
+            onUpdateStructureImageDarkBg={handleUpdateStructureImageDarkBg}
+            lockObsidian={lockObsidian}
+            onToggleLockObsidian={handleToggleLockObsidian}
+            bondLightColor={bondLightColor}
+            onUpdateBondLightColor={handleUpdateBondLightColor}
+            bondDarkColor={bondDarkColor}
+            onUpdateBondDarkColor={handleUpdateBondDarkColor}
             onImportComplete={handleImportComplete}
             onImportCollision={(parsed, collisions) => setPendingImport({ parsed, collisions })}
           />

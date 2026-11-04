@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X,
   Moon,
@@ -13,7 +13,32 @@ import {
   Check,
   BookOpen,
   Network,
+  Download,
+  Upload,
+  Database,
+  FileJson,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
+import type { ReviewModule } from '../types/reviewModule';
+import {
+  exportReviewModuleAsJson,
+  exportFullBackupAsJson,
+  parseAndValidateJsonPayload,
+  detectCollisions,
+  applyImport,
+  type ParsedImportResult,
+  type ImportCollision,
+} from '../utils/jsonPortability';
+import {
+  loadTopicProfiles,
+  DEFAULT_STRUCTURE_IMAGE_BG,
+  DEFAULT_STRUCTURE_IMAGE_DARK_BG,
+  DEFAULT_STRUCTURE_LOCK_OBSIDIAN,
+  DEFAULT_BOND_LIGHT_COLOR,
+  DEFAULT_BOND_DARK_COLOR,
+} from '../utils/storage';
+import { StructureStylePanel } from './StructureStylePanel';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -29,6 +54,20 @@ interface SettingsModalProps {
   activeModuleTitle: string;
   totalQuestions: number;
   answeredQuestions: number;
+  activeModule?: ReviewModule;
+  allModules?: ReviewModule[];
+  structureImageBg?: string;
+  onUpdateStructureImageBg?: (color: string) => void;
+  structureImageDarkBg?: string;
+  onUpdateStructureImageDarkBg?: (color: string) => void;
+  lockObsidian?: boolean;
+  onToggleLockObsidian?: (locked: boolean) => void;
+  bondLightColor?: string;
+  onUpdateBondLightColor?: (color: string) => void;
+  bondDarkColor?: string;
+  onUpdateBondDarkColor?: (color: string) => void;
+  onImportComplete?: (message: string, importedModuleId?: string) => void;
+  onImportCollision?: (parsed: ParsedImportResult, collisions: ImportCollision[]) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -45,10 +84,119 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   activeModuleTitle,
   totalQuestions,
   answeredQuestions,
+  activeModule,
+  allModules,
+  structureImageBg = DEFAULT_STRUCTURE_IMAGE_BG,
+  onUpdateStructureImageBg,
+  structureImageDarkBg = DEFAULT_STRUCTURE_IMAGE_DARK_BG,
+  onUpdateStructureImageDarkBg,
+  lockObsidian = DEFAULT_STRUCTURE_LOCK_OBSIDIAN,
+  onToggleLockObsidian,
+  bondLightColor = DEFAULT_BOND_LIGHT_COLOR,
+  onUpdateBondLightColor,
+  bondDarkColor = DEFAULT_BOND_DARK_COLOR,
+  onUpdateBondDarkColor,
+  onImportComplete,
+  onImportCollision,
 }) => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [importStatus, setImportStatus] = useState<{
+    type: 'idle' | 'success' | 'error';
+    message: string;
+  }>({ type: 'idle', message: '' });
+  const [isExporting, setIsExporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    const handleCancel = (e: Event) => {
+      e.preventDefault();
+      onClose();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+    return () => {
+      dialog.removeEventListener('cancel', handleCancel);
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, [onClose]);
 
   if (!isOpen) return null;
+
+  const handleExportModule = () => {
+    if (!activeModule) return;
+    setIsExporting(true);
+    try {
+      exportReviewModuleAsJson(activeModule);
+      setImportStatus({ type: 'success', message: `Exported "${activeModule.title}" as JSON.` });
+    } catch (err) {
+      setImportStatus({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Export failed.',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportFullBackup = async () => {
+    setIsExporting(true);
+    try {
+      await exportFullBackupAsJson(hideDrugNames);
+      setImportStatus({ type: 'success', message: 'Exported full platform backup as JSON.' });
+    } catch (err) {
+      setImportStatus({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Full export failed.',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const parsed = parseAndValidateJsonPayload(text);
+
+      const existingModules = allModules || (activeModule ? [activeModule] : []);
+      const existingProfiles = loadTopicProfiles();
+      const collisions = detectCollisions(parsed, existingModules, existingProfiles);
+
+      if (collisions.length > 0 && onImportCollision) {
+        onImportCollision(parsed, collisions);
+        onClose();
+        return;
+      }
+
+      const result = await applyImport(parsed, 'overwrite');
+      setImportStatus({ type: 'success', message: result.message });
+      if (onImportComplete) {
+        onImportComplete(result.message, result.importedModuleId);
+      }
+    } catch (err) {
+      setImportStatus({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to import JSON file.',
+      });
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const handleConfirmReset = () => {
     onResetQuiz();
@@ -56,8 +204,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onClose();
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+    <dialog
+      ref={dialogRef}
+      closedby="any"
+      onClick={handleBackdropClick}
+      className="m-auto p-4 bg-transparent outline-none max-w-full max-h-screen text-slate-800 dark:text-slate-100"
+    >
       <div
         className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -69,7 +228,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <Sliders className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 text-balance">
                 Settings &amp; Preferences
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -157,6 +316,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </button>
             </div>
+
+            {/* Structure Image Canvas & Bond Line Styling Panel */}
+            <StructureStylePanel
+              theme={theme}
+              structureImageBg={structureImageBg}
+              onUpdateStructureImageBg={onUpdateStructureImageBg || (() => {})}
+              structureImageDarkBg={structureImageDarkBg}
+              onUpdateStructureImageDarkBg={onUpdateStructureImageDarkBg || (() => {})}
+              lockObsidian={lockObsidian}
+              onToggleLockObsidian={onToggleLockObsidian || (() => {})}
+              bondLightColor={bondLightColor}
+              onUpdateBondLightColor={onUpdateBondLightColor || (() => {})}
+              bondDarkColor={bondDarkColor}
+              onUpdateBondDarkColor={onUpdateBondDarkColor || (() => {})}
+            />
           </div>
 
           <hr className="border-slate-150 dark:border-slate-800" />
@@ -314,6 +488,116 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
           </div>
+
+          <hr className="border-slate-150 dark:border-slate-800" />
+
+          {/* Section 4: Data Backup & Portability */}
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <FileJson className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Data Backup &amp; Portability</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Export your curriculum review modules or full profile backup to share or restore anytime
+              </p>
+            </div>
+
+            {importStatus.type !== 'idle' && (
+              <div
+                className={`p-3 rounded-xl border flex items-center gap-2 text-xs ${
+                  importStatus.type === 'success'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                    : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+                }`}
+              >
+                {importStatus.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                )}
+                <span className="flex-1 font-medium">{importStatus.message}</span>
+                <button
+                  type="button"
+                  onClick={() => setImportStatus({ type: 'idle', message: '' })}
+                  className="text-[11px] underline opacity-80 hover:opacity-100 cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Export Active Module */}
+              <button
+                type="button"
+                onClick={handleExportModule}
+                disabled={!activeModule || isExporting}
+                className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-750 text-left transition-colors flex flex-col justify-between cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <Download className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    Export Active Module
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                  Download questions, drugs, and rationales for "{activeModuleTitle}"
+                </p>
+              </button>
+
+              {/* Export Full Backup */}
+              <button
+                type="button"
+                onClick={handleExportFullBackup}
+                disabled={isExporting}
+                className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-750 text-left transition-colors flex flex-col justify-between cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <Database className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    Full Platform Backup
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                  Export all modules, study profiles, progress, and preferences
+                </p>
+              </button>
+            </div>
+
+            {/* Import File Section */}
+            <div className="p-3.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="space-y-0.5 text-center sm:text-left">
+                <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center justify-center sm:justify-start gap-1.5">
+                  <Upload className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>Import Module or Backup JSON</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Restore a curriculum module, topic profile, or complete platform backup file (.json)
+                </p>
+              </div>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelected}
+                accept=".json,application/json"
+                className="hidden"
+                id="json-import-input-settings"
+              />
+              <label
+                htmlFor="json-import-input-settings"
+                className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer shrink-0"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Select JSON File</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
@@ -327,6 +611,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };
