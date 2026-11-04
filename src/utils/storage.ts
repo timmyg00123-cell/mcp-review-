@@ -246,3 +246,129 @@ export function saveShowKnowledgeGraph(enabled: boolean): void {
     localStorage.setItem(SHOW_KNOWLEDGE_GRAPH_KEY, String(enabled));
   } catch {}
 }
+
+export const STRUCTURE_IMAGE_BG_KEY = 'mcp_structure_image_bg';
+export const DEFAULT_STRUCTURE_IMAGE_BG = 'hsl(286, 55%, 94%)';
+
+let inMemoryStructureImageBg: string | null = null;
+
+export function getInitialStructureImageBg(): string {
+  if (inMemoryStructureImageBg !== null) return inMemoryStructureImageBg;
+  try {
+    const saved = localStorage.getItem(STRUCTURE_IMAGE_BG_KEY);
+    if (saved && saved.trim()) {
+      inMemoryStructureImageBg = saved.trim();
+      return inMemoryStructureImageBg;
+    }
+  } catch {}
+  inMemoryStructureImageBg = DEFAULT_STRUCTURE_IMAGE_BG;
+  return inMemoryStructureImageBg;
+}
+
+export function saveStructureImageBg(color: string): void {
+  inMemoryStructureImageBg = color;
+  try {
+    localStorage.setItem(STRUCTURE_IMAGE_BG_KEY, color);
+  } catch {}
+}
+
+export const STRUCTURE_IMAGE_DARK_BG_KEY = 'mcp_structure_image_dark_bg';
+export const DEFAULT_STRUCTURE_IMAGE_DARK_BG = 'hsl(222, 47%, 14%)';
+
+let inMemoryStructureImageDarkBg: string | null = null;
+
+export function getInitialStructureImageDarkBg(): string {
+  if (inMemoryStructureImageDarkBg !== null) return inMemoryStructureImageDarkBg;
+  try {
+    const saved = localStorage.getItem(STRUCTURE_IMAGE_DARK_BG_KEY);
+    if (saved && saved.trim()) {
+      inMemoryStructureImageDarkBg = saved.trim();
+      return inMemoryStructureImageDarkBg;
+    }
+  } catch {}
+  inMemoryStructureImageDarkBg = DEFAULT_STRUCTURE_IMAGE_DARK_BG;
+  return inMemoryStructureImageDarkBg;
+}
+
+export function saveStructureImageDarkBg(color: string): void {
+  inMemoryStructureImageDarkBg = color;
+  try {
+    localStorage.setItem(STRUCTURE_IMAGE_DARK_BG_KEY, color);
+  } catch {}
+}
+
+export const STRUCTURE_LOCK_OBSIDIAN_KEY = 'mcp_structure_lock_obsidian';
+export const DEFAULT_STRUCTURE_LOCK_OBSIDIAN = false;
+
+let inMemoryStructureLockObsidian: boolean | null = null;
+
+export function getInitialStructureLockObsidian(): boolean {
+  if (inMemoryStructureLockObsidian !== null) return inMemoryStructureLockObsidian;
+  try {
+    const saved = localStorage.getItem(STRUCTURE_LOCK_OBSIDIAN_KEY);
+    if (saved !== null) {
+      inMemoryStructureLockObsidian = saved === 'true';
+      return inMemoryStructureLockObsidian;
+    }
+  } catch {}
+  inMemoryStructureLockObsidian = DEFAULT_STRUCTURE_LOCK_OBSIDIAN;
+  return inMemoryStructureLockObsidian;
+}
+
+export function saveStructureLockObsidian(locked: boolean): void {
+  inMemoryStructureLockObsidian = locked;
+  try {
+    localStorage.setItem(STRUCTURE_LOCK_OBSIDIAN_KEY, String(locked));
+  } catch {}
+}
+
+export const BOND_LIGHT_COLOR_KEY = 'mcp_structure_bond_light_color';
+export const DEFAULT_BOND_LIGHT_COLOR = '#475569';
+
+let inMemoryBondLightColor: string | null = null;
+
+export function getInitialBondLightColor(): string {
+  if (inMemoryBondLightColor !== null) return inMemoryBondLightColor;
+  try {
+    const saved = localStorage.getItem(BOND_LIGHT_COLOR_KEY);
+    if (saved && saved.trim()) {
+      inMemoryBondLightColor = saved.trim();
+      return inMemoryBondLightColor;
+    }
+  } catch {}
+  inMemoryBondLightColor = DEFAULT_BOND_LIGHT_COLOR;
+  return inMemoryBondLightColor;
+}
+
+export function saveBondLightColor(color: string): void {
+  inMemoryBondLightColor = color;
+  try {
+    localStorage.setItem(BOND_LIGHT_COLOR_KEY, color);
+  } catch {}
+}
+
+export const BOND_DARK_COLOR_KEY = 'mcp_structure_bond_dark_color';
+export const DEFAULT_BOND_DARK_COLOR = '#e2e8f0';
+
+let inMemoryBondDarkColor: string | null = null;
+
+export function getInitialBondDarkColor(): string {
+  if (inMemoryBondDarkColor !== null) return inMemoryBondDarkColor;
+  try {
+    const saved = localStorage.getItem(BOND_DARK_COLOR_KEY);
+    if (saved && saved.trim()) {
+      inMemoryBondDarkColor = saved.trim();
+      return inMemoryBondDarkColor;
+    }
+  } catch {}
+  inMemoryBondDarkColor = DEFAULT_BOND_DARK_COLOR;
+  return inMemoryBondDarkColor;
+}
+
+export function saveBondDarkColor(color: string): void {
+  inMemoryBondDarkColor = color;
+  try {
+    localStorage.setItem(BOND_DARK_COLOR_KEY, color);
+  } catch {}
+}
+

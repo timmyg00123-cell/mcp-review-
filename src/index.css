@@ -2,6 +2,58 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  color-scheme: light dark;
+  accent-color: #2563eb;
+  --structure-canvas-bg: hsl(286, 55%, 94%);
+  --structure-bond-stroke: #475569;
+}
+
+:root:where(.dark),
+.dark {
+  color-scheme: dark;
+  --structure-canvas-bg: hsl(222, 47%, 14%);
+  --structure-bond-stroke: #e2e8f0;
+}
+
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.anchor-module-btn {
+  anchor-name: --module-btn;
+}
+
+[popover] {
+  margin: 0;
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+
+.dropdown-popover {
+  position-anchor: --module-btn;
+  top: anchor(bottom);
+  left: anchor(left);
+  position-try-fallbacks: flip-block, flip-inline;
+}
+
 html {
   scrollbar-gutter: stable;
 }
