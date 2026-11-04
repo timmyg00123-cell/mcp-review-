@@ -290,7 +290,7 @@ export const HorizontalStructureVignette: React.FC<HorizontalStructureVignettePr
               >
                 {drug.name}
               </span>
-              <div className="w-[160px] h-[160px] bg-[var(--structure-canvas-bg)] dark:bg-slate-900 rounded-md flex items-center justify-center overflow-hidden border border-slate-200/60 dark:border-slate-700/50">
+              <div className="w-[160px] h-[160px] bg-[var(--structure-canvas-bg)] rounded-md flex items-center justify-center overflow-hidden border border-slate-200/60 dark:border-slate-700/50">
                 <SmilesCanvas
                   smiles={
                     drug.smiles ||

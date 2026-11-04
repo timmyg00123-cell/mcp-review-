@@ -112,26 +112,24 @@ function postProcessSvg(rawSvg: string, theme: 'light' | 'dark' = 'light', bondS
   cleanSvg = cleanSvg.replace(/<path\s/gi, '<path stroke-linecap="round" stroke-linejoin="round" ');
   cleanSvg = cleanSvg.replace(/<line\s/gi, '<line stroke-linecap="round" stroke-linejoin="round" ');
 
+  // Sanitize inline style stroke-linecap and stroke-linejoin so inline butt/miter does not override presentation attributes
+  cleanSvg = cleanSvg
+    .replace(/stroke-linecap:\s*butt/gi, 'stroke-linecap:round')
+    .replace(/stroke-linejoin:\s*miter/gi, 'stroke-linejoin:round');
+
   // Resolve bond stroke color:
   // 1. Direct prop passed (e.g. for live preview or explicit override)
-  // 2. Read from CSS custom property --structure-bond-stroke
-  // 3. Fallback based on theme
+  // 2. CSS custom property fallback var(--structure-bond-stroke, ...) so all SVGs dynamically update on theme/setting change without remounting
   const isDark = theme === 'dark' || (typeof document !== 'undefined' && document.documentElement.classList.contains('dark'));
-  let resolvedStroke = bondStrokeColor?.trim();
-  if (!resolvedStroke && typeof document !== 'undefined') {
-    const cssVar = getComputedStyle(document.documentElement).getPropertyValue('--structure-bond-stroke').trim();
-    if (cssVar) resolvedStroke = cssVar;
-  }
-  if (!resolvedStroke) {
-    resolvedStroke = isDark ? '#e2e8f0' : '#475569';
-  }
+  const fallbackColor = isDark ? '#e2e8f0' : '#475569';
+  const resolvedStroke = bondStrokeColor?.trim() || `var(--structure-bond-stroke, ${fallbackColor})`;
 
   // Soften bond strokes: replace default RDKit strokes/fills while keeping heteroatom colors intact
   cleanSvg = cleanSvg
     .replace(/stroke:\s*(#000000|#000\b|black|rgb\(0,\s*0,\s*0\)|#475569|#e2e8f0|#cbd5e1)/gi, `stroke: ${resolvedStroke}`)
-    .replace(/stroke="*(#000000|#000\b|black|#475569|#e2e8f0|#cbd5e1)"*/gi, `stroke="${resolvedStroke}"`)
+    .replace(/stroke=['"]*(#000000|#000\b|black|#475569|#e2e8f0|#cbd5e1)['"]*/gi, `stroke="${resolvedStroke}"`)
     .replace(/fill:\s*(#000000|#000\b|black|rgb\(0,\s*0,\s*0\)|#475569|#e2e8f0|#cbd5e1)/gi, `fill: ${resolvedStroke}`)
-    .replace(/fill="*(#000000|#000\b|black|#475569|#e2e8f0|#cbd5e1)"*/gi, `fill="${resolvedStroke}"`);
+    .replace(/fill=['"]*(#000000|#000\b|black|#475569|#e2e8f0|#cbd5e1)['"]*/gi, `fill="${resolvedStroke}"`);
 
   return cleanSvg;
 }

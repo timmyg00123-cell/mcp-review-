@@ -349,7 +349,7 @@ export const QuestionStructureSidePanel: React.FC<QuestionStructureSidePanelProp
             )}
 
             {/* Chemical Structure Image with Glowing Translucent Zones */}
-            <div className="relative group bg-white dark:bg-slate-900 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center min-h-[160px] max-h-[220px]">
+            <div className="relative group bg-[var(--structure-canvas-bg)] rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center min-h-[160px] max-h-[220px]">
               <InteractiveStructureViewer
                 structure={activeStructure}
                 activePharmacophoreIds={mergedActive}

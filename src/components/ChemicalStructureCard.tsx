@@ -339,7 +339,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
         )}
 
         {/* Chemical Structure Image with Interactive Pharmacophore Overlays */}
-        <div className="relative p-3 bg-white dark:bg-slate-900 flex items-center justify-center min-h-[170px] group">
+        <div className="relative p-3 bg-[var(--structure-canvas-bg)] flex items-center justify-center min-h-[170px] group">
           <InteractiveStructureViewer
             structure={structure}
             activePharmacophoreIds={mergedActive}

@@ -327,8 +327,15 @@ export const StructureStylePanel: React.FC<StructureStylePanelProps> = ({
       if (angle < 0) angle += 360;
       const hue = Math.round(angle);
 
+      // If saturation is currently 0 (e.g. user selected monochrome preset), bumping saturation to 70%
+      // ensures that clicking/dragging the hue wheel is visually active and responsive rather than staying stuck on gray/white
+      const effectiveSat = bondSaturation === 0 ? 70 : bondSaturation;
+      if (bondSaturation === 0) {
+        setBondSaturation(70);
+      }
+
       const lightness = activeTab === 'light' ? 38 : 88;
-      const newColor = `hsl(${hue}, ${bondSaturation}%, ${lightness}%)`;
+      const newColor = `hsl(${hue}, ${effectiveSat}%, ${lightness}%)`;
 
       if (activeTab === 'light') {
         onUpdateBondLightColor(newColor);
@@ -596,7 +603,10 @@ export const StructureStylePanel: React.FC<StructureStylePanelProps> = ({
                   max="100"
                   value={bondSaturation}
                   onChange={(e) => handleSaturationChange(parseInt(e.target.value, 10))}
-                  className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-blue-600 bg-gradient-to-r from-slate-400 via-indigo-400 to-blue-600 dark:from-slate-600 dark:via-indigo-500 dark:to-blue-400"
+                  className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-blue-600 shadow-inner"
+                  style={{
+                    background: `linear-gradient(to right, hsl(${activeBondHsl.h}, 0%, ${activeTab === 'light' ? 38 : 88}%), hsl(${activeBondHsl.h}, 100%, ${activeTab === 'light' ? 38 : 88}%))`
+                  }}
                 />
                 <div className="flex justify-between text-[10px] text-slate-400">
                   <span>0% (Monochrome)</span>
