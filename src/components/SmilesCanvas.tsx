@@ -90,23 +90,10 @@ function postProcessSvg(rawSvg: string, theme: 'light' | 'dark' = 'light', bondS
   // Strip XML comments
   cleanSvg = cleanSvg.replace(/<!--[\s\S]*?-->/g, '');
 
-  // Remove harsh solid background rectangles to ensure canvas transparency
-  cleanSvg = cleanSvg.replace(
-    /<rect[^>]*style=['"][^'"]*fill:\s*(#ffffff|#fff|white|rgb\(255,\s*255,\s*255\))[^'"]*['"][^>]*>[\s\S]*?<\/rect>/gi,
-    ''
-  );
-  cleanSvg = cleanSvg.replace(
-    /<rect[^>]*style=['"][^'"]*fill:\s*(#ffffff|#fff|white|rgb\(255,\s*255,\s*255\))[^'"]*['"][^>]*\/>/gi,
-    ''
-  );
-  cleanSvg = cleanSvg.replace(
-    /<rect[^>]*fill=['"](#ffffff|#fff|white|rgb\(255,\s*255,\s*255\))['"][^>]*>[\s\S]*?<\/rect>/gi,
-    ''
-  );
-  cleanSvg = cleanSvg.replace(
-    /<rect[^>]*fill=['"](#ffffff|#fff|white|rgb\(255,\s*255,\s*255\))['"][^>]*\/?>/gi,
-    ''
-  );
+  // Remove all background rectangles to ensure 100% canvas transparency
+  // RDKit MinimalLib only generates <rect> for the canvas background (fill: #ffffff, #00000000, etc.)
+  cleanSvg = cleanSvg.replace(/<rect[\s\S]*?<\/rect>/gi, '');
+  cleanSvg = cleanSvg.replace(/<rect[^>]*\/>/gi, '');
 
   // Inject rounded line-caps and rounded line-joins into paths and lines for soft organic joints
   cleanSvg = cleanSvg.replace(/<path\s/gi, '<path stroke-linecap="round" stroke-linejoin="round" ');
@@ -126,10 +113,10 @@ function postProcessSvg(rawSvg: string, theme: 'light' | 'dark' = 'light', bondS
 
   // Soften bond strokes: replace default RDKit strokes/fills while keeping heteroatom colors intact
   cleanSvg = cleanSvg
-    .replace(/stroke:\s*(#000000|#000\b|black|rgb\(0,\s*0,\s*0\)|#475569|#e2e8f0|#cbd5e1)/gi, `stroke: ${resolvedStroke}`)
-    .replace(/stroke=['"]*(#000000|#000\b|black|#475569|#e2e8f0|#cbd5e1)['"]*/gi, `stroke="${resolvedStroke}"`)
-    .replace(/fill:\s*(#000000|#000\b|black|rgb\(0,\s*0,\s*0\)|#475569|#e2e8f0|#cbd5e1)/gi, `fill: ${resolvedStroke}`)
-    .replace(/fill=['"]*(#000000|#000\b|black|#475569|#e2e8f0|#cbd5e1)['"]*/gi, `fill="${resolvedStroke}"`);
+    .replace(/stroke:\s*(#000000(?![0-9a-fA-F])|#000\b|black|rgb\(0,\s*0,\s*0\)|#475569|#e2e8f0|#cbd5e1)/gi, `stroke: ${resolvedStroke}`)
+    .replace(/stroke=['"]*(#000000(?![0-9a-fA-F])|#000\b|black|#475569|#e2e8f0|#cbd5e1)['"]*/gi, `stroke="${resolvedStroke}"`)
+    .replace(/fill:\s*(#000000(?![0-9a-fA-F])|#000\b|black|rgb\(0,\s*0,\s*0\)|#475569|#e2e8f0|#cbd5e1)/gi, `fill: ${resolvedStroke}`)
+    .replace(/fill=['"]*(#000000(?![0-9a-fA-F])|#000\b|black|#475569|#e2e8f0|#cbd5e1)['"]*/gi, `fill="${resolvedStroke}"`);
 
   return cleanSvg;
 }
