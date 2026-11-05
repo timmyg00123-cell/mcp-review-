@@ -1,9 +1,15 @@
 import {
   ReviewModule,
+  ReviewPage,
+  ReviewSection,
+  ChemicalStructure,
+  PharmacophoreGroup,
   QuizSessionProgress,
 } from '../types/reviewModule';
 import { pdfPages } from '../data/antiplateletQuizData';
+import { getDefaultAnticoagulantsModule } from '../data/anticoagulantsQuizData';
 import { medChemGraphDb } from '../db/medChemGraphDb';
+import { getCorrectedSmarts } from './smartsDictionary';
 
 const MODULES_STORAGE_KEY = 'medchem_review_modules_v2';
 const BUILTIN_OVERRIDES_KEY = 'medchem_builtin_overrides_v2';
@@ -55,9 +61,9 @@ export function getDefaultAntiplateletModule(): ReviewModule {
 }
 
 /**
- * Synchronous read from in-memory cache for instant 0ms first paint.
- * Avoids blocking the main thread during LCP with heavy localStorage JSON deserialization.
- * User-created modules and Dexie persistence are hydrated asynchronously post-mount.
+ * Synchronous read from in-memory cache and localStorage for instant 0ms first paint.
+ * Ensures custom modules are immediately available on refresh while Dexie IndexedDB
+ * hydrates asynchronously post-mount.
  */
 export function loadAllReviewModules(): ReviewModule[] {
   if (inMemoryModules && inMemoryModules.length > 0) {
@@ -65,6 +71,7 @@ export function loadAllReviewModules(): ReviewModule[] {
   }
 
   const defaultAntiplatelet = getDefaultAntiplateletModule();
+  const defaultAnticoagulant = getDefaultAnticoagulantsModule();
   const hiddenBuiltins = getHiddenBuiltins();
 
   let overrides: Record<string, ReviewModule> = {};
@@ -82,22 +89,49 @@ export function loadAllReviewModules(): ReviewModule[] {
   }
 
   const finalAntiplatelet = overrides['antiplatelets_mcp2'] || defaultAntiplatelet;
-  const initialList = hiddenBuiltins.includes('antiplatelets_mcp2') ? [] : [finalAntiplatelet];
+  const finalAnticoagulant = overrides['anticoagulants_mcp2'] || defaultAnticoagulant;
 
-  inMemoryModules = initialList.length > 0 ? initialList : [finalAntiplatelet];
+  const builtIns: ReviewModule[] = [];
+  if (!hiddenBuiltins.includes('antiplatelets_mcp2')) builtIns.push(finalAntiplatelet);
+  if (!hiddenBuiltins.includes('anticoagulants_mcp2')) builtIns.push(finalAnticoagulant);
+
+  // Synchronously load custom modules from localStorage so 0ms first-paint never drops them on reload
+  let customList: ReviewModule[] = [];
+  try {
+    const rawCustom = localStorage.getItem(MODULES_STORAGE_KEY);
+    if (rawCustom) {
+      const parsed = JSON.parse(rawCustom);
+      if (Array.isArray(parsed)) {
+        customList = parsed.filter(
+          (m) =>
+            m &&
+            m.id &&
+            m.id !== 'antiplatelets_mcp2' &&
+            m.id !== 'anticoagulants_mcp2' &&
+            m.id !== 'vasodilators_mcp2'
+        );
+      }
+    }
+  } catch (customErr) {
+    console.warn('Could not read custom modules from localStorage:', customErr);
+  }
+
+  const combined = [...builtIns, ...customList];
+  inMemoryModules = combined.length > 0 ? combined : [finalAntiplatelet, finalAnticoagulant];
   return inMemoryModules;
 }
 
 /**
- * Initializes and synchronizes review modules and session progress with Dexie IndexedDB.
- * Migrates existing localStorage modules to Dexie if needed and eliminates the 5MB quota limit.
+ * Initializes and synchronizes review modules and session progress bidirectionally with Dexie IndexedDB.
+ * Merges localStorage and Dexie modules, migrates any missing records, and eliminates 5MB quota errors.
  */
 export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
   try {
     const defaultAntiplatelet = getDefaultAntiplateletModule();
+    const defaultAnticoagulant = getDefaultAnticoagulantsModule();
     const hiddenBuiltins = getHiddenBuiltins();
 
-    // 1. Load custom modules from Dexie
+    // 1. Load custom modules and overrides from Dexie
     const dexieModules = await medChemGraphDb.modules.toArray();
 
     // 2. Load progress from Dexie
@@ -116,86 +150,171 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
       }
     } catch {}
 
+    // Check if Dexie has a newer or existing override for built-ins
+    const dexieAntiplatelet = dexieModules.find((m) => m.id === 'antiplatelets_mcp2')?.module;
+    if (dexieAntiplatelet) {
+      overrides['antiplatelets_mcp2'] = dexieAntiplatelet;
+    }
+    const dexieAnticoagulant = dexieModules.find((m) => m.id === 'anticoagulants_mcp2')?.module;
+    if (dexieAnticoagulant) {
+      overrides['anticoagulants_mcp2'] = dexieAnticoagulant;
+    }
+
     const finalAntiplatelet = overrides['antiplatelets_mcp2'] || defaultAntiplatelet;
+    const finalAnticoagulant = overrides['anticoagulants_mcp2'] || defaultAnticoagulant;
 
-    if (dexieModules.length > 0) {
-      // Dexie contains saved modules
-      const customList = dexieModules
-        .map((m) => m.module)
-        .filter((m) => m && m.id !== 'antiplatelets_mcp2' && m.id !== 'vasodilators_mcp2');
+    // 3. Bidirectional merge of custom modules between Dexie and localStorage
+    const rawLocal = localStorage.getItem(MODULES_STORAGE_KEY);
+    const localParsed: ReviewModule[] = rawLocal ? JSON.parse(rawLocal) : [];
+    const localCustom = Array.isArray(localParsed)
+      ? localParsed.filter(
+          (m) =>
+            m &&
+            m.id &&
+            m.id !== 'antiplatelets_mcp2' &&
+            m.id !== 'anticoagulants_mcp2' &&
+            m.id !== 'vasodilators_mcp2'
+        )
+      : [];
 
-      let combined: ReviewModule[];
-      if (hiddenBuiltins.includes('antiplatelets_mcp2') && customList.length > 0) {
-        combined = customList;
-      } else {
-        combined = [finalAntiplatelet, ...customList];
+    const customModuleMap = new Map<string, ReviewModule>();
+
+    // Start with localStorage entries
+    localCustom.forEach((m) => customModuleMap.set(m.id, m));
+
+    // Overlay Dexie entries (Dexie has full unbounded payloads)
+    dexieModules.forEach((dm) => {
+      if (
+        dm.module &&
+        dm.id !== 'antiplatelets_mcp2' &&
+        dm.id !== 'anticoagulants_mcp2' &&
+        dm.id !== 'vasodilators_mcp2'
+      ) {
+        customModuleMap.set(dm.id, dm.module);
       }
+    });
 
-      inMemoryModules = combined;
-      isDexieInitialized = true;
-      return combined;
-    } else {
-      // Dexie table is empty: migrate existing custom modules from localStorage to Dexie
-      const raw = localStorage.getItem(MODULES_STORAGE_KEY);
-      const parsed: ReviewModule[] = raw ? JSON.parse(raw) : [];
-      const customList = Array.isArray(parsed)
-        ? parsed.filter((m) => m.id !== 'antiplatelets_mcp2' && m.id !== 'vasodilators_mcp2')
-        : [];
+    const mergedCustom = Array.from(customModuleMap.values());
 
-      for (const m of customList) {
+    // Sync any missing custom modules to Dexie
+    for (const m of mergedCustom) {
+      const existsInDexie = dexieModules.some((dm) => dm.id === m.id);
+      if (!existsInDexie) {
         await medChemGraphDb.modules.put({
           id: m.id,
           module: m,
           updatedAt: new Date().toISOString(),
-        });
+        }).catch((e) => console.warn('Dexie put during sync warning:', e));
       }
+    }
 
-      // Also migrate any localStorage progress to Dexie
-      try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith(MODULE_ANSWERS_PREFIX)) {
-            const mId = key.replace(MODULE_ANSWERS_PREFIX, '');
-            const val = localStorage.getItem(key);
-            if (val) {
-              const prog = JSON.parse(val);
+    // Sync any missing custom modules back to localStorage (with quota safety)
+    try {
+      localStorage.setItem(MODULES_STORAGE_KEY, JSON.stringify(mergedCustom));
+    } catch (quotaErr) {
+      console.warn('LocalStorage quota limit reached while syncing merged modules:', quotaErr);
+    }
+
+    // Also migrate any un-migrated localStorage progress to Dexie
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(MODULE_ANSWERS_PREFIX)) {
+          const mId = key.replace(MODULE_ANSWERS_PREFIX, '');
+          const val = localStorage.getItem(key);
+          if (val) {
+            const prog = JSON.parse(val);
+            if (!inMemoryProgress[mId]) {
               inMemoryProgress[mId] = prog;
+            }
+            const existsProgress = dexieProgress.some((p) => p.moduleId === mId);
+            if (!existsProgress) {
               await medChemGraphDb.sessionProgress.put({
                 moduleId: mId,
                 progress: prog,
                 updatedAt: new Date().toISOString(),
-              });
+              }).catch(() => {});
             }
           }
         }
-      } catch (migErr) {
-        console.warn('Progress migration warning:', migErr);
       }
-
-      let combined: ReviewModule[];
-      if (hiddenBuiltins.includes('antiplatelets_mcp2') && customList.length > 0) {
-        combined = customList;
-      } else {
-        combined = [finalAntiplatelet, ...customList];
-      }
-
-      inMemoryModules = combined;
-      isDexieInitialized = true;
-      return combined;
+    } catch (migErr) {
+      console.warn('Progress migration warning:', migErr);
     }
+
+    const builtIns: ReviewModule[] = [];
+    if (!hiddenBuiltins.includes('antiplatelets_mcp2')) builtIns.push(finalAntiplatelet);
+    if (!hiddenBuiltins.includes('anticoagulants_mcp2')) builtIns.push(finalAnticoagulant);
+
+    const combined = [...builtIns, ...mergedCustom];
+    inMemoryModules = combined.length > 0 ? combined : [finalAntiplatelet, finalAnticoagulant];
+    isDexieInitialized = true;
+    return inMemoryModules;
   } catch (err) {
     console.error('Failed to init Dexie module storage, falling back to synchronous load:', err);
     return loadAllReviewModules();
   }
 }
 
+export function sanitizeModulePharmacophores(mod: ReviewModule): ReviewModule {
+  if (!mod || !Array.isArray(mod.pages)) return mod;
+
+  const sanitizePharmaList = (list?: PharmacophoreGroup[]): PharmacophoreGroup[] | undefined => {
+    if (!Array.isArray(list)) return list;
+    return list.map((p) => ({
+      ...p,
+      smarts: getCorrectedSmarts(p?.name, p?.smarts || '') || undefined,
+    }));
+  };
+
+  const sanitizeStruct = (s: ChemicalStructure): ChemicalStructure => {
+    if (!s) return s;
+    return {
+      ...s,
+      pharmacophores: sanitizePharmaList(s.pharmacophores),
+    };
+  };
+
+  return {
+    ...mod,
+    pages: mod.pages.map((page: ReviewPage) => ({
+      ...page,
+      sections: Array.isArray(page.sections)
+        ? page.sections.map((section: ReviewSection) => ({
+            ...section,
+            structures: Array.isArray(section.structures)
+              ? section.structures.map(sanitizeStruct)
+              : section.structures,
+            local_structures: Array.isArray(section.local_structures)
+              ? section.local_structures.map(sanitizeStruct)
+              : section.local_structures,
+            questions: Array.isArray(section.questions)
+              ? section.questions.map((q) => ({
+                  ...q,
+                  structuresDisplayed: Array.isArray(q.structuresDisplayed)
+                    ? q.structuresDisplayed.map(sanitizeStruct)
+                    : q.structuresDisplayed,
+                }))
+              : section.questions,
+          }))
+        : page.sections,
+    })),
+  };
+}
+
 /**
  * Saves a ReviewModule to Dexie IndexedDB (async) and updates in-memory cache and localStorage.
  * Gracefully handles any LocalStorage QuotaExceededError without crashing.
  */
-export function saveReviewModule(newModule: ReviewModule): void {
+export function saveReviewModule(rawModule: ReviewModule): void {
   try {
-    if (newModule.id === 'antiplatelets_mcp2') {
+    const newModule = sanitizeModulePharmacophores(rawModule);
+    const isBuiltIn =
+      newModule.id === 'antiplatelets_mcp2' ||
+      newModule.id === 'anticoagulants_mcp2' ||
+      Boolean(newModule.isBuiltIn);
+
+    if (isBuiltIn) {
       const rawOverrides = localStorage.getItem(BUILTIN_OVERRIDES_KEY);
       const overrides: Record<string, ReviewModule> = rawOverrides ? JSON.parse(rawOverrides) : {};
       overrides[newModule.id] = { ...newModule, isBuiltIn: true };
@@ -203,6 +322,17 @@ export function saveReviewModule(newModule: ReviewModule): void {
         localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
       } catch (quotaErr) {
         console.warn('LocalStorage quota exceeded on override, persisting in Dexie:', quotaErr);
+      }
+      // Update in-memory cache immediately
+      if (inMemoryModules) {
+        const idx = inMemoryModules.findIndex((m) => m.id === newModule.id);
+        if (idx !== -1) {
+          inMemoryModules[idx] = { ...newModule, isBuiltIn: true };
+        } else {
+          inMemoryModules = [{ ...newModule, isBuiltIn: true }, ...inMemoryModules];
+        }
+      } else {
+        inMemoryModules = [{ ...newModule, isBuiltIn: true }];
       }
       // Async persist in Dexie
       medChemGraphDb.modules.put({
@@ -219,7 +349,7 @@ export function saveReviewModule(newModule: ReviewModule): void {
 
     if (existingIndex !== -1) {
       current[existingIndex] = newModule;
-      updated = current;
+      updated = [...current];
     } else {
       updated = [...current, newModule];
     }
@@ -246,6 +376,24 @@ export function saveReviewModule(newModule: ReviewModule): void {
   }
 }
 
+/**
+ * Asynchronous version of saveReviewModule that awaits Dexie IndexedDB persistence.
+ */
+export async function saveReviewModuleAsync(rawModule: ReviewModule): Promise<void> {
+  saveReviewModule(rawModule);
+  const newModule = sanitizeModulePharmacophores(rawModule);
+  const isBuiltIn =
+    newModule.id === 'antiplatelets_mcp2' ||
+    newModule.id === 'anticoagulants_mcp2' ||
+    Boolean(newModule.isBuiltIn);
+
+  await medChemGraphDb.modules.put({
+    id: newModule.id,
+    module: isBuiltIn ? { ...newModule, isBuiltIn: true } : newModule,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 export function resetBuiltInModule(moduleId: string): void {
   try {
     const rawOverrides = localStorage.getItem(BUILTIN_OVERRIDES_KEY);
@@ -262,7 +410,7 @@ export function resetBuiltInModule(moduleId: string): void {
 
 export function deleteReviewModule(moduleId: string): void {
   try {
-    if (moduleId === 'antiplatelets_mcp2') {
+    if (moduleId === 'antiplatelets_mcp2' || moduleId === 'anticoagulants_mcp2') {
       const hidden = getHiddenBuiltins();
       if (!hidden.includes(moduleId)) {
         hidden.push(moduleId);
@@ -278,11 +426,12 @@ export function deleteReviewModule(moduleId: string): void {
     }
 
     const current = loadAllReviewModules();
-    const filtered = current.filter((m) => m.id !== moduleId && !m.isBuiltIn && m.id !== 'vasodilators_mcp2');
-    inMemoryModules = filtered;
+    const remainingCustom = current.filter((m) => m.id !== moduleId && !m.isBuiltIn && m.id !== 'vasodilators_mcp2');
+    const builtIns = current.filter((m) => m.isBuiltIn && m.id !== moduleId);
+    inMemoryModules = [...builtIns, ...remainingCustom];
 
     try {
-      localStorage.setItem(MODULES_STORAGE_KEY, JSON.stringify(filtered));
+      localStorage.setItem(MODULES_STORAGE_KEY, JSON.stringify(remainingCustom));
     } catch {}
     localStorage.removeItem(`${MODULE_ANSWERS_PREFIX}${moduleId}`);
     delete inMemoryProgress[moduleId];
@@ -324,6 +473,7 @@ export function getEmptySessionProgress(): QuizSessionProgress {
     tfAnswers: {},
     matchingAnswers: {},
     rankingAnswers: {},
+    workbenchAnswers: {},
   };
 }
 
