@@ -4,6 +4,8 @@ import {
   DABIGATRAN_WORKBENCH_QUESTION,
 } from './dabigatranWorkbenchData';
 
+export { DABIGATRAN_STEM_STRUCTURE, DABIGATRAN_WORKBENCH_QUESTION };
+
 // ============================================================================
 // Core Chemical Structures for Review 9 (Anticoagulants)
 // All audited and verified against NIH PubChem PUG-REST

@@ -8,6 +8,11 @@ import {
 import { SmilesCanvas } from './SmilesCanvas';
 import { evaluateWorkbenchAnswer } from '../utils/workbenchEvaluator';
 import {
+  normWorkbenchX,
+  normWorkbenchY,
+  normWorkbenchRadius,
+} from '../utils/workbenchCoordinates';
+import {
   CheckCircle2,
   XCircle,
   RotateCcw,
@@ -173,6 +178,17 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
   // Count metrics for header
   const correctAmidesCount = workbenchData.step2a_amides.targets.filter((t) => t.isCorrect).length;
   const correctMoietiesCount = workbenchData.step2b_moieties.targets.filter((t) => t.isCorrect).length;
+
+  // Auto-normalize coordinates using centralized workbenchCoordinates utility
+  // Projects percentage or absolute inputs properly into 880x320 SVG canvas within safe margins
+  const normX = normWorkbenchX;
+  const normY = normWorkbenchY;
+  const normRadius = normWorkbenchRadius;
+
+  const isLidocaine =
+    workbenchData.stemStructure.id === 'lidocaine_stem' ||
+    workbenchData.stemStructure.name?.toLowerCase().includes('lidocaine') ||
+    Boolean(workbenchData.instructions && workbenchData.instructions.toLowerCase().includes('lidocaine'));
 
   return (
     <div className="w-full space-y-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 sm:p-6 shadow-sm transition-all">
@@ -423,6 +439,10 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                   fill = 'rgba(59, 130, 246, 0.1)';
                 }
 
+                const cx = normX(target.x);
+                const cy = normY(target.y);
+                const r = normRadius(target.radius, 32);
+
                 return (
                   <g
                     key={target.id}
@@ -432,9 +452,9 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                     className="cursor-pointer transition-all"
                   >
                     <circle
-                      cx={target.x}
-                      cy={target.y}
-                      r={target.radius || 32}
+                      cx={cx}
+                      cy={cy}
+                      r={r}
                       fill={fill}
                       stroke={stroke}
                       strokeWidth={isSelected ? 3 : 2}
@@ -442,8 +462,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                       filter={isSelected ? `url(#${glowFilterId})` : undefined}
                     />
                     <text
-                      x={target.x}
-                      y={target.y + (target.radius || 32) + 16}
+                      x={cx}
+                      y={cy + r + 16}
                       textAnchor="middle"
                       fontSize="10"
                       fontWeight="700"
@@ -488,6 +508,11 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                   fill = 'rgba(139, 92, 246, 0.1)';
                 }
 
+                const cx = normX(target.x);
+                const cy = normY(target.y);
+                const rx = normRadius(target.radius ? target.radius * 1.3 : 70);
+                const ry = normRadius(target.radius || 50);
+
                 return (
                   <g
                     key={target.id}
@@ -497,10 +522,10 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                     className="cursor-pointer transition-all"
                   >
                     <ellipse
-                      cx={target.x}
-                      cy={target.y}
-                      rx={target.radius ? target.radius * 1.3 : 70}
-                      ry={target.radius || 50}
+                      cx={cx}
+                      cy={cy}
+                      rx={rx}
+                      ry={ry}
                       fill={fill}
                       stroke={stroke}
                       strokeWidth={isSelected ? 3 : 2}
@@ -508,8 +533,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                       filter={isSelected ? `url(#${glowFilterId})` : undefined}
                     />
                     <text
-                      x={target.x}
-                      y={target.y + (target.radius || 50) + 16}
+                      x={cx}
+                      y={cy + ry + 16}
                       textAnchor="middle"
                       fontSize="10"
                       fontWeight="700"
@@ -537,6 +562,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                 const assignedBadge = dropAssignments[zone.id];
                 const isCorrect = assignedBadge === zone.correctBadge;
                 const canAcceptTap = !!activeSelectedBadge;
+                const zx = normX(zone.x);
+                const zy = normY(zone.y);
 
                 return (
                   <g
@@ -554,8 +581,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                   >
                     {/* Zone Boundary Box */}
                     <rect
-                      x={(zone.x ?? 50) - 70}
-                      y={(zone.y ?? 50) - 24}
+                      x={zx - 70}
+                      y={zy - 24}
                       width="140"
                       height="46"
                       rx="10"
@@ -589,8 +616,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                     {assignedBadge ? (
                       <g>
                         <text
-                          x={zone.x ?? 50}
-                          y={(zone.y ?? 50) + 4}
+                          x={zx}
+                          y={zy + 4}
                           textAnchor="middle"
                           fontSize="12"
                           fontWeight="700"
@@ -605,8 +632,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                           🏷️ {assignedBadge}
                         </text>
                         <text
-                          x={zone.x ?? 50}
-                          y={(zone.y ?? 50) + 35}
+                          x={zx}
+                          y={zy + 35}
                           textAnchor="middle"
                           fontSize="9"
                           fill="#94a3b8"
@@ -617,8 +644,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                     ) : (
                       <g>
                         <text
-                          x={zone.x ?? 50}
-                          y={(zone.y ?? 50) - 2}
+                          x={zx}
+                          y={zy - 2}
                           textAnchor="middle"
                           fontSize="11"
                           fontWeight="700"
@@ -627,8 +654,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                           {zone.label}
                         </text>
                         <text
-                          x={zone.x ?? 50}
-                          y={(zone.y ?? 50) + 12}
+                          x={zx}
+                          y={zy + 12}
                           textAnchor="middle"
                           fontSize="9"
                           fontWeight="600"
@@ -643,315 +670,572 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
               })}
 
             {/* ========================================================== */}
-            {/* 3D. CHEMICAL BONDS & ATOMS SCHEMATIC (Dabigatran etexilate) */}
+            {/* 3D. CHEMICAL BONDS & ATOMS SCHEMATIC                       */}
             {/* ========================================================== */}
-            {/* Left Prodrug Moiety: Ethyl Ester */}
-            <text
-              x="60"
-              y="165"
-              fontFamily="monospace"
-              fontSize="14"
-              fontWeight="bold"
-              fill="var(--structure-bond-stroke, #334155)"
-            >
-              H₃C-CH₂-O
-            </text>
-            <line
-              x1="140"
-              y1="160"
-              x2="175"
-              y2="160"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            {/* Ester Carbonyl */}
-            <line
-              x1="172"
-              y1="158"
-              x2="172"
-              y2="135"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2"
-            />
-            <line
-              x1="178"
-              y1="158"
-              x2="178"
-              y2="135"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2"
-            />
-            <text
-              x="175"
-              y="130"
-              textAnchor="middle"
-              fontFamily="monospace"
-              fontSize="14"
-              fontWeight="bold"
-              fill="#dc2626"
-            >
-              O
-            </text>
+            {isLidocaine ? (
+              <g className="transition-opacity duration-300">
+                {/* 2,6-Dimethylphenyl (Xylyl) Ring centered at ~211, 144 */}
+                <polygon
+                  points="175,144 193,113 229,113 247,144 229,175 193,175"
+                  fill="none"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                />
+                {/* Inner aromatic circle */}
+                <circle
+                  cx="211"
+                  cy="144"
+                  r="20"
+                  fill="none"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="1.5"
+                  strokeDasharray="4,3"
+                />
+                {/* C2-Methyl (top-right ortho) */}
+                <line
+                  x1="229"
+                  y1="113"
+                  x2="245"
+                  y2="85"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <text
+                  x="250"
+                  y="80"
+                  fontFamily="monospace"
+                  fontSize="12"
+                  fontWeight="bold"
+                  fill="var(--structure-bond-stroke, #334155)"
+                >
+                  CH₃
+                </text>
+                {/* C6-Methyl (bottom-right ortho) */}
+                <line
+                  x1="229"
+                  y1="175"
+                  x2="245"
+                  y2="203"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <text
+                  x="250"
+                  y="215"
+                  fontFamily="monospace"
+                  fontSize="12"
+                  fontWeight="bold"
+                  fill="var(--structure-bond-stroke, #334155)"
+                >
+                  CH₃
+                </text>
+                {/* Para-H indication at left (175, 144) */}
+                <line
+                  x1="175"
+                  y1="144"
+                  x2="155"
+                  y2="144"
+                  stroke="var(--structure-bond-stroke, #94a3b8)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <text
+                  x="142"
+                  y="148"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="11"
+                  fill="#94a3b8"
+                >
+                  H
+                </text>
 
-            {/* Linker to Central Pyridine */}
-            <line
-              x1="175"
-              y1="160"
-              x2="225"
-              y2="160"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="225"
-              y1="160"
-              x2="255"
-              y2="140"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
+                {/* C1 to Amide NH Link */}
+                <line
+                  x1="247"
+                  y1="144"
+                  x2="280"
+                  y2="144"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <text
+                  x="295"
+                  y="149"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="#2563eb"
+                >
+                  NH
+                </text>
 
-            {/* Pyridine Ring */}
-            <polygon
-              points="255,140 285,120 315,140 315,175 285,195 255,175"
-              fill="none"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-            />
-            <text
-              x="285"
-              y="132"
-              textAnchor="middle"
-              fontFamily="monospace"
-              fontSize="13"
-              fontWeight="bold"
-              fill="#2563eb"
-            >
-              N
-            </text>
+                {/* NH to Carbonyl Carbon */}
+                <line
+                  x1="312"
+                  y1="144"
+                  x2="355"
+                  y2="144"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                {/* Carbonyl Double Bond C=O */}
+                <line
+                  x1="352"
+                  y1="142"
+                  x2="352"
+                  y2="108"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="358"
+                  y1="142"
+                  x2="358"
+                  y2="108"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2"
+                />
+                <text
+                  x="355"
+                  y="100"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="#dc2626"
+                >
+                  O
+                </text>
 
-            {/* Central Tertiary Amide Bond (2a Target 1) */}
-            <line
-              x1="315"
-              y1="155"
-              x2="340"
-              y2="155"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <line
-              x1="337"
-              y1="153"
-              x2="337"
-              y2="130"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2"
-            />
-            <line
-              x1="343"
-              y1="153"
-              x2="343"
-              y2="130"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2"
-            />
-            <text
-              x="340"
-              y="125"
-              textAnchor="middle"
-              fontFamily="monospace"
-              fontSize="14"
-              fontWeight="bold"
-              fill="#dc2626"
-            >
-              O
-            </text>
-            <line
-              x1="340"
-              y1="155"
-              x2="368"
-              y2="155"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <text
-              x="375"
-              y="160"
-              fontFamily="monospace"
-              fontSize="14"
-              fontWeight="bold"
-              fill="#2563eb"
-            >
-              N(CH₃)
-            </text>
+                {/* Carbonyl to Alpha Methylene (-CH2-) */}
+                <line
+                  x1="355"
+                  y1="144"
+                  x2="480"
+                  y2="144"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <text
+                  x="485"
+                  y="149"
+                  fontFamily="monospace"
+                  fontSize="13"
+                  fontWeight="bold"
+                  fill="var(--structure-bond-stroke, #334155)"
+                >
+                  -CH₂-
+                </text>
 
-            {/* Benzimidazole Fused Core */}
-            <line
-              x1="420"
-              y1="155"
-              x2="450"
-              y2="155"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-            />
-            {/* 6-ring */}
-            <polygon
-              points="450,155 475,135 505,135 520,155 505,175 475,175"
-              fill="none"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-            />
-            {/* 5-ring fused */}
-            <polygon
-              points="520,155 540,140 560,155 540,170"
-              fill="none"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-            />
-            <text
-              x="540"
-              y="142"
-              textAnchor="middle"
-              fontFamily="monospace"
-              fontSize="12"
-              fontWeight="bold"
-              fill="#2563eb"
-            >
-              N
-            </text>
+                {/* Methylene to Tertiary Amine N at ~640 */}
+                <line
+                  x1="525"
+                  y1="144"
+                  x2="635"
+                  y2="144"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx="651"
+                  cy="144"
+                  r="14"
+                  fill="rgba(37, 99, 235, 0.08)"
+                  stroke="#2563eb"
+                  strokeWidth="1.5"
+                />
+                <text
+                  x="651"
+                  y="149"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="15"
+                  fontWeight="bold"
+                  fill="#2563eb"
+                >
+                  N
+                </text>
 
-            {/* Benzamidine & Hexyl Carbamate (Right Side) */}
-            <line
-              x1="560"
-              y1="155"
-              x2="600"
-              y2="155"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-            />
-            {/* Phenyl Linker */}
-            <polygon
-              points="600,155 615,135 640,135 655,155 640,175 615,175"
-              fill="none"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-            />
+                {/* Ethyl Branch 1 (Up-Right) */}
+                <line
+                  x1="665"
+                  y1="138"
+                  x2="705"
+                  y2="115"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="705"
+                  y1="115"
+                  x2="745"
+                  y2="115"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <text
+                  x="755"
+                  y="120"
+                  fontFamily="monospace"
+                  fontSize="13"
+                  fontWeight="bold"
+                  fill="var(--structure-bond-stroke, #334155)"
+                >
+                  CH₂CH₃
+                </text>
 
-            {/* Amidine & Carbamate Linkage (2a Target 2) */}
-            <line
-              x1="655"
-              y1="155"
-              x2="675"
-              y2="155"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-            />
-            <text
-              x="685"
-              y="145"
-              textAnchor="middle"
-              fontFamily="monospace"
-              fontSize="12"
-              fontWeight="bold"
-              fill="#2563eb"
-            >
-              =NH
-            </text>
-            <text
-              x="685"
-              y="165"
-              textAnchor="middle"
-              fontFamily="monospace"
-              fontSize="13"
-              fontWeight="bold"
-              fill="#2563eb"
-            >
-              NH
-            </text>
+                {/* Ethyl Branch 2 (Down-Right) */}
+                <line
+                  x1="665"
+                  y1="150"
+                  x2="705"
+                  y2="173"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="705"
+                  y1="173"
+                  x2="745"
+                  y2="173"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <text
+                  x="755"
+                  y="178"
+                  fontFamily="monospace"
+                  fontSize="13"
+                  fontWeight="bold"
+                  fill="var(--structure-bond-stroke, #334155)"
+                >
+                  CH₂CH₃
+                </text>
+              </g>
+            ) : (
+              <g className="transition-opacity duration-300">
+                {/* Left Prodrug Moiety: Ethyl Ester */}
+                <text
+                  x="60"
+                  y="165"
+                  fontFamily="monospace"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="var(--structure-bond-stroke, #334155)"
+                >
+                  H₃C-CH₂-O
+                </text>
+                <line
+                  x1="140"
+                  y1="160"
+                  x2="175"
+                  y2="160"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                {/* Ester Carbonyl */}
+                <line
+                  x1="172"
+                  y1="158"
+                  x2="172"
+                  y2="135"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="178"
+                  y1="158"
+                  x2="178"
+                  y2="135"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2"
+                />
+                <text
+                  x="175"
+                  y="130"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="#dc2626"
+                >
+                  O
+                </text>
 
-            {/* Carbamate Carbonyl */}
-            <line
-              x1="695"
-              y1="160"
-              x2="720"
-              y2="160"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-            />
-            <line
-              x1="717"
-              y1="158"
-              x2="717"
-              y2="135"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2"
-            />
-            <line
-              x1="723"
-              y1="158"
-              x2="723"
-              y2="135"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2"
-            />
-            <text
-              x="720"
-              y="125"
-              textAnchor="middle"
-              fontFamily="monospace"
-              fontSize="14"
-              fontWeight="bold"
-              fill="#dc2626"
-            >
-              O
-            </text>
+                {/* Linker to Central Pyridine */}
+                <line
+                  x1="175"
+                  y1="160"
+                  x2="225"
+                  y2="160"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="225"
+                  y1="160"
+                  x2="255"
+                  y2="140"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
 
-            {/* Hexyloxy Chain */}
-            <line
-              x1="720"
-              y1="160"
-              x2="745"
-              y2="160"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-            />
-            <text
-              x="755"
-              y="165"
-              fontFamily="monospace"
-              fontSize="13"
-              fontWeight="bold"
-              fill="#dc2626"
-            >
-              O
-            </text>
-            <line
-              x1="765"
-              y1="160"
-              x2="785"
-              y2="160"
-              stroke="var(--structure-bond-stroke, #475569)"
-              strokeWidth="2.5"
-            />
-            <text
-              x="815"
-              y="165"
-              fontFamily="monospace"
-              fontSize="13"
-              fontWeight="bold"
-              fill="var(--structure-bond-stroke, #334155)"
-            >
-              -(CH₂)₅CH₃
-            </text>
+                {/* Pyridine Ring */}
+                <polygon
+                  points="255,140 285,120 315,140 315,175 285,195 255,175"
+                  fill="none"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                />
+                <text
+                  x="285"
+                  y="132"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="13"
+                  fontWeight="bold"
+                  fill="#2563eb"
+                >
+                  N
+                </text>
+
+                {/* Central Tertiary Amide Bond (2a Target 1) */}
+                <line
+                  x1="315"
+                  y1="155"
+                  x2="340"
+                  y2="155"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="337"
+                  y1="153"
+                  x2="337"
+                  y2="130"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="343"
+                  y1="153"
+                  x2="343"
+                  y2="130"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2"
+                />
+                <text
+                  x="340"
+                  y="125"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="#dc2626"
+                >
+                  O
+                </text>
+                <line
+                  x1="340"
+                  y1="155"
+                  x2="368"
+                  y2="155"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <text
+                  x="375"
+                  y="160"
+                  fontFamily="monospace"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="#2563eb"
+                >
+                  N(CH₃)
+                </text>
+
+                {/* Benzimidazole Fused Core */}
+                <line
+                  x1="420"
+                  y1="155"
+                  x2="450"
+                  y2="155"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                />
+                {/* 6-ring */}
+                <polygon
+                  points="450,155 475,135 505,135 520,155 505,175 475,175"
+                  fill="none"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                />
+                {/* 5-ring fused */}
+                <polygon
+                  points="520,155 540,140 560,155 540,170"
+                  fill="none"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                />
+                <text
+                  x="540"
+                  y="142"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="12"
+                  fontWeight="bold"
+                  fill="#2563eb"
+                >
+                  N
+                </text>
+
+                {/* Benzamidine & Hexyl Carbamate (Right Side) */}
+                <line
+                  x1="560"
+                  y1="155"
+                  x2="600"
+                  y2="155"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                />
+                {/* Phenyl Linker */}
+                <polygon
+                  points="600,155 615,135 640,135 655,155 640,175 615,175"
+                  fill="none"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                />
+
+                {/* Amidine & Carbamate Linkage (2a Target 2) */}
+                <line
+                  x1="655"
+                  y1="155"
+                  x2="675"
+                  y2="155"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                />
+                <text
+                  x="685"
+                  y="145"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="12"
+                  fontWeight="bold"
+                  fill="#2563eb"
+                >
+                  =NH
+                </text>
+                <text
+                  x="685"
+                  y="165"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="13"
+                  fontWeight="bold"
+                  fill="#2563eb"
+                >
+                  NH
+                </text>
+
+                {/* Carbamate Carbonyl */}
+                <line
+                  x1="695"
+                  y1="160"
+                  x2="720"
+                  y2="160"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                />
+                <line
+                  x1="717"
+                  y1="158"
+                  x2="717"
+                  y2="135"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="723"
+                  y1="158"
+                  x2="723"
+                  y2="135"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2"
+                />
+                <text
+                  x="720"
+                  y="125"
+                  textAnchor="middle"
+                  fontFamily="monospace"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="#dc2626"
+                >
+                  O
+                </text>
+
+                {/* Hexyloxy Chain */}
+                <line
+                  x1="720"
+                  y1="160"
+                  x2="745"
+                  y2="160"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                />
+                <text
+                  x="755"
+                  y="165"
+                  fontFamily="monospace"
+                  fontSize="13"
+                  fontWeight="bold"
+                  fill="#dc2626"
+                >
+                  O
+                </text>
+                <line
+                  x1="765"
+                  y1="160"
+                  x2="785"
+                  y2="160"
+                  stroke="var(--structure-bond-stroke, #475569)"
+                  strokeWidth="2.5"
+                />
+                <text
+                  x="815"
+                  y="165"
+                  fontFamily="monospace"
+                  fontSize="13"
+                  fontWeight="bold"
+                  fill="var(--structure-bond-stroke, #334155)"
+                >
+                  -(CH₂)₅CH₃
+                </text>
+              </g>
+            )}
           </svg>
         </div>
       </div>

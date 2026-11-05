@@ -60,9 +60,9 @@ export const CLASS_I_KINETICS_WORKBENCH_DATA: StructuralWorkbenchData = {
         isCorrect: true,
         rationale:
           'The amide bond resists rapid systemic amidase hydrolysis due to flanking 2,6-methyl groups, giving Lidocaine sufficient stability for cardiac IV therapy compared to ester-based procaine.',
-        x: 48,
-        y: 42,
-        radius: 12,
+        x: 422,
+        y: 134,
+        radius: 36,
       },
       {
         id: 'tertiary_amine',
@@ -71,9 +71,9 @@ export const CLASS_I_KINETICS_WORKBENCH_DATA: StructuralWorkbenchData = {
         isCorrect: true,
         rationale:
           'Ionized at physiologic pH (~pKa 7.9). The protonated ammonium cation enters the inner pore vestibule of Nav1.5 to block sodium flux, while the uncharged form permeates membranes.',
-        x: 74,
-        y: 44,
-        radius: 14,
+        x: 651,
+        y: 140,
+        radius: 40,
       },
       {
         id: 'para_hydrogen',
@@ -82,9 +82,9 @@ export const CLASS_I_KINETICS_WORKBENCH_DATA: StructuralWorkbenchData = {
         isCorrect: false,
         rationale:
           'The para position is accessible for minor aromatic hydroxylation but does not form the primary electrostatic or hydrogen-bonding interaction in the channel pore.',
-        x: 20,
-        y: 48,
-        radius: 10,
+        x: 140,
+        y: 144,
+        radius: 28,
       },
     ],
   },
@@ -100,9 +100,9 @@ export const CLASS_I_KINETICS_WORKBENCH_DATA: StructuralWorkbenchData = {
         isCorrect: true,
         rationale:
           'Twin ortho-methyl groups force the amide carbonyl out of coplanarity with the phenyl ring, shielding the carbonyl carbon from nucleophilic attack by hepatic amidases.',
-        x: 24,
-        y: 45,
-        radius: 16,
+        x: 211,
+        y: 144,
+        radius: 48,
       },
       {
         id: 'ethyl_chains',
@@ -111,9 +111,9 @@ export const CLASS_I_KINETICS_WORKBENCH_DATA: StructuralWorkbenchData = {
         isCorrect: false,
         rationale:
           'N-ethyl substituents modulate lipophilicity and substrate susceptibility to CYP-mediated N-dealkylation, not steric protection of the carbonyl.',
-        x: 88,
-        y: 35,
-        radius: 12,
+        x: 740,
+        y: 140,
+        radius: 36,
       },
     ],
   },
@@ -137,8 +137,8 @@ export const CLASS_I_KINETICS_WORKBENCH_DATA: StructuralWorkbenchData = {
         correctBadge: 'Class IB (tau_rec < 1s, Shortens APD)',
         rationale:
           'Class IB agents dissociate extremely rapidly (tau < 1s). They do not depress Phase 0 at normal heart rates but bind avidly during ischemia or tachycardia, shortening APD.',
-        x: 25,
-        y: 80,
+        x: 220,
+        y: 250,
       },
       {
         id: 'procainamide_subclass',
@@ -147,8 +147,8 @@ export const CLASS_I_KINETICS_WORKBENCH_DATA: StructuralWorkbenchData = {
         correctBadge: 'Class IA (tau_rec 1-10s, Prolongs APD/QT)',
         rationale:
           'Class IA agents exhibit intermediate dissociation kinetics (tau = 1-10s) and also block delayed rectifier IKr potassium channels, moderately depressing Phase 0 and prolonging APD/QT.',
-        x: 55,
-        y: 80,
+        x: 484,
+        y: 250,
       },
       {
         id: 'flecainide_subclass',
@@ -157,8 +157,8 @@ export const CLASS_I_KINETICS_WORKBENCH_DATA: StructuralWorkbenchData = {
         correctBadge: 'Class IC (tau_rec > 10s, Unchanged APD)',
         rationale:
           'Class IC agents possess the slowest dissociation kinetics (tau > 10s), marked Phase 0 slowing, widening of the QRS complex, and little to no effect on repolarization/APD.',
-        x: 82,
-        y: 80,
+        x: 720,
+        y: 250,
       },
     ],
   },
@@ -409,6 +409,13 @@ export const AMIODARONE_SAR_WORKBENCH_DATA: StructuralWorkbenchData = {
 };
 
 export const ANTIARRHYTHMIC_WORKBENCHES: Record<string, StructuralWorkbenchData> = {
+  class_i_kinetics: CLASS_I_KINETICS_WORKBENCH_DATA,
+  amiodarone_sar: AMIODARONE_SAR_WORKBENCH_DATA,
+};
+
+export const ANTIARRHYTHMIC_WORKBENCH_DATA = {
+  lidocaine: CLASS_I_KINETICS_WORKBENCH_DATA,
+  amiodarone: AMIODARONE_SAR_WORKBENCH_DATA,
   class_i_kinetics: CLASS_I_KINETICS_WORKBENCH_DATA,
   amiodarone_sar: AMIODARONE_SAR_WORKBENCH_DATA,
 };
