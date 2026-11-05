@@ -39,6 +39,7 @@ import { Navbar } from './components/Navbar';
 import { yieldToMainThread, runWhenIdle } from './utils/scheduler';
 import { processFileAndGenerateQuestions } from './services/lectureIngestion';
 import { evaluateWorkbenchAnswer } from './utils/workbenchEvaluator';
+import { isStudentMode } from './utils/envMode';
 
 // Code-split heavy modals and secondary views to shrink critical-path JS and accelerate LCP render
 const Dashboard = React.lazy(() =>
@@ -1460,6 +1461,7 @@ function AppContent() {
                           allStructures={allModuleStructures}
                           hideDrugName={hideDrugNames}
                           examModeActive={examStatus === 'active'}
+                          viewMode={blockStructures.length === 1 ? 'single' : 'auto'}
                           onInspectStructure={handleOpenPubChem}
                           globalActivePharmacophores={globalActivePharmacophores}
                           globalHoveredPharmacophoreId={hoveredGlobalPharmacophoreId}
@@ -1733,7 +1735,7 @@ function AppContent() {
         {/* ==================================================== */}
         {/* DOCKED / SLIDE-OVER AI MEDCHEM TUTOR PANEL          */}
         {/* ==================================================== */}
-        {showTutor && examStatus !== 'active' && (
+        {!isStudentMode() && showTutor && examStatus !== 'active' && (
           <React.Suspense fallback={null}>
             <div className="pt-2 animate-fadeIn">
               <AITutorPanel
@@ -1786,7 +1788,7 @@ function AppContent() {
       {/* ---------------------------------------------------- */}
       {/* LECTURE REVIEW & QUIZ SETUP MODAL                    */}
       {/* ---------------------------------------------------- */}
-      {(isDocumentStudioOpen || isImporterOpen) && (
+      {!isStudentMode() && (isDocumentStudioOpen || isImporterOpen) && (
         <React.Suspense fallback={null}>
           <DocumentStudioModal
             isOpen={isDocumentStudioOpen || isImporterOpen}
@@ -1855,7 +1857,7 @@ function AppContent() {
       {/* ---------------------------------------------------- */}
       {/* LIVE MODULE & QUESTION STUDIO EDITOR MODAL           */}
       {/* ---------------------------------------------------- */}
-      {isEditorOpen && (
+      {!isStudentMode() && isEditorOpen && (
         <React.Suspense fallback={null}>
           <ModuleEditorModal
             isOpen={isEditorOpen}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ReviewModule, ExamModeStatus } from '../types/reviewModule';
 import {
   ChevronRight,
@@ -15,12 +15,16 @@ import {
   Sparkles,
   ExternalLink,
   Upload,
+  Download,
+  FileJson,
   RotateCcw,
   Trash2,
   Check,
   MoreHorizontal,
   Layers,
 } from 'lucide-react';
+import { exportReviewModuleAsJson } from '../utils/jsonPortability';
+import { isStudentMode } from '../utils/envMode';
 
 export interface NavbarProps {
   courseCode?: string;
@@ -31,10 +35,11 @@ export interface NavbarProps {
   onRestoreDefaultModule?: () => void;
   canRestoreDefault?: boolean;
   onOpenImporter: () => void;
+  onOpenImportJson?: () => void;
   onOpenEditor: () => void;
   onOpenQuizSetup: () => void;
-  activeTab: 'document-review' | 'matrix' | 'knowledge-graph';
-  onSelectTab: (tab: 'document-review' | 'matrix' | 'knowledge-graph') => void;
+  activeTab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard';
+  onSelectTab: (tab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard') => void;
   pagesCount: number;
   showKnowledgeGraph?: boolean;
   hideDrugNames: boolean;
@@ -64,6 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onRestoreDefaultModule,
   canRestoreDefault = false,
   onOpenImporter,
+  onOpenImportJson,
   onOpenEditor,
   onOpenQuizSetup,
   activeTab,
@@ -87,7 +93,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSettings,
   onOpenPubChem,
 }) => {
-  const [isModuleDropdownOpen, setIsModuleDropdownOpen] = useState(false);
+  const modulePopoverRef = useRef<HTMLDivElement>(null);
   const [confirmDeleteModuleId, setConfirmDeleteModuleId] = useState<string | null>(null);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
 
@@ -108,11 +114,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="relative">
               <button
                 type="button"
+                popoverTarget="module-dropdown"
                 onClick={() => {
-                  setIsModuleDropdownOpen(!isModuleDropdownOpen);
+                  setConfirmDeleteModuleId(null);
                   setIsToolsMenuOpen(false);
                 }}
-                className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1 px-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                className="anchor-module-btn flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1 px-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 title="Switch course topic / module"
               >
                 <span className="truncate max-w-[120px] sm:max-w-[180px] md:max-w-[220px]">
@@ -121,22 +128,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               </button>
 
-              {/* Scope Dropdown Menu */}
-              {isModuleDropdownOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => {
-                      setIsModuleDropdownOpen(false);
-                      setConfirmDeleteModuleId(null);
-                    }}
-                  />
-
-                  <div
-                    className="absolute left-0 top-full mt-1.5 w-84 sm:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 z-40 animate-fadeIn space-y-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="px-2 py-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              {/* Scope Dropdown Menu via Native Popover API & CSS Anchor Positioning */}
+              <div
+                id="module-dropdown"
+                ref={modulePopoverRef}
+                popover="auto"
+                className="dropdown-popover w-84 sm:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 z-40 space-y-1"
+              >
+                <div className="px-2 py-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400">
                       <span>Curriculum Modules</span>
                       <span className="text-[10px] font-mono lowercase text-slate-400">
                         {modules.length} {modules.length === 1 ? 'module' : 'modules'}
@@ -147,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {modules.map((m) => {
                         const isActive = m.id === activeModule.id;
                         const isConfirming = confirmDeleteModuleId === m.id;
-                        const canDelete = modules.length > 1;
+                        const canDelete = !isStudentMode() && modules.length > 1 && !m.isBuiltIn;
 
                         return (
                           <div
@@ -192,7 +191,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                                   type="button"
                                   onClick={() => {
                                     onSwitchModule(m.id);
-                                    setIsModuleDropdownOpen(false);
+                                    modulePopoverRef.current?.hidePopover?.();
                                   }}
                                   className="min-w-0 flex-1 w-full text-left cursor-pointer flex flex-col overflow-hidden"
                                 >
@@ -213,6 +212,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                                   {isActive && (
                                     <Check className="w-4 h-4 text-blue-600 shrink-0" />
                                   )}
+
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      exportReviewModuleAsJson(m);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-all cursor-pointer"
+                                    title={`Export "${m.title}" as JSON`}
+                                    aria-label={`Export module ${m.title} as JSON`}
+                                  >
+                                    <Download className="w-3.5 h-3.5" />
+                                  </button>
 
                                   {canDelete && (
                                     <button
@@ -242,7 +254,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           type="button"
                           onClick={() => {
                             onRestoreDefaultModule();
-                            setIsModuleDropdownOpen(false);
+                            modulePopoverRef.current?.hidePopover?.();
                           }}
                           className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer"
                         >
@@ -254,29 +266,57 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          onOpenImporter();
-                          setIsModuleDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-xs cursor-pointer"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>+ Import New Review Document</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onOpenEditor();
-                          setIsModuleDropdownOpen(false);
+                          onSelectTab('dashboard');
+                          modulePopoverRef.current?.hidePopover?.();
                         }}
                         className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit Active Module &amp; Questions</span>
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Manage All Decks in Dashboard</span>
                       </button>
+
+                      {!isStudentMode() && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onOpenImporter();
+                              modulePopoverRef.current?.hidePopover?.();
+                            }}
+                            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-xs cursor-pointer"
+                          >
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>+ Import New Review Document</span>
+                          </button>
+
+                          {onOpenImportJson && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onOpenImportJson();
+                                modulePopoverRef.current?.hidePopover?.();
+                              }}
+                              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 transition-colors cursor-pointer"
+                            >
+                              <FileJson className="w-3.5 h-3.5" />
+                              <span>Import Module / Backup JSON</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onOpenEditor();
+                              modulePopoverRef.current?.hidePopover?.();
+                            }}
+                            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Edit Active Module &amp; Questions</span>
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
-                </>
-              )}
             </div>
           </div>
         </div>
@@ -285,6 +325,20 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* 2. CENTER ZONE (VIEWS): Centered Segmented Tab Bar   */}
         {/* ==================================================== */}
         <div className="hidden lg:flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs font-medium">
+          <button
+            type="button"
+            onClick={() => onSelectTab('dashboard')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 ${
+              activeTab === 'dashboard'
+                ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+            title="Curriculum Decks & Dashboard"
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Dashboard</span>
+          </button>
+
           <button
             type="button"
             onClick={() => onSelectTab('document-review')}
@@ -334,15 +388,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={onOpenEditor}
-            className="px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5"
-            title="Author or edit practice questions and clinical rationales"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-            <span>Question Studio</span>
-          </button>
+          {!isStudentMode() && (
+            <button
+              type="button"
+              onClick={onOpenEditor}
+              className="px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5"
+              title="Author or edit practice questions and clinical rationales"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Question Studio</span>
+            </button>
+          )}
         </div>
 
         {/* ==================================================== */}
@@ -468,7 +524,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               type="button"
               onClick={() => {
                 setIsToolsMenuOpen(!isToolsMenuOpen);
-                setIsModuleDropdownOpen(false);
+                modulePopoverRef.current?.hidePopover?.();
               }}
               className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-2xs transition-colors cursor-pointer flex items-center justify-center"
               title="Secondary Tools &amp; Preferences"
@@ -493,24 +549,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
 
                   {/* AI Tutor Toggle */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onToggleTutor();
-                      setIsToolsMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer ${
-                      showTutor
-                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-semibold'
-                        : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span>AI MedChem Tutor</span>
-                    </div>
-                    {showTutor && <Check className="w-3.5 h-3.5 text-blue-600" />}
-                  </button>
+                  {!isStudentMode() && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onToggleTutor();
+                        setIsToolsMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer ${
+                        showTutor
+                          ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-semibold'
+                          : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span>AI MedChem Tutor</span>
+                      </div>
+                      {showTutor && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                    </button>
+                  )}
 
                   {/* PubChem API Inspector */}
                   <button
