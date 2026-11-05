@@ -26,6 +26,7 @@ let isDexieInitialized = false;
 
 export function getHiddenBuiltins(): string[] {
   if (inMemoryHiddenBuiltins) return inMemoryHiddenBuiltins;
+  if (typeof localStorage === 'undefined') return [];
   try {
     const raw = localStorage.getItem(HIDDEN_BUILTIN_KEY);
     inMemoryHiddenBuiltins = raw ? JSON.parse(raw) : [];
@@ -75,17 +76,19 @@ export function loadAllReviewModules(): ReviewModule[] {
   const hiddenBuiltins = getHiddenBuiltins();
 
   let overrides: Record<string, ReviewModule> = {};
-  try {
-    const rawOverrides = localStorage.getItem(BUILTIN_OVERRIDES_KEY);
-    if (rawOverrides) {
-      overrides = JSON.parse(rawOverrides) || {};
-      if (overrides['vasodilators_mcp2']) {
-        delete overrides['vasodilators_mcp2'];
-        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const rawOverrides = localStorage.getItem(BUILTIN_OVERRIDES_KEY);
+      if (rawOverrides) {
+        overrides = JSON.parse(rawOverrides) || {};
+        if (overrides['vasodilators_mcp2']) {
+          delete overrides['vasodilators_mcp2'];
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        }
       }
+    } catch (e) {
+      console.warn('Could not parse built-in overrides:', e);
     }
-  } catch (e) {
-    console.warn('Could not parse built-in overrides:', e);
   }
 
   const finalAntiplatelet = overrides['antiplatelets_mcp2'] || defaultAntiplatelet;
@@ -97,23 +100,25 @@ export function loadAllReviewModules(): ReviewModule[] {
 
   // Synchronously load custom modules from localStorage so 0ms first-paint never drops them on reload
   let customList: ReviewModule[] = [];
-  try {
-    const rawCustom = localStorage.getItem(MODULES_STORAGE_KEY);
-    if (rawCustom) {
-      const parsed = JSON.parse(rawCustom);
-      if (Array.isArray(parsed)) {
-        customList = parsed.filter(
-          (m) =>
-            m &&
-            m.id &&
-            m.id !== 'antiplatelets_mcp2' &&
-            m.id !== 'anticoagulants_mcp2' &&
-            m.id !== 'vasodilators_mcp2'
-        );
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const rawCustom = localStorage.getItem(MODULES_STORAGE_KEY);
+      if (rawCustom) {
+        const parsed = JSON.parse(rawCustom);
+        if (Array.isArray(parsed)) {
+          customList = parsed.filter(
+            (m) =>
+              m &&
+              m.id &&
+              m.id !== 'antiplatelets_mcp2' &&
+              m.id !== 'anticoagulants_mcp2' &&
+              m.id !== 'vasodilators_mcp2'
+          );
+        }
       }
+    } catch (customErr) {
+      console.warn('Could not read custom modules from localStorage:', customErr);
     }
-  } catch (customErr) {
-    console.warn('Could not read custom modules from localStorage:', customErr);
   }
 
   const combined = [...builtIns, ...customList];
@@ -448,13 +453,15 @@ export function loadActiveModuleId(): string {
   if (inMemoryActiveModuleId) {
     return inMemoryActiveModuleId;
   }
-  try {
-    const stored = localStorage.getItem(ACTIVE_MODULE_ID_KEY);
-    if (stored) {
-      inMemoryActiveModuleId = stored;
-      return stored;
-    }
-  } catch {}
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(ACTIVE_MODULE_ID_KEY);
+      if (stored) {
+        inMemoryActiveModuleId = stored;
+        return stored;
+      }
+    } catch {}
+  }
   inMemoryActiveModuleId = 'antiplatelets_mcp2';
   return 'antiplatelets_mcp2';
 }
