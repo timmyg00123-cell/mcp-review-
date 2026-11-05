@@ -35,8 +35,9 @@ const amioVerify = verifyWorkbenchGeometry(ANTIARRHYTHMIC_WORKBENCH_DATA.amiodar
 assert.strictEqual(amioVerify.isValid, true, `Amiodarone workbench geometry invalid: ${amioVerify.errors.join('; ')}`);
 
 // Test 5: Verify Dabigatran workbench question in Anticoagulants
-if (DABIGATRAN_WORKBENCH_QUESTION?.workbenchData) {
-  const dabiVerify = verifyWorkbenchGeometry(DABIGATRAN_WORKBENCH_QUESTION.workbenchData);
+assert.ok(DABIGATRAN_WORKBENCH_QUESTION?.structuralWorkbench, 'Dabigatran workbench question must contain structuralWorkbench');
+if (DABIGATRAN_WORKBENCH_QUESTION?.structuralWorkbench) {
+  const dabiVerify = verifyWorkbenchGeometry(DABIGATRAN_WORKBENCH_QUESTION.structuralWorkbench);
   assert.strictEqual(dabiVerify.isValid, true, `Dabigatran workbench geometry invalid: ${dabiVerify.errors.join('; ')}`);
 }
 
