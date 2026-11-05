@@ -38,6 +38,7 @@ import { getHydratedDrugs, HydratedDrug } from './db/medChemGraphDb';
 import { Navbar } from './components/Navbar';
 import { yieldToMainThread, runWhenIdle } from './utils/scheduler';
 import { processFileAndGenerateQuestions } from './services/lectureIngestion';
+import { evaluateWorkbenchAnswer } from './utils/workbenchEvaluator';
 
 // Code-split heavy modals and secondary views to shrink critical-path JS and accelerate LCP render
 const Dashboard = React.lazy(() =>
@@ -766,6 +767,25 @@ function AppContent() {
             const it = itemMap.get(id);
             if (it && it.correctRank === idx + 1) earned += 1;
           });
+        }
+      }
+
+      // 5. Structural Workbench (4 points)
+      if (q.type === 'structural-workbench' && q.structuralWorkbench) {
+        possible += 4;
+        const ans = sessionProgress.workbenchAnswers?.[q.id];
+        if (ans) {
+          const evalRes = evaluateWorkbenchAnswer(q.structuralWorkbench, ans);
+          earned += evalRes.totalScore;
+          if (
+            evalRes.totalScore > 0 ||
+            ans.selectedAmideIds.length > 0 ||
+            ans.selectedMoietyIds.length > 0 ||
+            Object.keys(ans.dropZoneAssignments).length > 0 ||
+            ans.selectedCandidateId !== null
+          ) {
+            isAnswered = true;
+          }
         }
       }
 
@@ -1554,6 +1574,16 @@ function AppContent() {
                                   rankingChecked: {
                                     ...(prev.rankingChecked || {}),
                                     [q.id]: checked,
+                                  },
+                                }))
+                              }
+                              workbenchAnswer={sessionProgress.workbenchAnswers?.[q.id]}
+                              onWorkbenchAnswerChange={(nextAns) =>
+                                setSessionProgress((prev) => ({
+                                  ...prev,
+                                  workbenchAnswers: {
+                                    ...(prev.workbenchAnswers || {}),
+                                    [q.id]: nextAns,
                                   },
                                 }))
                               }

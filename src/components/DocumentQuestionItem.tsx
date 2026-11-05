@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { AntiplateletQuestion } from '../data/antiplateletQuizData';
-import { ChemicalStructure, ExamModeStatus, RankingItem } from '../types/reviewModule';
+import {
+  ChemicalStructure,
+  ExamModeStatus,
+  RankingItem,
+  StructuralWorkbenchAnswer,
+} from '../types/reviewModule';
 import { StructureDragDropMatch } from './StructureDragDropMatch';
+import { StructureLightboxModal } from './StructureLightboxModal';
+import { SmilesCanvas } from './SmilesCanvas';
+import { StructuralWorkbenchQuestion } from './StructuralWorkbenchQuestion';
 import {
   ChevronDown,
   ChevronUp,
@@ -17,12 +25,24 @@ import {
   ListOrdered,
   Lock,
   Edit3,
+  Eye,
+  EyeOff,
+  ZoomIn,
+  FlaskConical,
 } from 'lucide-react';
 
 import { ColorPaletteItem } from '../utils/pharmacophoreData';
+import { maskDrugNamesForExam } from '../utils/maskDrugNames';
+import {
+  getChemicalClass,
+  getTargetReceptor,
+  getReversibility,
+  getRouteOfAdmin,
+} from '../utils/structureDataUtils';
 
 interface DocumentQuestionItemProps {
   question: AntiplateletQuestion;
+  questionIndex?: number;
   isOpen: boolean;
   onToggle: () => void;
   hideDrugNames?: boolean;
@@ -45,10 +65,13 @@ interface DocumentQuestionItemProps {
   rankingChecked?: boolean;
   onRankingCheck?: (checked: boolean) => void;
   onEditQuestion?: (question: AntiplateletQuestion) => void;
+  workbenchAnswer?: StructuralWorkbenchAnswer;
+  onWorkbenchAnswerChange?: (answer: StructuralWorkbenchAnswer, score: number) => void;
 }
 
 const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
   question,
+  questionIndex,
   isOpen,
   onToggle,
   hideDrugNames = false,
@@ -70,6 +93,8 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
   rankingChecked: controlledRankingChecked,
   onRankingCheck,
   onEditQuestion,
+  workbenchAnswer,
+  onWorkbenchAnswerChange,
 }) => {
   const examModeActive = examModeStatus === 'active';
   const showFeedback = examModeStatus !== 'active';
@@ -81,6 +106,20 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
     (question.rankingItems || []).map((item) => item.id)
   );
   const [internalRankingChecked, setInternalRankingChecked] = useState<boolean>(false);
+
+  // Question chip selection and completion states
+  const [selectedChips, setSelectedChips] = useState<string[]>([]);
+  const [isSolved, setIsSolved] = useState<boolean>(examModeStatus === 'submitted');
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
+  const [peekedStructureNames, setPeekedStructureNames] = useState<Record<string, boolean>>({});
+  const [zoomedStructure, setZoomedStructure] = useState<ChemicalStructure | null>(null);
+  const [showMatchingVignette, setShowMatchingVignette] = useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (examModeStatus === 'submitted') {
+      setIsSolved(true);
+    }
+  }, [examModeStatus]);
 
   const tfAnswers = controlledTf ?? internalTf;
   const mcSelection = controlledMc !== undefined ? controlledMc : internalMc;
@@ -119,19 +158,69 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
     else setInternalRankingChecked(checked);
   };
 
-  const handleTfChoice = (stmtId: string, choice: boolean) => {
-    updateTfAnswers({
-      ...tfAnswers,
-      [stmtId]: choice,
-    });
+  // Reset chips, completion state, feedback message, and inputs
+  const resetChips = () => {
+    setSelectedChips([]);
+    setIsSolved(false);
+    setFeedbackMessage('');
+    updateTfAnswers({});
+    updateMcSelection(null);
+    const defaultIds = (question.rankingItems || []).map((item) => item.id);
+    updateRankingOrder(defaultIds, true);
   };
 
+  const handleReset = resetChips;
+
   const handleResetTfChoices = () => {
-    updateTfAnswers({});
+    resetChips();
   };
 
   const handleResetMcChoice = () => {
-    updateMcSelection(null);
+    resetChips();
+  };
+
+  const handleResetRanking = () => {
+    resetChips();
+  };
+
+  const handleSelectMc = (optIdx: number) => {
+    updateMcSelection(optIdx);
+    if (!examModeActive) {
+      if (optIdx === question.correctIndex) {
+        setIsSolved(true);
+        setFeedbackMessage('Correct answer!');
+      } else {
+        setIsSolved(false);
+        setFeedbackMessage('Incorrect choice. Review rationale below.');
+      }
+    }
+  };
+
+  const handleTfChoice = (stmtId: string, choice: boolean) => {
+    const next = {
+      ...tfAnswers,
+      [stmtId]: choice,
+    };
+    updateTfAnswers(next);
+
+    if (!examModeActive && question.subStatements) {
+      const answered = Object.keys(next).length;
+      if (answered === question.subStatements.length) {
+        const allCorrect = question.subStatements.every((s) => next[s.id] === s.isCorrect);
+        setIsSolved(allCorrect);
+        if (allCorrect) {
+          setFeedbackMessage('All statements evaluated correctly!');
+        } else {
+          setFeedbackMessage('Some statements are incorrect. Review rationales below.');
+        }
+      }
+    }
+  };
+
+  const handleToggleChip = (structureId: string) => {
+    setSelectedChips((prev) =>
+      prev.includes(structureId) ? prev.filter((id) => id !== structureId) : [...prev, structureId]
+    );
   };
 
   // Move ranking item up or down
@@ -143,11 +232,6 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
     copy[index] = copy[targetIndex];
     copy[targetIndex] = temp;
     updateRankingOrder(copy, true);
-  };
-
-  const handleResetRanking = () => {
-    const defaultIds = (question.rankingItems || []).map((item) => item.id);
-    updateRankingOrder(defaultIds, true);
   };
 
   // Score calculations for T/F questions
@@ -252,6 +336,30 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
     return matched;
   }, [question, allSectionStructures, allModuleStructures]);
 
+  // Pass options array through deduplication filter based on name/ID to prevent Cartesian explosions
+  const uniqueStructureOptions = React.useMemo(() => {
+    const options = structuresToAnalyze;
+    const uniqueOptions = options.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
+    return uniqueOptions;
+  }, [structuresToAnalyze]);
+
+  const isExamMode = Boolean(examModeActive || hideDrugNames);
+
+  // Memoized pool of candidate structures for dynamic client-side exam masking
+  const maskCandidateStructures = React.useMemo(() => {
+    const list: ChemicalStructure[] = [
+      ...(structuresToAnalyze || []),
+      ...(allSectionStructures || []),
+      ...(allModuleStructures || []),
+      ...(question.structuresDisplayed || []),
+    ];
+    return list.filter(
+      (v, i, a) =>
+        Boolean(v && v.name && v.name.trim()) &&
+        a.findIndex((t) => t?.name?.toLowerCase() === v?.name?.toLowerCase()) === i
+    );
+  }, [structuresToAnalyze, allSectionStructures, allModuleStructures, question.structuresDisplayed]);
+
   // Helper to render the comprehensive statement-by-statement table
   const renderSubStatementsTable = () => {
     if (!question.subStatements) return null;
@@ -279,18 +387,18 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {question.subStatements.map((stmt) => {
+              {question.subStatements.map((stmt, sIdx) => {
                 const userChoice = tfAnswers[stmt.id];
                 const hasAnswered = userChoice !== undefined;
                 const isUserCorrect = hasAnswered && userChoice === stmt.isCorrect;
 
                 return (
-                  <tr key={stmt.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                  <tr key={`q${question.id || 'q'}-stmt-${stmt.id || sIdx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <td className="py-2.5 px-3 font-mono font-bold text-slate-800 dark:text-slate-200">
                       {stmt.id})
                     </td>
                     <td className="py-2.5 px-3 text-slate-700 dark:text-slate-300 font-medium">
-                      {stmt.statement}
+                      {maskDrugNamesForExam(stmt.statement, maskCandidateStructures, isExamMode)}
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <span
@@ -364,7 +472,14 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
             {!examModeActive && (
               <button
                 type="button"
-                onClick={() => updateRankingChecked(true)}
+                onClick={() => {
+                  updateRankingChecked(true);
+                  const allCorrect = correctRanksCount === orderedRankingItems.length;
+                  setIsSolved(allCorrect);
+                  if (allCorrect) {
+                    setFeedbackMessage('All items placed in correct sequence!');
+                  }
+                }}
                 className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-2xs cursor-pointer"
               >
                 Check Order
@@ -401,7 +516,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
 
             return (
               <div
-                key={item.id}
+                key={`q${question.id || 'q'}-rank-${item.id || idx}`}
                 className={`p-2.5 sm:p-3 rounded-xl border transition-all flex flex-col gap-1.5 ${cardBorder}`}
               >
                 <div className="flex items-center justify-between gap-2.5">
@@ -490,11 +605,24 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
         <div className="flex items-start gap-3 flex-1 min-w-0">
           {/* Question Number Badge */}
           <span className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 min-w-[34px] h-[30px] rounded-md flex items-center justify-center font-mono font-bold text-xs shrink-0 mt-0.5 shadow-xs px-2">
-            {question.questionNumberLabel
-              ? question.questionNumberLabel.startsWith('Question ')
-                ? `Q${question.questionNumberLabel.replace('Question ', '')}`
-                : question.questionNumberLabel
-              : `Q${question.id}`}
+            {(() => {
+              const raw = (question.questionNumberLabel || '').trim();
+              const isTimestampHash = /^Q?\d{6,}$/i.test(raw) || /^Question \d{6,}$/i.test(raw);
+              if (raw && !isTimestampHash) {
+                if (raw.startsWith('Question ')) {
+                  return `Q${raw.replace('Question ', '')}`;
+                }
+                return raw.startsWith('Q') ? raw : `Q${raw}`;
+              }
+              const qId = question.id;
+              if (typeof qId === 'number' && qId > 0 && qId < 1000000) {
+                return `Q${qId}`;
+              }
+              if (questionIndex !== undefined) {
+                return `Q${questionIndex + 1}`;
+              }
+              return 'Q';
+            })()}
           </span>
 
           {/* Question Stem Text */}
@@ -504,8 +632,8 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                 {question.category || 'Pharmacology Review'}
               </span>
             </div>
-            <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 leading-snug">
-              {question.questionStem}
+            <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 leading-snug text-pretty">
+              {maskDrugNamesForExam(question.questionStem, maskCandidateStructures, isExamMode)}
             </h3>
             <div className="flex flex-wrap items-center gap-2">
               {question.type === 'matching' && (
@@ -525,6 +653,11 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                   {examModeActive
                     ? 'Single-Best-Answer Multiple Choice (Exam Mode)'
                     : 'Interactive Multiple-Choice with Option Rationales'}
+                </span>
+              )}
+              {question.type === 'structural-workbench' && (
+                <span className="inline-block text-[11px] font-mono font-semibold text-purple-600 dark:text-purple-400">
+                  Interactive Structural Workbench (4 pts)
                 </span>
               )}
               {question.rankingItems && question.rankingItems.length > 0 && (
@@ -576,18 +709,302 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
       {/* 2. QUESTION BODY                                                   */}
       {/* ------------------------------------------------------------------ */}
       <div className="p-4 sm:p-5 space-y-4">
+          {/* ============================================================== */}
+          {/* INTERSTITIAL STRUCTURE VIGNETTES (For Non-Matching Questions)  */}
+          {/* ============================================================== */}
+          {uniqueStructureOptions.length > 0 &&
+            question.type !== 'matching' &&
+            question.type !== 'structural-workbench' && (
+            <div className="space-y-2.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="p-1 rounded bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300">
+                    <FlaskConical className="w-3.5 h-3.5" />
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    {uniqueStructureOptions.length === 1 ? 'Referenced Chemical Structure' : 'Referenced Chemical Structures'}
+                  </span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-medium">
+                    {uniqueStructureOptions.length}
+                  </span>
+                </div>
+
+                {/* Peek toggle for study mode */}
+                {!examModeActive && (hideDrugNames || examModeStatus !== 'off') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const allPeeked = uniqueStructureOptions.every((s) => peekedStructureNames[s.id]);
+                      const next: Record<string, boolean> = {};
+                      uniqueStructureOptions.forEach((s) => {
+                        next[s.id] = !allPeeked;
+                      });
+                      setPeekedStructureNames(next);
+                    }}
+                    className="text-[11px] font-semibold text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-300 inline-flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {uniqueStructureOptions.every((s) => peekedStructureNames[s.id]) ? (
+                      <>
+                        <EyeOff className="w-3 h-3" />
+                        <span>Hide All Names</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="w-3 h-3" />
+                        <span>Peek Drug Names</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Responsive Cards Grid */}
+              <div
+                className={`grid gap-3 ${
+                  uniqueStructureOptions.length === 1
+                    ? 'grid-cols-1 max-w-lg'
+                    : uniqueStructureOptions.length === 2
+                    ? 'grid-cols-1 md:grid-cols-2'
+                    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                }`}
+              >
+                {(() => {
+                  const options = uniqueStructureOptions;
+                  const uniqueOptions = options.filter((v, i, a) => a.findIndex((t) => t.name === v.name || t.id === v.id) === i);
+                  return uniqueOptions.map((structure, index) => {
+                    const isNameBlinded =
+                      (examModeActive || hideDrugNames) && !peekedStructureNames[structure.id];
+                    const chemicalClass = getChemicalClass(structure);
+                    const targetReceptor = getTargetReceptor(structure);
+                    const reversibility = getReversibility(structure);
+                    const route = getRouteOfAdmin(structure);
+                    const isChipActive = selectedChips.includes(structure.id);
+
+                    return (
+                      <div
+                        key={`q${question.id || 'q'}-chip-${structure.id || index}`}
+                        className={`group relative rounded-xl border bg-white dark:bg-slate-900/80 p-3 shadow-xs transition-all flex flex-col justify-between ${
+                          isChipActive
+                            ? 'border-blue-500 ring-2 ring-blue-500/30 dark:border-blue-400'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600'
+                        }`}
+                      >
+                        {/* Top row: Roman Numeral badge + Drug Name / Blinded status */}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleChip(structure.id)}
+                              title={isChipActive ? 'Deselect structure chip' : 'Select structure chip'}
+                              className={`shrink-0 px-2 py-0.5 rounded-md font-mono font-black text-xs cursor-pointer transition-colors shadow-xs ${
+                                isChipActive
+                                  ? 'bg-blue-600 text-white dark:bg-blue-500'
+                                  : 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 hover:bg-slate-800'
+                              }`}
+                            >
+                              Structure {structure.document_label || structure.id}
+                            </button>
+                            <div className="truncate">
+                              {isNameBlinded ? (
+                                <span className="text-xs font-mono font-medium text-slate-400 dark:text-slate-500 italic">
+                                  [Blinded for exam]
+                                </span>
+                              ) : (
+                                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                                  {structure.name}
+                                  {structure.tradeName && (
+                                    <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400 ml-1">
+                                      ({structure.tradeName})
+                                    </span>
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Quick Controls: Blind / Peek toggle & Zoom */}
+                          <div className="shrink-0 flex items-center gap-1">
+                            {examModeActive ? (
+                              <span title="Blinded in exam mode" className="text-amber-500 p-0.5">
+                                <Lock className="w-3.5 h-3.5" />
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPeekedStructureNames((prev) => ({
+                                    ...prev,
+                                    [structure.id]: !prev[structure.id],
+                                  }));
+                                }}
+                                title={peekedStructureNames[structure.id] ? 'Hide drug name' : 'Peek drug name'}
+                                className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                              >
+                                {peekedStructureNames[structure.id] ? (
+                                  <EyeOff className="w-3.5 h-3.5" />
+                                ) : (
+                                  <Eye className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setZoomedStructure(structure)}
+                              title="Zoom / Inspect 2D structure"
+                              className="p-1 rounded text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
+                            >
+                              <ZoomIn className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Pure 2D Chemical Structure Line Drawing in high-contrast light canvas */}
+                        <div
+                          onClick={() => setZoomedStructure(structure)}
+                          className="relative w-full aspect-[4/3] bg-[var(--structure-canvas-bg)] rounded-lg border border-slate-100 dark:border-slate-800 p-2 flex items-center justify-center cursor-pointer overflow-hidden group-hover:shadow-inner transition-shadow"
+                        >
+                          <SmilesCanvas
+                            smiles={
+                              structure.canonicalSmiles ||
+                              structure.smiles ||
+                              (structure as any).structure?.canonicalSmiles ||
+                              (structure as any).structure?.smiles
+                            }
+                            molBlock={structure.pubchemMolBlock || (structure as any).structure?.pubchemMolBlock}
+                            fallbackImageUrl={structure.pngUrl || (structure as any).structure?.pngUrl}
+                            width={220}
+                            height={165}
+                            altText={`Structure ${structure.document_label || structure.id}`}
+                            className="w-full h-full bg-white border-0 shadow-none pointer-events-none"
+                          />
+                          <div className="absolute inset-0 bg-blue-500/0 hover:bg-blue-500/5 transition-colors flex items-end justify-end p-1.5 opacity-0 group-hover:opacity-100 pointer-events-none">
+                            <span className="text-[10px] font-semibold text-blue-700 bg-white/95 dark:bg-slate-900/95 px-1.5 py-0.5 rounded shadow-xs border border-blue-200 dark:border-blue-800 flex items-center gap-1">
+                              <ZoomIn className="w-2.5 h-2.5" /> Click to zoom
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Metadata / SAR Tags */}
+                        <div className="mt-2 space-y-1 text-[11px]">
+                          {targetReceptor && targetReceptor !== 'Data unavailable' && (
+                            <div className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
+                              <span className="font-semibold text-slate-500 dark:text-slate-400">Target:</span>
+                              <span className="truncate">{targetReceptor}</span>
+                            </div>
+                          )}
+                          {chemicalClass && chemicalClass !== 'Data unavailable' && (
+                            <div className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
+                              <span className="font-semibold text-slate-500 dark:text-slate-400">Class:</span>
+                              <span className="truncate">{chemicalClass}</span>
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {reversibility && reversibility !== 'Data unavailable' && (
+                              <span
+                                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-medium ${
+                                  reversibility.toLowerCase().includes('irrev')
+                                    ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300'
+                                    : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                                }`}
+                              >
+                                {reversibility}
+                              </span>
+                            )}
+                            {route && route !== 'Data unavailable' && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-medium">
+                                {route}
+                              </span>
+                            )}
+                            {structure.pharmacophores && structure.pharmacophores.length > 0 && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 font-medium">
+                                {structure.pharmacophores.length} pharmacophore{structure.pharmacophores.length > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          )}
+
+          {/* ============================================================== */}
+          {/* COLLAPSIBLE STRUCTURE VIGNETTES TOGGLE FOR MATCHING QUESTIONS */}
+          {/* ============================================================== */}
+          {question.type === 'matching' && uniqueStructureOptions.length > 0 && (
+            <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 bg-slate-50/50 dark:bg-slate-900/40">
+              <button
+                type="button"
+                onClick={() => setShowMatchingVignette((prev) => !prev)}
+                className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-between w-full cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5">
+                  <FlaskConical className="w-3.5 h-3.5 text-blue-500" />
+                  <span>
+                    {showMatchingVignette ? 'Hide' : 'Inspect'} 2D Structure Vignettes for Matching Pool ({uniqueStructureOptions.length})
+                  </span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {showMatchingVignette ? 'Collapse ▲' : 'Expand ▼'}
+                </span>
+              </button>
+              {showMatchingVignette && (
+                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {(() => {
+                    const options = uniqueStructureOptions;
+                    const uniqueOptions = options.filter((v, i, a) => a.findIndex((t) => t.name === v.name || t.id === v.id) === i);
+                    return uniqueOptions.map((structure, index) => (
+                      <div
+                        key={`q${question.id || 'q'}-vignette-${structure.id || index}`}
+                        onClick={() => setZoomedStructure(structure)}
+                        className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-1 cursor-pointer hover:border-blue-400 transition-colors"
+                      >
+                        <div className="w-full flex items-center justify-between text-[10px] font-mono">
+                          <span className="font-bold">Structure {structure.document_label || structure.id}</span>
+                          <ZoomIn className="w-3 h-3 text-slate-400" />
+                        </div>
+                        <div className="w-16 h-16 bg-[var(--structure-canvas-bg)] rounded p-1 flex items-center justify-center overflow-hidden">
+                          <SmilesCanvas
+                            smiles={
+                              structure.canonicalSmiles ||
+                              structure.smiles ||
+                              (structure as any).structure?.canonicalSmiles ||
+                              (structure as any).structure?.smiles
+                            }
+                            molBlock={structure.pubchemMolBlock || (structure as any).structure?.pubchemMolBlock}
+                            fallbackImageUrl={structure.pngUrl || (structure as any).structure?.pngUrl}
+                            width={64}
+                            height={64}
+                            altText={`Structure ${structure.id}`}
+                            className="w-full h-full bg-transparent border-0 shadow-none pointer-events-none"
+                          />
+                        </div>
+                        <span className="text-[10px] font-medium truncate max-w-full text-slate-600 dark:text-slate-400">
+                          {examModeActive ? 'Structure ' + structure.id : structure.name}
+                        </span>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* MATCHING TYPE */}
           {question.type === 'matching' && question.matchingTargets && (
             <StructureDragDropMatch
               question={{
                 ...question,
                 structuresDisplayed:
-                  structuresToAnalyze.length > 0 ? structuresToAnalyze : question.structuresDisplayed,
+                  uniqueStructureOptions.length > 0 ? uniqueStructureOptions : question.structuresDisplayed,
               }}
               placements={matchingPlacements}
               onPlacementsChange={onMatchingChange}
               examModeActive={examModeActive}
-              isSolved={examModeStatus === 'submitted'}
+              isSolved={examModeStatus === 'submitted' || isSolved}
             />
           )}
 
@@ -598,7 +1015,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                 <span className="font-semibold text-slate-700 dark:text-slate-300">
                   Select the best answer:
                 </span>
-                {mcSelection !== null && (
+                {(mcSelection !== null || selectedChips.length > 0 || isSolved) && (
                   <button
                     type="button"
                     onClick={handleResetMcChoice}
@@ -636,16 +1053,16 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
 
                   return (
                     <button
-                      key={optIdx}
+                      key={`q${question.id || 'q'}-opt-${optIdx}`}
                       type="button"
-                      onClick={() => updateMcSelection(optIdx)}
+                      onClick={() => handleSelectMc(optIdx)}
                       className={`text-xs flex items-start gap-2.5 p-3 rounded-xl border transition-all text-left cursor-pointer ${style}`}
                     >
                       <span className="font-mono font-bold shrink-0 min-w-[20px]">
                         {String.fromCharCode(97 + optIdx)})
                       </span>
                       <span className="leading-relaxed flex-1">
-                        {opt.replace(/^[A-F]\.\s*/, '')}
+                        {maskDrugNamesForExam(opt.replace(/^[A-F]\.\s*/, ''), maskCandidateStructures, isExamMode)}
                       </span>
                       {isSelected && (
                         examModeActive ? (
@@ -683,7 +1100,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                         ? `✓ Correct Choice (${String.fromCharCode(65 + mcSelection)})`
                         : `✕ Incorrect Choice (${String.fromCharCode(65 + mcSelection)}) — Try another option or inspect the rationale:`}
                     </div>
-                    <p className="text-slate-700 dark:text-slate-300">
+                    <p className="text-slate-700 dark:text-slate-300 text-pretty">
                       {question.optionExplanations?.[mcSelection] ||
                         question.overallExplanation}
                     </p>
@@ -725,7 +1142,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                   )}
                 </div>
 
-                {answeredStatementsCount > 0 && (
+                {(answeredStatementsCount > 0 || selectedChips.length > 0 || isSolved) && (
                   <button
                     type="button"
                     onClick={handleResetTfChoices}
@@ -740,7 +1157,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
 
               {/* Statements with Interactive T and F Toggle Pill Buttons */}
               <div className="space-y-2.5">
-                {question.subStatements.map((stmt) => {
+                {question.subStatements.map((stmt, sIdx) => {
                   const userChoice = tfAnswers[stmt.id];
                   const hasAnswered = userChoice !== undefined;
                   const isUserCorrect = hasAnswered && userChoice === stmt.isCorrect;
@@ -762,7 +1179,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
 
                   return (
                     <div
-                      key={stmt.id}
+                      key={`q${question.id || 'q'}-substmt-${stmt.id || sIdx}`}
                       className={`p-3 rounded-xl border transition-all ${rowClass}`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
@@ -772,7 +1189,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                             {stmt.id})
                           </span>
                           <span className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-normal">
-                            {stmt.statement}
+                            {maskDrugNamesForExam(stmt.statement, maskCandidateStructures, isExamMode)}
                           </span>
                         </div>
 
@@ -878,7 +1295,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                               )}
                             </div>
                             <p className="mt-1 text-slate-600 dark:text-slate-300 text-xs">
-                              {stmt.rationale}
+                              {maskDrugNamesForExam(stmt.rationale, maskCandidateStructures, isExamMode)}
                             </p>
                           </div>
                         </div>
@@ -887,6 +1304,63 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* STRUCTURAL-WORKBENCH TYPE: Interactive Multi-Step Chemical Workbench */}
+          {question.type === 'structural-workbench' && question.structuralWorkbench && (
+            <div className="pt-1">
+              <StructuralWorkbenchQuestion
+                question={question}
+                workbenchData={question.structuralWorkbench}
+                savedAnswer={workbenchAnswer}
+                onAnswer={(score, answerData) => {
+                  if (onWorkbenchAnswerChange) {
+                    onWorkbenchAnswerChange(answerData, score);
+                  }
+                  if (!examModeActive) {
+                    setIsSolved(score === 4);
+                    if (score === 4) {
+                      setFeedbackMessage('All 4 structural workbench steps completed correctly!');
+                    } else if (score > 0) {
+                      setFeedbackMessage(`Workbench in progress: ${score}/4 points earned.`);
+                    } else {
+                      setFeedbackMessage('');
+                    }
+                  }
+                }}
+                examMode={examModeActive}
+                isSubmitted={examModeStatus === 'submitted'}
+                isOpenAnswerKey={isOpen}
+              />
+            </div>
+          )}
+
+          {/* Completion / Feedback banner */}
+          {showFeedback && feedbackMessage && (
+            <div
+              className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 animate-fadeIn ${
+                isSolved
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                  : 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {isSolved ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                ) : (
+                  <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                )}
+                <span className="font-medium">{feedbackMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset Question</span>
+              </button>
             </div>
           )}
 
@@ -914,7 +1388,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {question.matchingTargets.map((target) => {
+                    {question.matchingTargets.map((target, index) => {
                       const matchedStrs = target.acceptedStructureIds
                         .map((id) => {
                           const str = question.structuresDisplayed?.find(
@@ -927,7 +1401,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                         .join(', ');
                       return (
                         <tr
-                          key={target.id}
+                          key={`q${question.id || 'q'}-target-${target.id || index}`}
                           className="hover:bg-slate-50 dark:hover:bg-slate-800/40"
                         >
                           <td className="py-2.5 px-3 font-mono font-bold text-slate-800 dark:text-slate-200">
@@ -971,7 +1445,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                   </span>
                   <div className="font-semibold text-sm">
                     {question.options
-                      ? question.options[question.correctIndex]
+                      ? maskDrugNamesForExam(question.options[question.correctIndex], maskCandidateStructures, isExamMode)
                       : ''}
                   </div>
                 </div>
@@ -984,7 +1458,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                       </span>
                       {question.optionExplanations.map((exp, idx) => (
                         <div
-                          key={idx}
+                          key={`q${question.id || 'q'}-exp-${idx}`}
                           className="flex items-start gap-2 text-slate-700 dark:text-slate-300"
                         >
                           <span className="font-mono font-bold text-slate-900 dark:text-slate-100 shrink-0">
@@ -1009,7 +1483,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
               <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span>Medicinal Chemistry / MOA Rationale:</span>
             </div>
-            <p className="leading-relaxed">{question.overallExplanation}</p>
+            <p className="leading-relaxed text-pretty">{question.overallExplanation}</p>
           </div>
 
           {/* High-Yield Exam Pearl */}
@@ -1023,6 +1497,19 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
             </div>
           )}
         </div>
+      )}
+
+      {/* Lightbox Zoom Modal for Interstitial Structure Vignettes */}
+      {zoomedStructure && (
+        <StructureLightboxModal
+          isOpen={Boolean(zoomedStructure)}
+          onClose={() => setZoomedStructure(null)}
+          initialStructure={zoomedStructure}
+          comparisonPool={uniqueStructureOptions}
+          hideDrugName={Boolean(examModeActive || hideDrugNames) && !peekedStructureNames[zoomedStructure.id]}
+          examModeActive={examModeActive}
+          onInspectPubChem={onInspectStructure}
+        />
       )}
     </div>
   );
