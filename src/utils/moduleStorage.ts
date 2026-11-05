@@ -89,6 +89,14 @@ export function loadAllReviewModules(): ReviewModule[] {
           delete overrides['vasodilators_mcp2'];
           localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
         }
+        if (
+          overrides['anticoagulants_mcp2'] &&
+          (overrides['anticoagulants_mcp2'].version !== '2.1.0' ||
+            (overrides['anticoagulants_mcp2'].pages || []).length < 8)
+        ) {
+          delete overrides['anticoagulants_mcp2'];
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        }
       }
     } catch (e) {
       console.warn('Could not parse built-in overrides:', e);
@@ -174,7 +182,19 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     }
     const dexieAnticoagulant = dexieModules.find((m) => m.id === 'anticoagulants_mcp2')?.module;
     if (dexieAnticoagulant) {
-      overrides['anticoagulants_mcp2'] = dexieAnticoagulant;
+      if (dexieAnticoagulant.version === '2.1.0' && (dexieAnticoagulant.pages || []).length >= 8) {
+        overrides['anticoagulants_mcp2'] = dexieAnticoagulant;
+      } else {
+        delete overrides['anticoagulants_mcp2'];
+        await medChemGraphDb.modules.put({
+          id: 'anticoagulants_mcp2',
+          module: defaultAnticoagulant,
+          updatedAt: new Date().toISOString(),
+        }).catch((e) => console.warn('Dexie put during anticoagulant migration warning:', e));
+        try {
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        } catch {}
+      }
     }
     const dexieHeartFailure = dexieModules.find((m) => m.id === 'heart_failure_mcp2')?.module;
     if (dexieHeartFailure) {
@@ -183,6 +203,17 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     const dexieAntiarrhythmic = dexieModules.find((m) => m.id === 'antiarrhythmics_mcp2')?.module;
     if (dexieAntiarrhythmic) {
       overrides['antiarrhythmics_mcp2'] = dexieAntiarrhythmic;
+    }
+
+    if (
+      overrides['anticoagulants_mcp2'] &&
+      (overrides['anticoagulants_mcp2'].version !== '2.1.0' ||
+        (overrides['anticoagulants_mcp2'].pages || []).length < 8)
+    ) {
+      delete overrides['anticoagulants_mcp2'];
+      try {
+        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+      } catch {}
     }
 
     const finalAntiplatelet = overrides['antiplatelets_mcp2'] || defaultAntiplatelet;
