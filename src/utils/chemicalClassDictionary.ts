@@ -1,5 +1,4 @@
 import type { ChemicalStructure } from '../types/reviewModule';
-import { getChemicalClass as getUtilChemicalClass } from './structureDataUtils';
 
 /**
  * Master Authoritative Chemical Class Dictionary grounded in Dr. Rami A. Al-Horani's
@@ -358,17 +357,11 @@ export function resolveChemicalClass(drug?: Partial<ChemicalStructure> | null): 
     }
   }
 
-  // 4. Try structureDataUtils fallback
-  const utilFallback = getUtilChemicalClass(drug);
-  if (
-    utilFallback &&
-    utilFallback !== 'Data unavailable' &&
-    utilFallback !== '0' &&
-    utilFallback !== '—' &&
-    utilFallback !== 'Small molecule compound' &&
-    utilFallback.toLowerCase() !== 'n/a'
-  ) {
-    return utilFallback;
+  if (typeof rawClass === 'object' && rawClass) {
+    const str = (rawClass as any).name || (rawClass as any).label || (rawClass as any).title;
+    if (typeof str === 'string' && str.trim().length > 0 && str !== 'Small molecule compound') {
+      return str.trim();
+    }
   }
 
   // 5. Chemoinformatics stem recognition

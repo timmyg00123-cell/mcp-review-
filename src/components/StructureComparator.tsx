@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import { fetchPubChemXLogP } from '../services/pubchemService';
 import { medChemGraphDb } from '../db/medChemGraphDb';
+import { ComparatorViewMode, resolveComparatorViewMode } from '../utils/comparatorViewMode';
+import { resolveChemicalClass as resolveAuthChemicalClass } from '../utils/chemicalClassDictionary';
 
 /**
  * Predefined array of distinct colors for simultaneous multi-pharmacophore highlighting:
@@ -156,6 +158,8 @@ export interface StructureComparatorProps {
   focusMatchingOnly?: boolean;
   hideDrugName?: boolean;
   examModeActive?: boolean;
+  viewMode?: ComparatorViewMode;
+  onViewModeChange?: (mode: 'single' | 'compare') => void;
 }
 
 /**
@@ -198,48 +202,10 @@ export function getCanonicalDrugKey(rawName?: string): string {
 }
 
 /**
- * Safely resolves Chemical Class checking multiple Dexie schema conventions
+ * Safely resolves Chemical Class using authoritative MedChem II lecture dictionary
  */
 export function resolveChemicalClass(drug?: Partial<ChemicalStructure> | null): string {
-  if (!drug) return 'N/A';
-  const val =
-    (drug as any).chemical_class ||
-    drug.chemicalClass ||
-    (drug as any).drug_class ||
-    (drug as any).drugClass ||
-    (drug as any).class ||
-    (drug as any).scaffold ||
-    (drug as any).core_scaffold ||
-    (drug as any).chemical_scaffold ||
-    (drug as any).chemicalScaffold ||
-    (drug as any).category;
-
-  if (typeof val === 'string') {
-    const trimmed = val.trim();
-    if (
-      trimmed &&
-      trimmed !== '0' &&
-      trimmed !== '—' &&
-      trimmed !== 'Small molecule compound' &&
-      trimmed.toLowerCase() !== 'data unavailable' &&
-      trimmed.toLowerCase() !== 'n/a'
-    ) {
-      return trimmed;
-    }
-  }
-
-  const fallback = getChemicalClass(drug);
-  if (
-    fallback &&
-    fallback !== 'Data unavailable' &&
-    fallback !== '0' &&
-    fallback !== '—' &&
-    fallback !== 'Small molecule compound'
-  ) {
-    return fallback;
-  }
-
-  return 'N/A';
+  return resolveAuthChemicalClass(drug);
 }
 
 /**
@@ -885,6 +851,8 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
   focusMatchingOnly = false,
   hideDrugName = false,
   examModeActive = false,
+  viewMode = 'auto',
+  onViewModeChange,
 }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -939,7 +907,6 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
   });
   const drugs = propsDrugs && propsDrugs.length > 0 ? propsDrugs : queriedDrugs;
   const hydratedDrugs = drugs;
-  const isSingleDrug = drugs.length === 1;
 
   // Map drug IDs, aliases, and names to target receptor from the hydrated graph layer
   const graphTargetMap = useMemo(() => {
@@ -1107,6 +1074,24 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
 
     return Array.from(drugMap.values());
   }, [moduleStructures, allStructures, structureA, structureB, dexieStructures]);
+
+  // 1.5 Determine effective structure count and single focus vs dual compare mode
+  const totalStructureCount =
+    (moduleStructures && moduleStructures.length > 0)
+      ? moduleStructures.length
+      : effectiveStructures.length > 0
+      ? effectiveStructures.length
+      : (propsDrugs?.length || drugs.length);
+
+  const [internalMode, setInternalMode] = useState<'single' | 'compare'>(() =>
+    resolveComparatorViewMode({ viewMode, structureCount: totalStructureCount })
+  );
+
+  useEffect(() => {
+    setInternalMode(resolveComparatorViewMode({ viewMode, structureCount: totalStructureCount }));
+  }, [viewMode, totalStructureCount]);
+
+  const isSingleDrug = internalMode === 'single' || totalStructureCount <= 1;
 
   // 2. Default Selections: Compound A -> drugs[0], Compound B -> drugs[1]
   // Strictly locked down to prevent dropdown re-render loops from overwriting user selections
@@ -1961,16 +1946,53 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
               <ArrowRightLeft className="w-4 h-4" />
             </span>
             <h2 className="font-bold text-base text-slate-900 dark:text-slate-100">
-              Side-by-Side Chemical Structure &amp; Attribute Comparator
+              {isSingleDrug
+                ? 'Chemical Structure & Attribute Focus Stage'
+                : 'Side-by-Side Chemical Structure & Attribute Comparator'}
             </h2>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Contrast 2D structures, pharmacophores, molecular properties, and bioactivation pathways
+            {isSingleDrug
+              ? 'Interactive 2D structure, pharmacophore mapping, molecular properties, and bioactivation'
+              : 'Contrast 2D structures, pharmacophores, molecular properties, and bioactivation pathways'}
           </p>
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
+          {totalStructureCount > 1 && (
+            <div className="inline-flex p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setInternalMode('single');
+                  onViewModeChange?.('single');
+                }}
+                className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                  isSingleDrug
+                    ? 'bg-blue-600 text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Single Focus
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setInternalMode('compare');
+                  onViewModeChange?.('compare');
+                }}
+                className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                  !isSingleDrug
+                    ? 'bg-blue-600 text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Dual Compare
+              </button>
+            </div>
+          )}
+
           {!isSingleDrug && (
             <button
               type="button"
@@ -2025,7 +2047,7 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
             }
           }}
           className={`${
-            isSingleDrug ? 'w-full max-w-xl' : 'relative flex flex-col h-full'
+            isSingleDrug ? 'w-full max-w-3xl mx-auto' : 'relative flex flex-col h-full'
           } rounded-2xl transition-all duration-150 ${
             isDragOverA
               ? 'ring-2 ring-blue-500 ring-offset-2 border-blue-500 bg-blue-50/20 dark:bg-blue-950/20 scale-[1.01]'
@@ -2041,7 +2063,7 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
           )}
           {renderSingleComparatorCard(
             compoundA,
-            isSingleDrug ? 'Compound Profile' : 'Compound A',
+            isSingleDrug ? 'Single Compound Focus' : 'Compound A',
             compoundA.name,
             handleSelectDrugA,
             activeTagsA,

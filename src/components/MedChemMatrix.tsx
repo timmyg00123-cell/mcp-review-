@@ -18,8 +18,12 @@ import {
   RotateCcw,
   Filter,
   ChevronDown,
+  X,
+  FileText,
 } from 'lucide-react';
 import { ColorPaletteItem } from '../utils/pharmacophoreData';
+import { formatClinicalWarnings } from '../utils/clinicalWarningFormatter';
+import { resolveChemicalClass } from '../utils/chemicalClassDictionary';
 
 export interface MedChemMatrixProps {
   moduleStructures?: ChemicalStructure[];
@@ -161,10 +165,10 @@ function structureToMatrixRow(s: ChemicalStructure, hydratedMap?: Map<string, Hy
     pharmacologicalTarget = s.target || s.pharmacologicalClass || 'Target receptor';
   }
 
-  // Derive chemical class from hydrated graph node
+  // Derive chemical class from hydrated graph node or authoritative lecture dictionary
   let chemicalClass = hydrated?.clinicalClass?.name;
-  if (!chemicalClass || chemicalClass === 'N/A' || chemicalClass === '0' || chemicalClass === '—') {
-    chemicalClass = s.chemicalClass || 'Small molecule compound';
+  if (!chemicalClass || chemicalClass === 'N/A' || chemicalClass === '0' || chemicalClass === '—' || chemicalClass === 'Small molecule compound') {
+    chemicalClass = resolveChemicalClass(s);
   }
 
   // Derive drugState ('Active Drug' | 'Prodrug' | etc.)
@@ -392,6 +396,13 @@ export const MedChemMatrix: React.FC<MedChemMatrixProps> = ({
   const [isExpandedStudioOpen, setIsExpandedStudioOpen] = useState<boolean>(false);
   const [isMatrixOpen, setIsMatrixOpen] = useState<boolean>(false);
   const [selectedLightboxStructure, setSelectedLightboxStructure] = useState<ChemicalStructure | null>(null);
+  const [selectedFdaModalDrug, setSelectedFdaModalDrug] = useState<{
+    drugName: string;
+    rawText: string;
+    adverseReactions?: string;
+    contraindications?: string;
+    boxedWarning?: string;
+  } | null>(null);
 
   // Synchronize when active dataset changes
   useEffect(() => {
@@ -925,32 +936,77 @@ export const MedChemMatrix: React.FC<MedChemMatrixProps> = ({
                     </td>
 
                     {/* Major Toxicity / Adverse Reactions */}
-                    <td className="py-2.5 px-3 text-[11px] min-w-[180px] max-w-sm text-rose-700 dark:text-rose-300 align-top">
-                      {Array.isArray(row.clinicalData?.adverse_reactions) && row.clinicalData.adverse_reactions.length > 0 ? (
-                        <div className="space-y-1">
-                          <ul className="list-disc list-inside space-y-0.5 marker:text-rose-500 leading-snug">
-                            {row.clinicalData.adverse_reactions.map((adv, idx) => (
-                              <li key={idx} className="break-words">
-                                {adv}
-                              </li>
-                            ))}
-                          </ul>
-                          <div className="pt-0.5">
-                            <span
-                              className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-mono font-medium bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-200 dark:border-sky-800"
-                              title="Hydrated directly from official OpenFDA Drug Label API via Gemini"
-                            >
-                              OpenFDA
-                            </span>
+                    <td className="py-2.5 px-3 text-[11px] min-w-[200px] max-w-sm text-rose-700 dark:text-rose-300 align-top">
+                      {(() => {
+                        const warningsSource =
+                          Array.isArray(row.clinicalData?.adverse_reactions) && row.clinicalData.adverse_reactions.length > 0
+                            ? row.clinicalData.adverse_reactions
+                            : (row.clinicalData?.adverseReactions || row.clinicalData?.contraindicationsText)
+                            ? [
+                                ...(row.clinicalData?.contraindicationsText ? [`Contraindications: ${row.clinicalData.contraindicationsText}`] : []),
+                                ...(row.clinicalData?.adverseReactions ? [`Adverse Reactions: ${row.clinicalData.adverseReactions}`] : []),
+                              ]
+                            : row.majorToxicityOrLimitation;
+
+                        const formatted = formatClinicalWarnings(warningsSource, 5);
+                        const isOpenFda = Boolean(
+                          row.clinicalData?.adverseReactions ||
+                          row.clinicalData?.contraindicationsText ||
+                          (Array.isArray(row.clinicalData?.adverse_reactions) && row.clinicalData.adverse_reactions.length > 0)
+                        );
+
+                        return (
+                          <div className="space-y-1.5">
+                            {formatted.items.length > 0 ? (
+                              <ul className="list-disc list-inside space-y-0.5 marker:text-rose-500 leading-snug">
+                                {formatted.items.map((item, idx) => (
+                                  <li key={idx} className="break-words">
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <div className="leading-snug break-words">
+                                {row.majorToxicityOrLimitation || 'Monitor therapeutic index and organ clearance.'}
+                              </div>
+                            )}
+
+                            <div className="pt-0.5 flex items-center gap-1.5 flex-wrap">
+                              {isOpenFda && (
+                                <span
+                                  className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-mono font-medium bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-200 dark:border-sky-800"
+                                  title="Hydrated directly from official OpenFDA Drug Label API"
+                                >
+                                  OpenFDA
+                                </span>
+                              )}
+                              {(formatted.isTruncated || isOpenFda) && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedFdaModalDrug({
+                                      drugName: row.drug,
+                                      rawText: formatted.rawText || row.majorToxicityOrLimitation,
+                                      adverseReactions:
+                                        row.clinicalData?.adverseReactions ||
+                                        (Array.isArray(row.clinicalData?.adverse_reactions)
+                                          ? row.clinicalData.adverse_reactions.join('\n• ')
+                                          : undefined),
+                                      contraindications: row.clinicalData?.contraindicationsText,
+                                      boxedWarning: row.clinicalData?.boxedWarning,
+                                    });
+                                  }}
+                                  className="text-[10px] font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 hover:underline cursor-pointer inline-flex items-center gap-1"
+                                >
+                                  <FileText className="w-2.5 h-2.5" />
+                                  <span>View Full FDA Label {formatted.isTruncated ? `(${formatted.totalCount} points)` : ''}</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <ExpandableClinicalText
-                          text={row.majorToxicityOrLimitation}
-                          maxChars={130}
-                          isOpenFda={Boolean(row.clinicalData?.adverseReactions || row.clinicalData?.contraindicationsText)}
-                        />
-                      )}
+                        );
+                      })()}
                     </td>
                   </tr>
                 ))
@@ -984,6 +1040,76 @@ export const MedChemMatrix: React.FC<MedChemMatrixProps> = ({
           comparisonPool={structures}
           onInspectPubChem={onInspectStructure}
         />
+      )}
+
+      {/* Full FDA Prescribing Information Modal */}
+      {selectedFdaModalDrug && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+          onClick={() => setSelectedFdaModalDrug(null)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <span>FDA Prescribing Information</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-mono">
+                    {selectedFdaModalDrug.drugName}
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Complete unedited regulatory adverse reactions and boxed warnings from OpenFDA.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedFdaModalDrug(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto space-y-4 text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
+              {selectedFdaModalDrug.boxedWarning && (
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200">
+                  <h4 className="font-bold uppercase tracking-wider text-[10px] text-amber-800 dark:text-amber-300 mb-1">
+                    FDA Boxed Warning
+                  </h4>
+                  <p className="whitespace-pre-wrap">{selectedFdaModalDrug.boxedWarning}</p>
+                </div>
+              )}
+              {selectedFdaModalDrug.contraindications && (
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-900 dark:text-rose-200">
+                  <h4 className="font-bold uppercase tracking-wider text-[10px] text-rose-800 dark:text-rose-300 mb-1">
+                    Contraindications
+                  </h4>
+                  <p className="whitespace-pre-wrap">{selectedFdaModalDrug.contraindications}</p>
+                </div>
+              )}
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800">
+                <h4 className="font-bold uppercase tracking-wider text-[10px] text-slate-600 dark:text-slate-400 mb-1">
+                  Adverse Reactions &amp; Warnings
+                </h4>
+                <p className="whitespace-pre-wrap">
+                  {selectedFdaModalDrug.adverseReactions || selectedFdaModalDrug.rawText}
+                </p>
+              </div>
+            </div>
+            <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedFdaModalDrug(null)}
+                className="px-4 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

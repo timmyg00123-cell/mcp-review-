@@ -1,34 +1,15 @@
 import { ChemicalStructure } from '../types/reviewModule';
+import { resolveChemicalClass } from './chemicalClassDictionary';
+
+export { resolveChemicalClass } from './chemicalClassDictionary';
 
 /**
  * Safely extracts the Chemical Class from a structure object,
- * accommodating various Dexie schema formats (camelCase, snake_case, scaffold, etc.).
+ * resolving authoritative lecture classifications and accommodating
+ * various Dexie schema formats (camelCase, snake_case, scaffold, etc.).
  */
 export const getChemicalClass = (drug?: Partial<ChemicalStructure> | null): string => {
-  if (!drug) return 'Data unavailable';
-  const val =
-    drug.chemicalClass ||
-    (drug as any).chemical_class ||
-    (drug as any).drug_class ||
-    (drug as any).drugClass ||
-    (drug as any).scaffold ||
-    (drug as any).core_scaffold ||
-    (drug as any).chemical_scaffold ||
-    (drug as any).chemicalScaffold ||
-    (drug as any).class ||
-    (drug as any).category;
-
-  if (typeof val === 'string') {
-    const trimmed = val.trim();
-    if (trimmed.length > 0 && trimmed !== '—' && trimmed !== '0' && trimmed.toLowerCase() !== 'n/a') {
-      return trimmed;
-    }
-  }
-  if (typeof val === 'object' && val) {
-    const str = (val as any).name || (val as any).label || (val as any).title;
-    if (typeof str === 'string' && str.trim().length > 0) return str.trim();
-  }
-  return 'Data unavailable';
+  return resolveChemicalClass(drug);
 };
 
 /**

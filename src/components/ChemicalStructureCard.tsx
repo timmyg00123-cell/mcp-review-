@@ -15,6 +15,7 @@ import {
   getPharmacophoresForStructure,
 } from '../utils/pharmacophoreData';
 import { resolveActivePharmacophoresForStructure } from '../utils/globalPharmacophores';
+import { resolveChemicalClass } from '../utils/chemicalClassDictionary';
 import {
   ExternalLink,
   ZoomIn,
@@ -465,7 +466,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
                   Chemical Class:
                 </span>
                 <span className="font-bold text-slate-900 dark:text-slate-100 text-xs">
-                  {structure.chemicalClass}
+                  {resolveChemicalClass(structure)}
                 </span>
               </div>
               <div className="pt-1">
