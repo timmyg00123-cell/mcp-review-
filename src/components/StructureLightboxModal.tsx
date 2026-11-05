@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import { InteractiveStructureViewer } from './InteractiveStructureViewer';
+import { TargetPocketViewer } from './TargetPocketViewer';
 import { PharmacophoreTagList } from './PharmacophoreTagList';
 import {
   PHARMACOPHORE_COLOR_PALETTE,
@@ -39,6 +40,7 @@ import {
   Sparkles,
   ArrowRightLeft,
   Lock,
+  Dna,
 } from 'lucide-react';
 
 interface StructureLightboxModalProps {
@@ -50,6 +52,7 @@ interface StructureLightboxModalProps {
   initialSecondaryStructure?: ChemicalStructure;
   hideDrugName?: boolean;
   examModeActive?: boolean;
+  initialViewTab?: '2d' | '3d';
   onInspectPubChem?: (structure: ChemicalStructure) => void;
 }
 
@@ -62,6 +65,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
   initialSecondaryStructure,
   hideDrugName = false,
   examModeActive = false,
+  initialViewTab = '2d',
   onInspectPubChem,
 }) => {
   // Deduplicate pool while ensuring initialStructure is present
@@ -80,6 +84,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
   const [primaryIdx, setPrimaryIdx] = useState<number>(0);
   const [secondaryIdx, setSecondaryIdx] = useState<number>(1);
   const [isCompareMode, setIsCompareMode] = useState<boolean>(initialCompareMode);
+  const [viewTab, setViewTab] = useState<'2d' | '3d'>(initialViewTab);
   const [isMatrixOpen, setIsMatrixOpen] = useState<boolean>(false);
 
   // Zoom and pan
@@ -121,6 +126,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
       }
 
       setIsCompareMode(initialCompareMode);
+      setViewTab(initialViewTab || '2d');
       setZoomLevel(100);
       setPanA({ x: 0, y: 0 });
       setPanB({ x: 0, y: 0 });
@@ -130,7 +136,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
       setSecondaryActivePharma({});
       setSecondaryHoveredPharma(null);
     }
-  }, [isOpen, initialStructure, initialSecondaryStructure, initialCompareMode, pool]);
+  }, [isOpen, initialStructure, initialSecondaryStructure, initialCompareMode, initialViewTab, pool]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -298,8 +304,38 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
 
           {/* Right: Controls Strip */}
           <div className="flex items-center gap-2 flex-wrap ml-auto">
+            {/* 2D / 3D Mode Toggle Switcher */}
+            <div className="flex items-center p-0.5 rounded-lg bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => setViewTab('2d')}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  viewTab === '2d'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="View 2D Chemical Structure, Pharmacophores, and SAR Classification"
+              >
+                <FlaskConical className="w-3.5 h-3.5" />
+                <span>2D SAR</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewTab('3d')}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  viewTab === '3d'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="View 3D Macromolecular Target Pocket and Catalytic Residues (PDB / AlphaFold)"
+              >
+                <Dna className="w-3.5 h-3.5" />
+                <span>3D Target Pocket</span>
+              </button>
+            </div>
+
             {/* Compare with 2nd Drug Toggle */}
-            {pool.length > 1 && (
+            {pool.length > 1 && viewTab === '2d' && (
               <button
                 type="button"
                 onClick={() => setIsCompareMode(!isCompareMode)}
@@ -390,10 +426,14 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
         </div>
 
         {/* ================================================================ */}
-        {/* MODAL BODY: DRUG COMPARISON / SINGLE EXPANDED VIEW               */}
+        {/* MODAL BODY: DRUG COMPARISON / SINGLE EXPANDED VIEW / 3D POCKET   */}
         {/* ================================================================ */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-          {/* Preset Zoom Pills */}
+          {viewTab === '3d' ? (
+            <TargetPocketViewer structure={primaryStructure} />
+          ) : (
+            <>
+              {/* Preset Zoom Pills */}
           <div className="flex items-center justify-between text-xs flex-wrap gap-2 pb-1 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-slate-400 font-medium">Zoom Presets:</span>
@@ -947,6 +987,8 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                 </div>
               )}
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

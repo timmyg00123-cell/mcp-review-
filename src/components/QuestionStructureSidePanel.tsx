@@ -26,6 +26,7 @@ import {
   Check,
   Lock,
   Sparkles,
+  Dna,
 } from 'lucide-react';
 
 interface QuestionStructureSidePanelProps {
@@ -53,6 +54,7 @@ export const QuestionStructureSidePanel: React.FC<QuestionStructureSidePanelProp
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [isZoomModalOpen, setIsZoomModalOpen] = useState<boolean>(false);
   const [openInCompareMode, setOpenInCompareMode] = useState<boolean>(false);
+  const [initialLightboxTab, setInitialLightboxTab] = useState<'2d' | '3d'>('2d');
   const [peekedNames, setPeekedNames] = useState<Record<string, boolean>>({});
   const [showFullDetails, setShowFullDetails] = useState<boolean>(false); // Only enable image hover-highlighting when expanded
   const [showCompareAll, setShowCompareAll] = useState<boolean>(false);
@@ -175,12 +177,27 @@ export const QuestionStructureSidePanel: React.FC<QuestionStructureSidePanelProp
               </button>
             )}
 
+            {/* 3D Target Pocket Lightbox Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setOpenInCompareMode(false);
+                setInitialLightboxTab('3d');
+                setIsZoomModalOpen(true);
+              }}
+              title="Open 3D Macromolecular Target Pocket & Residues (PDB / AlphaFold)"
+              className="p-1 rounded-md bg-white hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 transition-colors cursor-pointer"
+            >
+              <Dna className="w-3.5 h-3.5" />
+            </button>
+
             {/* Side-by-Side Comparison Lightbox Button */}
             {fullPool.length > 1 && (
               <button
                 type="button"
                 onClick={() => {
                   setOpenInCompareMode(true);
+                  setInitialLightboxTab('2d');
                   setIsZoomModalOpen(true);
                 }}
                 title="Open Side-by-Side Structure Comparator"
@@ -195,6 +212,7 @@ export const QuestionStructureSidePanel: React.FC<QuestionStructureSidePanelProp
               type="button"
               onClick={() => {
                 setOpenInCompareMode(false);
+                setInitialLightboxTab('2d');
                 setIsZoomModalOpen(true);
               }}
               title="Click to Zoom Structure (100%-250%)"
@@ -535,6 +553,7 @@ export const QuestionStructureSidePanel: React.FC<QuestionStructureSidePanelProp
             initialStructure={activeStructure}
             comparisonPool={fullPool}
             initialCompareMode={openInCompareMode}
+            initialViewTab={initialLightboxTab}
             hideDrugName={hideDrugName}
             examModeActive={examModeActive}
             onInspectPubChem={onInspectStructure}

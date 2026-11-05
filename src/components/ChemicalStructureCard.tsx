@@ -30,6 +30,7 @@ import {
   EyeOff,
   Lock,
   Sparkles,
+  Dna,
 } from 'lucide-react';
 
 interface ChemicalStructureCardProps {
@@ -65,6 +66,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
   const [showDetails, setShowDetails] = useState(showDetailsByDefault);
   const [isZoomed, setIsZoomed] = useState(false);
   const [openInCompareMode, setOpenInCompareMode] = useState(false);
+  const [initialLightboxTab, setInitialLightboxTab] = useState<'2d' | '3d'>('2d');
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isNamePeeked, setIsNamePeeked] = useState(false);
   const [copiedSmiles, setCopiedSmiles] = useState(false);
@@ -280,12 +282,27 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
               </button>
             )}
 
+            {/* 3D Macromolecular Target Pocket Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setOpenInCompareMode(false);
+                setInitialLightboxTab('3d');
+                setIsZoomed(true);
+              }}
+              className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+              title="Open 3D Macromolecular Target Pocket & Residues (PDB / AlphaFold)"
+            >
+              <Dna className="w-3.5 h-3.5" />
+            </button>
+
             {/* Side-by-Side Comparison Lightbox Button */}
             {comparisonPool && comparisonPool.length > 1 && (
               <button
                 type="button"
                 onClick={() => {
                   setOpenInCompareMode(true);
+                  setInitialLightboxTab('2d');
                   setIsZoomed(true);
                 }}
                 className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -300,6 +317,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
               type="button"
               onClick={() => {
                 setOpenInCompareMode(false);
+                setInitialLightboxTab('2d');
                 setIsZoomed(true);
               }}
               className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -633,6 +651,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
             initialStructure={structure}
             comparisonPool={comparisonPool}
             initialCompareMode={openInCompareMode}
+            initialViewTab={initialLightboxTab}
             hideDrugName={hideDrugName}
             examModeActive={examModeActive}
             onInspectPubChem={onInspect}
