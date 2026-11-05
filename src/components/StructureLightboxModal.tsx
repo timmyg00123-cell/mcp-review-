@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import { InteractiveStructureViewer } from './InteractiveStructureViewer';
 import { PharmacophoreTagList } from './PharmacophoreTagList';
@@ -8,12 +8,23 @@ import {
   getPharmacophoresForStructure,
 } from '../utils/pharmacophoreData';
 import {
+  getChemicalClass,
+  getTargetReceptor,
+  getReversibility,
+  getRouteOfAdmin,
+  getOnsetOfAction,
+  getEliminationHalfLife,
+  getBioactivationPathway,
+  getPharmacologicalClass,
+  getMoaOrSar,
+  resolveTargetAndReversibility,
+} from '../utils/structureDataUtils';
+import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
   X,
   Columns,
-  Rows,
   Maximize2,
   ShieldCheck,
   ExternalLink,
@@ -21,6 +32,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Eye,
   EyeOff,
   FlaskConical,
@@ -68,8 +80,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
   const [primaryIdx, setPrimaryIdx] = useState<number>(0);
   const [secondaryIdx, setSecondaryIdx] = useState<number>(1);
   const [isCompareMode, setIsCompareMode] = useState<boolean>(initialCompareMode);
-  // Layout toggle: 'side-by-side' (columns) vs 'stacked' (rows)
-  const [layoutMode, setLayoutMode] = useState<'side-by-side' | 'stacked'>('side-by-side');
+  const [isMatrixOpen, setIsMatrixOpen] = useState<boolean>(false);
 
   // Zoom and pan
   const [zoomLevel, setZoomLevel] = useState<number>(100);
@@ -142,6 +153,30 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    const handleCancel = (e: Event) => {
+      e.preventDefault();
+      onClose();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+    return () => {
+      dialog.removeEventListener('cancel', handleCancel);
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, [onClose]);
+
   if (!isOpen) return null;
 
   const primaryStructure = pool[primaryIdx] || initialStructure;
@@ -207,10 +242,18 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
     setSecondaryActivePharma(tempPharma);
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn"
-      onClick={onClose}
+    <dialog
+      ref={dialogRef}
+      closedby="any"
+      onClick={handleBackdropClick}
+      className="m-auto p-2 sm:p-4 bg-transparent outline-none max-w-full max-h-screen text-slate-800 dark:text-slate-100"
     >
       <div
         className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-7xl max-h-[96vh] flex flex-col overflow-hidden text-slate-800 dark:text-slate-100"
@@ -230,7 +273,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                 <span className="font-serif font-black text-sm px-2 py-0.5 rounded bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900">
                   {primaryStructure.id}
                 </span>
-                <h2 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 truncate">
+                <h2 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 truncate text-balance">
                   {getDisplayTitle(primaryStructure)}
                 </h2>
                 {isCompareMode && (
@@ -239,7 +282,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                     <span className="font-serif font-black text-sm px-2 py-0.5 rounded bg-indigo-900 text-white dark:bg-indigo-100 dark:text-indigo-900">
                       {secondaryStructure.id}
                     </span>
-                    <span className="font-bold text-sm sm:text-base text-indigo-900 dark:text-indigo-100 truncate">
+                    <span className="font-bold text-sm sm:text-base text-indigo-900 dark:text-indigo-100 truncate text-balance">
                       {getDisplayTitle(secondaryStructure)}
                     </span>
                   </>
@@ -272,37 +315,6 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
               </button>
             )}
 
-            {/* Adjustable Layout Toggle (Side-by-Side vs Stacked) */}
-            {isCompareMode && (
-              <div className="flex items-center rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setLayoutMode('side-by-side')}
-                  className={`px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
-                    layoutMode === 'side-by-side'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                  title="Side-by-Side Columns View"
-                >
-                  <Columns className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Side-by-Side</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLayoutMode('stacked')}
-                  className={`px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
-                    layoutMode === 'stacked'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                  title="Stacked Rows View (Expanded Width)"
-                >
-                  <Rows className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Stacked</span>
-                </button>
-              </div>
-            )}
 
             {/* Swap Drugs Button (if compare mode) */}
             {isCompareMode && (
@@ -417,15 +429,9 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
           {/* DUAL OR SINGLE INSPECTION CONTAINER */}
           {isCompareMode ? (
             /* ============================================================ */
-            /* DUAL-DRUG COMPARATOR VIEW (Side-by-Side vs Stacked)          */
+            /* DUAL-DRUG COMPARATOR VIEW (Side-by-Side)                     */
             /* ============================================================ */
-            <div
-              className={`grid gap-6 ${
-                layoutMode === 'side-by-side'
-                  ? 'grid-cols-1 lg:grid-cols-2'
-                  : 'grid-cols-1'
-              }`}
-            >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* DRUG A (PRIMARY) */}
               <div className="space-y-4 bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
                 <div className="space-y-3">
@@ -456,7 +462,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                   </div>
 
                   {/* Chemical Structure Image with Glowing Translucent Zones */}
-                  <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center min-h-[220px]">
+                  <div className="bg-[var(--structure-canvas-bg)] p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center min-h-[220px]">
                     <InteractiveStructureViewer
                       structure={primaryStructure}
                       activePharmacophoreIds={primaryActivePharma}
@@ -465,7 +471,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                       onHoverPharmacophore={setPrimaryHoveredPharma}
                       zoomLevel={zoomLevel}
                       pan={panA}
-                      maxHeightClass={layoutMode === 'stacked' ? 'max-h-72' : 'max-h-52'}
+                      maxHeightClass="max-h-52"
                       altText={getDisplayTitle(primaryStructure)}
                       isExpanded={true}
                     />
@@ -493,7 +499,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                               Chemical Class:
                             </span>
                             <span className="font-semibold text-slate-900 dark:text-slate-100">
-                              {primaryStructure.chemicalClass}
+                              {getChemicalClass(primaryStructure)}
                             </span>
                           </div>
                           <div>
@@ -501,7 +507,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                               Target &amp; Reversibility:
                             </span>
                             <span className="font-semibold text-slate-900 dark:text-slate-100">
-                              {primaryStructure.target} ({primaryStructure.reversibility})
+                              {resolveTargetAndReversibility(primaryStructure)}
                             </span>
                           </div>
                         </div>
@@ -511,7 +517,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                             MOA Summary:
                           </span>
                           <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
-                            {primaryStructure.moa_summary || primaryStructure.sar_rationale || primaryStructure.sarNotes}
+                            {getMoaOrSar(primaryStructure)}
                           </p>
                         </div>
                       </div>
@@ -569,7 +575,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                   </div>
 
                   {/* Chemical Structure Image with Glowing Translucent Zones */}
-                  <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center min-h-[220px]">
+                  <div className="bg-[var(--structure-canvas-bg)] p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center min-h-[220px]">
                     <InteractiveStructureViewer
                       structure={secondaryStructure}
                       activePharmacophoreIds={secondaryActivePharma}
@@ -578,7 +584,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                       onHoverPharmacophore={setSecondaryHoveredPharma}
                       zoomLevel={zoomLevel}
                       pan={panB}
-                      maxHeightClass={layoutMode === 'stacked' ? 'max-h-72' : 'max-h-52'}
+                      maxHeightClass="max-h-52"
                       altText={getDisplayTitle(secondaryStructure)}
                       isExpanded={true}
                     />
@@ -606,7 +612,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                               Chemical Class:
                             </span>
                             <span className="font-semibold text-slate-900 dark:text-slate-100">
-                              {secondaryStructure.chemicalClass}
+                              {getChemicalClass(secondaryStructure)}
                             </span>
                           </div>
                           <div>
@@ -614,7 +620,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                               Target &amp; Reversibility:
                             </span>
                             <span className="font-semibold text-slate-900 dark:text-slate-100">
-                              {secondaryStructure.target} ({secondaryStructure.reversibility})
+                              {resolveTargetAndReversibility(secondaryStructure)}
                             </span>
                           </div>
                         </div>
@@ -624,7 +630,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                             MOA Summary:
                           </span>
                           <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
-                            {secondaryStructure.moa_summary || secondaryStructure.sar_rationale || secondaryStructure.sarNotes}
+                            {getMoaOrSar(secondaryStructure)}
                           </p>
                         </div>
                       </div>
@@ -693,7 +699,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
               )}
 
               {/* Large Image Surface */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 min-h-[340px] sm:min-h-[400px] flex items-center justify-center p-6 shadow-inner">
+              <div className="bg-[var(--structure-canvas-bg)] rounded-2xl border-2 border-slate-200 dark:border-slate-700 min-h-[340px] sm:min-h-[400px] flex items-center justify-center p-6 shadow-inner">
                 <InteractiveStructureViewer
                   structure={primaryStructure}
                   activePharmacophoreIds={primaryActivePharma}
@@ -734,26 +740,30 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                         <span className="text-slate-400 block text-[10px] uppercase font-semibold">
                           Chemical Class:
                         </span>
-                        <span className="font-semibold">{primaryStructure.chemicalClass}</span>
+                        <span className="font-semibold">{getChemicalClass(primaryStructure)}</span>
                       </div>
                       <div>
                         <span className="text-slate-400 block text-[10px] uppercase font-semibold">
                           Pharmacological Class:
                         </span>
-                        <span className="font-semibold">{primaryStructure.pharmacologicalClass}</span>
+                        <span className="font-semibold">{getPharmacologicalClass(primaryStructure)}</span>
                       </div>
                       <div>
                         <span className="text-slate-400 block text-[10px] uppercase font-semibold">
                           Target Receptor:
                         </span>
-                        <span className="font-semibold">{primaryStructure.target}</span>
+                        <span className="font-semibold">{getTargetReceptor(primaryStructure)}</span>
                       </div>
                       <div>
                         <span className="text-slate-400 block text-[10px] uppercase font-semibold">
                           Reversibility &amp; Route:
                         </span>
                         <span className="font-semibold">
-                          {primaryStructure.reversibility} · {primaryStructure.route}
+                          {getReversibility(primaryStructure) !== 'Data unavailable' || getRouteOfAdmin(primaryStructure) !== 'Data unavailable'
+                            ? [getReversibility(primaryStructure), getRouteOfAdmin(primaryStructure)]
+                                .filter((v) => v !== 'Data unavailable')
+                                .join(' · ')
+                            : 'Data unavailable'}
                         </span>
                       </div>
                     </div>
@@ -763,7 +773,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                         MECHANISM OF ACTION (MOA):
                       </span>
                       <p className="text-slate-700 dark:text-slate-300 leading-relaxed mt-0.5">
-                        {primaryStructure.moa_summary || primaryStructure.sar_rationale || primaryStructure.sarNotes}
+                        {getMoaOrSar(primaryStructure)}
                       </p>
                     </div>
                   </div>
@@ -806,13 +816,13 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                       <div>
                         <span className="text-slate-400 block text-[10px]">Onset</span>
                         <span className="font-sans font-semibold">
-                          {primaryStructure.pkPdHighlights?.onset || '—'}
+                          {getOnsetOfAction(primaryStructure)}
                         </span>
                       </div>
                       <div>
                         <span className="text-slate-400 block text-[10px]">Half-Life</span>
                         <span className="font-sans font-semibold">
-                          {primaryStructure.pkPdHighlights?.halfLife || '—'}
+                          {getEliminationHalfLife(primaryStructure)}
                         </span>
                       </div>
                     </div>
@@ -825,7 +835,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                             type="button"
                             onClick={() =>
                               handleCopy(
-                                primaryStructure.pubchemAudit.canonicalSmiles || '',
+                                primaryStructure.pubchemAudit?.canonicalSmiles || '',
                                 'single_smiles'
                               )
                             }
@@ -865,71 +875,81 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
           {/* ============================================================ */}
           {isCompareMode && !examModeActive && (
             <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 font-bold text-xs text-slate-900 dark:text-slate-100">
-                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <button
+                type="button"
+                onClick={() => setIsMatrixOpen(!isMatrixOpen)}
+                className="flex items-center gap-2 cursor-pointer w-full text-left font-bold text-xs text-slate-900 dark:text-slate-100"
+                aria-expanded={isMatrixOpen}
+                aria-label="Toggle Head-to-Head Differential Matrix"
+              >
+                <ChevronDown
+                  className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${
+                    isMatrixOpen ? 'rotate-180' : ''
+                  }`}
+                />
                 <span>Head-to-Head Differential Matrix:</span>
-              </div>
+              </button>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                      <th className="py-2 px-3 font-semibold text-slate-500 text-[10px] uppercase">
-                        Attribute
-                      </th>
-                      <th className="py-2 px-3 font-bold text-blue-600 dark:text-blue-400">
-                        {primaryStructure.name}
-                      </th>
-                      <th className="py-2 px-3 font-bold text-indigo-600 dark:text-indigo-400">
-                        {secondaryStructure.name}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700/60">
-                    <tr>
-                      <td className="py-2 px-3 font-medium text-slate-500">Chemical Class</td>
-                      <td className="py-2 px-3">{primaryStructure.chemicalClass}</td>
-                      <td className="py-2 px-3">{secondaryStructure.chemicalClass}</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-medium text-slate-500">Target Receptor</td>
-                      <td className="py-2 px-3">{primaryStructure.target}</td>
-                      <td className="py-2 px-3">{secondaryStructure.target}</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-medium text-slate-500">Reversibility</td>
-                      <td className="py-2 px-3 font-semibold">{primaryStructure.reversibility}</td>
-                      <td className="py-2 px-3 font-semibold">{secondaryStructure.reversibility}</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-medium text-slate-500">Route of Admin</td>
-                      <td className="py-2 px-3">{primaryStructure.route}</td>
-                      <td className="py-2 px-3">{secondaryStructure.route}</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-medium text-slate-500">Onset of Action</td>
-                      <td className="py-2 px-3 font-mono">{primaryStructure.pkPdHighlights?.onset || '—'}</td>
-                      <td className="py-2 px-3 font-mono">{secondaryStructure.pkPdHighlights?.onset || '—'}</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-medium text-slate-500">Elimination Half-Life</td>
-                      <td className="py-2 px-3 font-mono">{primaryStructure.pkPdHighlights?.halfLife || '—'}</td>
-                      <td className="py-2 px-3 font-mono">{secondaryStructure.pkPdHighlights?.halfLife || '—'}</td>
-                    </tr>
-                    {primaryStructure.pkPdHighlights?.bioactivation && (
-                      <tr>
-                        <td className="py-2 px-3 font-medium text-slate-500">Bioactivation Pathway</td>
-                        <td className="py-2 px-3">{primaryStructure.pkPdHighlights.bioactivation}</td>
-                        <td className="py-2 px-3">{secondaryStructure.pkPdHighlights?.bioactivation || 'Directly active / N/A'}</td>
+              {isMatrixOpen && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                        <th className="py-2 px-3 font-semibold text-slate-500 text-[10px] uppercase">
+                          Attribute
+                        </th>
+                        <th className="py-2 px-3 font-bold text-blue-600 dark:text-blue-400">
+                          {primaryStructure.name}
+                        </th>
+                        <th className="py-2 px-3 font-bold text-indigo-600 dark:text-indigo-400">
+                          {secondaryStructure.name}
+                        </th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700/60">
+                      <tr>
+                        <td className="py-2 px-3 font-medium text-slate-500">Chemical Class</td>
+                        <td className="py-2 px-3">{getChemicalClass(primaryStructure)}</td>
+                        <td className="py-2 px-3">{getChemicalClass(secondaryStructure)}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-medium text-slate-500">Target Receptor</td>
+                        <td className="py-2 px-3">{getTargetReceptor(primaryStructure)}</td>
+                        <td className="py-2 px-3">{getTargetReceptor(secondaryStructure)}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-medium text-slate-500">Reversibility</td>
+                        <td className="py-2 px-3 font-semibold">{getReversibility(primaryStructure)}</td>
+                        <td className="py-2 px-3 font-semibold">{getReversibility(secondaryStructure)}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-medium text-slate-500">Route of Admin</td>
+                        <td className="py-2 px-3">{getRouteOfAdmin(primaryStructure)}</td>
+                        <td className="py-2 px-3">{getRouteOfAdmin(secondaryStructure)}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-medium text-slate-500">Onset of Action</td>
+                        <td className="py-2 px-3 font-mono">{getOnsetOfAction(primaryStructure)}</td>
+                        <td className="py-2 px-3 font-mono">{getOnsetOfAction(secondaryStructure)}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-medium text-slate-500">Elimination Half-Life</td>
+                        <td className="py-2 px-3 font-mono">{getEliminationHalfLife(primaryStructure)}</td>
+                        <td className="py-2 px-3 font-mono">{getEliminationHalfLife(secondaryStructure)}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-3 font-medium text-slate-500">Location of Metabolism</td>
+                        <td className="py-2 px-3">{getBioactivationPathway(primaryStructure)}</td>
+                        <td className="py-2 px-3">{getBioactivationPathway(secondaryStructure)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };

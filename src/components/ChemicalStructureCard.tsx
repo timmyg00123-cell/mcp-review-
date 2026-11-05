@@ -567,7 +567,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
                       <button
                         type="button"
                         onClick={() =>
-                          handleCopySmiles(structure.pubchemAudit.canonicalSmiles!)
+                          handleCopySmiles(structure.pubchemAudit?.canonicalSmiles || structure.canonical_smiles || structure.smiles || '')
                         }
                         className="text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 flex items-center gap-0.5"
                       >

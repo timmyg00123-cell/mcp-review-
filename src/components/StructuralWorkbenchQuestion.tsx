@@ -554,8 +554,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                   >
                     {/* Zone Boundary Box */}
                     <rect
-                      x={zone.x - 70}
-                      y={zone.y - 24}
+                      x={(zone.x ?? 50) - 70}
+                      y={(zone.y ?? 50) - 24}
                       width="140"
                       height="46"
                       rx="10"
@@ -589,8 +589,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                     {assignedBadge ? (
                       <g>
                         <text
-                          x={zone.x}
-                          y={zone.y + 4}
+                          x={zone.x ?? 50}
+                          y={(zone.y ?? 50) + 4}
                           textAnchor="middle"
                           fontSize="12"
                           fontWeight="700"
@@ -605,8 +605,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                           🏷️ {assignedBadge}
                         </text>
                         <text
-                          x={zone.x}
-                          y={zone.y + 35}
+                          x={zone.x ?? 50}
+                          y={(zone.y ?? 50) + 35}
                           textAnchor="middle"
                           fontSize="9"
                           fill="#94a3b8"
@@ -617,8 +617,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                     ) : (
                       <g>
                         <text
-                          x={zone.x}
-                          y={zone.y - 2}
+                          x={zone.x ?? 50}
+                          y={(zone.y ?? 50) - 2}
                           textAnchor="middle"
                           fontSize="11"
                           fontWeight="700"
@@ -627,8 +627,8 @@ export const StructuralWorkbenchQuestion: React.FC<StructuralWorkbenchQuestionPr
                           {zone.label}
                         </text>
                         <text
-                          x={zone.x}
-                          y={zone.y + 12}
+                          x={zone.x ?? 50}
+                          y={(zone.y ?? 50) + 12}
                           textAnchor="middle"
                           fontSize="9"
                           fontWeight="600"

@@ -159,23 +159,32 @@ export const DIGOXIN_WORKBENCH_DATA: StructuralWorkbenchData = {
       {
         id: 'zone_aglycone_role',
         label: 'Aglycone Steroid Nucleus + C17-Lactone',
+        correctBadge: 'Pharmacodynamics (Na+/K+-ATPase pump inhibition)',
         expectedBadge: 'Pharmacodynamics (Na+/K+-ATPase pump inhibition)',
         rationale:
           'The aglycone steroid nucleus with C14-beta OH and C17 lactone directly intercalates into the alpha-subunit pocket of Na+/K+-ATPase.',
+        x: 65,
+        y: 40,
       },
       {
         id: 'zone_glycone_role',
         label: 'Glycone (Trisaccharide Sugar Chain)',
+        correctBadge: 'Pharmacokinetics (Distribution, polarity, 36-48h half-life)',
         expectedBadge: 'Pharmacokinetics (Distribution, polarity, 36-48h half-life)',
         rationale:
           'The glycone moiety governs slow tissue distribution, extensive volume of distribution, enterohepatic recycling, and prolonged 36-48h half-life.',
+        x: 20,
+        y: 60,
       },
       {
         id: 'zone_lactone_reduction_role',
         label: 'C17 Lactone Double Bond (GIT Flora Susceptibility)',
+        correctBadge: 'Metabolic Inactivation Site (Normal flora lactone reduction)',
         expectedBadge: 'Metabolic Inactivation Site (Normal flora lactone reduction)',
         rationale:
           'Bacterial reduction in the gut by Eggerthella lenta saturates the lactone to dihydrodigoxin, completely abolishing cardiotonic activity in ~10% of patients.',
+        x: 88,
+        y: 20,
       },
     ],
   },
@@ -186,30 +195,41 @@ export const DIGOXIN_WORKBENCH_DATA: StructuralWorkbenchData = {
     candidates: [
       {
         id: 'steroid_a_cardiac_aglycone',
+        name: 'Steroid A: U-shaped cis/trans/cis Aglycone with C17-beta Unsaturated Lactone',
         label: 'Steroid A: U-shaped cis/trans/cis Aglycone with C17-beta Unsaturated Lactone',
-        smarts: 'CC12CCC3C(C1CCC2(C4=CC(=O)OC4)O)CCC5C3(CCC(C5)O)C',
+        smiles: 'CC12CCC3C(C1CCC2(C4=CC(=O)OC4)O)CCC5C3(CCC(C5)O)C',
         isCorrect: true,
+        classification: 'active',
         rationale:
           'Retains positive inotropic activity: Features the required A/B cis, B/C trans, and C/D cis U-shaped steroid core with beta-oriented C14-OH and C17-beta alpha,beta-unsaturated butyrolactone.',
       },
       {
         id: 'steroid_b_planar_glucocorticoid',
+        name: 'Steroid B: Planar trans/anti/trans Glucocorticoid Core',
         label: 'Steroid B: Planar trans/anti/trans Glucocorticoid Core',
+        smiles: 'CC12CCC(=O)C=C1CCC3C2C(CC4(C3CCC4(C(=O)CO)O)C)O',
         isCorrect: false,
+        classification: 'intermediate',
         rationale:
           'Inactive on Na+/K+-ATPase: Glucocorticoids have a flat, planar trans/trans/trans steroid ring junction that cannot fit into the curved cardiac pump receptor pocket.',
       },
       {
         id: 'steroid_c_alpha_lactone_isomer',
+        name: 'Steroid C: C17-alpha Lactone Inverted Diastereomer',
         label: 'Steroid C: C17-alpha Lactone Inverted Diastereomer',
+        smiles: 'CC12CCC3C(C1CCC2(C4=CC(=O)OC4)O)CCC5C3(CCC(C5)O)C',
         isCorrect: false,
+        classification: 'degradant',
         rationale:
           'Inactive: Inverting the C17 lactone to the alpha-face misdirects hydrogen-bonding with the pump alpha-subunit, abolishing binding affinity.',
       },
       {
         id: 'steroid_d_saturated_lactone',
+        name: 'Steroid D: Saturated C17 Butyrolactone (Dihydroaglycone)',
         label: 'Steroid D: Saturated C17 Butyrolactone (Dihydroaglycone)',
+        smiles: 'CC12CCC3C(C1CCC2(C4CCC(=O)O4)O)CCC5C3(CCC(C5)O)C',
         isCorrect: false,
+        classification: 'degradant',
         rationale:
           'Inactive: Saturating the lactone double bond removes pi-electron conjugation required for essential hydrogen-bonding interactions with target Gln111 and Glu117.',
       },
@@ -330,23 +350,32 @@ export const ACE_INHIBITOR_WORKBENCH_DATA: StructuralWorkbenchData = {
       {
         id: 'zone_captopril_class',
         label: 'Captopril',
+        correctBadge: 'Sulfhydryl (-SH) Zinc-Binding Class',
         expectedBadge: 'Sulfhydryl (-SH) Zinc-Binding Class',
         rationale:
           'Captopril is the prototype sulfhydryl ACE inhibitor. Associated with skin rash, metallic taste, and short duration.',
+        x: 25,
+        y: 40,
       },
       {
         id: 'zone_lisinopril_class',
         label: 'Lisinopril / Enalaprilat',
+        correctBadge: 'Dicarboxylate (-COO-) Zinc-Binding Class',
         expectedBadge: 'Dicarboxylate (-COO-) Zinc-Binding Class',
         rationale:
           'Lisinopril and Enalaprilat utilize a dicarboxylate group (-COO-) to bind Zn2+, eliminating sulfhydryl-specific adverse effects.',
+        x: 55,
+        y: 40,
       },
       {
         id: 'zone_fosinopril_class',
         label: 'Fosinopril / Fosinoprilat',
+        correctBadge: 'Phosphinate (-PO2-) Zinc-Binding Class',
         expectedBadge: 'Phosphinate (-PO2-) Zinc-Binding Class',
         rationale:
           'Fosinoprilat utilizes a phosphinate group (-PO2-) to bind catalytic Zn2+, mimicking the tetrahedral transition state of peptide bond cleavage.',
+        x: 85,
+        y: 40,
       },
     ],
   },
@@ -357,16 +386,21 @@ export const ACE_INHIBITOR_WORKBENCH_DATA: StructuralWorkbenchData = {
     candidates: [
       {
         id: 'enalaprilat_active',
+        name: 'Enalaprilat: Active Dicarboxylate Diacid',
         label: 'Enalaprilat: Active Dicarboxylate Diacid',
-        smarts: 'CCC(C(=O)O)NC(C)C(=O)N1CCCC1C(=O)O',
+        smiles: 'CCC(C(=O)O)NC(C)C(=O)N1CCCC1C(=O)O',
         isCorrect: true,
+        classification: 'active',
         rationale:
           'Active dicarboxylate diacid with both carboxylic acid groups free to chelate catalytic Zn2+ and salt-bridge the S2 subsite.',
       },
       {
         id: 'enalapril_prodrug',
+        name: 'Enalapril: Monoethyl Ester Prodrug',
         label: 'Enalapril: Monoethyl Ester Prodrug',
+        smiles: 'CCOC(=O)C(CCC1=CC=CC=C1)NC(C)C(=O)N2CCCC2C(=O)O',
         isCorrect: false,
+        classification: 'intermediate',
         rationale:
           'Enalapril is a monoethyl ester prodrug synthesized to improve oral bioavailability; it has low direct affinity for ACE until cleaved by hepatic esterases.',
       },

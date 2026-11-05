@@ -398,7 +398,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                       {stmt.id})
                     </td>
                     <td className="py-2.5 px-3 text-slate-700 dark:text-slate-300 font-medium">
-                      {maskDrugNamesForExam(stmt.statement, maskCandidateStructures, isExamMode)}
+                      {maskDrugNamesForExam(stmt.statement || stmt.text || '', maskCandidateStructures, isExamMode)}
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <span
@@ -633,7 +633,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
               </span>
             </div>
             <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 leading-snug text-pretty">
-              {maskDrugNamesForExam(question.questionStem, maskCandidateStructures, isExamMode)}
+              {maskDrugNamesForExam(question.questionStem || question.prompt || '', maskCandidateStructures, isExamMode)}
             </h3>
             <div className="flex flex-wrap items-center gap-2">
               {question.type === 'matching' && (
@@ -1189,7 +1189,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                             {stmt.id})
                           </span>
                           <span className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-normal">
-                            {maskDrugNamesForExam(stmt.statement, maskCandidateStructures, isExamMode)}
+                            {maskDrugNamesForExam(stmt.statement || stmt.text || '', maskCandidateStructures, isExamMode)}
                           </span>
                         </div>
 
@@ -1295,7 +1295,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                               )}
                             </div>
                             <p className="mt-1 text-slate-600 dark:text-slate-300 text-xs">
-                              {maskDrugNamesForExam(stmt.rationale, maskCandidateStructures, isExamMode)}
+                              {maskDrugNamesForExam(stmt.rationale || stmt.explanation || '', maskCandidateStructures, isExamMode)}
                             </p>
                           </div>
                         </div>

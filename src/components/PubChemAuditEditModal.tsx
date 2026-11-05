@@ -21,7 +21,7 @@ export const PubChemAuditEditModal: React.FC<PubChemAuditEditModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewAudit, setPreviewAudit] = useState<PubChemAuditInfo | null>(structure.pubchemAudit || null);
-  const [previewPngUrl, setPreviewPngUrl] = useState<string>(structure.pngUrl);
+  const [previewPngUrl, setPreviewPngUrl] = useState<string>(structure.pngUrl || '');
 
   const handleAuditLookup = async () => {
     const trimmed = inputVal.trim();

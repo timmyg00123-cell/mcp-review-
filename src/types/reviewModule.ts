@@ -1,16 +1,16 @@
 import type { OpenFdaClinicalData } from '../services/openFdaService';
 
 export interface PubChemAuditInfo {
-  cid: number;
-  status: 'verified' | 'unresolved' | 'manual_override';
-  verifiedAt: string;
-  source: 'nih_pug_rest' | 'document_crop_with_pubchem_match';
+  cid?: number;
+  status?: 'verified' | 'unresolved' | 'manual_override';
+  verifiedAt?: string;
+  source?: 'nih_pug_rest' | 'document_crop_with_pubchem_match';
   canonicalSmiles?: string;
   iupacName?: string;
   molecularFormula?: string;
   molecularWeight?: number;
   xlogp?: number;
-  pubChemUrl: string;
+  pubChemUrl?: string;
   matchScore?: number;
 }
 
@@ -48,7 +48,7 @@ export interface ChemicalStructure {
   pharmacophore_smarts?: string; // Core active pharmacophore SMARTS string
   pubchemMolBlock?: string; // 2D SDF/MOL block from PubChem PUG REST containing 2D coordinates
   pubchemUrl?: string;
-  pngUrl: string;
+  pngUrl?: string;
   fallbackSvg?: string;
   target: string;
   target_receptor?: string; // Biological target receptor & binding site
@@ -71,7 +71,7 @@ export interface ChemicalStructure {
   moa_summary?: string; // Concise Mechanism of Action (MOA) summary
   sar_rationale?: string; // Detailed structure-activity relationship rationale / legacy fallback
   majorToxicityOrLimitation?: string; // Clinical toxicities, adverse reactions or contraindications
-  pubchemAudit: PubChemAuditInfo; // Universal PubChem audit metadata
+  pubchemAudit?: PubChemAuditInfo; // Universal PubChem audit metadata
   clinicalData?: OpenFdaClinicalData; // Structured clinical data hydrated via OpenFDA
   location_of_metabolism?: string; // Distilled primary organ and mechanism
   elimination_half_life?: { value: string; unit: string } | string; // Distilled elimination half-life
@@ -87,9 +87,11 @@ export interface ChemicalStructure {
 
 export interface SubStatement {
   id: string; // e.g., 'a', 'b', 'c'
-  statement: string;
+  statement?: string;
+  text?: string;
   isCorrect: boolean; // True or False
-  rationale: string;
+  rationale?: string;
+  explanation?: string;
   keyPharmacophore?: string;
 }
 
@@ -120,21 +122,24 @@ export interface WorkbenchHaloTarget {
 
 export interface WorkbenchDropZone {
   id: string;
-  targetMoietyId: string;
-  label: string;
-  correctBadge: string;
-  rationale: string;
-  x: number;
-  y: number;
+  targetMoietyId?: string;
+  label?: string;
+  correctBadge?: string;
+  expectedBadge?: string;
+  rationale?: string;
+  x?: number;
+  y?: number;
 }
 
 export interface WorkbenchStructureCandidate {
   id: string;
-  name: string;
-  smiles: string;
+  name?: string;
+  label?: string;
+  smiles?: string;
+  smarts?: string;
   cid?: number;
   isCorrect: boolean;
-  classification: 'active' | 'intermediate' | 'degradant';
+  classification?: 'active' | 'intermediate' | 'degradant' | string;
   rationale: string;
 }
 
@@ -175,9 +180,10 @@ export interface StructuralWorkbenchAnswer {
 export interface AntiplateletQuestion {
   id: number;
   title?: string;
-  questionNumberLabel: string; // e.g. "Question 1", "Question 5"
-  category: string;
-  questionStem: string;
+  prompt?: string;
+  questionNumberLabel?: string; // e.g. "Question 1", "Question 5"
+  category?: string;
+  questionStem?: string;
   structuresDisplayed?: ChemicalStructure[];
   type: 'multiple-choice' | 'sub-statements' | 'matching' | 'ranking' | 'structural-workbench';
   matchingTargets?: MatchingTarget[];
@@ -185,14 +191,16 @@ export interface AntiplateletQuestion {
   draggable_items?: string[];
   options?: string[];
   correctIndex?: number;
+  correctAnswer?: string | number;
   optionExplanations?: string[];
+  explanation?: string;
   subStatements?: SubStatement[];
   rankingPrompt?: string;
   rankingItems?: RankingItem[];
   structuralWorkbench?: StructuralWorkbenchData;
-  overallExplanation: string;
-  highYieldPearl: string;
-  sourceReference: string;
+  overallExplanation?: string;
+  highYieldPearl?: string;
+  sourceReference?: string;
   referenced_structures?: string[];
   displayed_structure_entity_ids?: string[];
   hide_drug_name_show_structure_for?: string | string[];
@@ -209,6 +217,8 @@ export interface QuestionBlock {
 }
 
 export interface ReviewSection {
+  id?: string;
+  title?: string;
   sectionTitle?: string;
   headerNote?: string;
   block_instructions?: string;
@@ -219,8 +229,9 @@ export interface ReviewSection {
 
 export interface ReviewPage {
   pageNumber: number;
-  pageTitle: string;
-  subtitle: string;
+  pageTitle?: string;
+  title?: string;
+  subtitle?: string;
   sections: ReviewSection[];
 }
 

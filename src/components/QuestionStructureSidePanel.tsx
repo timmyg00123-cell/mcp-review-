@@ -164,7 +164,7 @@ export const QuestionStructureSidePanel: React.FC<QuestionStructureSidePanelProp
               <button
                 type="button"
                 onClick={() => onInspectStructure && onInspectStructure(activeStructure)}
-                title={`PubChem Audit Verified (CID ${activeStructure.cid || activeStructure.pubchemAudit.cid}): ${activeStructure.pubchemAudit.status.toUpperCase()}`}
+                title={`PubChem Audit Verified (CID ${activeStructure.cid || activeStructure.pubchemAudit.cid}): ${(activeStructure.pubchemAudit.status || 'verified').toUpperCase()}`}
                 className="inline-flex items-center justify-center p-1 rounded-md bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900 border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 transition-colors shadow-2xs group cursor-pointer"
                 aria-label={`PubChem Audit Verified (CID ${activeStructure.cid || activeStructure.pubchemAudit.cid})`}
               >

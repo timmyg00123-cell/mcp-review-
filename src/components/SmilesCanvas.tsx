@@ -20,6 +20,7 @@ export interface SmilesCanvasProps {
   smiles?: string;
   molBlock?: string;
   fallbackImageUrl?: string;
+  cid?: number | string;
   width?: number;
   height?: number;
   theme?: 'light' | 'dark';
@@ -125,6 +126,7 @@ export const SmilesCanvas: React.FC<SmilesCanvasProps> = ({
   smiles,
   molBlock,
   fallbackImageUrl,
+  cid,
   width = 280,
   height = 190,
   theme = 'light',
@@ -394,17 +396,31 @@ export const SmilesCanvas: React.FC<SmilesCanvasProps> = ({
     }
   }, [rdkit, smiles, molBlock, activePharmacophoresKey, width, height, theme, bondStrokeColor]);
 
+  const effectiveFallbackUrl = useMemo(() => {
+    if (
+      typeof fallbackImageUrl === 'string' &&
+      fallbackImageUrl.trim().length > 0 &&
+      fallbackImageUrl !== 'undefined' &&
+      fallbackImageUrl !== 'null'
+    ) {
+      return fallbackImageUrl.trim();
+    }
+    if (cid) {
+      const num = Number(cid);
+      if (!isNaN(num) && num > 0) {
+        return `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${num}/PNG?image_size=large`;
+      }
+    }
+    return undefined;
+  }, [fallbackImageUrl, cid]);
+
   const [imgLoadError, setImgLoadError] = useState(false);
 
   useEffect(() => {
     setImgLoadError(false);
-  }, [fallbackImageUrl]);
+  }, [effectiveFallbackUrl]);
 
-  const isValidFallback =
-    typeof fallbackImageUrl === 'string' &&
-    fallbackImageUrl.trim().length > 0 &&
-    fallbackImageUrl !== 'undefined' &&
-    fallbackImageUrl !== 'null';
+  const isValidFallback = Boolean(effectiveFallbackUrl);
 
   const showSvg = !!svg && !hasError;
   const isGenerating = isWasmLoading || (!showSvg && !hasError && Boolean(smiles || molBlock));
@@ -469,9 +485,9 @@ export const SmilesCanvas: React.FC<SmilesCanvasProps> = ({
       )}
 
       {/* Fallback Image strictly validated and guarded against load errors */}
-      {!isGenerating && showFallback && (
+      {!isGenerating && showFallback && effectiveFallbackUrl && (
         <img
-          src={fallbackImageUrl}
+          src={effectiveFallbackUrl}
           alt={altText}
           width={width}
           height={height}
