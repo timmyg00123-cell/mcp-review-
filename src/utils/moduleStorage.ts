@@ -8,6 +8,7 @@ import {
 } from '../types/reviewModule';
 import { pdfPages } from '../data/antiplateletQuizData';
 import { getDefaultAnticoagulantsModule } from '../data/anticoagulantsQuizData';
+import { getDefaultHeartFailureModule } from '../data/heartFailureModuleData';
 import { medChemGraphDb } from '../db/medChemGraphDb';
 import { getCorrectedSmarts } from './smartsDictionary';
 
@@ -73,6 +74,7 @@ export function loadAllReviewModules(): ReviewModule[] {
 
   const defaultAntiplatelet = getDefaultAntiplateletModule();
   const defaultAnticoagulant = getDefaultAnticoagulantsModule();
+  const defaultHeartFailure = getDefaultHeartFailureModule();
   const hiddenBuiltins = getHiddenBuiltins();
 
   let overrides: Record<string, ReviewModule> = {};
@@ -93,10 +95,12 @@ export function loadAllReviewModules(): ReviewModule[] {
 
   const finalAntiplatelet = overrides['antiplatelets_mcp2'] || defaultAntiplatelet;
   const finalAnticoagulant = overrides['anticoagulants_mcp2'] || defaultAnticoagulant;
+  const finalHeartFailure = overrides['heart_failure_mcp2'] || defaultHeartFailure;
 
   const builtIns: ReviewModule[] = [];
   if (!hiddenBuiltins.includes('antiplatelets_mcp2')) builtIns.push(finalAntiplatelet);
   if (!hiddenBuiltins.includes('anticoagulants_mcp2')) builtIns.push(finalAnticoagulant);
+  if (!hiddenBuiltins.includes('heart_failure_mcp2')) builtIns.push(finalHeartFailure);
 
   // Synchronously load custom modules from localStorage so 0ms first-paint never drops them on reload
   let customList: ReviewModule[] = [];
@@ -112,6 +116,7 @@ export function loadAllReviewModules(): ReviewModule[] {
               m.id &&
               m.id !== 'antiplatelets_mcp2' &&
               m.id !== 'anticoagulants_mcp2' &&
+              m.id !== 'heart_failure_mcp2' &&
               m.id !== 'vasodilators_mcp2'
           );
         }
@@ -122,7 +127,7 @@ export function loadAllReviewModules(): ReviewModule[] {
   }
 
   const combined = [...builtIns, ...customList];
-  inMemoryModules = combined.length > 0 ? combined : [finalAntiplatelet, finalAnticoagulant];
+  inMemoryModules = combined.length > 0 ? combined : [finalAntiplatelet, finalAnticoagulant, finalHeartFailure];
   return inMemoryModules;
 }
 
@@ -134,6 +139,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
   try {
     const defaultAntiplatelet = getDefaultAntiplateletModule();
     const defaultAnticoagulant = getDefaultAnticoagulantsModule();
+    const defaultHeartFailure = getDefaultHeartFailureModule();
     const hiddenBuiltins = getHiddenBuiltins();
 
     // 1. Load custom modules and overrides from Dexie
@@ -164,9 +170,14 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     if (dexieAnticoagulant) {
       overrides['anticoagulants_mcp2'] = dexieAnticoagulant;
     }
+    const dexieHeartFailure = dexieModules.find((m) => m.id === 'heart_failure_mcp2')?.module;
+    if (dexieHeartFailure) {
+      overrides['heart_failure_mcp2'] = dexieHeartFailure;
+    }
 
     const finalAntiplatelet = overrides['antiplatelets_mcp2'] || defaultAntiplatelet;
     const finalAnticoagulant = overrides['anticoagulants_mcp2'] || defaultAnticoagulant;
+    const finalHeartFailure = overrides['heart_failure_mcp2'] || defaultHeartFailure;
 
     // 3. Bidirectional merge of custom modules between Dexie and localStorage
     const rawLocal = localStorage.getItem(MODULES_STORAGE_KEY);
@@ -178,6 +189,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
             m.id &&
             m.id !== 'antiplatelets_mcp2' &&
             m.id !== 'anticoagulants_mcp2' &&
+            m.id !== 'heart_failure_mcp2' &&
             m.id !== 'vasodilators_mcp2'
         )
       : [];
@@ -193,6 +205,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
         dm.module &&
         dm.id !== 'antiplatelets_mcp2' &&
         dm.id !== 'anticoagulants_mcp2' &&
+        dm.id !== 'heart_failure_mcp2' &&
         dm.id !== 'vasodilators_mcp2'
       ) {
         customModuleMap.set(dm.id, dm.module);
@@ -250,9 +263,10 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     const builtIns: ReviewModule[] = [];
     if (!hiddenBuiltins.includes('antiplatelets_mcp2')) builtIns.push(finalAntiplatelet);
     if (!hiddenBuiltins.includes('anticoagulants_mcp2')) builtIns.push(finalAnticoagulant);
+    if (!hiddenBuiltins.includes('heart_failure_mcp2')) builtIns.push(finalHeartFailure);
 
     const combined = [...builtIns, ...mergedCustom];
-    inMemoryModules = combined.length > 0 ? combined : [finalAntiplatelet, finalAnticoagulant];
+    inMemoryModules = combined.length > 0 ? combined : [finalAntiplatelet, finalAnticoagulant, finalHeartFailure];
     isDexieInitialized = true;
     return inMemoryModules;
   } catch (err) {
@@ -317,6 +331,7 @@ export function saveReviewModule(rawModule: ReviewModule): void {
     const isBuiltIn =
       newModule.id === 'antiplatelets_mcp2' ||
       newModule.id === 'anticoagulants_mcp2' ||
+      newModule.id === 'heart_failure_mcp2' ||
       Boolean(newModule.isBuiltIn);
 
     if (isBuiltIn) {
@@ -390,6 +405,7 @@ export async function saveReviewModuleAsync(rawModule: ReviewModule): Promise<vo
   const isBuiltIn =
     newModule.id === 'antiplatelets_mcp2' ||
     newModule.id === 'anticoagulants_mcp2' ||
+    newModule.id === 'heart_failure_mcp2' ||
     Boolean(newModule.isBuiltIn);
 
   await medChemGraphDb.modules.put({
@@ -415,7 +431,11 @@ export function resetBuiltInModule(moduleId: string): void {
 
 export function deleteReviewModule(moduleId: string): void {
   try {
-    if (moduleId === 'antiplatelets_mcp2' || moduleId === 'anticoagulants_mcp2') {
+    if (
+      moduleId === 'antiplatelets_mcp2' ||
+      moduleId === 'anticoagulants_mcp2' ||
+      moduleId === 'heart_failure_mcp2'
+    ) {
       const hidden = getHiddenBuiltins();
       if (!hidden.includes(moduleId)) {
         hidden.push(moduleId);
