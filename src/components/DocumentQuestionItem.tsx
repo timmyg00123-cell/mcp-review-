@@ -1308,7 +1308,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
           )}
 
           {/* STRUCTURAL-WORKBENCH TYPE: Interactive Multi-Step Chemical Workbench */}
-          {question.type === 'structural-workbench' && question.structuralWorkbench && (
+          {(question.type === 'structural-workbench' || question.structuralWorkbench) && question.structuralWorkbench && (
             <div className="pt-1">
               <StructuralWorkbenchQuestion
                 question={question}
