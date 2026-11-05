@@ -10,6 +10,7 @@ import { StructureDragDropMatch } from './StructureDragDropMatch';
 import { StructureLightboxModal } from './StructureLightboxModal';
 import { SmilesCanvas } from './SmilesCanvas';
 import { StructuralWorkbenchQuestion } from './StructuralWorkbenchQuestion';
+import { MinimizedStructureCard } from './MinimizedStructureCard';
 import {
   ChevronDown,
   ChevronUp,
@@ -770,162 +771,24 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
               >
                 {(() => {
                   const options = uniqueStructureOptions;
-                  const uniqueOptions = options.filter((v, i, a) => a.findIndex((t) => t.name === v.name || t.id === v.id) === i);
-                  return uniqueOptions.map((structure, index) => {
-                    const isNameBlinded =
-                      (examModeActive || hideDrugNames) && !peekedStructureNames[structure.id];
-                    const chemicalClass = getChemicalClass(structure);
-                    const targetReceptor = getTargetReceptor(structure);
-                    const reversibility = getReversibility(structure);
-                    const route = getRouteOfAdmin(structure);
-                    const isChipActive = selectedChips.includes(structure.id);
-
-                    return (
-                      <div
-                        key={`q${question.id || 'q'}-chip-${structure.id || index}`}
-                        className={`group relative rounded-xl border bg-white dark:bg-slate-900/80 p-3 shadow-xs transition-all flex flex-col justify-between ${
-                          isChipActive
-                            ? 'border-blue-500 ring-2 ring-blue-500/30 dark:border-blue-400'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600'
-                        }`}
-                      >
-                        {/* Top row: Roman Numeral badge + Drug Name / Blinded status */}
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleChip(structure.id)}
-                              title={isChipActive ? 'Deselect structure chip' : 'Select structure chip'}
-                              className={`shrink-0 px-2 py-0.5 rounded-md font-mono font-black text-xs cursor-pointer transition-colors shadow-xs ${
-                                isChipActive
-                                  ? 'bg-blue-600 text-white dark:bg-blue-500'
-                                  : 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 hover:bg-slate-800'
-                              }`}
-                            >
-                              Structure {structure.document_label || structure.id}
-                            </button>
-                            <div className="truncate">
-                              {isNameBlinded ? (
-                                <span className="text-xs font-mono font-medium text-slate-400 dark:text-slate-500 italic">
-                                  [Blinded for exam]
-                                </span>
-                              ) : (
-                                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                                  {structure.name}
-                                  {structure.tradeName && (
-                                    <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400 ml-1">
-                                      ({structure.tradeName})
-                                    </span>
-                                  )}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Quick Controls: Blind / Peek toggle & Zoom */}
-                          <div className="shrink-0 flex items-center gap-1">
-                            {examModeActive ? (
-                              <span title="Blinded in exam mode" className="text-amber-500 p-0.5">
-                                <Lock className="w-3.5 h-3.5" />
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPeekedStructureNames((prev) => ({
-                                    ...prev,
-                                    [structure.id]: !prev[structure.id],
-                                  }));
-                                }}
-                                title={peekedStructureNames[structure.id] ? 'Hide drug name' : 'Peek drug name'}
-                                className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                              >
-                                {peekedStructureNames[structure.id] ? (
-                                  <EyeOff className="w-3.5 h-3.5" />
-                                ) : (
-                                  <Eye className="w-3.5 h-3.5" />
-                                )}
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => setZoomedStructure(structure)}
-                              title="Zoom / Inspect 2D structure"
-                              className="p-1 rounded text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
-                            >
-                              <ZoomIn className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Pure 2D Chemical Structure Line Drawing in high-contrast light canvas */}
-                        <div
-                          onClick={() => setZoomedStructure(structure)}
-                          className="relative w-full aspect-[4/3] bg-[var(--structure-canvas-bg)] rounded-lg border border-slate-100 dark:border-slate-800 p-2 flex items-center justify-center cursor-pointer overflow-hidden group-hover:shadow-inner transition-shadow"
-                        >
-                          <SmilesCanvas
-                            smiles={
-                              structure.canonicalSmiles ||
-                              structure.smiles ||
-                              (structure as any).structure?.canonicalSmiles ||
-                              (structure as any).structure?.smiles
-                            }
-                            molBlock={structure.pubchemMolBlock || (structure as any).structure?.pubchemMolBlock}
-                            fallbackImageUrl={structure.pngUrl || (structure as any).structure?.pngUrl}
-                            width={220}
-                            height={165}
-                            altText={`Structure ${structure.document_label || structure.id}`}
-                            className="w-full h-full bg-white border-0 shadow-none pointer-events-none"
-                          />
-                          <div className="absolute inset-0 bg-blue-500/0 hover:bg-blue-500/5 transition-colors flex items-end justify-end p-1.5 opacity-0 group-hover:opacity-100 pointer-events-none">
-                            <span className="text-[10px] font-semibold text-blue-700 bg-white/95 dark:bg-slate-900/95 px-1.5 py-0.5 rounded shadow-xs border border-blue-200 dark:border-blue-800 flex items-center gap-1">
-                              <ZoomIn className="w-2.5 h-2.5" /> Click to zoom
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Metadata / SAR Tags */}
-                        <div className="mt-2 space-y-1 text-[11px]">
-                          {targetReceptor && targetReceptor !== 'Data unavailable' && (
-                            <div className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                              <span className="font-semibold text-slate-500 dark:text-slate-400">Target:</span>
-                              <span className="truncate">{targetReceptor}</span>
-                            </div>
-                          )}
-                          {chemicalClass && chemicalClass !== 'Data unavailable' && (
-                            <div className="flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                              <span className="font-semibold text-slate-500 dark:text-slate-400">Class:</span>
-                              <span className="truncate">{chemicalClass}</span>
-                            </div>
-                          )}
-                          <div className="flex flex-wrap gap-1 pt-1">
-                            {reversibility && reversibility !== 'Data unavailable' && (
-                              <span
-                                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-medium ${
-                                  reversibility.toLowerCase().includes('irrev')
-                                    ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300'
-                                    : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
-                                }`}
-                              >
-                                {reversibility}
-                              </span>
-                            )}
-                            {route && route !== 'Data unavailable' && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-medium">
-                                {route}
-                              </span>
-                            )}
-                            {structure.pharmacophores && structure.pharmacophores.length > 0 && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 font-medium">
-                                {structure.pharmacophores.length} pharmacophore{structure.pharmacophores.length > 1 ? 's' : ''}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  });
+                  const uniqueOptions = options.filter(
+                    (v, i, a) => a.findIndex((t) => t.name === v.name || t.id === v.id) === i
+                  );
+                  return uniqueOptions.map((structure) => (
+                    <MinimizedStructureCard
+                      key={`q${question.id || 'q'}-chip-${structure.id}`}
+                      structure={structure}
+                      isSelected={selectedChips.includes(structure.id)}
+                      onToggleSelect={handleToggleChip}
+                      onZoom={setZoomedStructure}
+                      examModeActive={examModeActive || hideDrugNames}
+                      isNamePeeked={!!peekedStructureNames[structure.id]}
+                      onTogglePeek={(id) =>
+                        setPeekedStructureNames((prev) => ({ ...prev, [id]: !prev[id] }))
+                      }
+                      showPharmacophores={true}
+                    />
+                  ));
                 })()}
               </div>
             </div>
