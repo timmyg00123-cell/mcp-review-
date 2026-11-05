@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { QuizQuestion } from '../data/quizData';
 import { TopicProfile, SourceDocument } from '../utils/storage';
 import {
@@ -69,6 +69,29 @@ export const AddQuestionsModal: React.FC<AddQuestionsModalProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    const handleCancel = (e: Event) => {
+      e.preventDefault();
+      onClose();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+    return () => {
+      dialog.removeEventListener('cancel', handleCancel);
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -184,8 +207,19 @@ export const AddQuestionsModal: React.FC<AddQuestionsModalProps> = ({
     }
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+    <dialog
+      ref={dialogRef}
+      closedby="any"
+      onClick={handleBackdropClick}
+      className="m-auto p-4 bg-transparent outline-none max-w-full max-h-screen text-slate-800 dark:text-slate-100"
+    >
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
         {/* Modal Header */}
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur z-10">
@@ -194,7 +228,7 @@ export const AddQuestionsModal: React.FC<AddQuestionsModalProps> = ({
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white text-balance">
                 Generate More Questions
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[280px] sm:max-w-[360px]">
@@ -376,6 +410,6 @@ export const AddQuestionsModal: React.FC<AddQuestionsModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };

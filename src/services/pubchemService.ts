@@ -1,4 +1,6 @@
 import { ChemData, medChemGraphDb } from '../db/medChemGraphDb';
+import { getKnownDrugSmiles } from '../utils/knownDrugSmiles';
+import { fetchOpenFdaClinicalData, OpenFdaClinicalData } from './openFdaService';
 
 /**
  * Common pharmaceutical salt, counter-ion, and solvate suffixes to strip
@@ -531,6 +533,132 @@ export async function downloadCompoundStructureImage(
 }
 
 /**
+ * Fetches the 2D SDF / MOL block for a given PubChem CID.
+ * Endpoint: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{cid}/record/SDF/?record_type=2d&response_type=display
+ * RDKit WASM parses this MOL block directly to replicate PubChem's exact 2D visual layout and coordinates.
+ */
+export async function downloadCompoundMolBlock(cid: number): Promise<string | null> {
+  return pubchemRateLimiter.schedule(async () => {
+    const sdfUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/record/SDF/?record_type=2d&response_type=display`;
+    let res: Response;
+    try {
+      res = await fetch(sdfUrl, { signal: AbortSignal.timeout(8000) });
+    } catch (fetchErr: any) {
+      if (typeof window !== 'undefined') {
+        const proxyUrl = `/api/pubchem/compound/${cid}/sdf`;
+        try {
+          res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+        } catch {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    }
+
+    // Proxy fallback if direct fetch fails (e.g. browser CORS restrictions)
+    if (!res.ok && typeof window !== 'undefined') {
+      try {
+        const proxyUrl = `/api/pubchem/compound/${cid}/sdf`;
+        const proxyRes = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+        if (proxyRes.ok) {
+          const text = await proxyRes.text();
+          return text?.trim() ? text : null;
+        }
+      } catch {
+        // Fallback failure ignored
+      }
+    }
+
+    if (!res.ok) return null;
+    const text = await res.text();
+    return text?.trim() ? text : null;
+  });
+}
+
+/**
+ * Constructs a dynamic PubChem PUG REST URL for a chemical structure or drug entity.
+ * Explicitly encodes canonical SMILES via encodeURIComponent(drug.canonical_smiles)
+ * to safely escape special cheminformatics characters (#, =, +, @, /, \).
+ */
+export function buildPubChemRestUrl(
+  drug: {
+    cid?: number;
+    canonical_smiles?: string;
+    canonicalSmiles?: string;
+    smiles?: string;
+  },
+  operation: 'property' | 'png' | 'sdf' = 'property'
+): string {
+  if (drug.cid && drug.cid > 0) {
+    if (operation === 'png') {
+      return `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${drug.cid}/PNG?image_size=large`;
+    }
+    if (operation === 'sdf') {
+      return `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${drug.cid}/record/SDF/?record_type=2d&response_type=display`;
+    }
+    return `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${drug.cid}/property/Title,IUPACName,MolecularFormula,MolecularWeight,CanonicalSMILES,XLogP/JSON`;
+  }
+
+  const smiles = drug.canonical_smiles || drug.canonicalSmiles || drug.smiles;
+  if (smiles && smiles.trim()) {
+    const encoded = encodeURIComponent(smiles.trim());
+    if (operation === 'png') {
+      return `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/${encoded}/PNG?image_size=large`;
+    }
+    if (operation === 'sdf') {
+      return `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/${encoded}/record/SDF/?record_type=2d&response_type=display`;
+    }
+    return `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/${encoded}/property/Title,IUPACName,MolecularFormula,MolecularWeight,CanonicalSMILES,XLogP/JSON`;
+  }
+
+  return '';
+}
+
+/**
+ * Queries PubChem properties dynamically by canonical SMILES using PUG REST.
+ * Explicitly encodes canonical SMILES to safely handle cheminformatics symbols.
+ */
+export async function queryPropertiesBySmiles(smiles: string): Promise<ChemData | null> {
+  const cleanSmiles = smiles.trim();
+  if (!cleanSmiles) return null;
+  try {
+    return await pubchemRateLimiter.schedule(async () => {
+      const endpoint = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/${encodeURIComponent(
+        cleanSmiles
+      )}/property/CanonicalSMILES,IsomericSMILES,IUPACName,MolecularFormula,MolecularWeight,XLogP/JSON`;
+
+      let res: Response;
+      try {
+        res = await fetch(endpoint, { signal: AbortSignal.timeout(6000) });
+      } catch (fetchErr: any) {
+        if (typeof window !== 'undefined') {
+          const proxyUrl = `/api/pubchem/compound/smiles/${encodeURIComponent(cleanSmiles)}`;
+          res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
+        } else {
+          throw fetchErr;
+        }
+      }
+
+      if (res.status === 404) return null;
+      if (res.status === 503 || res.status === 429 || res.status === 504) {
+        const err: any = new Error(`PubChem transient error: ${res.status}`);
+        err.status = res.status;
+        throw err;
+      }
+
+      if (!res.ok) return null;
+      const json = await res.json();
+      const props = json?.PropertyTable?.Properties?.[0];
+      return props ? parsePubChemProperties(props) : null;
+    });
+  } catch (err: any) {
+    console.warn(`[PubChemService] SMILES lookup error for "${cleanSmiles}":`, err?.message || err);
+    return null;
+  }
+}
+
+/**
  * Fetches chemical properties and 2D structure image for a compound from NIH PubChem PUG REST.
  *
  * Ensured properties:
@@ -607,19 +735,24 @@ async function executeCompoundLookup(queryStr: string): Promise<ChemData | null>
   }
 
   if (result && result.cid) {
-    // Download 2D structure image and raw Blob for offline caching
+    // Download 2D structure image and 2D MOL block for offline caching & RDKit coordinate alignment
+    let imgData: { structureImageDataUrl?: string; structureImageBlob?: Blob } = {};
+    let molBlock: string | null = null;
     try {
-      const imgData = await downloadCompoundStructureImage(result.cid);
-      return {
-        ...result,
-        structureImageDataUrl: imgData.structureImageDataUrl,
-        structureImageBlob: imgData.structureImageBlob,
-      };
-    } catch (imgErr) {
-      console.warn(`[PubChemService] Could not fetch 2D image for CID ${result.cid}:`, imgErr);
+      [imgData, molBlock] = await Promise.all([
+        downloadCompoundStructureImage(result.cid).catch(() => ({})),
+        downloadCompoundMolBlock(result.cid).catch(() => null),
+      ]);
+    } catch (assetErr) {
+      console.warn(`[PubChemService] Asset fetch warning for CID ${result.cid}:`, assetErr);
     }
 
-    return result;
+    return {
+      ...result,
+      structureImageDataUrl: imgData.structureImageDataUrl,
+      structureImageBlob: imgData.structureImageBlob,
+      pubchemMolBlock: molBlock || result.pubchemMolBlock || undefined,
+    };
   }
 
   // Graceful null resolution: compound could not be found after all fallbacks
@@ -695,6 +828,36 @@ async function queryPropertiesByName(name: string): Promise<ChemData | null> {
 }
 
 /**
+ * Fetches the XLogP property directly from PubChem PUG REST API for a given CID.
+ */
+export async function fetchPubChemXLogP(cid: number): Promise<number | undefined> {
+  if (!cid || cid <= 0) return undefined;
+  try {
+    return await pubchemRateLimiter.schedule(async () => {
+      const endpoint = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/XLogP/JSON`;
+      let logPResponse: Response;
+      try {
+        logPResponse = await fetch(endpoint, { signal: AbortSignal.timeout(6000) });
+      } catch (fetchErr: any) {
+        if (typeof window !== 'undefined') {
+          logPResponse = await fetch(`/api/pubchem/compound/${cid}`, { signal: AbortSignal.timeout(6000) });
+        } else {
+          throw fetchErr;
+        }
+      }
+
+      if (!logPResponse.ok) return undefined;
+      const data = await logPResponse.json();
+      const xlogp = data?.PropertyTable?.Properties?.[0]?.XLogP;
+      return xlogp !== undefined && xlogp !== null ? Number(xlogp) : undefined;
+    });
+  } catch (err) {
+    console.warn(`[PubChemService] Failed to fetch XLogP for CID ${cid}:`, err);
+    return undefined;
+  }
+}
+
+/**
  * Internal helper to query properties by numeric CID.
  */
 async function queryPropertiesAndImageByCid(cid: number): Promise<ChemData | null> {
@@ -742,11 +905,22 @@ async function queryPropertiesAndImageByCid(cid: number): Promise<ChemData | nul
     });
 
     if (data && data.cid) {
-      const imgData = await downloadCompoundStructureImage(data.cid);
+      let imgData: { structureImageDataUrl?: string; structureImageBlob?: Blob } = {};
+      let molBlock: string | null = null;
+      try {
+        [imgData, molBlock] = await Promise.all([
+          downloadCompoundStructureImage(data.cid).catch(() => ({})),
+          downloadCompoundMolBlock(data.cid).catch(() => null),
+        ]);
+      } catch (assetErr) {
+        console.warn(`[PubChemService] Asset fetch warning for CID ${data.cid}:`, assetErr);
+      }
+
       return {
         ...data,
         structureImageDataUrl: imgData.structureImageDataUrl,
         structureImageBlob: imgData.structureImageBlob,
+        pubchemMolBlock: molBlock || data.pubchemMolBlock || undefined,
       };
     }
 
@@ -767,8 +941,8 @@ function parsePubChemProperties(props: any): ChemData {
   return {
     cid: props.CID ? Number(props.CID) : undefined,
     iupacName: props.IUPACName,
-    canonicalSmiles: props.CanonicalSMILES,
-    isomericSmiles: props.IsomericSMILES || props.CanonicalSMILES,
+    canonicalSmiles: props.CanonicalSMILES || props.ConnectivitySMILES || props.SMILES,
+    isomericSmiles: props.IsomericSMILES || props.SMILES || props.CanonicalSMILES || props.ConnectivitySMILES,
     molecularFormula: props.MolecularFormula,
     molecularWeight: props.MolecularWeight ? Number(props.MolecularWeight) : undefined,
     xlogp: props.XLogP !== undefined ? Number(props.XLogP) : undefined,
@@ -784,8 +958,8 @@ export async function enrichEntityInDexie(entityId: string): Promise<boolean> {
   const entity = await medChemGraphDb.entities.get(canonicalId);
   if (!entity) return false;
 
-  // If already enriched with structure image and properties, skip re-fetching
-  if (entity.chemData?.structureImageDataUrl && entity.chemData?.cid) {
+  // If already enriched with structure image, properties, and 2D MOL block, skip re-fetching
+  if (entity.chemData?.structureImageDataUrl && entity.chemData?.cid && (entity.pubchemMolBlock || entity.chemData?.pubchemMolBlock)) {
     return true;
   }
 
@@ -799,21 +973,114 @@ export async function enrichEntityInDexie(entityId: string): Promise<boolean> {
     const chemData = await fetchPubChemCompoundData(lookupTerm);
 
     if (chemData) {
+      const smiles = chemData.canonicalSmiles || chemData.isomericSmiles;
+      const molBlock = chemData.pubchemMolBlock || entity.pubchemMolBlock || entity.chemData?.pubchemMolBlock;
+
+      // Hydrate OpenFDA clinical data
+      let clinicalData = entity.clinicalData;
+      if (!clinicalData || !clinicalData.mechanism_of_action?.length) {
+        try {
+          const fdaRes = await fetchOpenFdaClinicalData(entity.name || entity.id);
+          if (fdaRes) clinicalData = fdaRes;
+        } catch (e) {
+          // ignore FDA fallback error
+        }
+      }
+
+      const moa_summary = clinicalData?.mechanism || entity.moa_summary || entity.clinical_and_sar_summary;
+      const half_life = clinicalData?.halfLife || entity.half_life || entity.pkPdHighlights?.halfLife;
+      const majorToxicityOrLimitation =
+        clinicalData?.adverseReactions ||
+        clinicalData?.contraindicationsText ||
+        entity.majorToxicityOrLimitation;
+
+      let logPVal = chemData.xlogp;
+      if ((logPVal === undefined || logPVal === null) && chemData.cid) {
+        logPVal = await fetchPubChemXLogP(chemData.cid);
+        if (logPVal !== undefined) {
+          chemData.xlogp = logPVal;
+        }
+      }
+
       await medChemGraphDb.entities.update(canonicalId, {
         cid: chemData.cid,
+        canonicalSmiles: smiles,
+        smiles: smiles,
+        pubchemMolBlock: molBlock,
+        clinicalData,
+        moa_summary,
+        half_life,
+        majorToxicityOrLimitation,
+        logP: logPVal,
+        properties: {
+          ...(entity.properties || {}),
+          logP: logPVal,
+          mw: chemData.molecularWeight,
+        },
+        pubchemAudit: {
+          ...(entity.pubchemAudit || {}),
+          cid: chemData.cid || 0,
+          status: 'verified',
+          verifiedAt: new Date().toISOString(),
+          source: 'nih_pug_rest',
+          canonicalSmiles: smiles,
+          iupacName: chemData.iupacName,
+          molecularFormula: chemData.molecularFormula,
+          molecularWeight: chemData.molecularWeight,
+          xlogp: logPVal,
+          pubChemUrl: chemData.cid ? `https://pubchem.ncbi.nlm.nih.gov/compound/${chemData.cid}` : '',
+        },
         chemData: {
           ...entity.chemData,
           ...chemData,
+          xlogp: logPVal,
+          canonicalSmiles: smiles,
+          isomericSmiles: smiles,
+          pubchemMolBlock: molBlock,
         },
         updatedAt: new Date().toISOString(),
       });
       return true;
     } else {
-      console.warn(`[PubChem] Compound not found, continuing: ${lookupTerm}`);
+      console.warn(`[PubChem] Compound not found, checking offline fallback: ${lookupTerm}`);
+      const fallbackSmiles = entity.canonicalSmiles || entity.smiles || getKnownDrugSmiles(entity.name) || getKnownDrugSmiles(canonicalId);
+      if (fallbackSmiles && !entity.canonicalSmiles) {
+        await medChemGraphDb.entities.update(canonicalId, {
+          canonicalSmiles: fallbackSmiles,
+          smiles: fallbackSmiles,
+          pubchemAudit: {
+            ...(entity.pubchemAudit || {}),
+            cid: entity.cid || 0,
+            status: 'verified',
+            verifiedAt: new Date().toISOString(),
+            source: 'curated_offline_fallback',
+            canonicalSmiles: fallbackSmiles,
+          },
+          updatedAt: new Date().toISOString(),
+        });
+        return true;
+      }
       return false;
     }
   } catch (lookupErr: any) {
-    console.warn(`[PubChem] Compound not found, continuing: ${lookupTerm}`);
+    console.warn(`[PubChem] Compound lookup error, checking offline fallback: ${lookupTerm}`);
+    const fallbackSmiles = entity.canonicalSmiles || entity.smiles || getKnownDrugSmiles(entity.name) || getKnownDrugSmiles(canonicalId);
+    if (fallbackSmiles && !entity.canonicalSmiles) {
+      await medChemGraphDb.entities.update(canonicalId, {
+        canonicalSmiles: fallbackSmiles,
+        smiles: fallbackSmiles,
+        pubchemAudit: {
+          ...(entity.pubchemAudit || {}),
+          cid: entity.cid || 0,
+          status: 'verified',
+          verifiedAt: new Date().toISOString(),
+          source: 'curated_offline_fallback',
+          canonicalSmiles: fallbackSmiles,
+        },
+        updatedAt: new Date().toISOString(),
+      });
+      return true;
+    }
     return false;
   }
 }
@@ -832,10 +1099,10 @@ export async function enrichGraphEntitiesWithPubChem(
 ): Promise<{ enrichedCount: number; totalScanned: number }> {
   const allEntities = await medChemGraphDb.entities.toArray();
 
-  // Find DRUG and METABOLITE nodes lacking complete chemData or missing 2D image
+  // Find DRUG and METABOLITE nodes lacking complete chemData, 2D image, or 2D MOL block
   const candidates = allEntities.filter((e) => {
     if (e.type !== 'DRUG' && e.type !== 'METABOLITE') return false;
-    return !e.chemData || !e.chemData.cid || !e.chemData.structureImageDataUrl;
+    return !e.chemData || !e.chemData.cid || !e.chemData.structureImageDataUrl || (!e.pubchemMolBlock && !e.chemData.pubchemMolBlock);
   });
 
   const total = candidates.length;
@@ -857,11 +1124,41 @@ export async function enrichGraphEntitiesWithPubChem(
     try {
       const chemData = await fetchPubChemCompoundData(lookupTerm);
       if (chemData) {
+        const resolvedSmiles =
+          chemData.canonicalSmiles ||
+          chemData.isomericSmiles ||
+          ent.canonicalSmiles ||
+          ent.smiles ||
+          ent.chemData?.canonicalSmiles;
+
+        const resolvedMolBlock =
+          chemData.pubchemMolBlock ||
+          ent.pubchemMolBlock ||
+          ent.chemData?.pubchemMolBlock;
+
         await medChemGraphDb.entities.update(ent.id, {
           cid: chemData.cid,
+          canonicalSmiles: resolvedSmiles,
+          smiles: resolvedSmiles,
+          pubchemMolBlock: resolvedMolBlock,
           chemData: {
             ...ent.chemData,
             ...chemData,
+            canonicalSmiles: resolvedSmiles,
+            isomericSmiles: resolvedSmiles,
+            pubchemMolBlock: resolvedMolBlock,
+          },
+          pubchemAudit: {
+            ...(ent.pubchemAudit || {}),
+            verified: true,
+            status: 'verified',
+            cid: chemData.cid,
+            canonicalSmiles: resolvedSmiles,
+            iupacName: chemData.iupacName,
+            molecularFormula: chemData.molecularFormula,
+            molecularWeight: chemData.molecularWeight,
+            xlogp: chemData.xlogp,
+            verifiedAt: new Date().toISOString(),
           },
           updatedAt: new Date().toISOString(),
         });
@@ -894,11 +1191,13 @@ export interface VerifiedStructureResult {
   name: string;
   cid: number | null;
   structureImageDataUrl: string | null;
+  pubchemMolBlock?: string;
   canonicalSmiles?: string;
   iupacName?: string;
   molecularFormula?: string;
   molecularWeight?: number;
   xlogp?: number;
+  clinicalData?: OpenFdaClinicalData;
   isPlaceholder?: boolean;
 }
 
@@ -914,7 +1213,7 @@ export interface VerifiedStructureResult {
  * @returns Array of verified structure results with CIDs and DataURLs
  */
 export async function verifyStructuresBatchPubChem(
-  structures: Array<{ id?: string; name: string; cid?: number; pngUrl?: string }>,
+  structures: Array<{ id?: string; name: string; cid?: number; pngUrl?: string; canonical_smiles?: string; canonicalSmiles?: string; smiles?: string; pubchemAudit?: any }>,
   onProgress?: (completed: number, total: number, currentName: string) => void,
   signal?: AbortSignal
 ): Promise<VerifiedStructureResult[]> {
@@ -932,6 +1231,13 @@ export async function verifyStructuresBatchPubChem(
 
     const structure = structures[i];
     const rawName = structure.name || structure.id || '';
+    const fallbackSmiles =
+      structure.canonical_smiles ||
+      structure.canonicalSmiles ||
+      structure.smiles ||
+      structure.pubchemAudit?.canonicalSmiles ||
+      getKnownDrugSmiles(structure.name) ||
+      getKnownDrugSmiles(structure.id);
 
     // Detect and skip placeholder labels matching patterns like "Antihyperlipidemic Drug A", "Compound B"
     if (isPlaceholderLabel(rawName)) {
@@ -942,6 +1248,7 @@ export async function verifyStructuresBatchPubChem(
         name: structure.name,
         cid: null,
         structureImageDataUrl: null,
+        canonicalSmiles: fallbackSmiles,
         isPlaceholder: true,
       });
       continue;
@@ -951,29 +1258,46 @@ export async function verifyStructuresBatchPubChem(
       const lookupTerm = structure.cid && structure.cid > 0 ? structure.cid : rawName;
       const chemData = await fetchPubChemCompoundData(lookupTerm);
 
+      let clinicalData: OpenFdaClinicalData | undefined = undefined;
+      try {
+        const fdaRes = await fetchOpenFdaClinicalData(rawName, signal);
+        if (fdaRes) clinicalData = fdaRes;
+      } catch {
+        // ignore FDA fallback error
+      }
+
       completedCount++;
       onProgress?.(completedCount, total, structure.name);
 
       if (chemData && chemData.cid) {
+        let xlogp = chemData.xlogp;
+        if ((xlogp === undefined || xlogp === null) && chemData.cid) {
+          xlogp = await fetchPubChemXLogP(chemData.cid);
+        }
+        const resolvedSmiles = chemData.canonicalSmiles || chemData.isomericSmiles || fallbackSmiles;
         results.push({
           id: structure.id,
           name: structure.name,
           cid: chemData.cid,
           structureImageDataUrl: chemData.structureImageDataUrl || null,
-          canonicalSmiles: chemData.canonicalSmiles,
+          pubchemMolBlock: chemData.pubchemMolBlock || undefined,
+          canonicalSmiles: resolvedSmiles,
           iupacName: chemData.iupacName,
           molecularFormula: chemData.molecularFormula,
           molecularWeight: chemData.molecularWeight,
-          xlogp: chemData.xlogp,
+          xlogp: xlogp !== undefined ? xlogp : chemData.xlogp,
+          clinicalData,
           isPlaceholder: false,
         });
       } else {
-        // Handle 404 cleanly: return null cid and null data url without throwing
+        // Handle 404 cleanly: return null cid and preserve fallback smiles without throwing
         results.push({
           id: structure.id,
           name: structure.name,
           cid: null,
           structureImageDataUrl: null,
+          canonicalSmiles: fallbackSmiles,
+          clinicalData,
           isPlaceholder: false,
         });
       }
@@ -986,6 +1310,7 @@ export async function verifyStructuresBatchPubChem(
         name: structure.name,
         cid: null,
         structureImageDataUrl: null,
+        canonicalSmiles: fallbackSmiles,
         isPlaceholder: false,
       });
     }

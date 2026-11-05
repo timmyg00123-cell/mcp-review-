@@ -23,7 +23,7 @@ declare module 'smiles-drawer' {
 
   export class Drawer {
     constructor(options?: SmilesDrawerOptions);
-    draw(data: any, target: HTMLCanvasElement | string, themeName?: string, infoOnly?: boolean): void;
+    draw(data: any, target: HTMLCanvasElement | string, themeName?: string, infoOnly?: boolean, overlapTree?: any): void;
   }
 
   export class SvgDrawer {

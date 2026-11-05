@@ -32,6 +32,14 @@ export interface IngestionSlide {
   };
 }
 
+export interface PageExtractionItem {
+  pageNumber: number;
+  totalPages: number;
+  text: string;
+  imageBase64: string; // Pure Base64 JPEG string
+  hasImages: boolean;
+}
+
 export interface ParsePdfResult {
   slides: IngestionSlide[];
   numPages: number;
@@ -224,6 +232,102 @@ export async function parsePdfToSlides(
 }
 
 /**
+ * Splits a PDF, image, or text file into individual PageExtractionItem items for per-page high-fidelity processing.
+ * For PDFs, renders high-resolution HTML5 canvas JPEGs (scale 1.35) and extracts verbatim text for each page.
+ */
+export async function splitDocumentIntoPageItems(
+  file: File,
+  onProgress?: (current: number, total: number) => void
+): Promise<PageExtractionItem[]> {
+  const fileName = file.name || 'document';
+  const lowerName = fileName.toLowerCase();
+
+  // 1. PDF File handling
+  if (lowerName.endsWith('.pdf') || file.type === 'application/pdf') {
+    const arrayBuffer = await file.arrayBuffer();
+    const loadingTask = pdfjsLib.getDocument({
+      data: arrayBuffer,
+      useSystemFonts: true,
+      stopAtErrors: false,
+    });
+    const pdfDoc = await loadingTask.promise;
+    const numPages = pdfDoc.numPages;
+    const pageItems: PageExtractionItem[] = [];
+
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      onProgress?.(pageNum, numPages);
+      try {
+        const page = await pdfDoc.getPage(pageNum);
+
+        // Extract page text
+        let fullText = '';
+        try {
+          const textContent = await page.getTextContent();
+          const textItems = textContent.items
+            .map((item: any) => item.str || '')
+            .filter(Boolean);
+          fullText = textItems.join(' ').replace(/\s+/g, ' ').trim();
+        } catch (textErr) {
+          console.warn(`[splitDocumentIntoPageItems] Error reading text on page ${pageNum}:`, textErr);
+        }
+
+        // Render high-res canvas (scale 1.35 gives crystal clarity for chemical structures and question lettering)
+        let jpegBase64 = '';
+        try {
+          jpegBase64 = await renderPdfPageToCanvasBase64(page, 1.35);
+        } catch (canvasErr) {
+          console.warn(`[splitDocumentIntoPageItems] Canvas render failed for page ${pageNum}:`, canvasErr);
+        }
+
+        pageItems.push({
+          pageNumber: pageNum,
+          totalPages: numPages,
+          text: fullText,
+          imageBase64: jpegBase64,
+          hasImages: Boolean(jpegBase64),
+        });
+      } catch (pageErr) {
+        console.warn(`[splitDocumentIntoPageItems] Failed to process page ${pageNum}:`, pageErr);
+        pageItems.push({
+          pageNumber: pageNum,
+          totalPages: numPages,
+          text: `[Page ${pageNum}]`,
+          imageBase64: '',
+          hasImages: false,
+        });
+      }
+    }
+    return pageItems;
+  }
+
+  // 2. Direct Image Files (PNG, JPG, WebP)
+  if (file.type.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(fileName)) {
+    const base64 = await readFileAsBase64(file);
+    return [
+      {
+        pageNumber: 1,
+        totalPages: 1,
+        text: '',
+        imageBase64: base64,
+        hasImages: true,
+      },
+    ];
+  }
+
+  // 3. Text / Markdown / Other fallback
+  const text = await file.text();
+  return [
+    {
+      pageNumber: 1,
+      totalPages: 1,
+      text: text.trim(),
+      imageBase64: '',
+      hasImages: false,
+    },
+  ];
+}
+
+/**
  * Parses a PPTX file ArrayBuffer into an array of IngestionSlides,
  * extracting slide XML text (<a:t>) and embedded images from ppt/media/.
  */
@@ -331,3 +435,89 @@ export async function parsePptxToSlides(
   const result = await parsePptx(arrayBuffer, fileName);
   return result.slides;
 }
+
+export interface EtlIngestionResult {
+  enrichedCount: number;
+  totalScanned: number;
+  results: Array<{ id: string; success: boolean; chemData?: any }>;
+}
+
+/**
+ * Instantiates the background ETL Web Worker using Vite's native module URL syntax.
+ */
+export function createIngestWorker(): Worker {
+  return new Worker(new URL('./ingestWorker.ts', import.meta.url), { type: 'module' });
+}
+
+/**
+ * Runs the PubChem fetching and Dexie persistence pipeline in a dedicated Web Worker thread.
+ * Listens for { type: 'PROGRESS', current, total } postMessage updates to notify the UI spinner.
+ */
+export function runEtlIngestion(
+  entityIdsOrPayload:
+    | string[]
+    | Array<{ id: string; name?: string; cid?: number; canonicalSmiles?: string; smiles?: string; [key: string]: any }>
+    | { entityIds?: string[]; entities?: any[]; structures?: any[] },
+  onProgress?: (current: number, total: number, name?: string) => void,
+  signal?: AbortSignal
+): Promise<EtlIngestionResult> {
+  return new Promise((resolve, reject) => {
+    let worker: Worker | null = null;
+    try {
+      worker = new Worker(new URL('./ingestWorker.ts', import.meta.url), { type: 'module' });
+    } catch (err) {
+      return reject(new Error(`Failed to instantiate ingestWorker: ${err}`));
+    }
+
+    const cleanup = () => {
+      if (worker) {
+        worker.terminate();
+        worker = null;
+      }
+    };
+
+    if (signal) {
+      if (signal.aborted) {
+        cleanup();
+        return reject(new DOMException('ETL Ingestion aborted by user', 'AbortError'));
+      }
+      signal.addEventListener('abort', () => {
+        cleanup();
+        reject(new DOMException('ETL Ingestion aborted by user', 'AbortError'));
+      });
+    }
+
+    worker.onmessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (!data) return;
+
+      if (data.type === 'PROGRESS') {
+        onProgress?.(data.current, data.total, data.name || data.message);
+      } else if (data.type === 'COMPLETE') {
+        const payload = data.payload || { enrichedCount: 0, totalScanned: 0, results: [] };
+        cleanup();
+        resolve(payload);
+      } else if (data.type === 'ERROR') {
+        cleanup();
+        reject(new Error(data.error || 'Worker ETL ingestion failed'));
+      }
+    };
+
+    worker.onerror = (err) => {
+      cleanup();
+      reject(new Error(`Web Worker error: ${err.message}`));
+    };
+
+    const payload = Array.isArray(entityIdsOrPayload)
+      ? typeof entityIdsOrPayload[0] === 'object'
+        ? { entities: entityIdsOrPayload }
+        : { entityIds: entityIdsOrPayload }
+      : entityIdsOrPayload;
+
+    worker.postMessage({
+      type: 'START_INGEST',
+      payload,
+    });
+  });
+}
+

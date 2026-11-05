@@ -7,9 +7,19 @@ export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
-      alias: {
-        '@': path.resolve(import.meta.dirname, '.'),
-      },
+      alias: [
+        {
+          find: '@',
+          replacement: path.resolve(import.meta.dirname, '.'),
+        },
+        {
+          find: /^@rdkit\/rdkit\/Code\/MinimalLib\/dist\/RDKit_minimal\.wasm/,
+          replacement: path.resolve(
+            import.meta.dirname,
+            'node_modules/@rdkit/rdkit/dist/RDKit_minimal.wasm'
+          ),
+        },
+      ],
     },
     optimizeDeps: {
       include: [

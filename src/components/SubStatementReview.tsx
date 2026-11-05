@@ -99,7 +99,7 @@ export const SubStatementReview: React.FC<SubStatementReviewProps> = ({
 
       {/* List of Statements */}
       <div className="space-y-3">
-        {statements.map((stmt) => {
+        {statements.map((stmt, sIdx) => {
           const userChoice = selectedAnswers[stmt.id];
           const isAnswered = userChoice !== undefined && userChoice !== null;
           const isUserCorrect = isAnswered && userChoice === stmt.isCorrect;
@@ -107,7 +107,7 @@ export const SubStatementReview: React.FC<SubStatementReviewProps> = ({
 
           return (
             <div
-              key={stmt.id}
+              key={`q${questionId}-stmt-${stmt.id || sIdx}`}
               className={`p-3.5 rounded-xl border transition-all duration-200 ${
                 isAnswered
                   ? isUserCorrect

@@ -1,0 +1,26 @@
+# Enforce LF (line feed) for all text files. 
+# This prevents Prettier/ESLint "Delete \r" errors on Windows.
+* text=auto eol=lf
+
+# Explicitly enforce LF for your specific React/TypeScript stack
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+
+# Ensure Windows batch scripts keep CRLF if you ever add them
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Prevent Git from corrupting binary files by attempting to fix line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.svg binary
+*.ico binary
+*.pdf binary
+*.wasm binary

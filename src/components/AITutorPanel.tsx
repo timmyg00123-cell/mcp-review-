@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { QuizQuestion } from '../data/quizData';
 import { AntiplateletQuestion } from '../data/antiplateletQuizData';
 import { Sparkles, Send, Loader2, Bot, AlertCircle } from 'lucide-react';
+import { renderSanitizedContent } from '../utils/sanitizer';
+import { medChemGraphDb } from '../db/medChemGraphDb';
+import { getPharmacophoresForStructure } from '../utils/pharmacophoreData';
 
 interface AITutorPanelProps {
   currentQuestion?: QuizQuestion | AntiplateletQuestion | any;
@@ -9,6 +12,18 @@ interface AITutorPanelProps {
   isOpen: boolean;
   onToggle: () => void;
 }
+
+const SanitizedMarkdown: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      renderSanitizedContent(containerRef.current, formatMarkdown(text));
+    }
+  }, [text]);
+
+  return <div ref={containerRef} className={className} />;
+};
 
 export const AITutorPanel: React.FC<AITutorPanelProps> = ({ currentQuestion, topicTitle = 'Medicinal Chemistry: Antiplatelets' }) => {
   const [inputQuestion, setInputQuestion] = useState('');
@@ -21,6 +36,92 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({ currentQuestion, top
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOnDeviceAvailable, setIsOnDeviceAvailable] = useState<boolean>(false);
+
+  // WebMCP: Expose client-side tools via document.modelContext.registerTool
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.modelContext?.registerTool) {
+      try {
+        document.modelContext.registerTool('searchDrugStructures', {
+          description: 'Search medicinal chemistry drug structures by name, class, or target receptor',
+          parameters: {
+            type: 'object',
+            properties: {
+              query: { type: 'string', description: 'Drug name, class, or target receptor keyword' },
+            },
+            required: ['query'],
+          },
+          handler: async (params: { query: string }) => {
+            const q = (params.query || '').toLowerCase().trim();
+            const all = await medChemGraphDb.entities.toArray();
+            const matches = all
+              .filter(
+                (e) =>
+                  e.id.toLowerCase().includes(q) ||
+                  (e.name && e.name.toLowerCase().includes(q)) ||
+                  (e.chemical_class && e.chemical_class.toLowerCase().includes(q)) ||
+                  (e.target_receptor && e.target_receptor.toLowerCase().includes(q))
+              )
+              .slice(0, 5);
+            return matches.map((m) => ({
+              id: m.id,
+              name: m.name || m.id,
+              cid: m.cid,
+              chemicalClass: m.chemical_class || m.chemicalClass,
+              target: m.target_receptor || m.target,
+              smiles: m.canonicalSmiles || m.smiles,
+              summary: m.clinical_and_sar_summary,
+            }));
+          },
+        });
+
+        document.modelContext.registerTool('getPharmacophoreAnalysis', {
+          description: 'Extract and analyze chemical pharmacophores and functional moieties for a drug structure',
+          parameters: {
+            type: 'object',
+            properties: {
+              drugName: { type: 'string', description: 'The name of the drug compound (e.g., clopidogrel, aspirin)' },
+            },
+            required: ['drugName'],
+          },
+          handler: async (params: { drugName: string }) => {
+            const norm = (params.drugName || '').toLowerCase().trim();
+            const drug = await medChemGraphDb.entities.get(norm);
+            const pharmacophores = getPharmacophoresForStructure({
+              id: norm,
+              name: drug?.name || params.drugName,
+              smiles: drug?.canonicalSmiles || drug?.smiles || '',
+            } as any);
+            return {
+              drug: drug?.name || params.drugName,
+              smiles: drug?.canonicalSmiles || drug?.smiles || '',
+              pharmacophores: pharmacophores.map((p) => ({
+                name: p.name,
+                smarts: p.smarts,
+                purpose: p.purpose,
+                description: p.description,
+                sarExplanation: p.casual_sar_explanation,
+              })),
+            };
+          },
+        });
+      } catch (e) {
+        console.warn('[AITutorPanel] WebMCP registration note:', e);
+      }
+    }
+
+    // Check availability of on-device model (window.ai.languageModel)
+    if (typeof window !== 'undefined' && window.ai?.languageModel?.capabilities) {
+      window.ai.languageModel
+        .capabilities()
+        .then((cap) => {
+          if (cap && (cap.available === 'readily' || cap.available === 'after-download')) {
+            setIsOnDeviceAvailable(true);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   const handleAsk = async (textToAsk?: string) => {
     const q = (textToAsk || inputQuestion).trim();
@@ -44,6 +145,46 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({ currentQuestion, top
         ? currentQuestion.structuresDisplayed.map((s: any) => `${s.id}: ${s.name} (${s.chemicalClass}, Target: ${s.target}, Reversibility: ${s.reversibility}, MOA: ${s.moa_summary || s.sar_rationale || s.sarNotes})`).join('\n')
         : '';
 
+      // 1. Proactively attempt On-Device Prompt API (window.ai.languageModel)
+      if (typeof window !== 'undefined' && window.ai?.languageModel) {
+        try {
+          const capabilities = await window.ai.languageModel.capabilities?.();
+          if (capabilities && capabilities.available !== 'no') {
+            const session = await window.ai.languageModel.create?.({
+              systemPrompt:
+                'You are an expert Medicinal Chemistry and Clinical Pharmacology tutor. Provide accurate, clear, and clinically grounded explanations regarding structure-activity relationships, pharmacophores, and drug mechanisms.',
+              temperature: 0.2,
+            });
+
+            if (session?.prompt) {
+              const promptText = `Context:
+Topic: ${topicTitle}
+Question Stem: ${questionStem}
+Structures Context: ${structuresContext}
+Correct Answer: ${currentQuestion?.options ? currentQuestion.options[currentQuestion.correctIndex || 0] : ''}
+Explanation: ${currentQuestion?.overallExplanation || currentQuestion?.explanation || ''}
+
+User Inquiry: ${q}`;
+
+              const reply = await session.prompt(promptText);
+              if (reply) {
+                const aiMsg = {
+                  sender: 'ai' as const,
+                  text: reply,
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                };
+                setMessages((prev) => [...prev, aiMsg]);
+                session.destroy?.();
+                return;
+              }
+            }
+          }
+        } catch (onDeviceErr) {
+          console.warn('[AITutorPanel] On-Device Prompt API fallback to network:', onDeviceErr);
+        }
+      }
+
+      // 2. Network Fallback: /api/gemini/tutor
       const response = await fetch('/api/gemini/tutor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,9 +238,9 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({ currentQuestion, top
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm md:text-base text-white">MedChem &amp; Pharmacology AI Tutor</h3>
+              <h3 className="font-bold text-sm md:text-base text-white text-balance">MedChem &amp; Pharmacology AI Tutor</h3>
               <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-semibold">
-                Gemini 3.8 Flash
+                {isOnDeviceAvailable ? 'On-Device Gemini Nano' : 'Gemini 3.8 Flash'}
               </span>
             </div>
             <p className="text-xs text-blue-200">
@@ -116,7 +257,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({ currentQuestion, top
             key={idx}
             disabled={loading}
             onClick={() => handleAsk(prompt)}
-            className="text-[11px] font-medium whitespace-nowrap bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            className="text-[11px] font-medium whitespace-nowrap bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
           >
             <Sparkles className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
             {prompt}
@@ -143,11 +284,9 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({ currentQuestion, top
                   : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-tl-none'
               }`}
             >
-              <div
-                className="prose prose-xs max-w-none space-y-2"
-                dangerouslySetInnerHTML={{
-                  __html: formatMarkdown(msg.text),
-                }}
+              <SanitizedMarkdown
+                className="prose prose-xs max-w-none space-y-2 text-pretty"
+                text={msg.text}
               />
               <div
                 className={`text-[10px] mt-2 font-medium ${
@@ -202,7 +341,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({ currentQuestion, top
           <button
             type="submit"
             disabled={!inputQuestion.trim() || loading}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 md:px-5 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 md:px-5 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <span>Ask</span>
             <Send className="w-3.5 h-3.5" />

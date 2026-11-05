@@ -511,6 +511,45 @@ export function getAntiarrhythmicReviewPages(): ReviewPage[] {
               correctAnswer: 'I: Phenoxy propyloxyamine; II: Xylene amide; III: p-Amino benzamide; IV: Amino butamide; V: Fluorinated benzamide piperidine',
               explanation:
                 'Drug I (Propafenone) is a phenoxy propyloxyamine. Drug II (Lidocaine) is a xylene amide. Drug III (Procainamide) is a p-amino benzamide. Drug IV (Disopyramide) is an amino butamide. Drug V (Flecainide) is a fluorinated benzamide piperidine with bis-trifluoroethoxy substituents.',
+              matchingTargets: [
+                {
+                  id: 'target-propafenone',
+                  label: 'Phenoxy propyloxyamine (Aryloxypropanolamine)',
+                  acceptedStructureIds: ['propafenone', 'I'],
+                  rationale: 'Structure I: Extended phenoxypropanolamine backbone with secondary propylamino group resembling beta-blockers.',
+                },
+                {
+                  id: 'target-lidocaine',
+                  label: 'Xylene amide (Aminoacyl xylide)',
+                  acceptedStructureIds: ['lidocaine', 'II'],
+                  rationale: 'Structure II: 2,6-dimethylanilide core with diethylaminoacetamide side chain.',
+                },
+                {
+                  id: 'target-procainamide',
+                  label: 'p-Amino benzamide',
+                  acceptedStructureIds: ['procainamide', 'III'],
+                  rationale: 'Structure III: Procaine ester bioisostere replacing ester with an amide linkage resisting esterase hydrolysis.',
+                },
+                {
+                  id: 'target-disopyramide',
+                  label: 'Amino butamide',
+                  acceptedStructureIds: ['disopyramide', 'IV'],
+                  rationale: 'Structure IV: Di-isopropyl amino butyramide with pyridine and phenyl rings.',
+                },
+                {
+                  id: 'target-flecainide',
+                  label: 'Fluorinated benzamide piperidine',
+                  acceptedStructureIds: ['flecainide', 'V'],
+                  rationale: 'Structure V: Benzamide with bis(2,2,2-trifluoroethoxy) aromatic substituents and piperidine ring.',
+                },
+              ],
+              structuresDisplayed: [
+                PROPAFENONE_STRUCTURE,
+                LIDOCAINE_STRUCTURE,
+                PROCAINAMIDE_STRUCTURE,
+                DISOPYRAMIDE_STRUCTURE,
+                FLECAINIDE_STRUCTURE,
+              ],
             },
             {
               id: 2,

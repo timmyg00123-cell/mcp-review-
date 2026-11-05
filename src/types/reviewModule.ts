@@ -244,6 +244,8 @@ export interface ReviewModule {
   code?: string;
   isBuiltIn?: boolean;
   createdAt: string;
+  version?: string;
+  chemicalStructures?: ChemicalStructure[];
   pages: ReviewPage[];
 }
 

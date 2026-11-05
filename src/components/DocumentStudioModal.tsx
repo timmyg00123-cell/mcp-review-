@@ -40,12 +40,14 @@ interface DocumentStudioModalProps {
   isOpen: boolean;
   onClose: () => void;
   onModuleImported: (newModule: ReviewModule) => void;
+  onStartBackgroundIngest?: (file: File) => void;
 }
 
 export const DocumentStudioModal: React.FC<DocumentStudioModalProps> = ({
   isOpen,
   onClose,
   onModuleImported,
+  onStartBackgroundIngest,
 }) => {
   if (!isOpen) return null;
 
@@ -91,6 +93,29 @@ export const DocumentStudioModal: React.FC<DocumentStudioModalProps> = ({
   const reviewFileInputRef = useRef<HTMLInputElement>(null);
   const sourceFileInputRef = useRef<HTMLInputElement>(null);
   const activeAbortControllerRef = useRef<AbortController | null>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    const handleCancel = (e: Event) => {
+      e.preventDefault();
+      onClose();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+    return () => {
+      dialog.removeEventListener('cancel', handleCancel);
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, [onClose]);
 
   useEffect(() => {
     return () => {
@@ -211,6 +236,12 @@ c. Dipyridamole inhibits adenosine deaminase and phosphodiesterase (PDE3/PDE5).`
 
       if (!targetFile) {
         throw new Error('No valid document or text found to process.');
+      }
+
+      if (onStartBackgroundIngest) {
+        onStartBackgroundIngest(targetFile);
+        onClose();
+        return;
       }
 
       if (activeAbortControllerRef.current) {
@@ -448,7 +479,7 @@ c. Dipyridamole inhibits adenosine deaminase and phosphodiesterase (PDE3/PDE5).`
 
     return (
       <div
-        key={structure.id || sIdx}
+        key={`${structure.id || 'structure'}_${sIdx}`}
         className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-2.5"
       >
         <div>
@@ -575,8 +606,19 @@ c. Dipyridamole inhibits adenosine deaminase and phosphodiesterase (PDE3/PDE5).`
     );
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
+    <dialog
+      ref={dialogRef}
+      closedby="any"
+      onClick={handleBackdropClick}
+      className="m-auto p-2 sm:p-4 bg-transparent outline-none max-w-full max-h-screen text-slate-800 dark:text-slate-100"
+    >
       <div
         className={`w-full ${
           stage === 'preview' ? 'max-w-6xl max-h-[94vh]' : 'max-w-4xl max-h-[92vh]'
@@ -590,7 +632,7 @@ c. Dipyridamole inhibits adenosine deaminase and phosphodiesterase (PDE3/PDE5).`
               <BookOpen className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-balance">
                 <span>Lecture Review &amp; Quiz Setup</span>
                 <span className="text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
                   {stage === 'preview' ? 'Lecture Review & Quiz Setup' : 'Review & Reference'}
@@ -1051,10 +1093,11 @@ c. Dipyridamole inhibits adenosine deaminase and phosphodiesterase (PDE3/PDE5).`
                         {/* Block Questions List */}
                         {blockQuestions.length > 0 ? (
                           <div className="space-y-4 pt-1">
-                            {blockQuestions.map((q) => (
+                            {blockQuestions.map((q, qIdx) => (
                               <DocumentQuestionItem
                                 key={q.id}
                                 question={q}
+                                questionIndex={qIdx}
                                 isOpen={openQuestionIds[q.id] ?? true}
                                 onToggle={() => toggleQuestion(q.id)}
                                 examModeStatus={simulationExamMode}
@@ -1423,7 +1466,7 @@ c. Dipyridamole inhibits adenosine deaminase and phosphodiesterase (PDE3/PDE5).`
           onClose={() => setInspectedStructure(null)}
         />
       )}
-    </div>
+    </dialog>
   );
 };
 

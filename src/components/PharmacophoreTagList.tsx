@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import {
   getPharmacophoresForStructure,
+  parsePharmacophoreName,
   ColorPaletteItem,
   PHARMACOPHORE_COLOR_PALETTE,
 } from '../utils/pharmacophoreData';
@@ -27,6 +28,31 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
   compact = false,
 }) => {
   const [showPurposeGuide, setShowPurposeGuide] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const activeTooltipRef = useRef<HTMLDivElement | null>(null);
+  const activeTagRef = useRef<HTMLElement | null>(null);
+
+  // Click-away listener: dismisses the active tooltip when clicking outside its ref
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        activeTooltipRef.current &&
+        !activeTooltipRef.current.contains(target) &&
+        (!activeTagRef.current || !activeTagRef.current.contains(target))
+      ) {
+        setActiveTooltip(null);
+      }
+    };
+
+    if (activeTooltip) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [activeTooltip]);
+
   const pharmacophores = getPharmacophoresForStructure(structure);
   const activeCount = Object.keys(activePharmacophoreIds).length;
 
@@ -74,6 +100,7 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
           const activeColor = activePharmacophoreIds[group.id];
           const isPinned = Boolean(activeColor);
           const isHovered = hoveredPharmacophoreId === group.id;
+          const { iupac, casual } = parsePharmacophoreName(group.name);
 
           return (
             <div
@@ -90,10 +117,17 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
               <button
                 type="button"
                 title={group.description || group.purpose}
-                onClick={() => {
+                onClick={(e) => {
                   onTogglePharmacophore(group);
                   // On touch devices without hover, clicking also activates preview
                   onHoverPharmacophore(group.id);
+                  // Exclusive tooltip: clicking a new tag overwrites the previous one; clicking same toggles off
+                  if (activeTooltip === group.id) {
+                    setActiveTooltip(null);
+                  } else {
+                    activeTagRef.current = e.currentTarget.parentElement;
+                    setActiveTooltip(group.id);
+                  }
                 }}
                 className={`relative px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors duration-100 cursor-pointer select-none border ${
                   isPinned
@@ -118,12 +152,67 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
                     backgroundColor: isPinned ? activeColor.hex : '#94A3B8',
                   }}
                 />
-                <span className="truncate">{group.name}</span>
+                <span className="truncate">{iupac}</span>
+                {casual && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded font-normal shrink-0 ${
+                      isPinned
+                        ? 'bg-black/10 dark:bg-white/15'
+                        : 'bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {casual}
+                  </span>
+                )}
 
                 {isPinned && (
                   <Check className="w-3 h-3 stroke-[3]" style={{ color: activeColor.hex }} />
                 )}
               </button>
+
+              {/* Exclusive Floating Tooltip with Click-Away */}
+              {activeTooltip === group.id && (
+                <div
+                  ref={activeTooltipRef}
+                  className="absolute z-50 bottom-full left-0 mb-2 w-72 max-w-[calc(100vw-2rem)] p-3 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 text-white shadow-xl border border-slate-700/80 backdrop-blur-md text-xs space-y-1.5 animate-in fade-in duration-150 pointer-events-auto"
+                  role="tooltip"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-700/60 pb-1.5">
+                    <div className="flex items-center gap-1.5 font-bold text-slate-100 min-w-0">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: activeColor?.hex || '#3b82f6' }}
+                      />
+                      <div className="truncate">
+                        <span className="truncate text-xs font-bold text-white">{iupac}</span>
+                        {casual && (
+                          <span className="text-[10px] text-blue-300 font-medium ml-1.5 truncate">
+                            ({casual})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">
+                      {group.category || 'PHARMACOPHORE'}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-slate-200 leading-relaxed">
+                    {group.description || group.purpose}
+                  </p>
+
+                  {group.casual_sar_explanation && (
+                    <div className="p-2 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-200 text-[11px] leading-snug">
+                      <span className="font-semibold text-amber-300">Clinical Impact: </span>
+                      {group.casual_sar_explanation}
+                    </div>
+                  )}
+
+                  {/* Downward pointer caret */}
+                  <div className="absolute top-full left-4 -mt-px w-2 h-2 rotate-45 bg-slate-900/95 dark:bg-slate-950/95 border-r border-b border-slate-700/80" />
+                </div>
+              )}
             </div>
           );
         })}
@@ -147,6 +236,7 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
               const activeColor = activePharmacophoreIds[group.id];
               const isPinned = Boolean(activeColor);
               const colorHex = activeColor ? activeColor.hex : PHARMACOPHORE_COLOR_PALETTE[idx % PHARMACOPHORE_COLOR_PALETTE.length].hex;
+              const { iupac, casual } = parsePharmacophoreName(group.name);
 
               return (
                 <div
@@ -168,10 +258,15 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
                         style={{ backgroundColor: colorHex }}
                       />
                       <span className="font-bold text-slate-900 dark:text-slate-100 truncate">
-                        {group.name}
+                        {iupac}
                       </span>
+                      {casual && (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium shrink-0">
+                          {casual}
+                        </span>
+                      )}
                       {isPinned && (
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 ml-1">
                           <Check className="w-3 h-3 stroke-[3]" />
                           <span>Active</span>
                         </span>
@@ -184,6 +279,11 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
                   <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
                     {group.description || group.purpose}
                   </p>
+                  {group.casual_sar_explanation && (
+                    <div className="mt-1.5 text-[11px] text-amber-900 dark:text-amber-200 bg-amber-500/10 border border-amber-500/20 rounded p-1.5 italic leading-snug">
+                      💡 {group.casual_sar_explanation}
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -27,10 +27,10 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
   placements: controlledPlacements,
   onPlacementsChange,
   examModeActive = false,
-  isSolved = false,
+  isSolved: controlledIsSolved = false,
 }) => {
   const masterStructures = question.structuresDisplayed || [];
-  const structures = React.useMemo(() => {
+  const rawStructures = React.useMemo(() => {
     if (Array.isArray(question.referenced_structures) && question.referenced_structures.length > 0) {
       const refs = question.referenced_structures.map((r) => r.trim().toLowerCase());
       const filtered = masterStructures.filter((s) => {
@@ -43,11 +43,30 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
     }
     return masterStructures;
   }, [question.referenced_structures, masterStructures]);
+
+  // Pass options array through deduplication filter based on name/ID to prevent Cartesian explosions
+  const structures = React.useMemo(() => {
+    const options = rawStructures;
+    const uniqueOptions = options.filter((v, i, a) => a.findIndex(t => (t.name === v.name || t.id === v.id)) === i);
+    return uniqueOptions;
+  }, [rawStructures]);
+
   const targets: MatchingTarget[] = (question.matchingTargets || (question as any).drop_zones || []) as MatchingTarget[];
 
   // Fallback internal state if uncontrolled
   const [internalPlacements, setInternalPlacements] = useState<Record<string, string[]>>({});
   const placements = controlledPlacements ?? internalPlacements;
+
+  // Question chip selection and completion states
+  const [selectedChips, setSelectedChips] = useState<string[]>([]);
+  const [isSolved, setIsSolved] = useState<boolean>(controlledIsSolved);
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
+
+  React.useEffect(() => {
+    if (controlledIsSolved !== undefined) {
+      setIsSolved(controlledIsSolved);
+    }
+  }, [controlledIsSolved]);
 
   const updatePlacements = (
     updater: (prev: Record<string, string[]>) => Record<string, string[]>
@@ -175,13 +194,25 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
     });
   };
 
-  // Reset all placements
-  const handleReset = () => {
-    if (isLocked) return;
+  // Synchronize completion feedback
+  React.useEffect(() => {
+    if (isCompleted) {
+      setIsSolved(true);
+      setFeedbackMessage('All structures correctly matched!');
+    }
+  }, [isCompleted]);
+
+  // Reset all placements and question completion state
+  const resetChips = () => {
+    setSelectedChips([]);
+    setIsSolved(false);
+    setFeedbackMessage('');
     updatePlacements(() => ({}));
     setSelectedStructureId(null);
     setDragOverTargetId(null);
   };
+
+  const handleReset = resetChips;
 
   // Solve / auto-fill correct matches
   const handleAutoSolve = () => {
@@ -204,7 +235,7 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
         {/* LEFT COLUMN: AUTHENTIC PDF LIST OF CLASSES WITH DROP SLOTS        */}
         {/* ================================================================ */}
         <div className="flex-1 w-full flex flex-col justify-between space-y-2">
-          {targets.map((target) => {
+          {targets.map((target, index) => {
             const placedHere = placements[target.id] || [];
             const isDragOver = dragOverTargetId === target.id;
 
@@ -243,7 +274,7 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
 
             return (
               <div
-                key={target.id}
+                key={`q${question.id || 'q'}-dropzone-${target.id || index}`}
                 id={`q${question.id || 'q'}-target-${target.id}`}
                 onClick={() => handleTargetClick(target.id)}
                 onDragOver={(e) => handleDragOver(e, target.id)}
@@ -307,12 +338,12 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
                         Drop chip
                       </span>
                     ) : (
-                      placedHere.map((sId) => {
+                      placedHere.map((sId, chipIndex) => {
                         const str = getStructureById(sId);
                         const isCorrect = target.acceptedStructureIds.includes(sId);
                         return (
                           <div
-                            key={sId}
+                            key={`q${question.id || 'q'}-dropzone-${target.id}-chip-${sId || chipIndex}`}
                             id={`q${question.id || 'q'}-target-${target.id}-chip-${sId}`}
                             onClick={(e) => handleRemovePlaced(sId, e)}
                             title={isLocked ? `Structure ${str?.document_label || sId} (Matched)` : `Structure ${str?.document_label || sId} (Click to remove)`}
@@ -383,7 +414,7 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
               <button
                 type="button"
                 onClick={handleReset}
-                disabled={placedStructureIds.length === 0}
+                disabled={placedStructureIds.length === 0 && selectedChips.length === 0 && !isSolved}
                 title="Reset all placed chips"
                 className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 flex items-center gap-0.5 transition-colors px-1 py-0.5 rounded hover:bg-slate-200/60 dark:hover:bg-slate-700/60 cursor-pointer"
               >
@@ -422,17 +453,24 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
 
           {/* 1x4 Linear Structure Chips: Evenly Distributed & Proportional */}
           <div className="flex-1 flex flex-col justify-around gap-2 py-1 items-center">
-            {unassignedStructures.length === 0 ? (
-              <div className="text-center py-6 text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex flex-col items-center justify-center gap-1.5">
-                <Check className="w-5 h-5" />
-                <span>All chips assigned!</span>
-              </div>
-            ) : (
-              unassignedStructures.map((structure) => {
+            {(() => {
+              const options = unassignedStructures;
+              const uniqueOptions = options.filter((v, i, a) => a.findIndex(t => (t.name === v.name || t.id === v.id)) === i);
+
+              if (uniqueOptions.length === 0) {
+                return (
+                  <div className="text-center py-6 text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex flex-col items-center justify-center gap-1.5">
+                    <Check className="w-5 h-5" />
+                    <span>All chips assigned!</span>
+                  </div>
+                );
+              }
+
+              return uniqueOptions.map((structure, index) => {
                 const isSelected = selectedStructureId === structure.id;
                 return (
                   <div
-                    key={structure.id}
+                    key={`q${question.id || 'q'}-chip-${structure.id || index}`}
                     id={`q${question.id || 'q'}-tray-chip-${structure.id}`}
                     draggable={!isLocked}
                     onDragStart={(e) => handleDragStart(e, structure.id)}
@@ -464,8 +502,8 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
                     />
                   </div>
                 );
-              })
-            )}
+              });
+            })()}
           </div>
         </div>
       </div>

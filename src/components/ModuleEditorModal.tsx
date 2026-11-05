@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ReviewModule,
   AntiplateletQuestion,
@@ -118,6 +118,30 @@ export const ModuleEditorModal: React.FC<ModuleEditorModalProps> = ({
       }
     }
   }, [isOpen, initialModule, initialQuestionId]);
+
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    const handleCancel = (e: Event) => {
+      e.preventDefault();
+      onClose();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+    return () => {
+      dialog.removeEventListener('cancel', handleCancel);
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -515,12 +539,18 @@ export const ModuleEditorModal: React.FC<ModuleEditorModalProps> = ({
     }, 600);
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
+
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-fadeIn"
-      onClick={onClose}
+    <dialog
+      ref={dialogRef}
+      closedby="any"
+      onClick={handleBackdropClick}
+      className="m-auto p-2 sm:p-4 bg-transparent outline-none max-w-full max-h-screen text-slate-800 dark:text-slate-100"
     >
       <div
         className="bg-white dark:bg-slate-900 rounded-2xl max-w-5xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
@@ -535,7 +565,7 @@ export const ModuleEditorModal: React.FC<ModuleEditorModalProps> = ({
               <Edit3 className="w-4 h-4" />
             </span>
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100">
+              <h2 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 text-balance">
                 Module &amp; Question Studio Editor
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -1104,7 +1134,7 @@ export const ModuleEditorModal: React.FC<ModuleEditorModalProps> = ({
                             {question.type}
                           </span>
                         </div>
-                        <div className="line-clamp-2 text-[11px] leading-snug">
+                        <div className="line-clamp-2 text-[11px] leading-snug text-pretty">
                           {question.questionStem}
                         </div>
                       </button>
@@ -1640,6 +1670,6 @@ export const ModuleEditorModal: React.FC<ModuleEditorModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };

@@ -13,7 +13,14 @@ import {
   MEDCHEM_INGESTION_RESPONSE_SCHEMA,
   MEDCHEM_INGESTION_SYSTEM_PROMPT,
   MEDCHEM_WORKSHEET_SYSTEM_PROMPT,
+  MEDCHEM_PAGE_EXTRACTION_SYSTEM_PROMPT,
+  MEDCHEM_PAGE_RESPONSE_SCHEMA,
+  FDA_TRANSFORMATION_SCHEMA,
+  FDA_TRANSFORMATION_SYSTEM_PROMPT,
+  buildFdaTransformationPrompt,
 } from './src/services/geminiPrompts.js';
+import { getKnownDrugSmiles } from './src/utils/knownDrugSmiles.js';
+import { getCorrectedSmarts } from './src/utils/smartsDictionary.js';
 
 if (fs.existsSync(path.resolve('.env.local'))) {
   dotenv.config({ path: path.resolve('.env.local'), override: true });
@@ -52,10 +59,14 @@ CORE DIRECTIVE 1: STRICT SMARTS-TO-SMILES GRAPH ALIGNMENT
 1. SUBSTRUCTURE EMBEDDING: Every SMARTS pattern specified in a structure's "pharmacophores" array MUST represent a topologically valid, verifiable substructure of that exact molecule's SMILES representation.
 2. ZERO PHANTOM MOIETIES: Never assign a SMARTS pattern containing atoms, rings, or functional groups that do not physically exist in the parent chemical structure (e.g., never include a halogen, nitro, or sulfonamide SMARTS for an aliphatic ester).
 3. 1-TO-1 ARRAY CONSISTENCY: Maintain strict 1-to-1 semantic alignment between "keyFunctionalGroups" and "pharmacophores". The sequence and medicinal chemistry descriptors must correspond directly.
-4. REQUIRED EXACT SMARTS: Every pharmacophore MUST include a valid, highly specific SMARTS pattern string for 2D canvas highlighting.
+4. REQUIRED EXACT SMARTS: Every pharmacophore MUST include a valid, highly specific SMARTS pattern string for RDKit 2D canvas highlighting.
+   - TOPOLOGY OVER BONDS: Always use flexible bond indicators ('~' for any bond) or omit bond symbols entirely unless a specific bond order is the exact mechanism of action.
+   - GENERIC ATOMS: For large carbon scaffolds (like rings), use '[#6]' or lowercase/uppercase 'a'/'A' (any aromatic/aliphatic atom) instead of rigid 'C' or 'c' to prevent aromaticity perception failures.
+   - TOPOLOGY-FIRST CYCLIC CORES: When generating SMARTS strings for cyclic cores (like the hexahydronaphthalene decalin core in statins), use topology-first SMARTS. For example, a 6-6 fused bicyclic ring MUST be represented as [#6]1~[#6]~[#6]~[#6]2~[#6]~[#6]~[#6]~[#6]~[#6]2~[#6]1 to match regardless of saturation or conjugation. Do not hardcode exact double bonds (=).
    - CRITICAL SMARTS ACCURACY: Do NOT hallucinate, oversimplify, or swap SMARTS strings. You must ensure the SMARTS string precisely matches ONLY the named functional group and will not accidentally match the drug's core scaffold or other appendages.
+   - PREVENT HIGHLIGHT COLLISION: If a molecule has multiple aromatic rings, you MUST include the unique substituent in the SMARTS so the renderer highlights the correct ring (e.g., use 'Fc1ccccc1' for a fluorophenyl group, NOT just 'c1ccccc1'. Use 'Clc1ccccc1' for chlorophenyl).
+   - NEVER include stereochemical directional markers ('@' or '@@'), explicit charges ('+' or '-'), or explicit hydrogens ('[H]').
    - For esters, amides, and side chains, specify the exact connectivity (e.g., \`[CX3](=[OX1])[OX2][CX4]\`).
-   - For complex ring systems (e.g., hexahydronaphthalene, indole, pyrrole, pyrimidine), use precise ring topology and explicit atom types.
    - If you write a generic or sloppy SMARTS string, the UI will highlight the wrong functional group and fail the student.
 
 ================================================================================
@@ -64,6 +75,7 @@ CORE DIRECTIVE 2: MEDICINAL CHEMISTRY NOMENCLATURE RIGOR
 1. SPECIFIC FUNCTIONAL GROUPS: Always use precise IUPAC / medicinal chemistry terminology for functional groups and pharmacophores (e.g., "1,4-dihydropyridine ring", "2,3-dichlorophenyl group", "sulfonamide moiety", "carboxylate group", "tetrazole ring").
 2. BANNED PLACEHOLDERS: ABSOLUTELY NEVER output generic placeholders such as "DRUG Core", "Main Scaffold", "Active Moiety", or "Generic Ring".
 3. PHARMACOPHORE ROLES: For every pharmacophore entry, provide an exact pharmacodynamic, pharmacokinetic, or physicochemical role in "purpose" (e.g., "Primary hydrogen bond acceptor engaging catalytic residue Lys123", "Lipophilic anchor occupying hydrophobic subpocket S1").
+4. CASUAL SAR EXPLANATION: For each pharmacophore or functional group, provide a casual_sar_explanation. This must be a brief, conversational, and intuitive explanation of how this specific group affects the drug's performance, pharmacokinetics, or binding. Do not use overly dense jargon. Use plain language analogies (e.g., 'The fluorine atom increases lipophilicity, acting like grease so the drug easily crosses cell membranes' or 'This acidic tail mimics the body's natural substrate to trick and block the target enzyme').
 
 ================================================================================
 CORE DIRECTIVE 3: STRUCTURAL IDENTIFIER & QUESTION SYNCHRONIZATION
@@ -125,11 +137,23 @@ async function generateWithFallback(options: {
 }) {
   let lastError: any = null;
 
+  // Normalize contents if passed as { parts } without role
+  let normalizedContents = options.contents;
+  if (
+    normalizedContents &&
+    typeof normalizedContents === 'object' &&
+    !Array.isArray(normalizedContents) &&
+    normalizedContents.parts &&
+    !normalizedContents.role
+  ) {
+    normalizedContents = { role: 'user', parts: normalizedContents.parts };
+  }
+
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
-        contents: options.contents,
+        contents: normalizedContents,
         config: {
           systemInstruction: options.systemInstruction || SENIOR_CHEMINFORMATICS_ENGINE_SYSTEM_INSTRUCTION,
           temperature: options.temperature,
@@ -1146,13 +1170,49 @@ app.get('/api/pubchem/compound/:name', async (req: Request, res: Response) => {
   }
 });
 
+const sdfCache = new Map<string, string>();
+
+app.get(['/api/pubchem/compound/:cid/sdf', '/api/pubchem/sdf/:cid'], async (req: Request, res: Response) => {
+  try {
+    const cidStr = String(req.params.cid || '').trim();
+    const cidNum = parseInt(cidStr, 10);
+    if (!cidNum || isNaN(cidNum)) {
+      res.status(400).send('Invalid CID');
+      return;
+    }
+
+    if (sdfCache.has(cidStr)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.send(sdfCache.get(cidStr));
+      return;
+    }
+
+    const sdfUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cidNum}/record/SDF/?record_type=2d&response_type=display`;
+    const sdfRes = await fetch(sdfUrl);
+    if (!sdfRes.ok) {
+      res.status(sdfRes.status).send(`Failed to fetch 2D SDF for CID ${cidNum}`);
+      return;
+    }
+
+    const text = await sdfRes.text();
+    sdfCache.set(cidStr, text);
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.send(text);
+  } catch (error: any) {
+    console.error('PubChem SDF proxy error:', error);
+    res.status(500).send(error?.message || 'Failed to fetch 2D SDF');
+  }
+});
+
 const structureImageCache = new Map<string, { buffer: Buffer; contentType: string }>();
 
 app.get('/api/structure-image', async (req: Request, res: Response) => {
   try {
     const rawUrl = String(req.query.url || '').trim();
     const cid = String(req.query.cid || '').trim();
-    const targetUrl = rawUrl || (cid ? `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/PNG?image_size=large` : '');
+    const cleanUrl = rawUrl && rawUrl !== 'undefined' && rawUrl !== 'null' ? rawUrl : '';
+    const cleanCid = cid && cid !== 'undefined' && cid !== 'null' ? cid : '';
+    const targetUrl = cleanUrl || (cleanCid ? `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cleanCid}/PNG?image_size=large` : '');
 
     if (!targetUrl) {
       res.status(400).send('Image URL or CID required');
@@ -1233,7 +1293,7 @@ async function auditSingleCompound(nameOrCid: string | number): Promise<any> {
       status: 'verified',
       verifiedAt: new Date().toISOString().split('T')[0],
       source: 'nih_pug_rest',
-      canonicalSmiles: prop?.CanonicalSMILES || '',
+      canonicalSmiles: prop?.CanonicalSMILES || getKnownDrugSmiles(query) || '',
       iupacName: prop?.IUPACName || '',
       molecularFormula: prop?.MolecularFormula || '',
       molecularWeight: prop?.MolecularWeight ? Number(prop.MolecularWeight) : undefined,
@@ -1243,12 +1303,14 @@ async function auditSingleCompound(nameOrCid: string | number): Promise<any> {
     };
   } catch (err: any) {
     console.warn(`Audit failed for ${query}:`, err?.message);
+    const fallbackSmiles = getKnownDrugSmiles(query);
     return {
       query,
       cid: 0,
-      status: 'unresolved',
+      status: fallbackSmiles ? 'verified' : 'unresolved',
       verifiedAt: new Date().toISOString().split('T')[0],
-      source: 'nih_pug_rest',
+      source: fallbackSmiles ? 'curated_offline_fallback' : 'nih_pug_rest',
+      canonicalSmiles: fallbackSmiles || '',
       pubChemUrl: `https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(query)}`,
     };
   }
@@ -1278,6 +1340,180 @@ app.post('/api/pubchem/batch-audit', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Batch audit error:', error);
     res.status(500).json({ error: error?.message || 'Failed to perform batch PubChem audit' });
+  }
+});
+
+app.post('/api/gemini/medchem-review-page', async (req: Request, res: Response) => {
+  try {
+    const {
+      pageNumber = 1,
+      totalPages = 1,
+      pageText = '',
+      pageImageBase64 = '',
+      pageImageMime = 'image/jpeg',
+      sourceFiles = [],
+      sourceText = '',
+      previouslyExtractedStructures = [],
+      documentTitle = 'Medicinal Chemistry Review Document',
+    } = req.body;
+
+    if (!pageText && !pageImageBase64) {
+      res.status(400).json({ error: 'Page text or page image base64 is required for page extraction.' });
+      return;
+    }
+
+    const parts: any[] = [];
+
+    // 1. Context header
+    parts.push({
+      text: `[PAGE EXTRACTION CONTEXT]\nDocument: "${documentTitle}"\nCurrent Target Page: Page ${pageNumber} of ${totalPages}\n`,
+    });
+
+    // 2. Previously extracted structures context (to maintain Roman numeral assignments across pages)
+    if (Array.isArray(previouslyExtractedStructures) && previouslyExtractedStructures.length > 0) {
+      const structSummary = previouslyExtractedStructures
+        .map(
+          (s: any) =>
+            `- Structure ${s.id || s.document_label || '?'}: ${s.name || 'Unnamed'} (${s.chemicalClass || 'Unknown class'})${s.cid ? ` [CID: ${s.cid}]` : ''}`
+        )
+        .join('\n');
+      parts.push({
+        text: `[PREVIOUSLY IDENTIFIED CHEMICAL STRUCTURES FROM EARLIER PAGES]:\n${structSummary}\n(If this page refers back to any of these structures by Roman numeral, retain the exact Roman numeral and core molecular identity.)\n`,
+      });
+    }
+
+    // 3. Authoritative Source Material (Lecture Reference) if supplied
+    const sourceItems: Array<{ fileName: string; fileBase64?: string; text?: string }> = [];
+    if (Array.isArray(sourceFiles) && sourceFiles.length > 0) {
+      for (const sf of sourceFiles) {
+        if (sf.fileBase64 || sf.text) sourceItems.push(sf);
+      }
+    }
+    if (sourceText && typeof sourceText === 'string' && sourceText.trim()) {
+      sourceItems.push({ fileName: 'Lecture Reference Notes', text: sourceText });
+    }
+
+    if (sourceItems.length > 0) {
+      parts.push({
+        text: `===================================================\n[INPUT 2: AUTHORITATIVE SOURCE REFERENCE (LECTURE SLIDES & MONOGRAPHS)]\nUse this material strictly to verify answers, determine True/False accuracy, cite exact active-site binding pockets/residues, and explain SAR rationales.\nCRITICAL: Do NOT alter or rewrite the worksheet's printed question text.\n===================================================\n`,
+      });
+
+      for (const sf of sourceItems) {
+        if (sf.text) {
+          parts.push({ text: `[REFERENCE TEXT: "${sf.fileName}"]:\n${sf.text}\n` });
+        } else if (sf.fileBase64) {
+          const extracted = await extractDocumentContent(sf.fileName, sf.fileBase64);
+          if (extracted.isPdf) {
+            parts.push({ inlineData: { mimeType: 'application/pdf', data: sf.fileBase64 } });
+            parts.push({ text: `[ATTACHED REFERENCE DOCUMENT: "${sf.fileName}"]` });
+          } else if (extracted.isImage) {
+            parts.push({ inlineData: { mimeType: extracted.imageMime || 'image/jpeg', data: sf.fileBase64 } });
+            parts.push({ text: `[ATTACHED REFERENCE DIAGRAM: "${sf.fileName}"]` });
+          } else if (extracted.text) {
+            parts.push({ text: `[REFERENCE CONTENT: "${sf.fileName}"]:\n${extracted.text}\n` });
+          }
+        }
+      }
+    }
+
+    // 4. Target Page Content (Input 1)
+    parts.push({
+      text: `===================================================\n[INPUT 1: WORKSHEET PAGE ${pageNumber} (QUESTIONS BLUEPRINT)]\nExtract EVERY question and EVERY chemical structure from this page with 100% verbatim fidelity.\n===================================================\n`,
+    });
+
+    if (pageImageBase64) {
+      const cleanBase64 = String(pageImageBase64).replace(/^data:[^;]+;base64,/, '');
+      parts.push({
+        inlineData: {
+          mimeType: pageImageMime || 'image/jpeg',
+          data: cleanBase64,
+        },
+      });
+      parts.push({ text: `[HIGH-RESOLUTION IMAGE RENDER OF WORKSHEET PAGE ${pageNumber}]` });
+    }
+
+    if (pageText && pageText.trim()) {
+      parts.push({
+        text: `[EXTRACTED TEXT FOR WORKSHEET PAGE ${pageNumber}]:\n${pageText.trim()}\n`,
+      });
+    }
+
+    // 5. Final mandate
+    parts.push({
+      text: `Extract all questions and chemical structures for Page ${pageNumber} adhering strictly to the MEDCHEM_PAGE_RESPONSE_SCHEMA.\nEnsure "subStatements" captures all propositions (a, b, c... k) with isCorrect and rationale.\nEnsure "matchingTargets" has acceptedStructureIds.\nEnsure local structures have Roman numeral IDs, Daylight canonical SMILES, and 3-5 pharmacophores with casual_sar_explanation.`,
+    });
+
+    const text = await generateWithFallback({
+      contents: { parts },
+      systemInstruction: MEDCHEM_PAGE_EXTRACTION_SYSTEM_PROMPT,
+      responseMimeType: 'application/json',
+      responseSchema: MEDCHEM_PAGE_RESPONSE_SCHEMA,
+      temperature: 0.1,
+    });
+
+    const parsedPage = JSON.parse(text || '{}');
+
+    // Audit extracted structures for this page via PubChem
+    const newlyDiscoveredStructures: any[] = [];
+    if (Array.isArray(parsedPage.sections)) {
+      for (const sec of parsedPage.sections) {
+        if (Array.isArray(sec.structures) && sec.structures.length > 0) {
+          for (let sIdx = 0; sIdx < sec.structures.length; sIdx++) {
+            const str = sec.structures[sIdx];
+            let audit: any = null;
+            try {
+              audit = await auditSingleCompound(str.cid || str.name);
+            } catch (err) {
+              console.warn(`[Page ${pageNumber}] PubChem audit fallback for ${str.name}:`, err);
+            }
+
+            const finalCid = audit?.cid || str.cid || 0;
+            const enriched = {
+              ...str,
+              cid: finalCid,
+              pngUrl: audit?.pngUrl || (finalCid ? `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${finalCid}/PNG?image_size=large` : ''),
+              pubchemUrl: audit?.pubChemUrl || (finalCid ? `https://pubchem.ncbi.nlm.nih.gov/compound/${finalCid}` : ''),
+              pubchemMolBlock: audit?.pubchemMolBlock || str.pubchemMolBlock,
+              canonicalSmiles: audit?.canonicalSmiles || str.canonicalSmiles || '',
+              pubchemAudit: {
+                cid: finalCid,
+                status: audit?.status || (finalCid ? 'verified' : 'unresolved'),
+                verifiedAt: audit?.verifiedAt || new Date().toISOString().split('T')[0],
+                source: 'nih_pug_rest',
+                canonicalSmiles: audit?.canonicalSmiles || str.canonicalSmiles || '',
+                iupacName: audit?.iupacName || '',
+                molecularFormula: audit?.molecularFormula || '',
+                molecularWeight: audit?.molecularWeight,
+                pubChemUrl: audit?.pubChemUrl || (finalCid ? `https://pubchem.ncbi.nlm.nih.gov/compound/${finalCid}` : ''),
+                matchScore: 100,
+              },
+            };
+            sec.structures[sIdx] = enriched;
+            newlyDiscoveredStructures.push(enriched);
+          }
+
+          // Link structures to questions if structuresDisplayed is not set
+          if (Array.isArray(sec.questions)) {
+            for (const q of sec.questions) {
+              if (!q.structuresDisplayed || q.structuresDisplayed.length === 0) {
+                q.structuresDisplayed = sec.structures;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    res.json({
+      page: parsedPage,
+      newlyDiscoveredStructures,
+      pageNumber,
+    });
+  } catch (error: any) {
+    console.error(`[Backend /api/gemini/medchem-review-page Error]:`, error);
+    res.status(500).json({
+      error: error?.message || 'Failed to extract page review data',
+    });
   }
 });
 
@@ -2531,13 +2767,54 @@ Return valid JSON adhering strictly to the schema.`;
       parsed?.knowledge_graph?.edges ||
       [];
 
+    const rawStructures = Array.isArray(parsed?.structures) ? parsed.structures : [];
+    const rawQuestionBlocks = Array.isArray(parsed?.question_blocks) ? parsed.question_blocks : [];
+
+    // Index structures and local_structures for cross-matching
+    const structureMap = new Map<string, any>();
+    for (const s of rawStructures) {
+      if (s.id) structureMap.set(String(s.id).toLowerCase(), s);
+      if (s.name) structureMap.set(String(s.name).toLowerCase(), s);
+      if (s.document_label) structureMap.set(String(s.document_label).toLowerCase(), s);
+    }
+    for (const qb of rawQuestionBlocks) {
+      if (Array.isArray(qb.local_structures)) {
+        for (const ls of qb.local_structures) {
+          if (ls.id) structureMap.set(String(ls.id).toLowerCase(), ls);
+          if (ls.name) structureMap.set(String(ls.name).toLowerCase(), ls);
+          if (ls.document_label) structureMap.set(String(ls.document_label).toLowerCase(), ls);
+        }
+      }
+    }
+
     const normalizedEntities = Array.isArray(rawEntities)
-      ? rawEntities.map((e: any) => ({
-          id: String(e.id || e.name || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'),
-          name: String(e.name || e.id || 'Unnamed Entity').trim(),
-          type: e.type || 'DRUG',
-          clinical_and_sar_summary: e.clinical_and_sar_summary || e.summary || e.description || '',
-        }))
+      ? rawEntities.map((e: any) => {
+          const normId = String(e.id || e.name || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+          const cleanName = String(e.name || e.id || 'Unnamed Entity').trim();
+          const matchedStruct = structureMap.get(normId) || structureMap.get(cleanName.toLowerCase());
+
+          const rawSmiles = e.canonicalSmiles || e.smiles || matchedStruct?.canonicalSmiles || matchedStruct?.smiles;
+          const resolvedSmiles = rawSmiles || getKnownDrugSmiles(cleanName) || getKnownDrugSmiles(normId);
+
+          const rawPharmacophores = Array.isArray(e.pharmacophores) && e.pharmacophores.length > 0
+            ? e.pharmacophores
+            : (Array.isArray(matchedStruct?.pharmacophores) ? matchedStruct.pharmacophores : []);
+
+          const correctedPharmacophores = rawPharmacophores.map((p: any) => ({
+            ...p,
+            smarts: getCorrectedSmarts(p?.name, p?.smarts || '') || undefined,
+          }));
+
+          return {
+            id: normId,
+            name: cleanName,
+            type: e.type || (matchedStruct ? 'DRUG' : 'DRUG'),
+            canonicalSmiles: resolvedSmiles,
+            pharmacophores: correctedPharmacophores,
+            source_slide_index: e.source_slide_index ?? matchedStruct?.source_slide_index,
+            clinical_and_sar_summary: e.clinical_and_sar_summary || e.summary || e.description || matchedStruct?.moa_summary || '',
+          };
+        })
       : [];
 
     const normalizedRelationships = Array.isArray(rawRelationships)
@@ -2550,6 +2827,21 @@ Return valid JSON adhering strictly to the schema.`;
         }))
       : [];
 
+    const enrichedStructures = rawStructures.map((s: any) => ({
+      ...s,
+      canonicalSmiles: s.canonicalSmiles || getKnownDrugSmiles(s.name) || getKnownDrugSmiles(s.id),
+    }));
+
+    const enrichedQuestionBlocks = rawQuestionBlocks.map((qb: any) => ({
+      ...qb,
+      local_structures: Array.isArray(qb.local_structures)
+        ? qb.local_structures.map((ls: any) => ({
+            ...ls,
+            canonicalSmiles: ls.canonicalSmiles || getKnownDrugSmiles(ls.name) || getKnownDrugSmiles(ls.id),
+          }))
+        : [],
+    }));
+
     if (normalizedEntities.length === 0 || normalizedRelationships.length === 0) {
       console.warn('[extract-graph] Warning: Entities or relationships resolved to empty array. Raw Gemini response string:\n', text);
     }
@@ -2557,6 +2849,8 @@ Return valid JSON adhering strictly to the schema.`;
     res.json({
       entities: normalizedEntities,
       relationships: normalizedRelationships,
+      structures: enrichedStructures,
+      question_blocks: enrichedQuestionBlocks,
     });
   } catch (err: any) {
     console.error("[Backend /api/gemini/extract-graph Error]:", err);
@@ -2736,7 +3030,38 @@ Output valid JSON matching the schema.`;
   }
 });
 
+app.post('/api/gemini/transform-fda', async (req: Request, res: Response) => {
+  try {
+    const { drugName, rawFdaText } = req.body;
+    if (!drugName) {
+      res.status(400).json({ error: 'drugName is required for FDA transformation.' });
+      return;
+    }
 
+    const promptText = buildFdaTransformationPrompt(drugName, rawFdaText || '');
+    const text = await generateWithFallback({
+      contents: promptText,
+      systemInstruction: FDA_TRANSFORMATION_SYSTEM_PROMPT,
+      temperature: 0.1,
+      responseSchema: FDA_TRANSFORMATION_SCHEMA,
+    });
+
+    const parsed = JSON.parse(text || '{}');
+    res.json(parsed);
+  } catch (err: any) {
+    console.error("[Backend /api/gemini/transform-fda Error]:", err);
+    const errorMessage =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      String(err);
+    res.status(500).json({ error: errorMessage, stack: err?.stack });
+  }
+});
+
+
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 const hasDist = fs.existsSync(path.join(__dirname, 'dist', 'index.html'));
 const isProduction = process.env.NODE_ENV === 'production' && hasDist;
@@ -2755,6 +3080,19 @@ if (!isProduction) {
   });
 }
 
-app.listen(port, host, () => {
-  console.log(`Server listening on ${host}:${port}`);
-});
+function startServer(targetPort: number, maxAttempts = 10) {
+  const server = app.listen(targetPort, host, () => {
+    console.log(`Server listening on http://localhost:${targetPort} (${host}:${targetPort})`);
+  });
+
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE' && maxAttempts > 0) {
+      console.warn(`Port ${targetPort} is in use, attempting port ${targetPort + 1}...`);
+      startServer(targetPort + 1, maxAttempts - 1);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+}
+
+startServer(port);

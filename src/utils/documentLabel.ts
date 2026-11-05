@@ -1,5 +1,6 @@
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import { resolvePharmacophoreRegion } from './pharmacophoreData';
+import { getCorrectedSmarts } from './smartsDictionary';
 
 export const ROMAN_NUMERALS_LIST = [
   'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
@@ -131,13 +132,14 @@ export function filterValidPharmacophores(pharmacophores?: PharmacophoreGroup[] 
     const id = p.id || `pg_${idx}_${name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}`;
     const purpose = p.purpose || p.description || `Functional group in structure contributing to pharmacological activity and receptor interaction.`;
     const description = p.description || p.purpose || purpose;
+    const correctedSmarts = getCorrectedSmarts(name, p.smarts || '') || undefined;
     return {
       ...p,
       id,
       name,
       purpose,
       description,
-      smarts: p.smarts || undefined,
+      smarts: correctedSmarts,
       region: p.region || resolvePharmacophoreRegion(p, idx, valid.length),
     };
   });

@@ -50,6 +50,7 @@ const NODE_COLORS: Record<string, string> = {
   ADVERSE_EFFECT: '#ef4444', // Red
   DRUG_CLASS: '#14b8a6', // Teal
   DISEASE_STATE: '#10b981', // Emerald
+  PHARMACOPHORE: '#eab308', // Amber
   PHARMACOPHORE_OR_MOIETY: '#eab308', // Amber
   CLINICAL_PARAMETER: '#8b5cf6', // Violet
 };
@@ -774,6 +775,7 @@ export const KnowledgeGraphExplorer: React.FC = () => {
           {activeQuestionWithFilteredStructures && (
             <DocumentQuestionItem
               question={activeQuestionWithFilteredStructures}
+              questionIndex={Math.max(0, generatedQuestions.findIndex((q) => q.id === activeQuestionWithFilteredStructures.id))}
               allSectionStructures={masterStructures}
               allModuleStructures={masterStructures}
               isOpen={true}
@@ -1502,6 +1504,7 @@ export const KnowledgeGraphExplorer: React.FC = () => {
                         selectedEntity.chemData?.isomericSmiles ||
                         selectedEntity.chemData?.canonicalSmiles
                       }
+                      molBlock={selectedEntity.pubchemMolBlock || selectedEntity.chemData?.pubchemMolBlock}
                       fallbackImageUrl={
                         selectedEntity.chemData?.structureImageDataUrl ||
                         (selectedEntity.chemData?.cid

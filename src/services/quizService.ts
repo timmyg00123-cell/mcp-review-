@@ -239,6 +239,9 @@ CRITICAL EXTRACTION DIRECTIVES:
 
 2. PHARMACOPHORE SMARTS & CHEMICAL SPECIFICITY:
    - For every pharmacophore identified, you MUST provide its valid SMARTS pattern string so the frontend cheminformatics renderer can highlight the exact atoms on the 2D canvas.
+   - TOPOLOGY OVER BONDS: Always use flexible bond indicators ('~' for any bond) or omit bond symbols entirely unless a specific bond order is the exact mechanism of action.
+   - GENERIC ATOMS: For large carbon scaffolds (like rings), use '[#6]' or lowercase/uppercase 'a'/'A' (any aromatic/aliphatic atom) instead of rigid 'C' or 'c' to prevent aromaticity perception failures.
+   - When generating SMARTS strings for cyclic cores (like the hexahydronaphthalene decalin core in statins), use topology-first SMARTS. For example, a 6-6 fused bicyclic ring MUST be represented as [#6]1~[#6]~[#6]~[#6]2~[#6]~[#6]~[#6]~[#6]~[#6]2~[#6]1 to match regardless of saturation or conjugation. Do not hardcode exact double bonds (=).
    - You MUST use specific medicinal chemistry nomenclature for functional groups (e.g., '1,4-dihydropyridine ring', 'butyryloxymethyl ester', 'ortho-chlorophenyl group'). ABSOLUTELY DO NOT use generic terms like 'DRUG Core', 'Main Scaffold', or 'Active Moiety'.
 
 3. STRICT TYPE CLASSIFICATION FOR MATCHING QUESTIONS:
@@ -364,11 +367,28 @@ CRITICAL EXTRACTION DIRECTIVES:
     const logP = chemStruct.logP !== undefined ? Number(chemStruct.logP) : (existing?.logP ?? existing?.pubchemAudit?.xlogp);
     const drug_state = chemStruct.drug_state || existing?.drug_state || 'Active Drug';
 
+    const canonicalSmiles =
+      chemStruct.canonical_smiles ||
+      chemStruct.canonicalSmiles ||
+      chemStruct.smiles ||
+      chemStruct.pubchemAudit?.canonicalSmiles ||
+      existing?.canonical_smiles ||
+      existing?.canonicalSmiles ||
+      existing?.smiles;
+    const pharmacophore_smarts =
+      chemStruct.pharmacophore_smarts ||
+      existing?.pharmacophore_smarts ||
+      (validPharmacophores[0]?.smarts);
+
     return {
       id: normalizedId,
       document_label: docLabel,
       name: rawName || existing?.name || name,
       tradeName: chemStruct.tradeName || existing?.tradeName,
+      canonical_smiles: canonicalSmiles,
+      canonicalSmiles: canonicalSmiles,
+      smiles: canonicalSmiles,
+      pharmacophore_smarts,
       chemicalClass: chemStruct.chemicalClass || existing?.chemicalClass || 'Small molecule compound',
       pharmacologicalClass: chemStruct.pharmacologicalClass || existing?.pharmacologicalClass || 'Pharmacological Agent',
       target_receptor: enrichedTarget || existing?.target_receptor,

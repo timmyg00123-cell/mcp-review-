@@ -24,6 +24,7 @@ out/
 .vite/
 .turbo/
 *.tsbuildinfo
+scratch/
 
 # Logs
 logs
@@ -43,3 +44,4 @@ Thumbs.db
 *.swo
 .vscode/
 .idea/
+.superpowers/
