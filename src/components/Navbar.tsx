@@ -22,6 +22,7 @@ import {
   Check,
   MoreHorizontal,
   Layers,
+  Sun,
 } from 'lucide-react';
 import { exportReviewModuleAsJson } from '../utils/jsonPortability';
 import { isStudentMode } from '../utils/envMode';
@@ -56,6 +57,8 @@ export interface NavbarProps {
   allQuestionsCount: number;
   showTutor: boolean;
   onToggleTutor: () => void;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
   onOpenSettings: () => void;
   onOpenPubChem: () => void;
 }
@@ -90,6 +93,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   allQuestionsCount,
   showTutor,
   onToggleTutor,
+  theme = 'light',
+  onToggleTheme,
   onOpenSettings,
   onOpenPubChem,
 }) => {
@@ -517,6 +522,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             )}
           </div>
+
+          {/* Color Settings & Preferences Shortcut (Light Icon) */}
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-400 dark:hover:border-amber-500 text-slate-700 dark:text-slate-200 shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-1.5 group"
+            title="Color Settings & Preferences"
+            aria-label="Color Settings & Preferences"
+          >
+            <Sun className="w-4 h-4 text-amber-500 dark:text-amber-400 group-hover:rotate-45 transition-transform" />
+            <span className="hidden md:inline text-xs font-semibold text-slate-700 dark:text-slate-300 group-hover:text-amber-700 dark:group-hover:text-amber-300">
+              Colors
+            </span>
+          </button>
 
           {/* Secondary Tools Compact Icon Menu */}
           <div className="relative">

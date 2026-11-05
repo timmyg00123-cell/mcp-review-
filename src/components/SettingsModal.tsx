@@ -256,7 +256,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   Theme &amp; Appearance
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Choose your interface display mode (default: Dark Mode)
+                  Choose your interface display mode (default: Light Mode)
                 </p>
               </div>
               <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-150 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
@@ -282,9 +282,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div>
                   <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                     <span>Dark Mode</span>
-                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-normal">
-                      (Default)
-                    </span>
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
                     High contrast obsidian canvas
@@ -307,8 +304,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <Sun className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Light Mode
+                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                    <span>Light Mode</span>
+                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-normal">
+                      (Default)
+                    </span>
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
                     Crisp clinical daytime theme

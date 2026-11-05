@@ -1140,6 +1140,8 @@ function AppContent() {
         allQuestionsCount={allModuleQuestions.length}
         showTutor={showTutor}
         onToggleTutor={() => setShowTutor(!showTutor)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenPubChem={() => handleOpenPubChem()}
         onOpenImportJson={() => jsonFileInputRef.current?.click()}

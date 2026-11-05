@@ -214,7 +214,7 @@ export function getInitialTheme(): 'light' | 'dark' {
       return saved;
     }
   } catch {}
-  inMemoryTheme = 'dark'; // Dark mode is default per user specification
+  inMemoryTheme = 'light'; // Light mode is default per user specification
   return inMemoryTheme;
 }
 
