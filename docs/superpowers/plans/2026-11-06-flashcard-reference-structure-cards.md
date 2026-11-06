@@ -54,7 +54,7 @@
   ): ClinicalPharmacologyProfile;
   ```
 
-- [ ] **Step 1: Write failing unit test for `clinicalPharmacologyDictionary`**
+- [x] **Step 1: Write failing unit test for `clinicalPharmacologyDictionary`**
 
 ```typescript
 // tests/clinicalPharmacologyDictionary.test.ts
@@ -95,12 +95,12 @@ describe('clinicalPharmacologyDictionary', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/clinicalPharmacologyDictionary.test.ts`  
 Expected: FAIL with "Cannot find module '../src/utils/clinicalPharmacologyDictionary'"
 
-- [ ] **Step 3: Implement `clinicalPharmacologyDictionary.ts`**
+- [x] **Step 3: Implement `clinicalPharmacologyDictionary.ts`**
 
 Implement `src/utils/clinicalPharmacologyDictionary.ts` with comprehensive entries for all 48 harvested lecture cardiovascular drugs across the four modules:
 1. **Antiplatelets**: Aspirin, Clopidogrel, Prasugrel, Ticagrelor, Cangrelor, Tirofiban, Eptifibatide, Vorapaxar, Cilostazol, Dipyridamole.
@@ -110,12 +110,12 @@ Implement `src/utils/clinicalPharmacologyDictionary.ts` with comprehensive entri
 
 Provide `resolveClinicalPharmacology(structure)` with normalized name lookup (stripping brackets, normalizing whitespace, checking aliases and trade names) and safe fallback synthesis.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/clinicalPharmacologyDictionary.test.ts`  
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/utils/clinicalPharmacologyDictionary.ts tests/clinicalPharmacologyDictionary.test.ts
@@ -150,7 +150,7 @@ git commit -m "feat(dict): author cardiovascular clinical pharmacology dictionar
   export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProps>;
   ```
 
-- [ ] **Step 1: Write failing component tests for `StructureFlashcardCardFace`**
+- [x] **Step 1: Write failing component tests for `StructureFlashcardCardFace`**
 
 ```typescript
 // tests/StructureFlashcardCardFace.test.tsx
@@ -220,12 +220,12 @@ describe('StructureFlashcardCardFace', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/StructureFlashcardCardFace.test.tsx`  
 Expected: FAIL with "Cannot find module '../src/components/StructureFlashcardCardFace'"
 
-- [ ] **Step 3: Implement `StructureFlashcardCardFace.tsx`**
+- [x] **Step 3: Implement `StructureFlashcardCardFace.tsx`**
 
 Implement `src/components/StructureFlashcardCardFace.tsx`:
 1. Use `bg-[var(--structure-canvas-bg)]` for the structure canvas container with border and hover zoom cue.
@@ -241,12 +241,12 @@ Implement `src/components/StructureFlashcardCardFace.tsx`:
      - Structure-Activity Relationship (SAR) notes card
    - Bottom Slot: Render `children` (Anki rating buttons).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/StructureFlashcardCardFace.test.tsx`  
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/StructureFlashcardCardFace.tsx tests/StructureFlashcardCardFace.test.tsx
@@ -265,7 +265,7 @@ git commit -m "feat(ui): implement two-column structure flashcard card face comp
 - Consumes: `StructureFlashcardCardFace` from `src/components/StructureFlashcardCardFace.tsx`
 - Produces: Updated `StructureFlashcardDeck` component rendering upgraded front and Option B back faces.
 
-- [ ] **Step 1: Write integration regression test in `tests/StructureFlashcardDeck.test.tsx`**
+- [x] **Step 1: Write integration regression test in `tests/StructureFlashcardDeck.test.tsx`**
 
 ```typescript
 // tests/StructureFlashcardDeck.test.tsx
@@ -325,29 +325,29 @@ describe('StructureFlashcardDeck Integration', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails or needs updates**
+- [x] **Step 2: Run test to verify it fails or needs updates**
 
 Run: `npx vitest run tests/StructureFlashcardDeck.test.tsx`  
 Expected: May fail or pass depending on existing imports; verify regression boundary.
 
-- [ ] **Step 3: Update `StructureFlashcardDeck.tsx` to use `StructureFlashcardCardFace`**
+- [x] **Step 3: Update `StructureFlashcardDeck.tsx` to use `StructureFlashcardCardFace`**
 
 Replace the inline canvas blocks in `StructureFlashcardDeck.tsx` with `<StructureFlashcardCardFace>`:
 1. Pass `structure={structure}`, `drugName={currentCard.drugName}`, `isFlipped={isFlipped}`, `isSuspended={Boolean(currentCard.isSuspended)}`, `onToggleSuspend={handleToggleSuspend}`, `onFlip={() => setIsFlipped(true)}`.
 2. Nest the 4-interval rating buttons (`Again [1]`, `Hard [2]`, `Good [3]`, `Easy [4]`) inside as children to slot cleanly into the bottom action bar when flipped.
 3. Preserve all existing state, module filter toggles, keyboard shortcut event listeners, and early finish handlers.
 
-- [ ] **Step 4: Run full test suite and verify all tests pass**
+- [x] **Step 4: Run full test suite and verify all tests pass**
 
 Run: `npm run test:run`  
 Expected: All 25+ test suites PASS cleanly.
 
-- [ ] **Step 5: Verify production build succeeds**
+- [x] **Step 5: Verify production build succeeds**
 
 Run: `npm run build`  
 Expected: Vite build succeeds with clean output in `dist/`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/components/StructureFlashcardDeck.tsx tests/StructureFlashcardDeck.test.tsx
