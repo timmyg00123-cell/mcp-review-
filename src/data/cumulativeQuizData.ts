@@ -509,13 +509,18 @@ export const CUMULATIVE_QUESTIONS: CumulativeQuestion[] = [
 ];
 
 import { CUMULATIVE_QUESTIONS_EXAM_2 as EXAM_2_QUESTIONS } from './exam2/exam2CumulativeQuizData';
+import { CUMULATIVE_QUESTIONS_EXAM_1 as EXAM_1_QUESTIONS } from './exam1/exam1CumulativeQuizData';
 
 export const CUMULATIVE_QUESTIONS_EXAM_3: CumulativeQuestion[] = CUMULATIVE_QUESTIONS;
 export let CUMULATIVE_QUESTIONS_EXAM_2: CumulativeQuestion[] = EXAM_2_QUESTIONS;
-export const CUMULATIVE_QUESTIONS_EXAM_1: CumulativeQuestion[] = [];
+export let CUMULATIVE_QUESTIONS_EXAM_1: CumulativeQuestion[] = EXAM_1_QUESTIONS;
 
 export function setExam2QuestionBank(questions: CumulativeQuestion[]): void {
   CUMULATIVE_QUESTIONS_EXAM_2 = questions;
+}
+
+export function setExam1QuestionBank(questions: CumulativeQuestion[]): void {
+  CUMULATIVE_QUESTIONS_EXAM_1 = questions;
 }
 
 /**

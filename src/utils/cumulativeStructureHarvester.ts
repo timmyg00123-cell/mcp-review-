@@ -2,6 +2,8 @@ import type { ReviewModule, ChemicalStructure } from '../types/reviewModule';
 import type { FlashcardItem } from '../types/cumulativeStudy';
 import { loadAllReviewModules } from './moduleStorage';
 import { getModuleExamId } from '../types/examTypes';
+import { getExam1Modules } from '../data/exam1';
+import { getExam2Modules } from '../data/exam2';
 
 /**
  * Normalizes SMILES strings for reliable deduplication comparison.
@@ -305,10 +307,18 @@ export function harvestCumulativeFlashcards(
 
   const allMods =
     targetModules && targetModules.length > 0 ? targetModules : loadAllReviewModules();
-  const filtered =
+  let filtered =
     targetExamId && targetExamId !== 'all'
       ? allMods.filter((m) => getModuleExamId(m) === targetExamId)
       : allMods;
+
+  if (filtered.length === 0) {
+    if (targetExamId === 'exam_1') {
+      filtered = getExam1Modules();
+    } else if (targetExamId === 'exam_2') {
+      filtered = getExam2Modules();
+    }
+  }
 
   return harvestCurriculumStructures(filtered);
 }
