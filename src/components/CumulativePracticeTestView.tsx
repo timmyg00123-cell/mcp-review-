@@ -153,7 +153,11 @@ export const CumulativePracticeTestView: React.FC<CumulativePracticeTestViewProp
     if (!currentQuestion) return;
 
     if (selectedIds.length === 0) {
-      setValidationError('Please select at least one candidate structure before submitting.');
+      const msg =
+        currentQuestion.type === 'structure-to-effects'
+          ? 'Please select at least one physiological effect statement before submitting.'
+          : 'Please select at least one candidate structure before submitting.';
+      setValidationError(msg);
       return;
     }
 
@@ -476,6 +480,7 @@ export const CumulativePracticeTestView: React.FC<CumulativePracticeTestViewProp
                       type="checkbox"
                       checked={isSelected}
                       disabled={isSubmitted}
+                      onClick={(e) => e.stopPropagation()}
                       onChange={() => handleToggleSelect(stmt.id)}
                       className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer disabled:cursor-not-allowed"
                     />
@@ -572,6 +577,7 @@ export const CumulativePracticeTestView: React.FC<CumulativePracticeTestViewProp
                           type="checkbox"
                           checked={isSelected}
                           disabled={isSubmitted}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={() => handleToggleSelect(candidate.id)}
                           className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer disabled:cursor-not-allowed"
                         />
