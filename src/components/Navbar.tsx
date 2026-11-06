@@ -23,6 +23,7 @@ import {
   MoreHorizontal,
   Layers,
   Sun,
+  GraduationCap,
 } from 'lucide-react';
 import { exportReviewModuleAsJson } from '../utils/jsonPortability';
 import { isStudentMode } from '../utils/envMode';
@@ -61,6 +62,7 @@ export interface NavbarProps {
   onToggleTheme?: () => void;
   onOpenSettings: () => void;
   onOpenPubChem: () => void;
+  onOpenCumulativeHub?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -97,6 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleTheme,
   onOpenSettings,
   onOpenPubChem,
+  onOpenCumulativeHub,
 }) => {
   const modulePopoverRef = useRef<HTMLDivElement>(null);
   const [confirmDeleteModuleId, setConfirmDeleteModuleId] = useState<string | null>(null);
@@ -522,6 +525,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             )}
           </div>
+
+          {/* Cumulative MedChem Study Hub Action Button */}
+          {onOpenCumulativeHub && (
+            <button
+              type="button"
+              onClick={onOpenCumulativeHub}
+              className="px-2.5 py-1 text-xs font-semibold rounded-full border border-indigo-300 dark:border-indigo-800 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer group"
+              title="Open Cumulative Study Hub: Practice Test, Rapid Flashcards, and Diagnostic Overview"
+              aria-label="Open Cumulative Study Hub"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+              <span className="hidden sm:inline font-bold">Cumulative</span>
+            </button>
+          )}
 
           {/* Color Settings & Preferences Shortcut (Light Icon) */}
           <button

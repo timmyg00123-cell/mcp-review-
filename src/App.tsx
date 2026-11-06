@@ -69,6 +69,9 @@ const KnowledgeGraphExplorer = React.lazy(() =>
 const PharmacophoreExplorerSidebar = React.lazy(() =>
   import('./components/PharmacophoreExplorerSidebar').then((m) => ({ default: m.PharmacophoreExplorerSidebar }))
 );
+const CumulativeStudyHubModal = React.lazy(() =>
+  import('./components/CumulativeStudyHubModal').then((m) => ({ default: m.CumulativeStudyHubModal }))
+);
 import { GlobalPharmacophore } from './utils/globalPharmacophores';
 import {
   ColorPaletteItem,
@@ -581,6 +584,9 @@ function AppContent() {
   // PubChem inspector modal state
   const [inspectedStructure, setInspectedStructure] = useState<ChemicalStructure | null>(null);
   const [isPubChemModalOpen, setIsPubChemModalOpen] = useState(false);
+
+  // Cumulative Study Hub modal state
+  const [isCumulativeHubOpen, setIsCumulativeHubOpen] = useState(false);
 
   // AI Tutor slide-over state
   const [showTutor, setShowTutor] = useState<boolean>(false);
@@ -1144,6 +1150,7 @@ function AppContent() {
         onToggleTheme={toggleTheme}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenPubChem={() => handleOpenPubChem()}
+        onOpenCumulativeHub={() => setIsCumulativeHubOpen(true)}
         onOpenImportJson={() => jsonFileInputRef.current?.click()}
       />
 
@@ -1869,6 +1876,18 @@ function AppContent() {
             onSaveModule={handleSaveEditedModule}
             onDeleteModule={handleDeleteCustomModule}
             onResetBuiltIn={handleResetBuiltIn}
+          />
+        </React.Suspense>
+      )}
+
+      {/* ---------------------------------------------------- */}
+      {/* CUMULATIVE MEDCHEM STUDY HUB MODAL                   */}
+      {/* ---------------------------------------------------- */}
+      {isCumulativeHubOpen && (
+        <React.Suspense fallback={null}>
+          <CumulativeStudyHubModal
+            isOpen={isCumulativeHubOpen}
+            onClose={() => setIsCumulativeHubOpen(false)}
           />
         </React.Suspense>
       )}

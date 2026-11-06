@@ -1,5 +1,6 @@
 import type { ReviewModule, ChemicalStructure } from '../types/reviewModule';
 import type { FlashcardItem } from '../types/cumulativeStudy';
+import { loadAllReviewModules } from './moduleStorage';
 
 /**
  * Normalizes SMILES strings for reliable deduplication comparison.
@@ -274,3 +275,17 @@ export function filterFlashcardsByModules(
   const activeSet = new Set(activeModuleIds);
   return cards.filter((card) => card.moduleIds.some((mId) => activeSet.has(mId)));
 }
+
+/**
+ * Harvests all deduplicated chemical structures across loaded curriculum modules
+ * into ready-to-study FlashcardItem records for the Cumulative Study Hub.
+ * If no modules are provided, automatically loads all available review modules.
+ *
+ * @param modules Optional array of ReviewModule instances (defaults to loadAllReviewModules())
+ * @returns Deduplicated array of initialized FlashcardItem records
+ */
+export function harvestCumulativeFlashcards(modules?: ReviewModule[]): FlashcardItem[] {
+  const mods = Array.isArray(modules) && modules.length > 0 ? modules : loadAllReviewModules();
+  return harvestCurriculumStructures(mods);
+}
+
