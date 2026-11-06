@@ -204,6 +204,10 @@ export const CUMULATIVE_QUESTIONS_EXAM_1: CumulativeQuestion[] = [
           'Theophylline has a notoriously narrow therapeutic index (target 10-20 mcg/mL, with toxicity frequently observed at >20-25 mcg/mL), mandating routine TDM.',
       },
     ],
+    rationales: {
+      theophylline:
+        'Theophylline is 1,3-dimethylxanthine. It produces dual bronchodilation and anti-inflammatory effects through non-selective PDE inhibition (PDE3/4/5) and adenosine A1/A2A receptor antagonism. It has a narrow therapeutic range (10-20 mcg/mL) and undergoes hepatic CYP1A2 metabolism.',
+    },
     highYieldPearl:
       'Theophylline (1,3-dimethylxanthine) exerts dual bronchodilation and anti-inflammatory actions via non-selective PDE inhibition and adenosine A1/A2A receptor antagonism. It has a very narrow therapeutic window (10-20 mcg/mL, with toxicity appearing at >20-25 mcg/mL). Hepatic clearance is driven by CYP1A2; CYP1A2 inhibitors (ciprofloxacin, fluvoxamine, zileuton) dramatically spike theophylline levels, causing cardiac arrhythmias and fatal seizures, whereas cigarette smoking induces CYP1A2 and requires higher maintenance doses.',
   },
@@ -258,6 +262,10 @@ export const CUMULATIVE_QUESTIONS_EXAM_1: CumulativeQuestion[] = [
           'Furosemide causes massive potassium and hydrogen wasting (hypokalemic, hypochloremic metabolic alkalosis), not potassium sparing or hyperkalemia.',
       },
     ],
+    rationales: {
+      furosemide:
+        'Furosemide is 4-chloro-2-[(furan-2-ylmethyl)amino]-5-sulfamoylbenzoic acid. It is an anthranilic acid high-ceiling loop diuretic that blocks luminal NKCC2 in the TAL of Henle. It requires active proximal secretion via OAT1/3 due to >95% albumin binding and induces hypokalemic hypochloremic metabolic alkalosis, hypomagnesemia, and hypocalcemia.',
+    },
     highYieldPearl:
       'Furosemide is a prototype high-ceiling loop diuretic (anthranilic acid derivative) that inhibits NKCC2 in the TAL. Because >95% is protein-bound to albumin, it cannot access its site of action via glomerular filtration; instead, it relies on active proximal tubular secretion via OAT1/3. Key toxicities include hypokalemic hypochloremic metabolic alkalosis, hypomagnesemia, hypocalcemia (unlike thiazides, which retain calcium), and sulfa cross-reactivity.',
   },
@@ -312,6 +320,10 @@ export const CUMULATIVE_QUESTIONS_EXAM_1: CumulativeQuestion[] = [
           'Tiotropium is a quaternary ammonium salt with zero unionized fraction at physiological pH; it cannot cross the BBB.',
       },
     ],
+    rationales: {
+      tiotropium:
+        'Tiotropium bromide is an inhaled long-acting muscarinic antagonist (LAMA) featuring a scopine ring, two thienyl rings, and a permanent quaternary ammonium charge preventing blood-brain barrier penetration. It exhibits kinetic selectivity with very slow dissociation from M3 receptors (t1/2 ~35 h) and fast dissociation from M2 autoreceptors (t1/2 ~3.6 h).',
+    },
     highYieldPearl:
       'Tiotropium is a prototype inhaled LAMA for COPD and severe asthma. Its permanent quaternary ammonium charge restricts action to the respiratory tract without central anticholinergic toxicity. Although it has similar thermodynamic equilibrium affinity for M1, M2, and M3 receptors, its clinical once-daily efficacy stems from kinetic selectivity: an exceptionally slow dissociation off-rate from airway smooth muscle M3 receptors (t1/2 ~35 h) compared to rapid off-rate from presynaptic M2 autoreceptors (t1/2 ~3.6 h).',
   },
@@ -366,6 +378,10 @@ export const CUMULATIVE_QUESTIONS_EXAM_1: CumulativeQuestion[] = [
           'Dexamethasone contains the mandatory 11beta-OH group and acts primarily via cytoplasmic glucocorticoid nuclear receptors (transrepression of NF-kB and transactivation of anti-inflammatory genes).',
       },
     ],
+    rationales: {
+      dexamethasone:
+        'Dexamethasone is 9alpha-fluoro-16alpha-methylprednisolone. It features a Delta-1 double bond that enhances glucocorticoid receptor affinity, a 9alpha-fluoro substituent that inductively strengthens 11beta-OH hydrogen bonding, and a 16alpha-methyl group that sterically eliminates mineralocorticoid receptor binding, completely abolishing salt and water retention.',
+    },
     highYieldPearl:
       'Dexamethasone is a potent synthetic glucocorticoid (~25-30x more potent than cortisol) possessing three key SAR modifications: (1) a Delta-1 double bond that increases glucocorticoid potency and slows ring-A reduction; (2) a 9alpha-fluoro group that inductively stabilizes the active 11beta-OH conformation; and (3) a 16alpha-methyl group that abolishes mineralocorticoid receptor binding, completely preventing fluid retention and hypertension. Unlike cortisone and prednisone (which are 11-keto prodrugs), dexamethasone already contains the active 11beta-hydroxyl group.',
   },

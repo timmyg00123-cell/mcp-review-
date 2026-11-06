@@ -17,6 +17,11 @@ import {
   getDefaultRaasModule,
   getDefaultAntihyperlipidemicsModule,
 } from '../data/exam2';
+import {
+  getDefaultRenalDrugsModule,
+  getDefaultRespiratoryBronchodilatorsModule,
+  getDefaultRespiratoryAntiinflammatoriesModule,
+} from '../data/exam1';
 import { medChemGraphDb } from '../db/medChemGraphDb';
 import { getCorrectedSmarts } from './smartsDictionary';
 import { getModuleExamId } from '../types/examTypes';
@@ -31,6 +36,9 @@ export const ALL_BUILTIN_MODULE_IDS = [
   'antihypertensives_3_mcp2',
   'antihypertensives_4_mcp2',
   'antihyperlipidemics_mcp2',
+  'renal_drugs_mcp2',
+  'respiratory_bronchodilators_mcp2',
+  'respiratory_antiinflammatories_mcp2',
 ] as const;
 
 export const BUILTIN_IDS_SET = new Set<string>([
@@ -114,6 +122,9 @@ export function loadAllReviewModules(): ReviewModule[] {
   const defaultVasodilators = getDefaultVasodilatorsModule();
   const defaultRaas = getDefaultRaasModule();
   const defaultAntihyperlipidemics = getDefaultAntihyperlipidemicsModule();
+  const defaultRenal = getDefaultRenalDrugsModule();
+  const defaultRespBroncho = getDefaultRespiratoryBronchodilatorsModule();
+  const defaultRespAntiinflam = getDefaultRespiratoryAntiinflammatoriesModule();
   const hiddenBuiltins = getHiddenBuiltins();
 
   let overrides: Record<string, ReviewModule> = {};
@@ -149,6 +160,9 @@ export function loadAllReviewModules(): ReviewModule[] {
   const finalVasodilators = overrides['antihypertensives_3_mcp2'] || defaultVasodilators;
   const finalRaas = overrides['antihypertensives_4_mcp2'] || defaultRaas;
   const finalAntihyperlipidemics = overrides['antihyperlipidemics_mcp2'] || defaultAntihyperlipidemics;
+  const finalRenal = overrides['renal_drugs_mcp2'] || defaultRenal;
+  const finalRespBroncho = overrides['respiratory_bronchodilators_mcp2'] || defaultRespBroncho;
+  const finalRespAntiinflam = overrides['respiratory_antiinflammatories_mcp2'] || defaultRespAntiinflam;
 
   const builtIns: ReviewModule[] = [];
   if (!hiddenBuiltins.includes('antiplatelets_mcp2')) builtIns.push(finalAntiplatelet);
@@ -160,6 +174,9 @@ export function loadAllReviewModules(): ReviewModule[] {
   if (!hiddenBuiltins.includes('antihypertensives_3_mcp2')) builtIns.push(finalVasodilators);
   if (!hiddenBuiltins.includes('antihypertensives_4_mcp2')) builtIns.push(finalRaas);
   if (!hiddenBuiltins.includes('antihyperlipidemics_mcp2')) builtIns.push(finalAntihyperlipidemics);
+  if (!hiddenBuiltins.includes('renal_drugs_mcp2')) builtIns.push(finalRenal);
+  if (!hiddenBuiltins.includes('respiratory_bronchodilators_mcp2')) builtIns.push(finalRespBroncho);
+  if (!hiddenBuiltins.includes('respiratory_antiinflammatories_mcp2')) builtIns.push(finalRespAntiinflam);
 
   // Synchronously load custom modules from localStorage so 0ms first-paint never drops them on reload
   let customList: ReviewModule[] = [];
@@ -204,6 +221,9 @@ export function loadAllReviewModules(): ReviewModule[] {
           finalVasodilators,
           finalRaas,
           finalAntihyperlipidemics,
+          finalRenal,
+          finalRespBroncho,
+          finalRespAntiinflam,
         ].map(sanitizeModule);
   return inMemoryModules;
 }
@@ -223,6 +243,9 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     const defaultVasodilators = getDefaultVasodilatorsModule();
     const defaultRaas = getDefaultRaasModule();
     const defaultAntihyperlipidemics = getDefaultAntihyperlipidemicsModule();
+    const defaultRenal = getDefaultRenalDrugsModule();
+    const defaultRespBroncho = getDefaultRespiratoryBronchodilatorsModule();
+    const defaultRespAntiinflam = getDefaultRespiratoryAntiinflammatoriesModule();
     const hiddenBuiltins = getHiddenBuiltins();
 
     // 1. Load custom modules and overrides from Dexie
@@ -290,6 +313,9 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     const finalVasodilators = overrides['antihypertensives_3_mcp2'] || defaultVasodilators;
     const finalRaas = overrides['antihypertensives_4_mcp2'] || defaultRaas;
     const finalAntihyperlipidemics = overrides['antihyperlipidemics_mcp2'] || defaultAntihyperlipidemics;
+    const finalRenal = overrides['renal_drugs_mcp2'] || defaultRenal;
+    const finalRespBroncho = overrides['respiratory_bronchodilators_mcp2'] || defaultRespBroncho;
+    const finalRespAntiinflam = overrides['respiratory_antiinflammatories_mcp2'] || defaultRespAntiinflam;
 
     // 3. Bidirectional merge of custom modules between Dexie and localStorage
     const rawLocal = localStorage.getItem(MODULES_STORAGE_KEY);
@@ -370,6 +396,9 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     if (!hiddenBuiltins.includes('antihypertensives_3_mcp2')) builtIns.push(finalVasodilators);
     if (!hiddenBuiltins.includes('antihypertensives_4_mcp2')) builtIns.push(finalRaas);
     if (!hiddenBuiltins.includes('antihyperlipidemics_mcp2')) builtIns.push(finalAntihyperlipidemics);
+    if (!hiddenBuiltins.includes('renal_drugs_mcp2')) builtIns.push(finalRenal);
+    if (!hiddenBuiltins.includes('respiratory_bronchodilators_mcp2')) builtIns.push(finalRespBroncho);
+    if (!hiddenBuiltins.includes('respiratory_antiinflammatories_mcp2')) builtIns.push(finalRespAntiinflam);
 
     const defaultAll = [
       finalAntiplatelet,
@@ -381,6 +410,9 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
       finalVasodilators,
       finalRaas,
       finalAntihyperlipidemics,
+      finalRenal,
+      finalRespBroncho,
+      finalRespAntiinflam,
     ];
 
     const combined = [...builtIns, ...mergedCustom];

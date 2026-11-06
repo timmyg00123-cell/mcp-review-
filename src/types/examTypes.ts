@@ -16,12 +16,17 @@ export const EXAM_DEFINITIONS: ExamDefinition[] = [
   {
     id: 'exam_1',
     code: 'Exam 1',
-    title: 'Exam 1: Foundations & Autonomics',
-    shortTitle: 'Autonomics & Foundations',
-    description: 'Autonomic nervous system, adrenergics, cholinergics & foundational medchem concepts.',
-    chapters: 'Chapters 1–2',
-    builtInModuleIds: [],
-    isAvailable: false,
+    title: 'Exam 1: Renal & Respiratory Medicinal Chemistry',
+    shortTitle: 'Renal & Respiratory',
+    description: 'Diuretics, Vaptans, Potassium Binders, Bronchodilators, Glucocorticoids & Antileukotrienes.',
+    chapters: 'Modules 1–3',
+    builtInModuleIds: [
+      'renal_drugs_mcp2',
+      'respiratory_bronchodilators_mcp2',
+      'respiratory_antiinflammatories_mcp2',
+    ],
+    defaultModuleId: 'renal_drugs_mcp2',
+    isAvailable: true,
   },
   {
     id: 'exam_2',
@@ -116,6 +121,22 @@ export function getModuleExamId(module: ReviewModule | null | undefined): string
     module.title.toLowerCase().includes('antihyperlipidemic')
   ) {
     return 'exam_2';
+  }
+
+  // Exam 1 built-ins or custom matching pattern
+  if (
+    [
+      'renal_drugs_mcp2',
+      'respiratory_bronchodilators_mcp2',
+      'respiratory_antiinflammatories_mcp2',
+    ].includes(module.id) ||
+    module.id.startsWith('renal_') ||
+    module.id.startsWith('respiratory_') ||
+    module.title.toLowerCase().includes('renal') ||
+    module.title.toLowerCase().includes('respiratory') ||
+    module.title.toLowerCase().includes('bronchodilator')
+  ) {
+    return 'exam_1';
   }
 
   // If code was explicitly set to an exam
