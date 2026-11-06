@@ -5,6 +5,9 @@ const filePath = 'src/components/StructureFlashcardDeck.tsx';
 assert.ok(fs.existsSync(filePath), `Target file ${filePath} must exist`);
 
 const content = fs.readFileSync(filePath, 'utf-8');
+const cardFacePath = 'src/components/StructureFlashcardCardFace.tsx';
+const cardFaceContent = fs.existsSync(cardFacePath) ? fs.readFileSync(cardFacePath, 'utf-8') : '';
+const combined = content + '\n' + cardFaceContent;
 
 // Test 1: Component exports and Props interface
 assert.ok(content.includes('export interface StructureFlashcardDeckProps'), 'Must export StructureFlashcardDeckProps');
@@ -27,16 +30,16 @@ assert.ok(content.includes('Space') || content.includes("' '"), 'Must handle Spa
 assert.ok(content.includes('INPUT') || content.includes('TEXTAREA') || content.includes('isContentEditable'), 'Must guard against keydown inside input or textarea');
 
 // Test 4: Front of card blinding and prompt
-assert.ok(content.includes('Identify the Pharmacologic Class & Key Moieties'), 'Must render prompt on card front');
-assert.ok(content.includes('Flip Card') || content.includes('Show Answer'), 'Must render flip / show answer button');
-assert.ok(content.includes('SmilesCanvas'), 'Must render 2D chemical structure using SmilesCanvas');
+assert.ok(combined.includes('Identify the Pharmacologic Class & Key Moieties'), 'Must render prompt on card front');
+assert.ok(combined.includes('Flip Card') || combined.includes('Show Answer'), 'Must render flip / show answer button');
+assert.ok(combined.includes('SmilesCanvas'), 'Must render 2D chemical structure using SmilesCanvas');
 
 // Test 5: Back of card elements (class banner, trade name, target, moieties, SAR, suspend)
-assert.ok(content.includes('pharmacologicalClass') || content.includes('chemicalClass'), 'Must display pharmacologic or chemical class banner on back');
-assert.ok(content.includes('tradeName'), 'Must render trade name on back when present');
-assert.ok(content.includes('keyFunctionalGroups'), 'Must display key functional groups on back');
-assert.ok(content.includes('sarNotes') || content.includes('sar_rationale'), 'Must display SAR notes on back');
-assert.ok(content.includes('Suspend Card') || content.includes('toggleCardSuspension'), 'Must provide card suspension toggle');
+assert.ok(combined.includes('pharmacologicalClass') || combined.includes('chemicalClass'), 'Must display pharmacologic or chemical class banner on back');
+assert.ok(combined.includes('tradeName'), 'Must render trade name on back when present');
+assert.ok(combined.includes('keyFunctionalGroups'), 'Must display key functional groups on back');
+assert.ok(combined.includes('sarNotes') || combined.includes('sar_rationale'), 'Must display SAR notes on back');
+assert.ok(combined.includes('Suspend Card') || combined.includes('toggleCardSuspension'), 'Must provide card suspension toggle');
 
 // Test 6: Spaced Repetition Service integration
 assert.ok(content.includes('applySpacedRepetitionGrade'), 'Must import and use applySpacedRepetitionGrade');

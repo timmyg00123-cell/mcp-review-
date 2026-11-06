@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { FlashcardItem, SpacedRepetitionRating } from '../types/cumulativeStudy';
 import {
   applySpacedRepetitionGrade,
@@ -7,17 +7,12 @@ import {
   toggleCardSuspension,
   applyProgressToCards,
 } from '../utils/spacedRepetitionService';
-import { SmilesCanvas } from './SmilesCanvas';
+import { StructureFlashcardCardFace } from './StructureFlashcardCardFace';
 import {
   CheckCircle2,
-  Ban,
   X,
   Filter,
-  Sparkles,
   Layers,
-  HelpCircle,
-  Eye,
-  RotateCcw,
 } from 'lucide-react';
 
 export interface StructureFlashcardDeckProps {
@@ -54,9 +49,9 @@ function cardMatchesModuleFilter(card: FlashcardItem, filter: ModuleFilterState)
  * Anki-Style Flashcard Component for Rapid Chemical Structure Recall
  *
  * Implements:
- * - Blinded front card: 2D chemical structure only, with class & moiety deduction prompt.
- * - Comprehensive back card: Pharmacologic class banner, generic & trade names, target/effect,
- *   key functional groups, SAR notes, and card suspension toggle.
+ * - Blinded front card: High-contrast 2D chemical structure with zoom modal and prompt.
+ * - Comprehensive Option B back card: Two-column split deck with reference properties,
+ *   pharmacophore tags, clinical pharmacology (metabolism, BBB, pregnancy risk), and SAR notes.
  * - 4-interval spaced repetition bar: Again (< 1 min), Hard (4 min), Good (10 min), Easy (1 day).
  * - Keyboard shortcuts: Space (flip), 1 (Again), 2 (Hard), 3 (Good), 4 (Easy) with input focus guard.
  * - Module filter toggles (Antiplatelets, Anticoagulants, Heart Failure, Antiarrhythmics).
@@ -262,7 +257,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
           <button
             type="button"
             onClick={() => onSessionComplete(struggled, deck)}
-            className="px-6 py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all"
+            className="px-6 py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all cursor-pointer"
           >
             View Struggle Diagnostics
           </button>
@@ -270,7 +265,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="px-5 py-2.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Close Deck
             </button>
@@ -281,9 +276,6 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   }
 
   const structure = currentCard.structure;
-  const canonicalSmiles =
-    structure.smiles || structure.canonicalSmiles || structure.canonical_smiles;
-  const fallbackImage = structure.pngUrl || structure.croppedImageUrl;
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl flex flex-col gap-5 text-slate-900 dark:text-slate-100">
@@ -308,7 +300,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             <button
               type="button"
               onClick={handleFinishEarly}
-              className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 underline decoration-slate-300 dark:decoration-slate-600"
+              className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 underline decoration-slate-300 dark:decoration-slate-600 cursor-pointer"
             >
               Finish Session Early
             </button>
@@ -316,7 +308,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 title="Close Deck"
               >
                 <X className="w-5 h-5" />
@@ -383,199 +375,55 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         </div>
       </div>
 
-      {/* Card Body */}
-      {!isFlipped ? (
-        /* FRONT OF CARD: Strictly Blinded Structure & Prompt */
-        <div className="flex flex-col gap-4">
-          <div className="text-center py-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-semibold mb-2">
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span>Flashcard Prompt</span>
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-              Identify the Pharmacologic Class & Key Moieties
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Deduce receptor selectivity, functional groups, and physiological activity before revealing answer.
-            </p>
-          </div>
-
-          {/* 2D Chemical Structure (No name or module leak) */}
-          <div className="w-full flex items-center justify-center p-6 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800">
-            <SmilesCanvas
-              smiles={canonicalSmiles}
-              fallbackImageUrl={fallbackImage}
-              altText="Blinded 2D Chemical Structure for Pharmacologic Class Recall"
-              width={480}
-              height={320}
-              className="max-h-72 w-auto mx-auto object-contain"
-            />
-          </div>
-
-          {/* Flip / Show Answer Action */}
+      {/* Upgraded Card Body with Blinded Front Face & Option B Split Back Face */}
+      <StructureFlashcardCardFace
+        structure={structure}
+        drugName={currentCard.drugName}
+        isFlipped={isFlipped}
+        isSuspended={Boolean(currentCard.isSuspended)}
+        onToggleSuspend={handleToggleSuspend}
+        onFlip={() => setIsFlipped(true)}
+      >
+        {/* 4-Interval Anki Rating Bar */}
+        <div className="grid grid-cols-4 gap-2">
           <button
             type="button"
-            onClick={() => setIsFlipped(true)}
-            className="w-full py-3.5 px-6 rounded-xl font-bold text-base bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2"
+            onClick={() => handleGrade('again')}
+            className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:border-rose-300 dark:hover:border-rose-700 transition-all shadow-xs cursor-pointer"
           >
-            <span>Show Answer / Flip Card</span>
-            <span className="text-xs px-2 py-0.5 rounded bg-blue-500/40 text-blue-100 font-mono">
-              (Space)
-            </span>
+            <span className="text-[11px] font-semibold text-rose-500 dark:text-rose-400">&lt; 1 min</span>
+            <span className="text-base font-extrabold mt-0.5">Again</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[1]</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleGrade('hard')}
+            className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-700 transition-all shadow-xs cursor-pointer"
+          >
+            <span className="text-[11px] font-semibold text-amber-500 dark:text-amber-400">4 min</span>
+            <span className="text-base font-extrabold mt-0.5">Hard</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[2]</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleGrade('good')}
+            className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all shadow-xs cursor-pointer"
+          >
+            <span className="text-[11px] font-semibold text-blue-500 dark:text-blue-400">10 min</span>
+            <span className="text-base font-extrabold mt-0.5">Good</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[3]</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleGrade('easy')}
+            className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all shadow-xs cursor-pointer"
+          >
+            <span className="text-[11px] font-semibold text-emerald-500 dark:text-emerald-400">1 day</span>
+            <span className="text-base font-extrabold mt-0.5">Easy</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[4]</span>
           </button>
         </div>
-      ) : (
-        /* BACK OF CARD: Class Banner, Drug Name, Effect, Moieties, SAR, Rating */
-        <div className="flex flex-col gap-4">
-          {/* Pharmacologic Class Banner */}
-          <div className="p-3.5 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-              <div>
-                <div className="text-[10px] font-bold tracking-wider uppercase text-indigo-600 dark:text-indigo-400">
-                  Pharmacologic Class
-                </div>
-                <div className="text-lg font-extrabold text-indigo-900 dark:text-indigo-100">
-                  {structure.pharmacologicalClass || structure.chemicalClass || 'Pharmacologic Class'}
-                </div>
-              </div>
-            </div>
-            <div className="text-right">
-              <span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm">
-                {structure.chemicalClass || 'Chemical Scaffold'}
-              </span>
-            </div>
-          </div>
-
-          {/* Drug Name, Trade Name & Suspend Toggle */}
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">
-                {structure.name || currentCard.drugName}
-              </h3>
-              {structure.tradeName && (
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                  Trade: <span className="font-semibold text-slate-700 dark:text-slate-300">{structure.tradeName}</span>
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={handleToggleSuspend}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                currentCard.isSuspended
-                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:text-rose-600 dark:hover:text-rose-400'
-              }`}
-              title="Suspend card to exclude from active review"
-            >
-              <Ban className="w-3.5 h-3.5" />
-              <span>{currentCard.isSuspended ? 'Unsuspend Card' : 'Suspend Card'}</span>
-            </button>
-          </div>
-
-          {/* Compact Structure Visualization on Back */}
-          <div className="w-full flex items-center justify-center py-3 px-4 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-200 dark:border-slate-800">
-            <SmilesCanvas
-              smiles={canonicalSmiles}
-              fallbackImageUrl={fallbackImage}
-              altText={`${structure.name} 2D chemical structure`}
-              width={380}
-              height={180}
-              className="max-h-40 w-auto mx-auto object-contain"
-            />
-          </div>
-
-          {/* Physiological Target & Bodily Effect */}
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Physiological Target & Bodily Effect
-            </div>
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
-              {structure.target || structure.target_receptor || 'Biological Target'}
-              {structure.moa_summary ? ` — ${structure.moa_summary}` : ''}
-            </p>
-            {structure.route && (
-              <div className="text-xs text-slate-500 dark:text-slate-400 pt-0.5">
-                Route: <span className="font-semibold text-slate-700 dark:text-slate-300">{structure.route}</span>
-                {structure.reversibility && ` • ${structure.reversibility}`}
-              </div>
-            )}
-          </div>
-
-          {/* Key Functional Groups */}
-          {structure.keyFunctionalGroups && structure.keyFunctionalGroups.length > 0 && (
-            <div className="space-y-1.5">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Key Functional Groups / Moieties
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {structure.keyFunctionalGroups.map((group, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80"
-                  >
-                    {group}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Structure-Activity Relationship (SAR) Notes */}
-          {(structure.sarNotes || structure.sar_rationale) && (
-            <div className="p-3 rounded-lg bg-amber-500/10 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-900 dark:text-amber-200">
-              <div className="font-bold text-amber-800 dark:text-amber-300 mb-0.5 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                Structure-Activity Relationship (SAR) Notes
-              </div>
-              <p className="leading-relaxed">
-                {structure.sarNotes || structure.sar_rationale}
-              </p>
-            </div>
-          )}
-
-          {/* 4-Interval Rating Bar */}
-          <div className="grid grid-cols-4 gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={() => handleGrade('again')}
-              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:border-rose-300 dark:hover:border-rose-700 transition-all shadow-sm"
-            >
-              <span className="text-[11px] font-semibold text-rose-500 dark:text-rose-400">&lt; 1 min</span>
-              <span className="text-base font-extrabold mt-0.5">Again</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[1]</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleGrade('hard')}
-              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-700 transition-all shadow-sm"
-            >
-              <span className="text-[11px] font-semibold text-amber-500 dark:text-amber-400">4 min</span>
-              <span className="text-base font-extrabold mt-0.5">Hard</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[2]</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleGrade('good')}
-              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all shadow-sm"
-            >
-              <span className="text-[11px] font-semibold text-blue-500 dark:text-blue-400">10 min</span>
-              <span className="text-base font-extrabold mt-0.5">Good</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[3]</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleGrade('easy')}
-              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all shadow-sm"
-            >
-              <span className="text-[11px] font-semibold text-emerald-500 dark:text-emerald-400">1 day</span>
-              <span className="text-base font-extrabold mt-0.5">Easy</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[4]</span>
-            </button>
-          </div>
-        </div>
-      )}
+      </StructureFlashcardCardFace>
     </div>
   );
 };
