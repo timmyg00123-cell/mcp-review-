@@ -17,7 +17,6 @@ import {
   Sparkles,
   BookOpenCheck,
   RotateCcw,
-  Flame,
   ArrowRight,
   ShieldAlert,
 } from 'lucide-react';

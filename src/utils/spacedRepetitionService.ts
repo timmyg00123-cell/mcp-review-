@@ -149,6 +149,11 @@ export function applySpacedRepetitionGrade(
 }
 
 /**
+ * Alias for applySpacedRepetitionGrade to support workflow integration interfaces.
+ */
+export const processReviewRating = applySpacedRepetitionGrade;
+
+/**
  * Toggles a flashcard's suspended status.
  * Suspended cards are excluded from active practice sessions.
  */

@@ -81,6 +81,11 @@ export function calculateQuestionScore(
 }
 
 /**
+ * Alias for calculateQuestionScore for partial credit evaluation.
+ */
+export const calculateQuestionPartialCredit = calculateQuestionScore;
+
+/**
  * Evaluates student performance across practice questions and/or flashcards to produce
  * a comprehensive diagnostic struggle report.
  *
