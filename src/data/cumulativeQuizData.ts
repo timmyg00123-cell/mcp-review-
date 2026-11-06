@@ -508,9 +508,26 @@ export const CUMULATIVE_QUESTIONS: CumulativeQuestion[] = [
   },
 ];
 
+import { CUMULATIVE_QUESTIONS_EXAM_2 as EXAM_2_QUESTIONS } from './exam2/exam2CumulativeQuizData';
+
+export const CUMULATIVE_QUESTIONS_EXAM_3: CumulativeQuestion[] = CUMULATIVE_QUESTIONS;
+export let CUMULATIVE_QUESTIONS_EXAM_2: CumulativeQuestion[] = EXAM_2_QUESTIONS;
+export const CUMULATIVE_QUESTIONS_EXAM_1: CumulativeQuestion[] = [];
+
+export function setExam2QuestionBank(questions: CumulativeQuestion[]): void {
+  CUMULATIVE_QUESTIONS_EXAM_2 = questions;
+}
+
 /**
- * Accessor function returning the complete curated cross-curriculum cumulative question bank.
+ * Accessor function returning the complete curated cross-curriculum cumulative question bank,
+ * scoped by examId ('exam_1', 'exam_2', 'exam_3'). Defaults to 'exam_3'.
  */
-export function getCumulativeQuestionBank(): CumulativeQuestion[] {
-  return CUMULATIVE_QUESTIONS;
+export function getCumulativeQuestionBank(examId: string = 'exam_3'): CumulativeQuestion[] {
+  if (examId === 'exam_2') {
+    return CUMULATIVE_QUESTIONS_EXAM_2;
+  }
+  if (examId === 'exam_1') {
+    return CUMULATIVE_QUESTIONS_EXAM_1;
+  }
+  return CUMULATIVE_QUESTIONS_EXAM_3;
 }

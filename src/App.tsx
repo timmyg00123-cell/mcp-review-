@@ -30,6 +30,13 @@ import {
   clearModuleProgress,
   getEmptySessionProgress,
 } from './utils/moduleStorage';
+import {
+  loadActiveExamId,
+  saveActiveExamId,
+  getModuleExamId,
+  getExamDefinition,
+  EXAM_DEFINITIONS,
+} from './types/examTypes';
 import { ChemicalStructureCard } from './components/ChemicalStructureCard';
 import { StructureComparator } from './components/StructureComparator';
 import { DocumentQuestionItem } from './components/DocumentQuestionItem';
@@ -402,6 +409,7 @@ function AppContent() {
   });
 
   const [activeModuleId, setActiveModuleId] = useState<string>(loadActiveModuleId);
+  const [activeExamId, setActiveExamId] = useState<string>(loadActiveExamId);
   const [isModuleDropdownOpen, setIsModuleDropdownOpen] = useState(false);
   const [confirmDeleteModuleId, setConfirmDeleteModuleId] = useState<string | null>(null);
   const [isImporterOpen, setIsImporterOpen] = useState(false);
@@ -419,6 +427,26 @@ function AppContent() {
   const activeModule = useMemo(() => {
     return modules.find((m) => m.id === activeModuleId) || modules[0];
   }, [modules, activeModuleId]);
+
+  const activeExam = useMemo(() => {
+    return getExamDefinition(activeExamId);
+  }, [activeExamId]);
+
+  const examModules = useMemo(() => {
+    return modules.filter((m) => getModuleExamId(m) === activeExamId);
+  }, [modules, activeExamId]);
+
+  const handleSwitchExam = (newExamId: string) => {
+    setActiveExamId(newExamId);
+    saveActiveExamId(newExamId);
+
+    const targetExamMods = modules.filter((m) => getModuleExamId(m) === newExamId);
+    if (targetExamMods.length > 0 && getModuleExamId(activeModule) !== newExamId) {
+      const nextModId = targetExamMods[0].id;
+      setActiveModuleId(nextModId);
+      saveActiveModuleId(nextModId);
+    }
+  };
 
   // Unified Session Progress persisted per module
   const [sessionProgress, setSessionProgress] = useState<QuizSessionProgress>(() =>
@@ -926,6 +954,14 @@ function AppContent() {
   const handleSwitchModule = (modId: string) => {
     setActiveModuleId(modId);
     saveActiveModuleId(modId);
+    const targetMod = modules.find((m) => m.id === modId);
+    if (targetMod) {
+      const modExamId = getModuleExamId(targetMod);
+      if (modExamId !== activeExamId) {
+        setActiveExamId(modExamId);
+        saveActiveExamId(modExamId);
+      }
+    }
     setIsModuleDropdownOpen(false);
   };
 
@@ -1111,6 +1147,10 @@ function AppContent() {
       {/* ---------------------------------------------------- */}
       <Navbar
         courseCode="MCP II"
+        activeExamId={activeExamId}
+        activeExam={activeExam}
+        exams={EXAM_DEFINITIONS}
+        onSwitchExam={handleSwitchExam}
         activeModule={activeModule}
         modules={modules}
         onSwitchModule={(id) => React.startTransition(() => handleSwitchModule(id))}
@@ -1888,6 +1928,9 @@ function AppContent() {
           <CumulativeStudyHubModal
             isOpen={isCumulativeHubOpen}
             onClose={() => setIsCumulativeHubOpen(false)}
+            activeExamId={activeExamId}
+            activeExam={activeExam}
+            examModules={examModules}
           />
         </React.Suspense>
       )}

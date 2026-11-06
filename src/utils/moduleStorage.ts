@@ -10,8 +10,33 @@ import { pdfPages } from '../data/antiplateletQuizData';
 import { getDefaultAnticoagulantsModule } from '../data/anticoagulantsQuizData';
 import { getDefaultHeartFailureModule } from '../data/heartFailureModuleData';
 import { getDefaultAntiarrhythmicModule } from '../data/antiarrhythmicModuleData';
+import {
+  getDefaultDiureticsModule,
+  getDefaultSympatholyticsModule,
+  getDefaultVasodilatorsModule,
+  getDefaultRaasModule,
+  getDefaultAntihyperlipidemicsModule,
+} from '../data/exam2';
 import { medChemGraphDb } from '../db/medChemGraphDb';
 import { getCorrectedSmarts } from './smartsDictionary';
+import { getModuleExamId } from '../types/examTypes';
+
+export const ALL_BUILTIN_MODULE_IDS = [
+  'antiplatelets_mcp2',
+  'anticoagulants_mcp2',
+  'heart_failure_mcp2',
+  'antiarrhythmics_mcp2',
+  'antihypertensives_1_mcp2',
+  'antihypertensives_2_mcp2',
+  'antihypertensives_3_mcp2',
+  'antihypertensives_4_mcp2',
+  'antihyperlipidemics_mcp2',
+] as const;
+
+export const BUILTIN_IDS_SET = new Set<string>([
+  ...ALL_BUILTIN_MODULE_IDS,
+  'vasodilators_mcp2', // legacy cleanup
+]);
 
 const MODULES_STORAGE_KEY = 'medchem_review_modules_v2';
 const BUILTIN_OVERRIDES_KEY = 'medchem_builtin_overrides_v2';
@@ -39,6 +64,11 @@ export function getHiddenBuiltins(): string[] {
   }
 }
 
+export function getModulesForExam(examId: string, allModules?: ReviewModule[]): ReviewModule[] {
+  const mods = allModules || loadAllReviewModules();
+  return mods.filter((m) => getModuleExamId(m) === examId);
+}
+
 export function restoreBuiltInModule(moduleId: string): void {
   try {
     const hidden = getHiddenBuiltins().filter((id) => id !== moduleId);
@@ -56,7 +86,9 @@ export function getDefaultAntiplateletModule(): ReviewModule {
     subtitle: 'Thienopyridines, Nucleosides, Peptidomimetics & Gp IIb/IIIa Antagonists',
     course: 'Medicinal Chemistry (MCP II)',
     semester: 'Fall 2026',
-    code: 'RAAH',
+    code: 'Exam 3',
+    examId: 'exam_3',
+    examTitle: 'Exam 3: Blood, Heart Failure & Antiarrhythmics',
     isBuiltIn: true,
     createdAt: '2026-10-14',
     pages: pdfPages as any,
@@ -77,6 +109,11 @@ export function loadAllReviewModules(): ReviewModule[] {
   const defaultAnticoagulant = getDefaultAnticoagulantsModule();
   const defaultHeartFailure = getDefaultHeartFailureModule();
   const defaultAntiarrhythmic = getDefaultAntiarrhythmicModule();
+  const defaultDiuretics = getDefaultDiureticsModule();
+  const defaultSympatholytics = getDefaultSympatholyticsModule();
+  const defaultVasodilators = getDefaultVasodilatorsModule();
+  const defaultRaas = getDefaultRaasModule();
+  const defaultAntihyperlipidemics = getDefaultAntihyperlipidemicsModule();
   const hiddenBuiltins = getHiddenBuiltins();
 
   let overrides: Record<string, ReviewModule> = {};
@@ -107,12 +144,22 @@ export function loadAllReviewModules(): ReviewModule[] {
   const finalAnticoagulant = overrides['anticoagulants_mcp2'] || defaultAnticoagulant;
   const finalHeartFailure = overrides['heart_failure_mcp2'] || defaultHeartFailure;
   const finalAntiarrhythmic = overrides['antiarrhythmics_mcp2'] || defaultAntiarrhythmic;
+  const finalDiuretics = overrides['antihypertensives_1_mcp2'] || defaultDiuretics;
+  const finalSympatholytics = overrides['antihypertensives_2_mcp2'] || defaultSympatholytics;
+  const finalVasodilators = overrides['antihypertensives_3_mcp2'] || defaultVasodilators;
+  const finalRaas = overrides['antihypertensives_4_mcp2'] || defaultRaas;
+  const finalAntihyperlipidemics = overrides['antihyperlipidemics_mcp2'] || defaultAntihyperlipidemics;
 
   const builtIns: ReviewModule[] = [];
   if (!hiddenBuiltins.includes('antiplatelets_mcp2')) builtIns.push(finalAntiplatelet);
   if (!hiddenBuiltins.includes('anticoagulants_mcp2')) builtIns.push(finalAnticoagulant);
   if (!hiddenBuiltins.includes('heart_failure_mcp2')) builtIns.push(finalHeartFailure);
   if (!hiddenBuiltins.includes('antiarrhythmics_mcp2')) builtIns.push(finalAntiarrhythmic);
+  if (!hiddenBuiltins.includes('antihypertensives_1_mcp2')) builtIns.push(finalDiuretics);
+  if (!hiddenBuiltins.includes('antihypertensives_2_mcp2')) builtIns.push(finalSympatholytics);
+  if (!hiddenBuiltins.includes('antihypertensives_3_mcp2')) builtIns.push(finalVasodilators);
+  if (!hiddenBuiltins.includes('antihypertensives_4_mcp2')) builtIns.push(finalRaas);
+  if (!hiddenBuiltins.includes('antihyperlipidemics_mcp2')) builtIns.push(finalAntihyperlipidemics);
 
   // Synchronously load custom modules from localStorage so 0ms first-paint never drops them on reload
   let customList: ReviewModule[] = [];
@@ -123,14 +170,7 @@ export function loadAllReviewModules(): ReviewModule[] {
         const parsed = JSON.parse(rawCustom);
         if (Array.isArray(parsed)) {
           customList = parsed.filter(
-            (m) =>
-              m &&
-              m.id &&
-              m.id !== 'antiplatelets_mcp2' &&
-              m.id !== 'anticoagulants_mcp2' &&
-              m.id !== 'heart_failure_mcp2' &&
-              m.id !== 'antiarrhythmics_mcp2' &&
-              m.id !== 'vasodilators_mcp2'
+            (m) => m && m.id && !BUILTIN_IDS_SET.has(m.id)
           );
         }
       }
@@ -139,8 +179,32 @@ export function loadAllReviewModules(): ReviewModule[] {
     }
   }
 
-  const combined = [...builtIns, ...customList];
-  inMemoryModules = combined.length > 0 ? combined : [finalAntiplatelet, finalAnticoagulant, finalHeartFailure, finalAntiarrhythmic];
+  const sanitizeModule = (m: ReviewModule): ReviewModule => {
+    let updated = m;
+    if (updated.code === 'RAAH') {
+      updated = { ...updated, code: 'Exam 3' };
+    }
+    if (!updated.examId) {
+      updated = { ...updated, examId: getModuleExamId(updated) };
+    }
+    return updated;
+  };
+
+  const combined = [...builtIns, ...customList].map(sanitizeModule);
+  inMemoryModules =
+    combined.length > 0
+      ? combined
+      : [
+          finalAntiplatelet,
+          finalAnticoagulant,
+          finalHeartFailure,
+          finalAntiarrhythmic,
+          finalDiuretics,
+          finalSympatholytics,
+          finalVasodilators,
+          finalRaas,
+          finalAntihyperlipidemics,
+        ].map(sanitizeModule);
   return inMemoryModules;
 }
 
@@ -154,6 +218,11 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     const defaultAnticoagulant = getDefaultAnticoagulantsModule();
     const defaultHeartFailure = getDefaultHeartFailureModule();
     const defaultAntiarrhythmic = getDefaultAntiarrhythmicModule();
+    const defaultDiuretics = getDefaultDiureticsModule();
+    const defaultSympatholytics = getDefaultSympatholyticsModule();
+    const defaultVasodilators = getDefaultVasodilatorsModule();
+    const defaultRaas = getDefaultRaasModule();
+    const defaultAntihyperlipidemics = getDefaultAntihyperlipidemicsModule();
     const hiddenBuiltins = getHiddenBuiltins();
 
     // 1. Load custom modules and overrides from Dexie
@@ -176,10 +245,14 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     } catch {}
 
     // Check if Dexie has a newer or existing override for built-ins
-    const dexieAntiplatelet = dexieModules.find((m) => m.id === 'antiplatelets_mcp2')?.module;
-    if (dexieAntiplatelet) {
-      overrides['antiplatelets_mcp2'] = dexieAntiplatelet;
-    }
+    ALL_BUILTIN_MODULE_IDS.forEach((id) => {
+      if (id === 'anticoagulants_mcp2') return;
+      const dm = dexieModules.find((m) => m.id === id)?.module;
+      if (dm) {
+        overrides[id] = dm;
+      }
+    });
+
     const dexieAnticoagulant = dexieModules.find((m) => m.id === 'anticoagulants_mcp2')?.module;
     if (dexieAnticoagulant) {
       if (dexieAnticoagulant.version === '2.1.0' && (dexieAnticoagulant.pages || []).length >= 8) {
@@ -195,14 +268,6 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
           localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
         } catch {}
       }
-    }
-    const dexieHeartFailure = dexieModules.find((m) => m.id === 'heart_failure_mcp2')?.module;
-    if (dexieHeartFailure) {
-      overrides['heart_failure_mcp2'] = dexieHeartFailure;
-    }
-    const dexieAntiarrhythmic = dexieModules.find((m) => m.id === 'antiarrhythmics_mcp2')?.module;
-    if (dexieAntiarrhythmic) {
-      overrides['antiarrhythmics_mcp2'] = dexieAntiarrhythmic;
     }
 
     if (
@@ -220,20 +285,18 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     const finalAnticoagulant = overrides['anticoagulants_mcp2'] || defaultAnticoagulant;
     const finalHeartFailure = overrides['heart_failure_mcp2'] || defaultHeartFailure;
     const finalAntiarrhythmic = overrides['antiarrhythmics_mcp2'] || defaultAntiarrhythmic;
+    const finalDiuretics = overrides['antihypertensives_1_mcp2'] || defaultDiuretics;
+    const finalSympatholytics = overrides['antihypertensives_2_mcp2'] || defaultSympatholytics;
+    const finalVasodilators = overrides['antihypertensives_3_mcp2'] || defaultVasodilators;
+    const finalRaas = overrides['antihypertensives_4_mcp2'] || defaultRaas;
+    const finalAntihyperlipidemics = overrides['antihyperlipidemics_mcp2'] || defaultAntihyperlipidemics;
 
     // 3. Bidirectional merge of custom modules between Dexie and localStorage
     const rawLocal = localStorage.getItem(MODULES_STORAGE_KEY);
     const localParsed: ReviewModule[] = rawLocal ? JSON.parse(rawLocal) : [];
     const localCustom = Array.isArray(localParsed)
       ? localParsed.filter(
-          (m) =>
-            m &&
-            m.id &&
-            m.id !== 'antiplatelets_mcp2' &&
-            m.id !== 'anticoagulants_mcp2' &&
-            m.id !== 'heart_failure_mcp2' &&
-            m.id !== 'antiarrhythmics_mcp2' &&
-            m.id !== 'vasodilators_mcp2'
+          (m) => m && m.id && !BUILTIN_IDS_SET.has(m.id)
         )
       : [];
 
@@ -244,14 +307,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     // Overlay Dexie entries (Dexie has full unbounded payloads)
     dexieModules.forEach((dm) => {
-      if (
-        dm.module &&
-        dm.id !== 'antiplatelets_mcp2' &&
-        dm.id !== 'anticoagulants_mcp2' &&
-        dm.id !== 'heart_failure_mcp2' &&
-        dm.id !== 'antiarrhythmics_mcp2' &&
-        dm.id !== 'vasodilators_mcp2'
-      ) {
+      if (dm.module && !BUILTIN_IDS_SET.has(dm.id)) {
         customModuleMap.set(dm.id, dm.module);
       }
     });
@@ -309,9 +365,26 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
     if (!hiddenBuiltins.includes('anticoagulants_mcp2')) builtIns.push(finalAnticoagulant);
     if (!hiddenBuiltins.includes('heart_failure_mcp2')) builtIns.push(finalHeartFailure);
     if (!hiddenBuiltins.includes('antiarrhythmics_mcp2')) builtIns.push(finalAntiarrhythmic);
+    if (!hiddenBuiltins.includes('antihypertensives_1_mcp2')) builtIns.push(finalDiuretics);
+    if (!hiddenBuiltins.includes('antihypertensives_2_mcp2')) builtIns.push(finalSympatholytics);
+    if (!hiddenBuiltins.includes('antihypertensives_3_mcp2')) builtIns.push(finalVasodilators);
+    if (!hiddenBuiltins.includes('antihypertensives_4_mcp2')) builtIns.push(finalRaas);
+    if (!hiddenBuiltins.includes('antihyperlipidemics_mcp2')) builtIns.push(finalAntihyperlipidemics);
+
+    const defaultAll = [
+      finalAntiplatelet,
+      finalAnticoagulant,
+      finalHeartFailure,
+      finalAntiarrhythmic,
+      finalDiuretics,
+      finalSympatholytics,
+      finalVasodilators,
+      finalRaas,
+      finalAntihyperlipidemics,
+    ];
 
     const combined = [...builtIns, ...mergedCustom];
-    inMemoryModules = combined.length > 0 ? combined : [finalAntiplatelet, finalAnticoagulant, finalHeartFailure, finalAntiarrhythmic];
+    inMemoryModules = combined.length > 0 ? combined : defaultAll;
     isDexieInitialized = true;
     return inMemoryModules;
   } catch (err) {
@@ -478,12 +551,7 @@ export function resetBuiltInModule(moduleId: string): void {
 
 export function deleteReviewModule(moduleId: string): void {
   try {
-    if (
-      moduleId === 'antiplatelets_mcp2' ||
-      moduleId === 'anticoagulants_mcp2' ||
-      moduleId === 'heart_failure_mcp2' ||
-      moduleId === 'antiarrhythmics_mcp2'
-    ) {
+    if (BUILTIN_IDS_SET.has(moduleId)) {
       const hidden = getHiddenBuiltins();
       if (!hidden.includes(moduleId)) {
         hidden.push(moduleId);
@@ -499,7 +567,7 @@ export function deleteReviewModule(moduleId: string): void {
     }
 
     const current = loadAllReviewModules();
-    const remainingCustom = current.filter((m) => m.id !== moduleId && !m.isBuiltIn && m.id !== 'vasodilators_mcp2');
+    const remainingCustom = current.filter((m) => m.id !== moduleId && !m.isBuiltIn && !BUILTIN_IDS_SET.has(m.id));
     const builtIns = current.filter((m) => m.isBuiltIn && m.id !== moduleId);
     inMemoryModules = [...builtIns, ...remainingCustom];
 

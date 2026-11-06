@@ -242,6 +242,8 @@ export interface ReviewModule {
   course: string;
   semester: string;
   code?: string;
+  examId?: string; // 'exam_1', 'exam_2', 'exam_3'
+  examTitle?: string; // 'Exam 3', 'Exam 2: Antihypertensives & Lipids'
   isBuiltIn?: boolean;
   createdAt: string;
   version?: string;

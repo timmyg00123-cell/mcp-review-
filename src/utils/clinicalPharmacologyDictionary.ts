@@ -680,7 +680,671 @@ export const CLINICAL_PHARMACOLOGY_DICTIONARY: Record<string, ClinicalPharmacolo
     pregnancyCategory: 'Category C (First-Line for Acute Paroxysmal SVT)',
     pregnancySummary: 'Drug of choice for acute conversion of paroxysmal supraventricular tachycardia (PSVT) in pregnancy. Ultra-short half-life (<10 sec) prevents fetal transfer.',
     clinicalPearls: 'Activates A1 purinergic receptors in AV node, opening G-protein-coupled inward rectifying K+ channels (IK-ACh) causing transient AV block.'
-  }
+  },
+
+  // ==========================================
+  // EXAM 2: ANTIHYPERTENSIVES & ANTIHYPERLIPIDEMICS
+  // ==========================================
+  chlorothiazide: {
+    metabolism: "Not significantly metabolized; excreted primarily unchanged in the urine via glomerular filtration and organic acid secretory transporter (OAT1/3).",
+    metabolismLocation: "Renal excretion (>95% unchanged).",
+    bbbCrossing: "Low BBB penetration; highly polar sulfonamide and benzothiadiazine core.",
+    bbbCnsEffects: "Headache, dizziness, paresthesias reported rarely; mainly secondary to volume contraction.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta; may decrease uteroplacental perfusion by contracting plasma volume. Avoid routine use in gestational hypertension unless treating pulmonary edema or heart failure.",
+    clinicalPearls: "Prototype thiazide; oral bioavailability only ~10-20% due to low lipophilicity (available IV as sodium salt); weak carbonic anhydrase inhibitory activity."
+  },
+  hydrochlorothiazide: {
+    metabolism: "Essentially not metabolized; excreted >95% unchanged in urine by renal filtration and active tubular secretion.",
+    metabolismLocation: "Renal excretion; half-life 6-12 hours.",
+    bbbCrossing: "Low BBB penetration (polar zwitterionic/acidic character).",
+    bbbCnsEffects: "Mild dizziness, fatigue, vertigo associated with orthostasis and electrolyte shifts.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Crosses placental barrier. Can cause neonatal thrombocytopenia, jaundice, and electrolyte disturbances. Not first-line for gestational hypertension.",
+    clinicalPearls: "Saturated 3,4-dihydro bond increases potency 10-fold over chlorothiazide. Competes for organic acid transporter with uric acid (hyperuricemia/gout precipitation)."
+  },
+  trichlormethiazide: {
+    metabolism: "Minimal hepatic metabolism; primarily eliminated unchanged in the urine.",
+    metabolismLocation: "Renal clearance.",
+    bbbCrossing: "Low to moderate BBB penetration; 3-dichloromethyl substitution enhances lipophilicity.",
+    bbbCnsEffects: "Dizziness, headache.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Avoid during gestation unless maternal cardiac decompensation mandates diuresis.",
+    clinicalPearls: "Lipophilic 3-dichloromethyl group increases potency ~100-fold compared to chlorothiazide; prolonged duration of action (up to 24 hours)."
+  },
+  polythiazide: {
+    metabolism: "Extensive renal excretion; prolonged retention due to high tissue/protein binding and high lipophilicity.",
+    metabolismLocation: "Renal clearance; terminal half-life ~25-27 hours.",
+    bbbCrossing: "Moderate BBB penetration compared to simpler thiazides due to 3-trifluoromethylthiomethyl and 2-methyl substituents.",
+    bbbCnsEffects: "Occasional dizziness or drowsiness.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Long half-life increases prolonged fetal exposure; use only if strictly necessary.",
+    clinicalPearls: "High lipophilicity confers extreme potency (relative potency ~1000 vs chlorothiazide) and once-daily dosing with 24-36 hour duration."
+  },
+  metolazone: {
+    metabolism: "Minimal hepatic metabolism; ~70-80% excreted unchanged in urine.",
+    metabolismLocation: "Renal clearance.",
+    bbbCrossing: "Low BBB penetration; quinazoline sulfonamide.",
+    bbbCnsEffects: "Dizziness, lightheadedness, fatigue.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Limited gestational data; potential risk of reduced placental perfusion and fetal electrolyte disturbances.",
+    clinicalPearls: "Thiazide-like quinazolinone diuretic; retains efficacy at CrCl < 30 mL/min; synergistic sequential nephron blockade when combined with loop diuretics in refractory edema."
+  },
+  indapamide: {
+    metabolism: "Extensively metabolized by hepatic CYP enzymes (primarily CYP3A4); <7% excreted unchanged in urine.",
+    metabolismLocation: "Hepatic metabolism with inactive renal and biliary metabolites.",
+    bbbCrossing: "Moderate BBB penetration; lipophilic indoline chlorobenzamide scaffold.",
+    bbbCnsEffects: "Dizziness, headache, anxiety, fatigue.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Animal reproduction studies showed no teratogenicity; use with caution due to maternal plasma volume depletion.",
+    clinicalPearls: "Lipophilic indoline diuretic with dual mechanism: DCT NCC blockade plus direct arteriolar vasodilation via vascular smooth muscle calcium channel modulation."
+  },
+  chlorthalidone: {
+    metabolism: "Minimal hepatic metabolism; extensively sequestered inside erythrocytes (binds red blood cell carbonic anhydrase), slowly released and cleared renally.",
+    metabolismLocation: "Erythrocyte carbonic anhydrase depot; terminal half-life 40-60 hours.",
+    bbbCrossing: "Low BBB penetration; phthalimidine ring sulfonamide.",
+    bbbCnsEffects: "Dizziness, vertigo, paresthesias.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Crosses placenta; volume contraction may compromise placental blood flow. Avoid unless clearly needed for maternal volume overload.",
+    clinicalPearls: "Thiazide-like phthalimidine diuretic; superior 24-hour ambulatory blood pressure reduction compared to HCTZ in landmark trials (ALLHAT) due to RBC reservoir depot."
+  },
+  ethacrynicacid: {
+    metabolism: "Hepatic cysteine conjugation at the alpha,beta-unsaturated ketone (Michael acceptor); ~60-70% excreted renally as parent and cysteine/mercapturic acid adducts.",
+    metabolismLocation: "Hepatic glutathione/cysteine conjugation and renal excretion.",
+    bbbCrossing: "Low BBB penetration; phenoxyacetic acid derivative.",
+    bbbCnsEffects: "Headache, fatigue, severe ototoxicity (hearing loss, tinnitus, vertigo) especially with renal failure.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Safety not established in human pregnancy; potential for fetal ototoxicity and maternal hypovolemia.",
+    clinicalPearls: "Lacks a sulfonamide group (safe in severe sulfa allergy); acts as Michael acceptor alkylating sulfhydryl groups on NKCC2; highest ototoxic potential among loop diuretics."
+  },
+  triamterene: {
+    metabolism: "Extensive hepatic hydroxylation by CYP1A2 to 4-hydroxytriamterene followed by active sulfate ester conjugation (4-hydroxytriamterene sulfate).",
+    metabolismLocation: "Hepatic phase I oxidation and phase II sulfation.",
+    bbbCrossing: "Low BBB penetration (basic pteridine ring).",
+    bbbCnsEffects: "Dizziness, fatigue, headache.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Weak folic acid antagonist; avoid in pregnancy (especially 1st trimester) due to potential neural tube defect risks.",
+    clinicalPearls: "Potassium-sparing pteridine; directly blocks epithelial sodium channels (ENaC) in late DCT/collecting duct; can precipitate as renal calculi (triamterene kidney stones)."
+  },
+  amiloride: {
+    metabolism: "Not metabolized by liver; excreted 50% unchanged in urine and 40% unchanged in feces.",
+    metabolismLocation: "Renal and fecal excretion without biotransformation.",
+    bbbCrossing: "Negligible BBB penetration; highly basic acylguanidine pyrazine derivative.",
+    bbbCnsEffects: "Headache, dizziness, weakness.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Limited human pregnancy data. Risk of maternal hyperkalemia and reduced placental perfusion. Reserve for refractory hypokalemia.",
+    clinicalPearls: "Pyrazinoylguanidine ENaC blocker; protonated positively charged guanidine competes directly with Na+ for the outer vestibule of luminal ENaC."
+  },
+  canrenone: {
+    metabolism: "Major active metabolite of spironolactone; undergoes renal elimination and glucuronide conjugation.",
+    metabolismLocation: "Hepatic conjugation and renal excretion.",
+    bbbCrossing: "Lipophilic steroid; penetrates BBB.",
+    bbbCnsEffects: "Drowsiness, lethargy, headache.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Steroid antagonist with antiandrogenic actions; potential risk of feminization of male fetuses. Avoid in pregnancy.",
+    clinicalPearls: "Active delta-6,7 lactone metabolite of spironolactone; possesses mineralocorticoid receptor antagonist efficacy without the 7alpha-thioester."
+  },
+  acetazolamide: {
+    metabolism: "Not metabolized; 90-100% excreted unchanged in urine by tubular secretion within 24 hours.",
+    metabolismLocation: "Renal excretion.",
+    bbbCrossing: "Moderate BBB penetration; acts on choroid plexus carbonic anhydrase.",
+    bbbCnsEffects: "Paresthesias (tingling in fingers/toes), drowsiness, depression, confusion in acidosis.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Teratogenic in rodents (forelimb ectrodactyly/adactyly); contraindicated in first trimester. Use only for maternal pseudotumor cerebri or acute glaucoma if alternatives fail.",
+    clinicalPearls: "Reversible carbonic anhydrase inhibitor (CAI); alkalinizes urine (HCO3- wasting) causing hyperchloremic metabolic acidosis and tolerance within 48-72 hours."
+  },
+  mannitol: {
+    metabolism: "Not metabolized; strictly filtered at the glomerulus with zero tubular reabsorption or secretion.",
+    metabolismLocation: "Renal glomerular filtration.",
+    bbbCrossing: "Does not cross intact BBB; hyperosmolar agent draws free water from cerebral parenchyma into vascular space.",
+    bbbCnsEffects: "Headache, confusion, dizziness; transient expansion of intravascular volume can worsen cerebral edema if BBB is disrupted.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta poorly; acute osmotic shifts can induce fetal distress or dehydration. Reserve for acute neurosurgical maternal emergencies.",
+    clinicalPearls: "Osmotic diuretic (polyol); administered IV only; must be inspected for crystals and warmed/filtered prior to infusion."
+  },
+  atenolol: {
+    metabolism: "Minimal hepatic metabolism (<10%); ~85-90% eliminated unchanged in urine by glomerular filtration.",
+    metabolismLocation: "Renal excretion; half-life 6-7 hours (prolonged in CKD).",
+    bbbCrossing: "Very low BBB penetration; hydrophilic aryloxypropanolamine with polar acetamide group.",
+    bbbCnsEffects: "Significantly fewer CNS side effects (nightmares, vivid dreams, depression) compared to lipophilic beta-blockers.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D",
+    pregnancySummary: "Associated with intrauterine growth restriction (IUGR), low birth weight, and placental hypoperfusion. Avoid in pregnancy; labetalol is preferred.",
+    clinicalPearls: "Cardioselective beta-1 antagonist; polar para-acetamide confers cardioselectivity and water solubility; requires dose adjustment in renal impairment."
+  },
+  labetalol: {
+    metabolism: "Extensive first-pass hepatic metabolism by glucuronidation; oral bioavailability ~25%. High clearance.",
+    metabolismLocation: "Hepatic glucuronide conjugation (inactive).",
+    bbbCrossing: "Low to moderate BBB penetration; zwitterionic/polar arylethanolamine.",
+    bbbCnsEffects: "Fatigue, dizziness, scalp tingling (formication) secondary to alpha-1 blockade.",
+    pregnancyRisk: "safe",
+    pregnancyCategory: "Category C (First-Line in Pregnancy)",
+    pregnancySummary: "First-line agent for chronic hypertension, gestational hypertension, and acute preeclampsia/eclampsia in pregnancy. Decades of reassuring safety data without IUGR risk seen with atenolol.",
+    clinicalPearls: "Mixed antagonist with 2 chiral centers (4 stereoisomers): R,R-isomer (dilevalol) provides non-selective beta-blockade; S,R-isomer provides selective alpha-1 blockade; oral ratio ~3:1 beta:alpha."
+  },
+  pindolol: {
+    metabolism: "Dual clearance: ~60% hepatic metabolism (glucuronidation, oxidation) and ~40% excreted unchanged in urine.",
+    metabolismLocation: "Hepatic and renal elimination.",
+    bbbCrossing: "Moderate BBB penetration; lipophilic indole core.",
+    bbbCnsEffects: "Insomnia, vivid dreams, nervousness, dizziness.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Limited data; potential for fetal bradycardia or hypoglycemia. Labetalol remains preferred.",
+    clinicalPearls: "Non-selective beta-blocker with potent Intrinsic Sympathomimetic Activity (ISA / partial agonist); produces less resting bradycardia and lipid alteration."
+  },
+  nadolol: {
+    metabolism: "Zero hepatic metabolism; 100% eliminated unchanged in urine.",
+    metabolismLocation: "Renal excretion; terminal half-life 20-24 hours.",
+    bbbCrossing: "Very low BBB penetration; highly polar cis-diol tetrahydronaphthalene ring.",
+    bbbCnsEffects: "Low incidence of central fatigue, vivid dreams, or depression.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Prolonged half-life leads to persistent fetal beta-blockade; risk of neonatal bradycardia and hypoglycemia.",
+    clinicalPearls: "Non-selective beta-antagonist with longest elimination half-life; water-soluble; preferred for variceal bleeding prophylaxis in cirrhosis."
+  },
+  clonidine: {
+    metabolism: "Hepatic metabolism (~50%) to inactive metabolites and renal excretion of unchanged drug (~50%).",
+    metabolismLocation: "Hepatic oxidation and renal clearance; half-life 12-16 hours.",
+    bbbCrossing: "High BBB penetration; lipophilic 2-aminoimidazoline with ortho-dichloro groups preventing coplanarity.",
+    bbbCnsEffects: "Marked sedation, drowsiness, dry mouth (xerostomia), depression, fatigue. Life-threatening rebound hypertension upon abrupt discontinuation.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta; used as second- or third-line agent for refractory pregnancy hypertension. Avoid abrupt cessation due to hypertensive crisis.",
+    clinicalPearls: "Centrally acting alpha-2A adrenergic receptor agonist in nucleus tractus solitarius; decreases central sympathetic outflow; ortho-chlorines force imidazoline ring perpendicular to phenyl ring."
+  },
+  guanfacine: {
+    metabolism: "Extensive hepatic oxidation by CYP3A4 to 3-hydroxyguanfacine; ~50% excreted unchanged in urine.",
+    metabolismLocation: "Hepatic CYP3A4 metabolism and renal elimination.",
+    bbbCrossing: "High BBB penetration; lipophilic phenylacetylguanidine.",
+    bbbCnsEffects: "Sedation, somnolence, fatigue, dry mouth; less severe sedation and rebound than clonidine due to higher alpha-2A selectivity.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Crosses placenta; limited human pregnancy data. Generally reserved for ADHD or refractory hypertension.",
+    clinicalPearls: "Selective central alpha-2A agonist; open-chain guanidine analogue; longer elimination half-life (17 hours) than clonidine."
+  },
+  methyldopa: {
+    metabolism: "Prodrug transported into CNS by L-type amino acid transporter 1 (LAT1); decarboxylated by AADC to alpha-methyldopamine, then beta-hydroxylated by DBH to active (1R,2S)-alpha-methylnorepinephrine.",
+    metabolismLocation: "Central adrenergic neurons (stereospecific bioactivation).",
+    bbbCrossing: "Crosses BBB via active carrier-mediated LAT1 amino acid transport.",
+    bbbCnsEffects: "Sedation, drowsiness, depression, decreased mental acuity, nightmares.",
+    pregnancyRisk: "safe",
+    pregnancyCategory: "Category B (Historic Gold Standard in Pregnancy)",
+    pregnancySummary: "Longest safety track record for chronic and gestational hypertension in pregnancy. Does not cause fetal malformations or adverse hemodynamic shifts.",
+    clinicalPearls: "False neurotransmitter prodrug; active metabolite (1R,2S)-alpha-methylnorepinephrine is a selective alpha-2 agonist; risk of Coombs-positive hemolytic anemia and drug-induced hepatitis."
+  },
+  alphamethylnorepinephrine: {
+    metabolism: "Metabolized by COMT and MAO in neuronal and peripheral tissues.",
+    metabolismLocation: "Adrenergic synapse.",
+    bbbCrossing: "Generated directly inside central adrenergic nerve terminals from methyldopa.",
+    bbbCnsEffects: "Mediates central alpha-2 sympathetic suppression; sedation, dry mouth.",
+    pregnancyRisk: "safe",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Active therapeutic metabolite of methyldopa; safe profile established via parent drug.",
+    clinicalPearls: "Active form of methyldopa; stereochemistry must be (1R,2S) to bind and stimulate central alpha-2 adrenergic receptors."
+  },
+  prazosin: {
+    metabolism: "Extensive hepatic metabolism by demethylation and glucuronidation; oral bioavailability ~60%; <10% excreted unchanged renally.",
+    metabolismLocation: "Hepatic microsomal metabolism; half-life 2-3 hours.",
+    bbbCrossing: "Moderate BBB penetration; lipophilic quinazoline derivative.",
+    bbbCnsEffects: "Dizziness, drowsiness, headache; severe syncope with first dose (\"first-dose phenomenon\").",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta; limited data. Used occasionally for refractory preeclampsia or pheochromocytoma in pregnancy.",
+    clinicalPearls: "Selective alpha-1 adrenergic antagonist; quinazoline piperazine core; causes balanced arterial and venous dilation without reflex tachycardia (preserves presynaptic alpha-2 negative feedback)."
+  },
+  terazosin: {
+    metabolism: "Extensive hepatic metabolism; biliary and fecal excretion (~60%) and renal excretion (~40%).",
+    metabolismLocation: "Hepatic metabolism; half-life 12 hours.",
+    bbbCrossing: "Moderate BBB penetration.",
+    bbbCnsEffects: "Dizziness, asthenia, somnolence, postural hypotension.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Not recommended during pregnancy due to lack of adequate human studies; use labetalol or nifedipine instead.",
+    clinicalPearls: "Tetrahydrofuran ring replacement of prazosin furan ring increases water solubility and extends elimination half-life, allowing once-daily dosing for HTN and BPH."
+  },
+  doxazosin: {
+    metabolism: "Extensively metabolized in the liver by O-demethylation and hydroxylation (CYP3A4); <5% excreted unchanged.",
+    metabolismLocation: "Hepatic CYP3A4 metabolism; terminal half-life ~22 hours.",
+    bbbCrossing: "Moderate BBB penetration; benzodioxan quinazoline.",
+    bbbCnsEffects: "Dizziness, fatigue, headache, vertigo.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Avoid during gestation unless alternatives fail; risk of maternal hypotension and reduced placental perfusion.",
+    clinicalPearls: "Benzodioxan ring replacement gives longest half-life (~22 hours) among quinazoline alpha-1 blockers; once-daily administration."
+  },
+  tamsulosin: {
+    metabolism: "Extensive hepatic metabolism by CYP2D6 and CYP3A4; <10% excreted unchanged in urine.",
+    metabolismLocation: "Hepatic CYP2D6/CYP3A4.",
+    bbbCrossing: "Low BBB penetration; sulfonamide phenethylamine.",
+    bbbCnsEffects: "Dizziness, abnormal ejaculation, headache; Intraoperative Floppy Iris Syndrome (IFIS) during cataract surgery.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category B",
+    pregnancySummary: "Not indicated for female use; used off-label for distal ureteral stone expulsion in pregnancy with caution.",
+    clinicalPearls: "Subtype-selective alpha-1A/1D antagonist (uroselective); relaxes prostatic smooth muscle with minimal vascular alpha-1B blockade (minimal effect on systemic blood pressure)."
+  },
+  reserpine: {
+    metabolism: "Slow hepatic metabolism by esterases and microsomal oxidation to methyl reserpate and trimethoxybenzoic acid.",
+    metabolismLocation: "Hepatic and tissue esterase hydrolysis.",
+    bbbCrossing: "High BBB penetration; lipophilic indole alkaloid.",
+    bbbCnsEffects: "Profound, severe depression (suicidal ideation, psychosis), severe sedation, nightmares, parkinsonism, nasal congestion.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta; associated with neonatal lethargy, hypothermia, bradycardia, and severe nasal congestion causing respiratory distress in newborns.",
+    clinicalPearls: "Irreversibly inhibits vesicular monoamine transporter 2 (VMAT2); depletes NE, dopamine, and serotonin vesicles; recovery requires de novo VMAT2 synthesis (days to weeks)."
+  },
+  guanethidine: {
+    metabolism: "Partial hepatic metabolism to inactive ring-oxidized metabolites; excreted primarily unchanged in urine.",
+    metabolismLocation: "Hepatic metabolism and renal excretion; very long half-life (~5 days).",
+    bbbCrossing: "Does NOT cross BBB; highly basic, permanently protonated aliphatic guanidine ring (octahydroazocine).",
+    bbbCnsEffects: "No central sedation or depression; severe orthostatic hypotension and explosive diarrhea due to peripheral sympathetic ablation and unopposed parasympathetics.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Severe maternal orthostatic hypotension and fetal hypoperfusion; contraindicated in pregnancy.",
+    clinicalPearls: "Postganglionic adrenergic neuron blocker; taken up by NET (norepinephrine transporter) into peripheral nerve terminals where it displaces NE and prevents release."
+  },
+  nifedipine: {
+    metabolism: "Extensive first-pass hepatic oxidation by CYP3A4 to inactive pyridine metabolite; oral bioavailability ~45-70%.",
+    metabolismLocation: "Hepatic CYP3A4.",
+    bbbCrossing: "Moderate BBB penetration; lipophilic 1,4-dihydropyridine.",
+    bbbCnsEffects: "Headache, dizziness, flushing; lightheadedness from peripheral vasodilation.",
+    pregnancyRisk: "safe",
+    pregnancyCategory: "Category C (First-Line Oral Agent in Pregnancy)",
+    pregnancySummary: "First-line oral calcium channel blocker for chronic hypertension and acute preeclampsia/gestational hypertension; also used as a tocolytic to arrest preterm labor.",
+    clinicalPearls: "Prototype 1,4-dihydropyridine (DHP); selective L-type Ca2+ channel blocker in vascular smooth muscle; ortho-nitro group locks phenyl ring perpendicular to DHP boat conformation."
+  },
+  amlodipine: {
+    metabolism: "Extensively metabolized by hepatic CYP3A4 to inactive pyridine metabolites; oral bioavailability 60-80%; very slow clearance.",
+    metabolismLocation: "Hepatic CYP3A4; elimination half-life 35-50 hours.",
+    bbbCrossing: "Moderate BBB penetration.",
+    bbbCnsEffects: "Dizziness, fatigue, headache, peripheral edema (gravity-dependent precapillary vasodilation).",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta; animal studies show embryotoxicity. Nifedipine is strongly preferred in pregnancy; switch if pregnancy is planned.",
+    clinicalPearls: "Basic 2-(2-aminoethoxymethyl) side chain is fully protonated at physiologic pH, providing slow receptor association/dissociation and prolonged 24-hour hemodynamic control."
+  },
+  nicardipine: {
+    metabolism: "Rapid and extensive first-pass hepatic metabolism via CYP3A4 and CYP2C8; bioavailability ~35%.",
+    metabolismLocation: "Hepatic CYP3A4; half-life 2-4 hours.",
+    bbbCrossing: "High BBB penetration; tertiary benzylmethylamino side chain confers lipophilicity and cerebral vascular selectivity.",
+    bbbCnsEffects: "Headache, dizziness, flushing; used IV for acute hypertensive encephalopathy and subarachnoid hemorrhage.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Intravenous nicardipine is effective for severe acute refractory preeclampsia; monitor maternal BP and fetal heart rate continuously.",
+    clinicalPearls: "Asymmetric 3,5-diester DHP with tertiary amine; high selectivity for cerebral and coronary vasculature; available IV for acute hypertensive crises."
+  },
+  clevidipine: {
+    metabolism: "Ultra-rapid ester hydrolysis by blood and tissue esterases to inactive carboxylic acid metabolite (clevidipine acid); independent of hepatic or renal function.",
+    metabolismLocation: "Vascular/blood esterases (initial half-life ~1 minute).",
+    bbbCrossing: "Low effective CNS accumulation due to ultra-short intravascular lifespan.",
+    bbbCnsEffects: "Headache, dizziness.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Formulated in a 20% lipid emulsion; used in acute perioperative hypertensive emergencies. Safety in gestation not established.",
+    clinicalPearls: "Engineered \"soft drug\" 1,4-DHP; double ester prodrug-like linkage hydrolyzes in seconds; precise titratability with rapid on/off arterial vasodilation without reflex bradycardia."
+  },
+  felodipine: {
+    metabolism: "Complete first-pass hepatic metabolism by CYP3A4 to inactive pyridine metabolite; oral bioavailability ~15-20%.",
+    metabolismLocation: "Hepatic CYP3A4; half-life 11-16 hours.",
+    bbbCrossing: "Moderate BBB penetration.",
+    bbbCnsEffects: "Headache, dizziness, flushing, peripheral edema.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Digital anomalies observed in animal studies; avoid during pregnancy.",
+    clinicalPearls: "2,3-Dichlorophenyl substitution provides steric bulk maintaining perpendicular ring orientation and vascular selectivity."
+  },
+  nimodipine: {
+    metabolism: "Extensive hepatic first-pass metabolism by CYP3A4; oral bioavailability ~13%.",
+    metabolismLocation: "Hepatic CYP3A4.",
+    bbbCrossing: "Very high BBB penetration; highly lipophilic isopropyl 2-methoxyethyl diester DHP.",
+    bbbCnsEffects: "Prevents ischemic neurological deficits following subarachnoid hemorrhage (SAH) by blocking cerebral arterial vasospasm.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Teratogenic in animal models; indicated only for life-threatening maternal aneurysmal subarachnoid hemorrhage.",
+    clinicalPearls: "Cerebroselective DHP CCB; 2-methoxyethyl ester group maximizes CNS penetration; specifically approved for prevention of cerebral vasospasm following SAH."
+  },
+  minoxidil: {
+    metabolism: "Hepatic bioactivation: Sulfotransferase 1A1 (SULT1A1) transfers sulfate to N-oxide, forming active minoxidil sulfate; parent drug is inactive.",
+    metabolismLocation: "Hepatic SULT1A1 sulfonation (phase II activation).",
+    bbbCrossing: "Moderate BBB penetration.",
+    bbbCnsEffects: "Headache, fatigue; severe hypertrichosis (hair growth stimulation via K_ATP channel opening), pericardial effusion, reflex tachycardia.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta; associated with fetal hypertrichosis and severe maternal/fetal hypotension. Contraindicated in pregnancy unless all other options fail.",
+    clinicalPearls: "Direct K_ATP channel opener in vascular smooth muscle; requires SULT1A1 bioactivation; must be co-administered with a loop diuretic (prevent massive fluid retention) and a beta-blocker (prevent reflex tachycardia)."
+  },
+  minoxidilsulfate: {
+    metabolism: "Eliminated primarily by renal excretion and glucuronidation.",
+    metabolismLocation: "Renal excretion.",
+    bbbCrossing: "Polar sulfate conjugate; limited BBB entry.",
+    bbbCnsEffects: "Direct vascular relaxant; flushing, headache.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Active form of minoxidil; avoid in pregnancy.",
+    clinicalPearls: "Active metabolite of minoxidil; directly opens ATP-sensitive K+ channels (K_ATP), hyperpolarizing vascular smooth muscle membranes and preventing voltage-gated Ca2+ entry."
+  },
+  sodiumnitroprusside: {
+    metabolism: "Non-enzymatic breakdown in blood: interacts with oxyhemoglobin/RBC sulfhydryls, releasing 1 molecule of nitric oxide (NO) and 5 cyanide (CN-) ions. Cyanide is detoxified by hepatic rhodanese using thiosulfate into thiocyanate (SCN-).",
+    metabolismLocation: "Intravascular spontaneous breakdown and hepatic rhodanese detoxification.",
+    bbbCrossing: "NO diffuses across vascular endothelium; cyanide and thiocyanate cross BBB causing neurotoxicity.",
+    bbbCnsEffects: "Cyanide toxicity (metabolic acidosis, confusion, seizures, coma); thiocyanate toxicity (hyperreflexia, psychosis, tinnitus, delirium).",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta; high risk of fatal fetal cyanide poisoning and metabolic acidosis. Strictly contraindicated in pregnancy unless all alternatives fail and infusion is <1-2 hours.",
+    clinicalPearls: "Potent balanced arteriolar and venous dilator; rapid onset and offset (<2 min); photosensitive (must protect IV bag from light); co-infuse sodium thiosulfate in prolonged infusions to prevent cyanide toxicity."
+  },
+  nitroglycerin: {
+    metabolism: "Enzymatic denitration in vascular smooth muscle and liver by mitochondrial aldehyde dehydrogenase (ALDH-2) and glutathione S-transferases, releasing nitric oxide (NO).",
+    metabolismLocation: "Mitochondrial ALDH-2 in venous/vascular smooth muscle.",
+    bbbCrossing: "Crosses BBB readily; high lipophilicity.",
+    bbbCnsEffects: "Severe throbbing headache (meningeal arterial vasodilation), dizziness, flushing, syncope.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Used IV for acute pulmonary edema and severe hypertensive emergencies in preeclampsia; monitor maternal BP carefully.",
+    clinicalPearls: "Organic nitrate; preferentially dilates venous capacitance vessels (reduces preload) at low doses; develops clinical tolerance (nitrate tolerance) due to ALDH-2 sulfhydryl oxidation; requires 10-12 hr nitrate-free interval."
+  },
+  diazoxide: {
+    metabolism: "Hepatic oxidation and sulfate conjugation; ~50% excreted unchanged in urine.",
+    metabolismLocation: "Hepatic metabolism and renal clearance; half-life 20-36 hours.",
+    bbbCrossing: "Moderate BBB penetration; benzothiadiazine derivative lacking 7-sulfonamide.",
+    bbbCnsEffects: "Dizziness, headache, weakness, severe hyperglycemia.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Crosses placenta; causes fetal and neonatal hyperbilirubinemia, thrombocytopenia, and marked fetal hyperglycemia/pancreatic inhibition. Avoid during labor and delivery.",
+    clinicalPearls: "Non-diuretic benzothiadiazine; potent K_ATP channel opener in vascular smooth muscle and pancreatic beta-cells (inhibits insulin release); used for acute hypertensive crises and refractory hypoglycemia."
+  },
+  aliskiren: {
+    metabolism: "Minimal hepatic metabolism by CYP3A4 (<10%); excreted >80% unchanged in feces via biliary clearance (substrate for P-glycoprotein).",
+    metabolismLocation: "Biliary/fecal excretion; oral bioavailability ~2.5%.",
+    bbbCrossing: "Very low BBB penetration; large transition-state peptidomimetic.",
+    bbbCnsEffects: "Dizziness, headache, fatigue.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Contraindicated in 2nd/3rd Trimester)",
+    pregnancySummary: "Boxed Warning: Drugs that act directly on the RAAS cause oligohydramnios, fetal renal agenesis, skull hypoplasia, and fetal death. Discontinue immediately upon pregnancy detection.",
+    clinicalPearls: "Direct Renin Inhibitor; non-peptide transition-state mimetic targeting the catalytic Asp32/Asp215 dyad; blocks the rate-limiting step of RAAS (angiotensinogen -> Ang I)."
+  },
+  enalaprilat: {
+    metabolism: "Not metabolized; cleared 100% unchanged by renal glomerular filtration and tubular secretion.",
+    metabolismLocation: "Renal excretion; half-life ~11 hours.",
+    bbbCrossing: "Negligible BBB penetration; hydrophilic tri-ionized dicarboxylate zwitterion.",
+    bbbCnsEffects: "Dizziness, lightheadedness.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D",
+    pregnancySummary: "Direct RAAS inhibitor; Boxed Warning for fetopathy, pulmonary hypoplasia, and neonatal renal failure.",
+    clinicalPearls: "Active metabolite of enalapril; formulated as IV injection for hypertensive emergencies; contains carboxylate zinc-binding group replacing captopril sulfhydryl."
+  },
+  fosinopril: {
+    metabolism: "Prodrug: completely hydrolyzed by intestinal and hepatic esterases to active fosinoprilat.",
+    metabolismLocation: "Gut/liver esterase cleavage.",
+    bbbCrossing: "Low BBB penetration; phosphinate ACE inhibitor.",
+    bbbCnsEffects: "Dizziness, cough, fatigue.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Contraindicated in 2nd/3rd Trimester)",
+    pregnancySummary: "Boxed Warning for second- and third-trimester fetopathy. Discontinue immediately if pregnancy occurs.",
+    clinicalPearls: "Phosphinic acid ACE inhibitor; unique compensatory dual elimination: cleared equally by hepatic biliary excretion (50%) and renal excretion (50%); no dose adjustment needed in mild-to-moderate CKD."
+  },
+  quinapril: {
+    metabolism: "Prodrug: rapid hepatic esterase de-esterification to active quinaprilat.",
+    metabolismLocation: "Hepatic carboxylesterases.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Dizziness, headache, dry cough (bradykinin accumulation).",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Boxed Warning)",
+    pregnancySummary: "Contraindicated in pregnancy due to catastrophic RAAS fetopathy.",
+    clinicalPearls: "Dicarboxylate ACE inhibitor prodrug; tetrahydroisoquinoline bicyclic core provides potent ACE binding."
+  },
+  benazepril: {
+    metabolism: "Prodrug: completely bioactivated by hepatic esterases to active benazeprilat.",
+    metabolismLocation: "Hepatic esterase hydrolysis.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Dizziness, headache, somnolence, dry cough.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Boxed Warning)",
+    pregnancySummary: "Causes fetal renal failure, oligohydramnios, and limb contractures; contraindicated.",
+    clinicalPearls: "Benzazepine-containing ACE inhibitor prodrug; ethyl ester enhances lipophilicity for oral absorption."
+  },
+  exp3174: {
+    metabolism: "Active imidazole-5-carboxylic acid metabolite of losartan; eliminated unchanged in urine and bile.",
+    metabolismLocation: "Hepatic CYP2C9/CYP3A4 oxidation of losartan 5-hydroxymethyl group.",
+    bbbCrossing: "Low BBB penetration; highly ionized dicarboxylate.",
+    bbbCnsEffects: "Dizziness, fatigue.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D",
+    pregnancySummary: "Active ARB metabolite; contraindicated in pregnancy due to RAAS fetopathy.",
+    clinicalPearls: "10 to 40 times more potent than losartan; non-competitive, insurmountable AT1 receptor antagonist with terminal half-life of 6-9 hours; responsible for majority of losartan clinical efficacy."
+  },
+  candesartancilexetil: {
+    metabolism: "Prodrug: completely bioactivated during gastrointestinal absorption by mucosal esterases; cleaves cilexetil (cyclohexyl oxycarbonyloxy ethyl) ester releasing active candesartan.",
+    metabolismLocation: "Intestinal wall esterases.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Dizziness, headache, back pain.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Boxed Warning)",
+    pregnancySummary: "Direct RAAS inhibitor; Boxed Warning for fetopathy, skull hypoplasia, and neonatal anuria. Contraindicated in 2nd/3rd trimesters.",
+    clinicalPearls: "Carbonate ester prodrug; active candesartan displays tight, insurmountable pseudoirreversible binding to AT1 receptor with very slow dissociation rate."
+  },
+  candesartan: {
+    metabolism: "Minimal hepatic metabolism by CYP2C9 (<20%); ~33% excreted renally and ~67% in feces/bile.",
+    metabolismLocation: "Renal and biliary clearance.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Dizziness, fatigue.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Boxed Warning)",
+    pregnancySummary: "Contraindicated in pregnancy due to oligohydramnios and fetal renal dysgenesis.",
+    clinicalPearls: "Insurmountable AT1 receptor antagonist; benzimidazole carboxylic acid provides electrostatic interaction with Lys199 on AT1 receptor."
+  },
+  olmesartanmedoxomil: {
+    metabolism: "Prodrug: rapid and complete cleavage of medoxomil (5-methyl-2-oxo-1,3-dioxol-4-yl) ester by gut mucosa and portal blood esterases to active olmesartan.",
+    metabolismLocation: "Intestinal mucosa esterases.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Dizziness, headache; unique risk of severe sprue-like enteropathy (severe chronic diarrhea with substantial weight loss and intestinal villous atrophy).",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Boxed Warning)",
+    pregnancySummary: "Contraindicated in pregnancy due to fatal fetal renal damage.",
+    clinicalPearls: "Medoxomil prodrug ARB; causes sprue-like enteropathy requiring drug discontinuation; active olmesartan features hydroxypropyl and carboxylic acid groups on imidazole ring."
+  },
+  olmesartan: {
+    metabolism: "No further metabolism; eliminated ~35-50% in urine and ~50-65% in feces via biliary excretion.",
+    metabolismLocation: "Renal and biliary excretion.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Dizziness, headache.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D",
+    pregnancySummary: "Contraindicated in pregnancy.",
+    clinicalPearls: "Active form of olmesartan medoxomil; insurmountable AT1 blocker."
+  },
+  telmisartan: {
+    metabolism: "Extensive hepatic glucuronidation (1-O-acylglucuronide); zero CYP450 metabolism; excreted >98% unchanged in feces via biliary clearance.",
+    metabolismLocation: "Hepatic glucuronide conjugation and biliary excretion; terminal half-life ~24 hours.",
+    bbbCrossing: "Moderate BBB penetration; most lipophilic ARB.",
+    bbbCnsEffects: "Dizziness, fatigue, back pain.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Boxed Warning)",
+    pregnancySummary: "Contraindicated in pregnancy due to fetal RAAS toxicity.",
+    clinicalPearls: "Lacks the acidic tetrazole ring (contains a carboxylic acid instead); dual pharmacology: potent AT1 receptor antagonist PLUS partial agonist at Peroxisome Proliferator-Activated Receptor gamma (PPAR-gamma), improving insulin sensitivity and lipid metabolism."
+  },
+  irbesartan: {
+    metabolism: "Hepatic oxidation primarily by CYP2C9 to glucuronide and monohydroxylated metabolites; <2% excreted unchanged in urine.",
+    metabolismLocation: "Hepatic CYP2C9; half-life 11-15 hours.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Dizziness, fatigue, headache.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category D (Boxed Warning)",
+    pregnancySummary: "Contraindicated in pregnancy due to oligohydramnios and fetal death.",
+    clinicalPearls: "Active drug (not a prodrug); contains a spirocyclopentyl group attached to imidazolinone core; highly selective AT1 blocker with excellent oral bioavailability (~60-80%)."
+  },
+  lovastatin: {
+    metabolism: "Lactone prodrug: hydrolyzed by hepatic and intestinal esterases to active beta-hydroxy acid. Extensively metabolized by CYP3A4; extensive first-pass extraction (oral bioavailability <5%).",
+    metabolismLocation: "Hepatic CYP3A4 and carboxylesterases.",
+    bbbCrossing: "Moderate BBB penetration; lipophilic decalin lactone.",
+    bbbCnsEffects: "Headache, insomnia, fatigue, mild cognitive impairment reported rarely.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category X (Contraindicated in Pregnancy)",
+    pregnancySummary: "Cholesterol synthesis is fundamentally essential for fetal embryogenesis, cell membrane synthesis, and organ development. Discontinue statins prior to conception or immediately upon pregnancy confirmation.",
+    clinicalPearls: "Natural fungal HMG-CoA reductase inhibitor; closed lactone ring is a prodrug mimetic of mevalonate transition state; take with evening meal to boost absorption."
+  },
+  simvastatin: {
+    metabolism: "Lactone prodrug: hydrolyzed by esterases to active beta-hydroxy acid form; extensively metabolized by CYP3A4 (high risk of drug-drug interactions with CYP3A4 inhibitors).",
+    metabolismLocation: "Hepatic CYP3A4 and esterases; bioavailability ~5%.",
+    bbbCrossing: "Moderate BBB penetration; highly lipophilic lactone.",
+    bbbCnsEffects: "Headache, insomnia, memory loss (rare); primary adverse effects are myalgia, myopathy, and rhabdomyolysis.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category X",
+    pregnancySummary: "Contraindicated; risk of severe embryofetal developmental anomalies.",
+    clinicalPearls: "Semi-synthetic derivative of lovastatin with an extra alpha-methyl group on 2-methylbutyrate ester; potent substrate for OATP1B1 and CYP3A4; contraindicated with gemfibrozil due to severe rhabdomyolysis."
+  },
+  pravastatin: {
+    metabolism: "Active open-ring dihydroxy acid drug (NOT a prodrug); undergoes non-CYP hepatic and renal clearance (minor sulfoconjugation and isomerization); NOT metabolized by CYP3A4.",
+    metabolismLocation: "Hepatic uptake via OATP1B1; non-CYP metabolism and dual renal/biliary elimination.",
+    bbbCrossing: "Very low BBB penetration; hydrophilic 6beta-hydroxy group prevents passive diffusion into non-hepatic tissues/CNS.",
+    bbbCnsEffects: "Low incidence of central sleep disturbances and lowest risk of myopathy among statins.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category X",
+    pregnancySummary: "Contraindicated during gestation.",
+    clinicalPearls: "Hydrophilic statin; 6beta-hydroxy group confers hepatoselectivity (enters hepatocytes via OATP1B1 active transport); lowest potential for CYP-mediated drug interactions."
+  },
+  atorvastatin: {
+    metabolism: "Active open-ring acid drug; extensive hepatic metabolism by CYP3A4 to active ortho- and para-hydroxylated metabolites (contribute ~70% of circulating HMG-CoA reductase inhibitory activity).",
+    metabolismLocation: "Hepatic CYP3A4; elimination half-life ~14 hours (inhibitory activity half-life 20-30 hours).",
+    bbbCrossing: "Low to moderate BBB penetration; lipophilic synthetic pyrrole core.",
+    bbbCnsEffects: "Headache, dizziness, fatigue, myalgia.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category X",
+    pregnancySummary: "Contraindicated in pregnancy and nursing mothers.",
+    clinicalPearls: "Synthetic statin; substituted pyrrole ring; high-intensity statin (produces >=50% LDL reduction at 40-80 mg); can be dosed at any time of day due to prolonged active metabolite half-life."
+  },
+  rosuvastatin: {
+    metabolism: "Active open-ring acid drug; minimal hepatic metabolism (~10% by CYP2C9); not a substrate for CYP3A4; cleared >90% as parent drug in feces and urine.",
+    metabolismLocation: "Hepatic OATP1B1 uptake and biliary excretion; terminal half-life ~19 hours.",
+    bbbCrossing: "Very low BBB penetration; hydrophilic methane-sulfonamide group on pyrimidine ring confers amphoteric character and marked hepatoselectivity.",
+    bbbCnsEffects: "Low CNS penetration; myopathy risk in patients with SLCO1B1 (OATP1B1) variants or of Asian ancestry (initiate at lower dose).",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category X",
+    pregnancySummary: "Contraindicated in pregnancy.",
+    clinicalPearls: "Most potent statin on a milligram basis; pyrimidine core with polar sulfonamide moiety; high-intensity statin with longest elimination half-life and minimal CYP3A4 interaction liability."
+  },
+  fluvastatin: {
+    metabolism: "Extensive hepatic metabolism primarily by CYP2C9 (~75%) and minor CYP3A4/CYP2C8 to inactive metabolites; bioavailability ~24%.",
+    metabolismLocation: "Hepatic CYP2C9; short half-life 1-3 hours.",
+    bbbCrossing: "Low BBB penetration; synthetic indole ring.",
+    bbbCnsEffects: "Headache, fatigue, insomnia, dyspepsia.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category X",
+    pregnancySummary: "Contraindicated in pregnancy.",
+    clinicalPearls: "First fully synthetic statin; substituted indole scaffold; metabolized by CYP2C9 (low interaction with CYP3A4 inhibitors); lower LDL lowering efficacy."
+  },
+  pitavastatin: {
+    metabolism: "Minimal hepatic metabolism; glucuronidation by UGT1A3/UGT2B7; negligible CYP3A4/CYP2C9 oxidation; excreted >80% in feces via bile.",
+    metabolismLocation: "Hepatic UGT glucuronidation and biliary clearance; half-life ~12 hours.",
+    bbbCrossing: "Low BBB penetration; quinoline ring with lipophilic cyclopropyl group.",
+    bbbCnsEffects: "Headache, myalgia, back pain.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category X",
+    pregnancySummary: "Contraindicated in pregnancy.",
+    clinicalPearls: "Synthetic statin with quinoline core and unique cyclopropyl ring; low risk of CYP-mediated drug interactions; does not adversely affect glycemic control / HbA1c."
+  },
+  gemfibrozil: {
+    metabolism: "Extensive hepatic oxidation of methyl groups to hydroxymethyl and carboxylic acid metabolites; glucuronidation by UGT2B7 (gemfibrozil 1-O-beta-glucuronide); excreted primarily in urine.",
+    metabolismLocation: "Hepatic oxidation and glucuronidation; half-life 1.5 hours.",
+    bbbCrossing: "Moderate BBB penetration; phenoxyalkyl carboxylic acid.",
+    bbbCnsEffects: "Dizziness, headache, fatigue; abdominal pain, gallstones (cholelithiasis).",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Animal studies show adverse fetal effects; avoid in pregnancy unless hypertriglyceridemia-induced pancreatitis threatens maternal life.",
+    clinicalPearls: "Fibrate (PPAR-alpha agonist); increases LPL activity and decreases ApoC-III; potent mechanism-based inhibitor of CYP2C8 and potent inhibitor of OATP1B1 transporter; STRICTLY CONTRAINDICATED with statins (especially simvastatin) due to catastrophic rhabdomyolysis."
+  },
+  fenofibrate: {
+    metabolism: "Prodrug: rapidly and completely hydrolyzed by plasma and tissue esterases to active fenofibric acid; negligible intact fenofibrate detected in circulation.",
+    metabolismLocation: "Plasma and tissue carboxylesterases.",
+    bbbCrossing: "Low to moderate BBB penetration.",
+    bbbCnsEffects: "Headache, fatigue; cholelithiasis, myopathy.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Avoid during gestation unless severe hypertriglyceridemia risks acute maternal pancreatitis.",
+    clinicalPearls: "Isopropyl ester prodrug; does NOT inhibit CYP2C8 or OATP1B1 to the extent of gemfibrozil; preferred fibrate when combination therapy with a statin is clinically required."
+  },
+  fenofibricacid: {
+    metabolism: "Glucuronide conjugation and renal excretion (~60% in urine as glucuronide and unchanged acid).",
+    metabolismLocation: "Hepatic/renal glucuronidation; half-life ~20 hours.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Headache, dizziness, myalgia.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Contraindicated unless severe hypertriglyceridemia threatens pancreatitis.",
+    clinicalPearls: "Active metabolite of fenofibrate; activates PPAR-alpha; available as choline fenofibrate salt."
+  },
+  ezetimibe: {
+    metabolism: "Rapidly glucuronidated in intestinal mucosa and liver to active ezetimibe-glucuronide; undergoes extensive enterohepatic recirculation back to the brush border; excreted 80% in feces.",
+    metabolismLocation: "Intestinal mucosa and hepatic UGT1A1/UGT1A3/UGT2B7 glucuronidation.",
+    bbbCrossing: "Very low BBB penetration; polar 1,4-diphenyl azetidin-2-one (beta-lactam).",
+    bbbCnsEffects: "Fatigue, headache, diarrhea, upper respiratory infection.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "Limited human pregnancy data. Avoid during pregnancy unless maternal cardiovascular risk outweighs potential fetal harm; discontinue statin component if taken as combination.",
+    clinicalPearls: "Cholesterol absorption inhibitor; binds Niemann-Pick C1-Like 1 (NPC1L1) transporter at the jejunal enterocyte brush border; active glucuronide metabolite is recycled repeatedly via enterohepatic circulation."
+  },
+  colesevelam: {
+    metabolism: "Not metabolized by enzymes; completely non-absorbed and biologically inert; excreted 100% unchanged in feces.",
+    metabolismLocation: "Non-systemic; remains entirely within gastrointestinal lumen.",
+    bbbCrossing: "Zero BBB penetration (large insoluble cross-linked polymer).",
+    bbbCnsEffects: "None; strictly gastrointestinal (constipation, dyspepsia, bloating, flatulence).",
+    pregnancyRisk: "safe",
+    pregnancyCategory: "Category B (Safest Lipid Agent in Pregnancy)",
+    pregnancySummary: "Non-systemic polymer resin that is not absorbed into the bloodstream. Preferred agent for treating familial hypercholesterolemia in pregnant women; supplement with fat-soluble vitamins (A, D, E, K).",
+    clinicalPearls: "High-capacity bile acid sequestrant (polyallylamine polymer); binds bile acids in intestine, preventing enterohepatic circulation and upregulating hepatic LDL receptors; also reduces HbA1c in type 2 diabetes."
+  },
+  cholestyramine: {
+    metabolism: "Not absorbed from GI tract; excreted unchanged in feces.",
+    metabolismLocation: "Insoluble quaternary ammonium anion-exchange resin in GI tract.",
+    bbbCrossing: "Zero BBB penetration.",
+    bbbCnsEffects: "None; causes severe constipation, nausea, fecal impaction.",
+    pregnancyRisk: "safe",
+    pregnancyCategory: "Category C (Non-systemic; historically used in pregnancy)",
+    pregnancySummary: "Not systemically absorbed, making it safe for fetal development; can impair maternal absorption of fat-soluble vitamins (vitamins A, D, E, and K), risking maternal/fetal coagulopathy if vitamin K is depleted.",
+    clinicalPearls: "Anion-exchange resin with styryl quaternary ammonium groups; binds negatively charged bile acids; binds and blocks absorption of acidic co-medications (warfarin, levothyroxine, thiazides, digoxin) - space dosing by 4 hours."
+  },
+  lomitapide: {
+    metabolism: "Extensive hepatic metabolism by CYP3A4 to inactive metabolites; minor CYP2E1, CYP2C8, CYP2C19.",
+    metabolismLocation: "Hepatic CYP3A4; half-life ~39 hours.",
+    bbbCrossing: "Moderate BBB penetration; hexafluorinated phenanthrenyl dicarboxamide.",
+    bbbCnsEffects: "Headache, dizziness, fatigue; severe hepatic steatosis and marked elevations in transaminases.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Category X (Contraindicated in Pregnancy - Boxed Warning)",
+    pregnancySummary: "Severe teratogenicity and embryofetal toxicity demonstrated in animal studies. Boxed Warning for embryo-fetal toxicity and hepatotoxicity. Pregnancy test required prior to initiation.",
+    clinicalPearls: "Microsomal Triglyceride Transfer Protein (MTP) inhibitor; prevents assembly and secretion of apoB-containing lipoproteins (chylomicrons in enterocytes, VLDL in hepatocytes); approved for homozygous familial hypercholesterolemia (HoFH)."
+  },
+  niacin: {
+    metabolism: "Dual pathways: high-affinity/low-capacity conjugation with glycine to nicotinuric acid (predominant at high doses; causes cutaneous flushing); and low-affinity/high-capacity conversion to NAD+/NADP+ (causes hepatotoxicity).",
+    metabolismLocation: "Hepatic metabolism and renal excretion.",
+    bbbCrossing: "Crosses BBB via active monocarboxylate transporter.",
+    bbbCnsEffects: "Headache, dizziness, lightheadedness; intense prostaglandin D2/E2-mediated cutaneous flushing and pruritus.",
+    pregnancyRisk: "caution",
+    pregnancyCategory: "Category C",
+    pregnancySummary: "High-dose pharmacological niacin is contraindicated in pregnancy; nutritional doses (as vitamin B3) are safe.",
+    clinicalPearls: "Nicotinic acid (vitamin B3); binds GPR109A (HCA2) receptors on adipocytes, suppressing lipolysis and reducing free fatty acid flux to liver; reduces triglycerides, LDL-C, and increases HDL-C; pre-treat with aspirin 30 min prior to reduce flushing."
+  },
+  bempedoicacid: {
+    metabolism: "Prodrug: converted in liver by very long-chain acyl-CoA synthetase-1 (ACSVL1 / SLC27A2) to active bempedoyl-CoA; ACSVL1 is absent in skeletal muscle; parent drug is glucuronidated and cleared renally.",
+    metabolismLocation: "Hepatic ACSVL1 bioactivation and UGT2B7 glucuronidation; half-life ~21 hours.",
+    bbbCrossing: "Low BBB penetration.",
+    bbbCnsEffects: "Headache, fatigue; hyperuricemia/gout precipitation and tendon rupture.",
+    pregnancyRisk: "contraindicated",
+    pregnancyCategory: "Contraindicated (Pregnancy & Breastfeeding)",
+    pregnancySummary: "Discontinue when pregnancy is recognized; mechanism of cholesterol synthesis inhibition can cause fetal harm.",
+    clinicalPearls: "Inhibits ATP-citrate lyase (ACL), upstream of HMG-CoA reductase in cholesterol biosynthesis pathway; because ACSVL1 is absent in skeletal muscle, it does NOT cause the myalgias/myopathy characteristic of statins."
+  },
 };
 
 /**
@@ -751,7 +1415,72 @@ const DRUG_ALIAS_MAP: Record<string, string> = {
   cardizem: 'diltiazem',
   adenocard: 'adenosine',
   ufh: 'heparin',
-  lmwh: 'enoxaparin'
+  lmwh: 'enoxaparin',
+
+  // Exam 2 Aliases
+  diuril: "chlorothiazide",
+  microzide: "hydrochlorothiazide",
+  esidrix: "hydrochlorothiazide",
+  hctz: "hydrochlorothiazide",
+  zaroxolyn: "metolazone",
+  lozol: "indapamide",
+  hygroton: "chlorthalidone",
+  edecrin: "ethacrynicacid",
+  dyrenium: "triamterene",
+  midamor: "amiloride",
+  diamox: "acetazolamide",
+  osmitrol: "mannitol",
+  tenormin: "atenolol",
+  trandate: "labetalol",
+  normodyne: "labetalol",
+  visken: "pindolol",
+  corgard: "nadolol",
+  catapres: "clonidine",
+  tenex: "guanfacine",
+  intuniv: "guanfacine",
+  aldomet: "methyldopa",
+  minipress: "prazosin",
+  hytrin: "terazosin",
+  cardura: "doxazosin",
+  flomax: "tamsulosin",
+  serpasil: "reserpine",
+  ismelin: "guanethidine",
+  procardia: "nifedipine",
+  adalat: "nifedipine",
+  norvasc: "amlodipine",
+  cardene: "nicardipine",
+  cleviprex: "clevidipine",
+  plendil: "felodipine",
+  nimotop: "nimodipine",
+  loniten: "minoxidil",
+  nitropress: "sodiumnitroprusside",
+  nitrostat: "nitroglycerin",
+  hyperstat: "diazoxide",
+  proglycem: "diazoxide",
+  tekturna: "aliskiren",
+  monopril: "fosinopril",
+  accupril: "quinapril",
+  lotensin: "benazepril",
+  atacand: "candesartan",
+  benicar: "olmesartan",
+  micardis: "telmisartan",
+  avapro: "irbesartan",
+  mevacor: "lovastatin",
+  zocor: "simvastatin",
+  pravachol: "pravastatin",
+  lipitor: "atorvastatin",
+  crestor: "rosuvastatin",
+  lescol: "fluvastatin",
+  livalo: "pitavastatin",
+  lopid: "gemfibrozil",
+  tricor: "fenofibrate",
+  trilipix: "fenofibricacid",
+  zetia: "ezetimibe",
+  welchol: "colesevelam",
+  questran: "cholestyramine",
+  juxtapid: "lomitapide",
+  niaspan: "niacin",
+  nexletol: "bempedoicacid",
 };
 
 /**

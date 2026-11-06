@@ -1,6 +1,7 @@
 import type { ReviewModule, ChemicalStructure } from '../types/reviewModule';
 import type { FlashcardItem } from '../types/cumulativeStudy';
 import { loadAllReviewModules } from './moduleStorage';
+import { getModuleExamId } from '../types/examTypes';
 
 /**
  * Normalizes SMILES strings for reliable deduplication comparison.
@@ -279,13 +280,36 @@ export function filterFlashcardsByModules(
 /**
  * Harvests all deduplicated chemical structures across loaded curriculum modules
  * into ready-to-study FlashcardItem records for the Cumulative Study Hub.
- * If no modules are provided, automatically loads all available review modules.
+ * If an examId is provided (e.g. 'exam_3', 'exam_2'), filters structures to modules
+ * belonging to that specific exam.
  *
- * @param modules Optional array of ReviewModule instances (defaults to loadAllReviewModules())
- * @returns Deduplicated array of initialized FlashcardItem records
+ * @param modulesOrExamId Optional array of ReviewModule instances OR examId string ('exam_1' | 'exam_2' | 'exam_3')
+ * @param examId Optional examId string if first param was modules array
+ * @returns Deduplicated array of initialized FlashcardItem records scoped to the exam
  */
-export function harvestCumulativeFlashcards(modules?: ReviewModule[]): FlashcardItem[] {
-  const mods = Array.isArray(modules) && modules.length > 0 ? modules : loadAllReviewModules();
-  return harvestCurriculumStructures(mods);
+export function harvestCumulativeFlashcards(
+  modulesOrExamId?: ReviewModule[] | string,
+  examId?: string
+): FlashcardItem[] {
+  let targetExamId: string | undefined;
+  let targetModules: ReviewModule[] | undefined;
+
+  if (typeof modulesOrExamId === 'string') {
+    targetExamId = modulesOrExamId;
+  } else if (Array.isArray(modulesOrExamId)) {
+    targetModules = modulesOrExamId;
+    targetExamId = examId;
+  } else {
+    targetExamId = examId;
+  }
+
+  const allMods =
+    targetModules && targetModules.length > 0 ? targetModules : loadAllReviewModules();
+  const filtered =
+    targetExamId && targetExamId !== 'all'
+      ? allMods.filter((m) => getModuleExamId(m) === targetExamId)
+      : allMods;
+
+  return harvestCurriculumStructures(filtered);
 }
 

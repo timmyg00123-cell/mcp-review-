@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { ReviewModule, ExamModeStatus } from '../types/reviewModule';
+import { ExamDefinition, EXAM_DEFINITIONS, getModuleExamId } from '../types/examTypes';
 import {
   ChevronRight,
   ChevronDown,
@@ -30,6 +31,10 @@ import { isStudentMode } from '../utils/envMode';
 
 export interface NavbarProps {
   courseCode?: string;
+  activeExamId?: string;
+  activeExam?: ExamDefinition;
+  exams?: ExamDefinition[];
+  onSwitchExam?: (examId: string) => void;
   activeModule: ReviewModule;
   modules: ReviewModule[];
   onSwitchModule: (id: string) => void;
@@ -67,6 +72,10 @@ export interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   courseCode = 'MCP II',
+  activeExamId = 'exam_3',
+  activeExam,
+  exams = EXAM_DEFINITIONS,
+  onSwitchExam,
   activeModule,
   modules,
   onSwitchModule,
@@ -104,18 +113,108 @@ export const Navbar: React.FC<NavbarProps> = ({
   const modulePopoverRef = useRef<HTMLDivElement>(null);
   const [confirmDeleteModuleId, setConfirmDeleteModuleId] = useState<string | null>(null);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
+  const [isExamMenuOpen, setIsExamMenuOpen] = useState(false);
+
+  const currentExam = useMemo(() => {
+    return activeExam || exams.find((e) => e.id === activeExamId) || exams[2];
+  }, [activeExam, exams, activeExamId]);
+
+  const examModules = useMemo(() => {
+    return modules.filter((m) => getModuleExamId(m) === currentExam.id);
+  }, [modules, currentExam.id]);
 
   return (
     <header className="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-3">
         {/* ==================================================== */}
-        {/* 1. LEFT ZONE (SCOPE): Course > Topic Breadcrumb      */}
+        {/* 1. LEFT ZONE (SCOPE): Exam > Topic Breadcrumb        */}
         {/* ==================================================== */}
         <div className="flex items-center gap-2 shrink-0">
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs">
-              {activeModule.code || courseCode}
-            </span>
+            {/* Scope Exam Switcher Button & Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsExamMenuOpen(!isExamMenuOpen);
+                  setIsToolsMenuOpen(false);
+                  modulePopoverRef.current?.hidePopover?.();
+                }}
+                className="flex items-center gap-1 font-mono font-bold text-xs px-2.5 py-1 rounded-md bg-slate-900 text-white hover:bg-blue-600 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-blue-400 dark:hover:text-white transition-colors shadow-2xs cursor-pointer select-none"
+                title="Switch Semester Exam"
+              >
+                <span>{currentExam.code}</span>
+                <ChevronDown className="w-3 h-3 opacity-80 shrink-0" />
+              </button>
+
+              {/* Exam Dropdown Menu */}
+              {isExamMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsExamMenuOpen(false)}
+                  />
+                  <div
+                    className="absolute left-0 top-full mt-1.5 w-72 sm:w-80 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 z-40 animate-fadeIn space-y-1 text-xs"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="px-2 py-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      <span>Semester Examinations</span>
+                      <span className="text-[10px] font-mono lowercase text-slate-400">
+                        {exams.length} exams
+                      </span>
+                    </div>
+
+                    <div className="space-y-1">
+                      {exams.map((ex) => {
+                        const isExActive = ex.id === currentExam.id;
+                        const modCount = modules.filter(
+                          (m) => getModuleExamId(m) === ex.id
+                        ).length;
+
+                        return (
+                          <button
+                            key={ex.id}
+                            type="button"
+                            onClick={() => {
+                              onSwitchExam?.(ex.id);
+                              setIsExamMenuOpen(false);
+                            }}
+                            className={`w-full p-2.5 rounded-lg text-left transition-colors flex items-start justify-between gap-2.5 cursor-pointer ${
+                              isExActive
+                                ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-900 dark:text-blue-200 font-bold border border-blue-200 dark:border-blue-800'
+                                : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-transparent'
+                            }`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold shrink-0">
+                                  {ex.code}
+                                </span>
+                                <span className="truncate font-semibold">{ex.shortTitle}</span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 font-normal">
+                                {ex.description}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                                <span>{ex.chapters}</span>
+                                <span>·</span>
+                                <span>
+                                  {modCount} {modCount === 1 ? 'module' : 'modules'}
+                                </span>
+                              </div>
+                            </div>
+                            {isExActive && (
+                              <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
 
             {/* Scope Topic Switcher Button */}
@@ -126,6 +225,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => {
                   setConfirmDeleteModuleId(null);
                   setIsToolsMenuOpen(false);
+                  setIsExamMenuOpen(false);
                 }}
                 className="anchor-module-btn flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1 px-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 title="Switch course topic / module"
@@ -144,19 +244,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="dropdown-popover w-84 sm:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 z-40 space-y-1"
               >
                 <div className="px-2 py-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      <span>Curriculum Modules</span>
-                      <span className="text-[10px] font-mono lowercase text-slate-400">
-                        {modules.length} {modules.length === 1 ? 'module' : 'modules'}
-                      </span>
+                  <span>{currentExam.code} Modules</span>
+                  <span className="text-[10px] font-mono lowercase text-slate-400">
+                    {examModules.length} {examModules.length === 1 ? 'module' : 'modules'}
+                  </span>
+                </div>
+
+                <div className="max-h-72 overflow-y-auto space-y-1 pr-0.5">
+                  {examModules.length === 0 ? (
+                    <div className="p-3 text-center text-xs text-slate-400 dark:text-slate-500 italic">
+                      No modules available for {currentExam.code} yet. Import or author one below!
                     </div>
+                  ) : (
+                    examModules.map((m) => {
+                      const isActive = m.id === activeModule.id;
+                      const isConfirming = confirmDeleteModuleId === m.id;
+                      const canDelete =
+                        !isStudentMode() && examModules.length > 1 && !m.isBuiltIn;
 
-                    <div className="max-h-72 overflow-y-auto space-y-1 pr-0.5">
-                      {modules.map((m) => {
-                        const isActive = m.id === activeModule.id;
-                        const isConfirming = confirmDeleteModuleId === m.id;
-                        const canDelete = !isStudentMode() && modules.length > 1 && !m.isBuiltIn;
-
-                        return (
+                      return (
                           <div
                             key={m.id}
                             className={`group w-full p-2 rounded-lg text-xs transition-colors flex items-center justify-between gap-2 ${
@@ -253,8 +359,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                             )}
                           </div>
                         );
-                      })}
-                    </div>
+                      })
+                    )}
+                  </div>
 
                     <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800 space-y-1">
                       {canRestoreDefault && onRestoreDefaultModule && (

@@ -3,6 +3,8 @@ import type {
   StruggleDiagnosticReport,
   FlashcardItem,
 } from '../types/cumulativeStudy';
+import type { ReviewModule } from '../types/reviewModule';
+import { type ExamDefinition, getExamDefinition } from '../types/examTypes';
 import { getCumulativeQuestionBank } from '../data/cumulativeQuizData';
 import { harvestCumulativeFlashcards } from '../utils/cumulativeStructureHarvester';
 import { generateStruggleReport } from '../utils/struggleDiagnosticService';
@@ -25,6 +27,9 @@ export interface CumulativeStudyHubModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: 'practice-test' | 'flashcards' | 'diagnostics';
+  activeExamId?: string;
+  activeExam?: ExamDefinition;
+  examModules?: ReviewModule[];
 }
 
 export type CumulativeStudyTab = 'practice-test' | 'flashcards' | 'diagnostics';
@@ -41,10 +46,17 @@ export const CumulativeStudyHubModal: React.FC<CumulativeStudyHubModalProps> = (
   isOpen,
   onClose,
   initialTab = 'practice-test',
+  activeExamId = 'exam_3',
+  activeExam,
+  examModules,
 }) => {
   const [activeTab, setActiveTab] = useState<CumulativeStudyTab>(initialTab);
   const [activeReport, setActiveReport] = useState<StruggleDiagnosticReport | null>(null);
   const [drillCandidateIds, setDrillCandidateIds] = useState<string[]>([]);
+
+  const currentExam = useMemo(() => {
+    return activeExam || getExamDefinition(activeExamId);
+  }, [activeExam, activeExamId]);
 
   // Update active tab if initialTab changes while open
   useEffect(() => {
@@ -67,15 +79,15 @@ export const CumulativeStudyHubModal: React.FC<CumulativeStudyHubModalProps> = (
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Harvest curriculum chemical structures for flashcard deck
+  // Harvest curriculum chemical structures for flashcard deck, scoped to active exam
   const harvestedCards = useMemo(() => {
-    return harvestCumulativeFlashcards();
-  }, []);
+    return harvestCumulativeFlashcards(examModules, activeExamId);
+  }, [examModules, activeExamId]);
 
-  // Base question bank across all cardiovascular modules
+  // Base question bank scoped to the active exam
   const baseQuestions = useMemo(() => {
-    return getCumulativeQuestionBank();
-  }, []);
+    return getCumulativeQuestionBank(activeExamId);
+  }, [activeExamId]);
 
   // Filter or prioritize questions when drilling struggled items from diagnostics
   const activeQuestions = useMemo(() => {
@@ -208,18 +220,23 @@ export const CumulativeStudyHubModal: React.FC<CumulativeStudyHubModalProps> = (
               <GraduationCap className="w-6 h-6" />
             </div>
             <div className="min-w-0">
-              <h2
-                id="cumulative-hub-title"
-                className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 truncate"
-              >
-                <span>Cumulative MedChem Study Hub</span>
-                <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  <Sparkles className="w-3 h-3 text-indigo-500" />
-                  Cross-Curriculum
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs">
+                  {currentExam.code}
                 </span>
-              </h2>
+                <h2
+                  id="cumulative-hub-title"
+                  className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 truncate"
+                >
+                  <span>{currentExam.shortTitle} Study Hub</span>
+                  <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                    <Sparkles className="w-3 h-3 text-indigo-500" />
+                    {currentExam.chapters}
+                  </span>
+                </h2>
+              </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                Cross-Curriculum SAR Deduction &amp; Rapid Structure-to-Class Recall
+                {currentExam.description}
               </p>
             </div>
           </div>
