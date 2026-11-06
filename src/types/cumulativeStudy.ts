@@ -144,4 +144,6 @@ export interface StruggleDiagnosticReport {
   classBreakdown: ClassRecallBreakdown[];
   primaryStrugglePatterns?: string[];
   generatedAt?: number;
+  weakestClasses?: string[];
+  remediationCandidateIds?: string[];
 }
