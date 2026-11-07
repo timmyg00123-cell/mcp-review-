@@ -88,7 +88,9 @@ const hfRegex = /heart|failure/i;
 const arrhythmRegex = /arrhythm/i;
 
 // Exam 1 module IDs
+assert.ok(renalRegex.test('renal_review_mcp2'), 'Renal pattern must match renal_review_mcp2');
 assert.ok(renalRegex.test('renal_drugs_mcp2'), 'Renal pattern must match renal_drugs_mcp2');
+assert.ok(respRegex.test('respiratory_review_mcp2'), 'Resp pattern must match respiratory_review_mcp2');
 assert.ok(respRegex.test('respiratory_bronchodilators_mcp2'), 'Resp pattern must match respiratory_bronchodilators_mcp2');
 assert.ok(respRegex.test('respiratory_antiinflammatories_mcp2'), 'Resp pattern must match respiratory_antiinflammatories_mcp2');
 
