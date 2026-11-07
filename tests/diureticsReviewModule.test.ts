@@ -8,7 +8,7 @@ test('Diuretics review module benchmark audit', async (t) => {
 
   await t.test('has correct module metadata and version', () => {
     assert.equal(mod.id, 'antihypertensives_1_mcp2');
-    assert.equal(mod.version, '2.0.0', 'Module version must be 2.0.0');
+    assert.equal(mod.version, '2.1.0', 'Module version must be 2.1.0');
     assert.equal(mod.pages.length, 5, 'Module must contain exactly 5 review pages matching the 5-page PDF');
   });
 

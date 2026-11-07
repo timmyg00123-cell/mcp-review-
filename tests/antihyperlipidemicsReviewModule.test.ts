@@ -9,7 +9,7 @@ test('Antihyperlipidemics review module benchmark audit', async (t) => {
 
   await t.test('has correct module metadata and version', () => {
     assert.equal(moduleData.id, 'antihyperlipidemics_mcp2');
-    assert.equal(moduleData.version, '2.0.0');
+    assert.equal(moduleData.version, '2.1.0');
     assert.equal(moduleData.pages.length, 5, 'Must have exactly 5 review pages matching the 5-page PDF');
   });
 

@@ -1393,7 +1393,7 @@ export const antihyperlipidemicsPages: ReviewPage[] = [
 export function getDefaultAntihyperlipidemicsModule(): ReviewModule {
   return {
     id: 'antihyperlipidemics_mcp2',
-    version: '2.0.0',
+    version: '2.1.0',
     examId: 'exam_2',
     examTitle: 'Exam 2: Antihypertensives & Lipids',
     title: 'Antihyperlipidemics & Lipid-Lowering Agents',

@@ -1554,7 +1554,7 @@ export const sympatholyticsPages: ReviewPage[] = [
 export function getDefaultSympatholyticsModule(): ReviewModule {
   return {
     id: 'antihypertensives_2_mcp2',
-    version: '2.0.0',
+    version: '2.1.0',
     examId: 'exam_2',
     examTitle: 'Exam 2: Antihypertensives & Lipids',
     title: 'Antihypertensives II: Sympatholytics',

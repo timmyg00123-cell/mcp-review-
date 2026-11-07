@@ -164,7 +164,7 @@ export function loadAllReviewModules(): ReviewModule[] {
         }
         if (
           overrides['respiratory_review_mcp2'] &&
-          (overrides['respiratory_review_mcp2'].version !== '2.0.0' ||
+          (overrides['respiratory_review_mcp2'].version !== '2.1.0' ||
             (overrides['respiratory_review_mcp2'].pages || []).length < 9)
         ) {
           delete overrides['respiratory_review_mcp2'];
@@ -172,7 +172,7 @@ export function loadAllReviewModules(): ReviewModule[] {
         }
         if (
           overrides['antihypertensives_1_mcp2'] &&
-          (overrides['antihypertensives_1_mcp2'].version !== '2.0.0' ||
+          (overrides['antihypertensives_1_mcp2'].version !== '2.1.0' ||
             (overrides['antihypertensives_1_mcp2'].pages || []).length < 5)
         ) {
           delete overrides['antihypertensives_1_mcp2'];
@@ -180,7 +180,7 @@ export function loadAllReviewModules(): ReviewModule[] {
         }
         if (
           overrides['antihypertensives_2_mcp2'] &&
-          (overrides['antihypertensives_2_mcp2'].version !== '2.0.0' ||
+          (overrides['antihypertensives_2_mcp2'].version !== '2.1.0' ||
             (overrides['antihypertensives_2_mcp2'].pages || []).length < 7)
         ) {
           delete overrides['antihypertensives_2_mcp2'];
@@ -188,7 +188,7 @@ export function loadAllReviewModules(): ReviewModule[] {
         }
         if (
           overrides['antihypertensives_3_mcp2'] &&
-          (overrides['antihypertensives_3_mcp2'].version !== '2.0.0' ||
+          (overrides['antihypertensives_3_mcp2'].version !== '2.1.0' ||
             (overrides['antihypertensives_3_mcp2'].pages || []).length < 4)
         ) {
           delete overrides['antihypertensives_3_mcp2'];
@@ -196,7 +196,7 @@ export function loadAllReviewModules(): ReviewModule[] {
         }
         if (
           overrides['antihypertensives_4_mcp2'] &&
-          (overrides['antihypertensives_4_mcp2'].version !== '2.0.0' ||
+          (overrides['antihypertensives_4_mcp2'].version !== '2.1.0' ||
             (overrides['antihypertensives_4_mcp2'].pages || []).length < 4)
         ) {
           delete overrides['antihypertensives_4_mcp2'];
@@ -204,7 +204,7 @@ export function loadAllReviewModules(): ReviewModule[] {
         }
         if (
           overrides['antihyperlipidemics_mcp2'] &&
-          (overrides['antihyperlipidemics_mcp2'].version !== '2.0.0' ||
+          (overrides['antihyperlipidemics_mcp2'].version !== '2.1.0' ||
             (overrides['antihyperlipidemics_mcp2'].pages || []).length < 5)
         ) {
           delete overrides['antihyperlipidemics_mcp2'];
@@ -328,9 +328,17 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
       }
     } catch {}
 
-    // Check if Dexie has a newer or existing override for built-ins
+    // Check if Dexie has a newer or existing override for built-ins (excluding version-migrated modules)
     ALL_BUILTIN_MODULE_IDS.forEach((id) => {
-      if (id === 'anticoagulants_mcp2' || id === 'respiratory_review_mcp2') return;
+      if (
+        id === 'anticoagulants_mcp2' ||
+        id === 'respiratory_review_mcp2' ||
+        id === 'antihypertensives_1_mcp2' ||
+        id === 'antihypertensives_2_mcp2' ||
+        id === 'antihypertensives_3_mcp2' ||
+        id === 'antihypertensives_4_mcp2' ||
+        id === 'antihyperlipidemics_mcp2'
+      ) return;
       const dm = dexieModules.find((m) => m.id === id)?.module;
       if (dm) {
         overrides[id] = dm;
@@ -367,7 +375,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     const dexieRespReview = dexieModules.find((m) => m.id === 'respiratory_review_mcp2')?.module;
     if (dexieRespReview) {
-      if (dexieRespReview.version === '2.0.0' && (dexieRespReview.pages || []).length >= 9) {
+      if (dexieRespReview.version === '2.1.0' && (dexieRespReview.pages || []).length >= 9) {
         overrides['respiratory_review_mcp2'] = dexieRespReview;
       } else {
         delete overrides['respiratory_review_mcp2'];
@@ -384,7 +392,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     if (
       overrides['respiratory_review_mcp2'] &&
-      (overrides['respiratory_review_mcp2'].version !== '2.0.0' ||
+      (overrides['respiratory_review_mcp2'].version !== '2.1.0' ||
         (overrides['respiratory_review_mcp2'].pages || []).length < 9)
     ) {
       delete overrides['respiratory_review_mcp2'];
@@ -395,7 +403,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     const dexieDiuretics = dexieModules.find((m) => m.id === 'antihypertensives_1_mcp2')?.module;
     if (dexieDiuretics) {
-      if (dexieDiuretics.version === '2.0.0' && (dexieDiuretics.pages || []).length >= 5) {
+      if (dexieDiuretics.version === '2.1.0' && (dexieDiuretics.pages || []).length >= 5) {
         overrides['antihypertensives_1_mcp2'] = dexieDiuretics;
       } else {
         delete overrides['antihypertensives_1_mcp2'];
@@ -412,7 +420,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     if (
       overrides['antihypertensives_1_mcp2'] &&
-      (overrides['antihypertensives_1_mcp2'].version !== '2.0.0' ||
+      (overrides['antihypertensives_1_mcp2'].version !== '2.1.0' ||
         (overrides['antihypertensives_1_mcp2'].pages || []).length < 5)
     ) {
       delete overrides['antihypertensives_1_mcp2'];
@@ -423,7 +431,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     const dexieSympatholytics = dexieModules.find((m) => m.id === 'antihypertensives_2_mcp2')?.module;
     if (dexieSympatholytics) {
-      if (dexieSympatholytics.version === '2.0.0' && (dexieSympatholytics.pages || []).length >= 7) {
+      if (dexieSympatholytics.version === '2.1.0' && (dexieSympatholytics.pages || []).length >= 7) {
         overrides['antihypertensives_2_mcp2'] = dexieSympatholytics;
       } else {
         delete overrides['antihypertensives_2_mcp2'];
@@ -440,7 +448,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     if (
       overrides['antihypertensives_2_mcp2'] &&
-      (overrides['antihypertensives_2_mcp2'].version !== '2.0.0' ||
+      (overrides['antihypertensives_2_mcp2'].version !== '2.1.0' ||
         (overrides['antihypertensives_2_mcp2'].pages || []).length < 7)
     ) {
       delete overrides['antihypertensives_2_mcp2'];
@@ -451,7 +459,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     const dexieVasodilators = dexieModules.find((m) => m.id === 'antihypertensives_3_mcp2')?.module;
     if (dexieVasodilators) {
-      if (dexieVasodilators.version === '2.0.0' && (dexieVasodilators.pages || []).length >= 4) {
+      if (dexieVasodilators.version === '2.1.0' && (dexieVasodilators.pages || []).length >= 4) {
         overrides['antihypertensives_3_mcp2'] = dexieVasodilators;
       } else {
         delete overrides['antihypertensives_3_mcp2'];
@@ -468,7 +476,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     if (
       overrides['antihypertensives_3_mcp2'] &&
-      (overrides['antihypertensives_3_mcp2'].version !== '2.0.0' ||
+      (overrides['antihypertensives_3_mcp2'].version !== '2.1.0' ||
         (overrides['antihypertensives_3_mcp2'].pages || []).length < 4)
     ) {
       delete overrides['antihypertensives_3_mcp2'];
@@ -479,7 +487,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     const dexieRaas = dexieModules.find((m) => m.id === 'antihypertensives_4_mcp2')?.module;
     if (dexieRaas) {
-      if (dexieRaas.version === '2.0.0' && (dexieRaas.pages || []).length >= 4) {
+      if (dexieRaas.version === '2.1.0' && (dexieRaas.pages || []).length >= 4) {
         overrides['antihypertensives_4_mcp2'] = dexieRaas;
       } else {
         delete overrides['antihypertensives_4_mcp2'];
@@ -496,7 +504,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     if (
       overrides['antihypertensives_4_mcp2'] &&
-      (overrides['antihypertensives_4_mcp2'].version !== '2.0.0' ||
+      (overrides['antihypertensives_4_mcp2'].version !== '2.1.0' ||
         (overrides['antihypertensives_4_mcp2'].pages || []).length < 4)
     ) {
       delete overrides['antihypertensives_4_mcp2'];
@@ -507,7 +515,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     const dexieLipids = dexieModules.find((m) => m.id === 'antihyperlipidemics_mcp2')?.module;
     if (dexieLipids) {
-      if (dexieLipids.version === '2.0.0' && (dexieLipids.pages || []).length >= 5) {
+      if (dexieLipids.version === '2.1.0' && (dexieLipids.pages || []).length >= 5) {
         overrides['antihyperlipidemics_mcp2'] = dexieLipids;
       } else {
         delete overrides['antihyperlipidemics_mcp2'];
@@ -524,7 +532,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     if (
       overrides['antihyperlipidemics_mcp2'] &&
-      (overrides['antihyperlipidemics_mcp2'].version !== '2.0.0' ||
+      (overrides['antihyperlipidemics_mcp2'].version !== '2.1.0' ||
         (overrides['antihyperlipidemics_mcp2'].pages || []).length < 5)
     ) {
       delete overrides['antihyperlipidemics_mcp2'];

@@ -1234,7 +1234,7 @@ export const diureticsPages: ReviewPage[] = [
 export function getDefaultDiureticsModule(): ReviewModule {
   return {
     id: 'antihypertensives_1_mcp2',
-    version: '2.0.0',
+    version: '2.1.0',
     examId: 'exam_2',
     examTitle: 'Exam 2: Antihypertensives & Lipids',
     title: 'Review for Antihypertensive Drugs I (Diuretics)',

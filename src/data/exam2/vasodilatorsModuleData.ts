@@ -883,7 +883,7 @@ export function getDefaultVasodilatorsModule(): ReviewModule {
     semester: 'Spring',
     code: 'MCP-2-05',
     isBuiltIn: true,
-    version: '2.0.0',
+    version: '2.1.0',
     createdAt: new Date().toISOString(),
     chemicalStructures: Object.values(VASODILATORS_STRUCTURES),
     pages: vasodilatorsPages,
