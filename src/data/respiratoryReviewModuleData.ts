@@ -1838,6 +1838,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q1 (201)
             {
               id: 201,
+              questionNumberLabel: 'Question 1',
               type: 'multiple-choice',
               title: 'Core Adrenergic Pharmacophore',
               questionStem:
@@ -1855,15 +1856,16 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q2 (202)
             {
               id: 202,
+              questionNumberLabel: 'Question 2',
               type: 'multiple-choice',
               title: 'Nonselective Alpha and Beta Agonist Identification',
               questionStem:
                 'Which structure is a nonselective alpha and beta adrenergic agonist?',
               options: [
-                'Structure VII (Norepinephrine)',
-                'Structure I (Isoproterenol)',
-                'Structure II (Dobutamine)',
-                'Structure IV (Salmeterol)',
+                'Structure VII',
+                'Structure I',
+                'Structure II',
+                'Structure IV',
               ],
               correctIndex: 0,
               explanation:
@@ -1872,15 +1874,16 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q3 (203)
             {
               id: 203,
+              questionNumberLabel: 'Question 3',
               type: 'multiple-choice',
               title: 'Nonselective Beta-1 and Beta-2 Agonist Identification',
               questionStem:
                 'Which structure is a nonselective beta-1 and beta-2 adrenergic agonist?',
               options: [
-                'Structure I (Isoproterenol)',
-                'Structure II (Dobutamine)',
-                'Structure VI (Pirbuterol)',
-                'Structure VII (Norepinephrine)',
+                'Structure I',
+                'Structure II',
+                'Structure VI',
+                'Structure VII',
               ],
               correctIndex: 0,
               explanation:
@@ -1889,15 +1892,16 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q4 (204)
             {
               id: 204,
+              questionNumberLabel: 'Question 4',
               type: 'multiple-choice',
               title: 'Selective Beta-1 Agonist Identification',
               questionStem:
                 'Which structure is a selective beta-1 adrenergic agonist indicated for acute heart failure and cardiogenic shock?',
               options: [
-                'Structure II (Dobutamine)',
-                'Structure I (Isoproterenol)',
-                'Structure III (Olodaterol)',
-                'Structure V (Indacaterol)',
+                'Structure II',
+                'Structure I',
+                'Structure III',
+                'Structure V',
               ],
               correctIndex: 0,
               explanation:
@@ -1906,13 +1910,14 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q5 (205)
             {
               id: 205,
+              questionNumberLabel: 'Question 5',
               type: 'multiple-choice',
               title: 'Selective Beta-2 Agonists Identification',
               questionStem:
                 'Which structures are selective beta-2 adrenergic agonists suitable for therapeutic bronchodilation?',
               options: [
-                'Structures III, IV, V, and VI (Olodaterol, Salmeterol, Indacaterol, Pirbuterol)',
-                'Structures I, II, and VII (Isoproterenol, Dobutamine, Norepinephrine)',
+                'Structures III, IV, V, and VI',
+                'Structures I, II, and VII',
                 'Structures I, III, and V only',
                 'Structures II, IV, and VII only',
               ],
@@ -1923,13 +1928,14 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q6 (206)
             {
               id: 206,
+              questionNumberLabel: 'Question 6',
               type: 'multiple-choice',
               title: 'SABA vs LABA vs Ultra-LABA Bronchodilator Categorization',
               questionStem:
                 'Categorize the selective beta-2 agonists into Short-Acting (SABA), Long-Acting (LABA), and Ultra-Long-Acting (ultra-LABA) bronchodilators:',
               options: [
-                'Structure VI (Pirbuterol) = SABA; Structure IV (Salmeterol) = LABA (12-hour); Structures III (Olodaterol) and V (Indacaterol) = ultra-LABA (once-daily 24-hour)',
-                'Structure IV (Salmeterol) = SABA; Structure VI (Pirbuterol) = LABA; Structures III and V = ultra-LABA',
+                'Structure VI = SABA; Structure IV = LABA (12-hour); Structures III and V = ultra-LABA (once-daily 24-hour)',
+                'Structure IV = SABA; Structure VI = LABA; Structures III and V = ultra-LABA',
                 'Structures III, IV, V, and VI are all short-acting SABAs requiring Q4H dosing',
                 'Structures III and VI are SABAs; Structures IV and V are once-daily ultra-LABAs',
               ],
@@ -1940,15 +1946,16 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q7 (207)
             {
               id: 207,
+              questionNumberLabel: 'Question 7',
               type: 'multiple-choice',
               title: 'Clinical Indications: Asthma/COPD vs Shock and Heart Failure',
               questionStem:
                 'Which of the adrenergic structures (I–VII) are clinically indicated for the management of asthma and COPD versus acute shock or heart failure?',
               options: [
-                'Structures III, IV, V, and VI are indicated for asthma and COPD; Structure II (Dobutamine) is indicated for cardiogenic shock/decompensated heart failure; Structure VII (Norepinephrine) is indicated for septic/vasodilatory shock',
+                'Structures III, IV, V, and VI are indicated for asthma and COPD; Structure II is indicated for cardiogenic shock/decompensated heart failure; Structure VII is indicated for septic/vasodilatory shock',
                 'Structures I, II, and VII are indicated for asthma and COPD maintenance; Structures III, IV, and V are for cardiogenic shock',
                 'All structures I through VII are approved for once-daily maintenance therapy of persistent asthma',
-                'Only Structure VI (Pirbuterol) is indicated for respiratory disorders',
+                'Only Structure VI is indicated for respiratory disorders',
               ],
               correctIndex: 0,
               explanation:
@@ -1957,6 +1964,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q8 (208)
             {
               id: 208,
+              questionNumberLabel: 'Question 8',
               type: 'multiple-choice',
               title: 'Metabolic Susceptibility to COMT and MAO',
               questionStem:

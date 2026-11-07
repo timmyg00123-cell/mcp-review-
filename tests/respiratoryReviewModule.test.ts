@@ -245,6 +245,24 @@ assert.ok(s2q7, 'Slide 2 must have Q7 for indications');
 const s2q8 = p2Questions.find((q) => q.questionStem?.toLowerCase().includes('comt') || q.title?.toLowerCase().includes('comt'));
 assert.ok(s2q8, 'Slide 2 must have Q8 for COMT & MAO metabolism');
 
+// Slide 2 sequential numbering & spoiler audits
+p2Questions.forEach((q, idx) => {
+  assert.equal(
+    q.questionNumberLabel,
+    `Question ${idx + 1}`,
+    `Slide 2 question ${q.id} must have questionNumberLabel "Question ${idx + 1}"`
+  );
+  if (q.options) {
+    q.options.forEach((opt) => {
+      assert.doesNotMatch(
+        opt,
+        /Structure\s+[IVXLCDM]+\s*\([A-Za-z]+\)/,
+        `Slide 2 option must not contain drug name spoilers in parentheses: "${opt}"`
+      );
+    });
+  }
+});
+
 // 6. Slide 3 (Page 3): Anticholinergics & Hydrocortisone Prototype
 const page3 = pages[2]!;
 assert.equal(page3.pageNumber, 3, 'Page 3 must be pageNumber 3');
