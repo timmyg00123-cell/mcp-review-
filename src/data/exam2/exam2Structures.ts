@@ -3624,6 +3624,287 @@ export const EXAM_2_STRUCTURES: Record<string, ChemicalStructure> = {
       pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/98214"
     }
   },
+  isradipine: {
+    id: "chem-isradipine",
+    name: "Isradipine",
+    genericName: "Isradipine",
+    brandNames: ["DynaCirc", "DynaCirc CR"],
+    document_label: "Structure III",
+    smiles: "CC1=C(C(C(=C(N1)C)C(=O)OC(C)C)C2=CC=CC3=NON=C32)C(=O)OC",
+    canonicalSmiles: "CC1=C(C(C(=C(N1)C)C(=O)OC(C)C)C2=CC=CC3=NON=C32)C(=O)OC",
+    chemicalClass: "1,4-Dihydropyridine (1,4-DHP) CCB",
+    moa: "Inhibits calcium influx by selectively blocking L-type voltage-sensitive calcium channels (Cav1.2) in vascular smooth muscle, producing arterial vasodilation.",
+    clinicalIndications: ["Essential hypertension"],
+    keyStructuralFeatures: [
+      "1,4-Dihydropyridine core ring",
+      "Heteroaromatic 2',3'-oxadiazole (benzofurazan) ring at C4 enforcing perpendicular orientation",
+      "Asymmetric ester substituents: methyl ester at C3 and isopropyl ester at C5"
+    ],
+    pkPdHighlights: {
+      onset: "1-2 hours",
+      duration: "8-12 hours (IR), 24 hours (CR)",
+      halfLife: "8 hours",
+      elimination: "Extensive hepatic CYP3A4 oxidation to inactive pyridine metabolite",
+      bioactivation: "Active as administered"
+    },
+    sarNotes: "Incorporates a bicyclic heteroaromatic benzofurazan system at C4 that satisfies the steric requirement for orthogonal/perpendicular ring alignment to bind vascular Cav1.2 channels.",
+    moa_summary: "Selective L-type calcium channel blocker producing peripheral vasodilation and blood pressure reduction.",
+    pngUrl: "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/3784/PNG",
+    pubchemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/3784",
+    pubchemAudit: {
+      cid: 3784,
+      status: "verified",
+      source: "nih_pug_rest",
+      canonicalSmiles: "CC1=C(C(C(=C(N1)C)C(=O)OC(C)C)C2=CC=CC3=NON=C32)C(=O)OC",
+      iupacName: "3-O-methyl 5-O-propan-2-yl 4-(2,1,3-benzoxadiazol-4-yl)-2,6-dimethyl-1,4-dihydropyridine-3,5-dicarboxylate",
+      molecularFormula: "C19H21N3O5",
+      molecularWeight: 371.4,
+      xlogp: 4.5,
+      pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/3784"
+    }
+  },
+  ranolazine: {
+    id: "chem-ranolazine",
+    name: "Ranolazine",
+    genericName: "Ranolazine",
+    brandNames: ["Ranexa"],
+    document_label: "Structure IX",
+    smiles: "CC1=C(C(=CC=C1)C)NC(=O)CN2CCN(CC2)CC(COC3=CC=CC=C3OC)O",
+    canonicalSmiles: "CC1=C(C(=CC=C1)C)NC(=O)CN2CCN(CC2)CC(COC3=CC=CC=C3OC)O",
+    chemicalClass: "Aryloxypropanolamine / Piperazine",
+    moa: "Inhibits the late inward sodium current (late INa) in cardiac myocytes, attenuating intracellular sodium and secondary calcium overload during ischemia.",
+    clinicalIndications: ["Chronic stable angina pectoris"],
+    keyStructuralFeatures: [
+      "2-Methoxyphenoxy group",
+      "Propanol linker with secondary alcohol (-CH(OH)-)",
+      "Piperazine core (cyclic tertiary amine that differentiates it from classic beta-blockers)",
+      "2,6-Dimethylacetanilide terminal moiety"
+    ],
+    pkPdHighlights: {
+      onset: "Gradual (SR formulation)",
+      duration: "12 hours (BID)",
+      halfLife: "7 hours",
+      elimination: "Extensive hepatic CYP3A4 and CYP2D6 metabolism",
+      bioactivation: "Active as administered"
+    },
+    sarNotes: "Superficially resembles aryloxypropanolamine beta-blockers, but possesses a cyclic tertiary amine (piperazine) rather than a secondary alkylamine, lacking beta-adrenergic blocking activity.",
+    moa_summary: "Inhibitor of late sodium current (late INa) in myocardial tissue, decreasing diastolic wall tension without reducing heart rate or blood pressure.",
+    pngUrl: "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/56959/PNG",
+    pubchemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/56959",
+    pubchemAudit: {
+      cid: 56959,
+      status: "verified",
+      source: "nih_pug_rest",
+      canonicalSmiles: "CC1=C(C(=CC=C1)C)NC(=O)CN2CCN(CC2)CC(COC3=CC=CC=C3OC)O",
+      iupacName: "N-(2,6-dimethylphenyl)-2-[4-[2-hydroxy-3-(2-methoxyphenoxy)propyl]piperazin-1-yl]acetamide",
+      molecularFormula: "C24H33N3O4",
+      molecularWeight: 427.5,
+      xlogp: 1.8,
+      pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/56959"
+    }
+  },
+  milrinone: {
+    id: "chem-milrinone",
+    name: "Milrinone",
+    genericName: "Milrinone",
+    brandNames: ["Primacor"],
+    document_label: "Structure X",
+    smiles: "CC1=C(C=C(C(=O)N1)C#N)C2=CC=NC=C2",
+    canonicalSmiles: "CC1=C(C=C(C(=O)N1)C#N)C2=CC=NC=C2",
+    chemicalClass: "4-Substituted pyridine / Bipyridine",
+    moa: "Selectively inhibits phosphodiesterase-3 (PDE3) in cardiac and vascular tissue, elevating intracellular cAMP -> inotropic stimulation and systemic vasodilation.",
+    clinicalIndications: ["Short-term IV management of acute decompensated heart failure"],
+    keyStructuralFeatures: [
+      "4-Substituted pyridine ring attached at C5 of pyridinone",
+      "1,6-Dihydro-6-oxopyridine ring",
+      "Cyano (-C#N) group at position 3",
+      "Methyl substituent at position 2"
+    ],
+    pkPdHighlights: {
+      onset: "5-15 minutes (IV)",
+      duration: "3-5 hours",
+      halfLife: "2.3 hours",
+      elimination: "Renal excretion of unchanged drug (>80%)",
+      bioactivation: "Active as administered"
+    },
+    sarNotes: "The 4-substituted pyridine core coupled to a 2-pyridone-3-carbonitrile ring system confers high affinity and selectivity for the catalytic domain of PDE3 over other PDE isozymes.",
+    moa_summary: "Phosphodiesterase-3 (PDE3) inhibitor producing balanced inotropic and arteriolar/venular vasodilatory actions ('inodilator').",
+    pngUrl: "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/4197/PNG",
+    pubchemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/4197",
+    pubchemAudit: {
+      cid: 4197,
+      status: "verified",
+      source: "nih_pug_rest",
+      canonicalSmiles: "CC1=C(C=C(C(=O)N1)C#N)C2=CC=NC=C2",
+      iupacName: "6-methyl-2-oxo-5-pyridin-4-yl-1H-pyridine-3-carbonitrile",
+      molecularFormula: "C12H9N3O",
+      molecularWeight: 211.22,
+      xlogp: 0.8,
+      pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/4197"
+    }
+  },
+  isosorbide_dinitrate: {
+    id: "chem-isosorbide-dinitrate",
+    name: "Isosorbide Dinitrate",
+    genericName: "Isosorbide Dinitrate",
+    brandNames: ["Isordil", "Dilatrate-SR"],
+    document_label: "Structure III",
+    smiles: "C1C(C2C(O1)C(CO2)O[N+](=O)[O-])O[N+](=O)[O-]",
+    canonicalSmiles: "C1C(C2C(O1)C(CO2)O[N+](=O)[O-])O[N+](=O)[O-]",
+    chemicalClass: "Organic nitrate",
+    moa: "Prodrug bioactivated by mitochondrial aldehyde dehydrogenase (ALDH2) to release nitric oxide (NO), stimulating soluble guanylyl cyclase and producing cGMP-mediated vasodilation.",
+    clinicalIndications: ["Angina pectoris prophylaxis and treatment", "Heart failure in combination with hydralazine (BiDil)"],
+    keyStructuralFeatures: [
+      "Fused bicyclic 1,4:3,6-dianhydro-D-glucitol (bis-tetrahydrofuran) backbone",
+      "Two nitrate ester (-O-NO2) groups at positions 2 and 5 (endo and exo)",
+      "Rigid V-shaped bicyclic ether core"
+    ],
+    pkPdHighlights: {
+      onset: "15-30 minutes (oral), 2-5 minutes (sublingual)",
+      duration: "4-6 hours (oral), 1-2 hours (SL)",
+      halfLife: "1 hour (active metabolites isosorbide-5-mononitrate t1/2 ~5 hours)",
+      elimination: "Hepatic denitration and glucuronidation",
+      bioactivation: "Prodrug bioactivated by ALDH2 to active nitric oxide (NO)"
+    },
+    sarNotes: "Organic nitrate prodrug requiring enzymatic bioactivation by ALDH2 to generate NO. Sustained exposure leads to ALDH2 enzyme sulfhydryl oxidation and nitrate tolerance.",
+    moa_summary: "Organic nitrate ester prodrug bioactivated to nitric oxide (NO), triggering cGMP-mediated vascular smooth muscle relaxation.",
+    pngUrl: "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/6883/PNG",
+    pubchemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/6883",
+    pubchemAudit: {
+      cid: 6883,
+      status: "verified",
+      source: "nih_pug_rest",
+      canonicalSmiles: "C1C(C2C(O1)C(CO2)O[N+](=O)[O-])O[N+](=O)[O-]",
+      iupacName: "[(3S,3aS,6R,6aS)-3-nitrooxy-2,3,3a,5,6,6a-hexahydrofuro[3,2-b]furan-6-yl] nitrate",
+      molecularFormula: "C6H8N2O8",
+      molecularWeight: 236.14,
+      xlogp: 0.5,
+      pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/6883"
+    }
+  },
+  nifedipine_oxidized: {
+    id: "chem-dehydronifedipine",
+    name: "Dehydronifedipine",
+    genericName: "Oxidized Nifedipine Pyridine Metabolite",
+    brandNames: [],
+    document_label: "Structure II",
+    smiles: "CC1=C(C(=C(C(=N1)C)C(=O)OC)C2=CC=CC=C2[N+](=O)[O-])C(=O)OC",
+    canonicalSmiles: "CC1=C(C(=C(C(=N1)C)C(=O)OC)C2=CC=CC=C2[N+](=O)[O-])C(=O)OC",
+    chemicalClass: "Pyridine",
+    moa: "Pharmacologically INACTIVE as a calcium channel blocker and vasodilator due to aromatization to a planar pyridine ring, which abolishes the bioactive boat conformation and perpendicular 4-phenyl orientation.",
+    clinicalIndications: [],
+    keyStructuralFeatures: [
+      "Aromatized, completely planar pyridine ring (dehydrogenated 1,4-DHP)",
+      "Loss of secondary amine (N1-H hydrogen bond donor)",
+      "4-(2-Nitrophenyl) substituent and 3,5-dimethyl esters coplanar with the aromatic ring"
+    ],
+    pkPdHighlights: {
+      onset: "N/A (inactive)",
+      duration: "N/A",
+      halfLife: "Rapid renal elimination",
+      elimination: "Primary terminating metabolic pathway of nifedipine via hepatic CYP3A4",
+      bioactivation: "Inactive terminal metabolite"
+    },
+    sarNotes: "CYP3A4 oxidation of the 1,4-dihydropyridine boat-shaped ring to a flat, aromatic pyridine destroys calcium channel blocking activity. The coplanar geometry cannot bind Cav1.2 channel receptors.",
+    moa_summary: "Inactive oxidized pyridine metabolite of nifedipine formed by CYP3A4 dehydrogenation.",
+    pngUrl: "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/128753/PNG",
+    pubchemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/128753",
+    pubchemAudit: {
+      cid: 128753,
+      status: "verified",
+      source: "nih_pug_rest",
+      canonicalSmiles: "CC1=C(C(=C(C(=N1)C)C(=O)OC)C2=CC=CC=C2[N+](=O)[O-])C(=O)OC",
+      iupacName: "dimethyl 2,6-dimethyl-4-(2-nitrophenyl)pyridine-3,5-dicarboxylate",
+      molecularFormula: "C17H16N2O6",
+      molecularWeight: 344.32,
+      xlogp: 2.1,
+      pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/128753"
+    }
+  },
+  dhp_n_methyl: {
+    id: "chem-dhp-n-methyl",
+    name: "Structure X (N1-Methyl DHP Inactive Congener)",
+    genericName: "N1-Methyl-1,4-DHP Congener",
+    brandNames: [],
+    document_label: "Structure X",
+    smiles: "CN1C(C)=C(C(=O)OC)C(C2=CC=CC=C2Cl)C(C(=O)OC)=C1C",
+    canonicalSmiles: "CN1C(C)=C(C(=O)OC)C(C2=CC=CC=C2Cl)C(C(=O)OC)=C1C",
+    chemicalClass: "1,4-Dihydropyridine (N1-alkylated)",
+    moa: "Pharmacologically INACTIVE/weak CCB because N1-methylation replaces the essential N1-H secondary amine hydrogen-bond donor and introduces steric clash in the Cav1.2 channel binding pocket.",
+    clinicalIndications: [],
+    keyStructuralFeatures: [
+      "1,4-Dihydropyridine ring with N1-methyl (N-CH3)",
+      "Missing essential secondary amine N1-H hydrogen-bond donor",
+      "Requires replacement of N-CH3 with N-H at position-1 to restore CCB activity"
+    ],
+    pkPdHighlights: {
+      onset: "N/A (inactive)",
+      duration: "N/A",
+      halfLife: "N/A",
+      elimination: "Hepatic",
+      bioactivation: "None"
+    },
+    sarNotes: "Unsubstituted N1-H is strictly required for calcium channel blockade. The N1-H forms an indispensable hydrogen bond with the receptor; alkylation (e.g., N-CH3) abolishes activity.",
+    moa_summary: "Inactive DHP analog lacking the crucial N1-H hydrogen-bond donor.",
+    pngUrl: "",
+    pubchemUrl: ""
+  },
+  dhp_unsubstituted_phenyl: {
+    id: "chem-dhp-unsubstituted-phenyl",
+    name: "Structure Y (Unsubstituted 4-Phenyl DHP Inactive Congener)",
+    genericName: "4-Phenyl-1,4-DHP Congener",
+    brandNames: [],
+    document_label: "Structure Y",
+    smiles: "CC1=C(C(=O)OC)C(C2=CC=CC=C2)C(C(=O)OC)=C(C)N1",
+    canonicalSmiles: "CC1=C(C(=O)OC)C(C2=CC=CC=C2)C(C(=O)OC)=C(C)N1",
+    chemicalClass: "1,4-Dihydropyridine (unsubstituted 4-phenyl)",
+    moa: "Pharmacologically INACTIVE/weak CCB because the 4-phenyl ring lacks ortho/meta substituents (-Cl or -NO2) to sterically lock it perpendicular to the 1,4-DHP ring plane.",
+    clinicalIndications: [],
+    keyStructuralFeatures: [
+      "1,4-Dihydropyridine core with unsubstituted 4-phenyl ring",
+      "Lacks ortho/meta steric hindrance to prevent free rotation",
+      "Requires introducing Cl or NO2 at position-2' or 3' to enforce perpendicular bioactive conformation"
+    ],
+    pkPdHighlights: {
+      onset: "N/A (inactive/weak)",
+      duration: "N/A",
+      halfLife: "N/A",
+      elimination: "Hepatic",
+      bioactivation: "None"
+    },
+    sarNotes: "Ortho and meta substituents on the 4-phenyl ring create steric clash with C3/C5 ester carbonyls, locking the phenyl ring perpendicular to the DHP boat ring (bioactive conformation). Unsubstituted derivatives rotate freely and bind poorly.",
+    moa_summary: "Inactive/weak DHP analog lacking ortho/meta steric hindrance to lock perpendicular ring geometry.",
+    pngUrl: "",
+    pubchemUrl: ""
+  },
+  dhp_free_acid: {
+    id: "chem-dhp-free-acid",
+    name: "Structure Z (C3-Carboxylic Acid DHP Inactive Congener)",
+    genericName: "1,4-DHP-3-Carboxylic Acid Congener",
+    brandNames: [],
+    document_label: "Structure Z",
+    smiles: "CC1=C(C(=O)O)C(C2=CC=CC=C2Cl)C(C(=O)OC)=C(C)N1",
+    canonicalSmiles: "CC1=C(C(=O)O)C(C2=CC=CC=C2Cl)C(C(=O)OC)=C(C)N1",
+    chemicalClass: "1,4-Dihydropyridine (carboxylic acid)",
+    moa: "Pharmacologically INACTIVE CCB because the free carboxylic acid at C3 is fully ionized (deprotonated, carboxylate anion) at physiological pH, disrupting essential hydrophobic receptor interactions.",
+    clinicalIndications: [],
+    keyStructuralFeatures: [
+      "1,4-Dihydropyridine ring with free C3-carboxylic acid (-COOH / -COO-)",
+      "Ionized negative charge at physiological pH 7.4",
+      "Requires esterification of the carboxylic group at position-3 into an alkyl ester to restore activity"
+    ],
+    pkPdHighlights: {
+      onset: "N/A (inactive)",
+      duration: "N/A",
+      halfLife: "N/A",
+      elimination: "Renal",
+      bioactivation: "None"
+    },
+    sarNotes: "Ester groups at both C3 and C5 are mandatory for CCB activity. Free carboxylic acids cannot penetrate the hydrophobic binding pocket of the calcium channel.",
+    moa_summary: "Inactive DHP analog possessing a free C3-carboxylic acid instead of an ester.",
+    pngUrl: "",
+    pubchemUrl: ""
+  },
 };
 
 export const DIURETICS_STRUCTURES: Record<string, ChemicalStructure> = Object.fromEntries(
@@ -3648,7 +3929,9 @@ export const VASODILATORS_STRUCTURES: Record<string, ChemicalStructure> = Object
   Object.entries(EXAM_2_STRUCTURES).filter(([k, s]) => [
     'nifedipine', 'amlodipine', 'nicardipine', 'clevidipine', 'felodipine',
     'nimodipine', 'verapamil', 'diltiazem', 'hydralazine', 'minoxidil',
-    'minoxidil_sulfate', 'sodium_nitroprusside', 'nitroglycerin', 'diazoxide'
+    'minoxidil_sulfate', 'sodium_nitroprusside', 'nitroglycerin', 'diazoxide',
+    'isradipine', 'ranolazine', 'milrinone', 'isosorbide_dinitrate',
+    'nifedipine_oxidized', 'dhp_n_methyl', 'dhp_unsubstituted_phenyl', 'dhp_free_acid'
   ].includes(k))
 );
 

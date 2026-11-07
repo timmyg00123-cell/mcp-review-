@@ -3,22 +3,22 @@ import { VASODILATORS_STRUCTURES } from './exam2Structures';
 
 export const vasodilatorsPages: ReviewPage[] = [
   // ---------------------------------------------------------------------------
-  // PAGE 1: 1,4-Dihydropyridine CCBs: Pharmacokinetics & SAR (Questions 1 - 10)
+  // PAGE 1: 1,4-Dihydropyridines Core Pharmacophore & PK/PD (Questions 1 - 9)
   // ---------------------------------------------------------------------------
   {
     pageNumber: 1,
     title: 'Calcium Channel Blockers: 1,4-Dihydropyridines SAR & Pharmacokinetics',
-    subtitle: '1,4-DHP pharmacophore, vascular selectivity, ester bio-reversibility, clevidipine ultra-short design, and amlodipine PK',
+    subtitle: '1,4-DHP pharmacophore, vascular selectivity, inactive oxidized pyridine metabolite, clevidipine ultra-short double ester, and amlodipine PK',
     sections: [
       {
         sectionTitle: '1,4-Dihydropyridine Core Pharmacophore & PK/PD',
-        block_instructions: 'Consider Structures I (Nifedipine), II (Amlodipine), III (Nicardipine), IV (Clevidipine), and V (Felodipine) to answer questions 1 - 10.',
+        block_instructions: 'Consider chemical structures I, II, III, IV, and V to answer questions (1 - 9):',
         structures: [
+          VASODILATORS_STRUCTURES.clevidipine,
+          VASODILATORS_STRUCTURES.nifedipine_oxidized,
+          VASODILATORS_STRUCTURES.isradipine,
           VASODILATORS_STRUCTURES.nifedipine,
           VASODILATORS_STRUCTURES.amlodipine,
-          VASODILATORS_STRUCTURES.nicardipine,
-          VASODILATORS_STRUCTURES.clevidipine,
-          VASODILATORS_STRUCTURES.felodipine,
         ],
         questions: [
           {
@@ -27,10 +27,10 @@ export const vasodilatorsPages: ReviewPage[] = [
             title: 'Chemical Class of 1,4-DHP CCBs',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following best describes the chemical class of the above active molecules (Nifedipine, Amlodipine, Nicardipine, Clevidipine, Felodipine)?',
+            questionStem: 'Which of the following best describes the chemical class of the above active molecules?',
             options: [
               'Benzothiadiazine-1,1-dioxide',
-              '1,4-Dihydropyridine (1,4-DHP)',
+              '1,4-dihydropyridine',
               'Aryloxypropanolamine',
               'Arylethanolamine',
               'Sulfamoyl anthranilic acid',
@@ -48,7 +48,7 @@ export const vasodilatorsPages: ReviewPage[] = [
               'Incorrect: Not peptide mimetics.'
             ],
             overallExplanation: 'The 1,4-dihydropyridine (1,4-DHP) nucleus is the core pharmacophore for dihydropyridine calcium channel blockers, providing potent and selective relaxation of arterial smooth muscle.',
-            highYieldPearl: '1,4-Dihydropyridines (1,4-DHPs) = Nifedipine, Amlodipine, Nicardipine, Felodipine, Clevidipine. Selective for vascular Cav1.2 channels.',
+            highYieldPearl: '1,4-Dihydropyridines (1,4-DHPs) = Nifedipine, Amlodipine, Isradipine, Clevidipine. Selective for vascular Cav1.2 channels.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 1, Question 1',
             sourcePageNumber: 1
           },
@@ -63,8 +63,8 @@ export const vasodilatorsPages: ReviewPage[] = [
               'Potassium-sparing agents',
               'Loop diuretics',
               'Thiazide diuretics',
-              'Calcium channel blockers (voltage-gated L-type Cav1.2 blockers)',
-              'Beta-Blockers',
+              'Calcium channel blockers',
+              'β-Blockers',
               'Angiotensin-converting enzyme inhibitors',
               'Angiotensin II receptor antagonists'
             ],
@@ -86,50 +86,50 @@ export const vasodilatorsPages: ReviewPage[] = [
           {
             id: 503,
             questionNumberLabel: 'Question 3',
-            title: 'Pharmacodynamic and Pharmacokinetic Characteristics of 1,4-DHPs',
+            title: 'Pharmacodynamic and Pharmacokinetic Aspects of 1,4-DHPs',
             category: 'Pharmacokinetics ADME',
             type: 'sub-statements',
-            questionStem: 'Considering the pharmacodynamic and pharmacokinetic properties of 1,4-dihydropyridines, state whether each of the following statements is true or false:',
+            questionStem: 'Considering the pharmacodynamic and pharmacokinetic aspects of the above active molecules, state whether each of the following statements is true or false:',
             subStatements: [
               {
                 id: 'a',
-                text: 'They generally have poor and/or variable oral bioavailability due to extensive hepatic CYP3A4 first-pass metabolism.',
+                text: 'They generally have poor and/or variable oral bioavailability due to extensive 1st pass effect.',
                 isCorrect: true,
-                explanation: 'True: Most 1,4-DHPs (e.g., nifedipine, felodipine) undergo substantial CYP3A4-mediated oxidation during first pass, giving bioavailability around 20-50%.'
+                explanation: 'True: Most 1,4-DHPs (e.g., nifedipine, isradipine) undergo substantial CYP3A4-mediated oxidation during first pass, giving bioavailability around 15-50%.'
               },
               {
                 id: 'b',
-                text: 'Due to their lipophilic structure, they bind extensively to plasma proteins (>90%).',
+                text: 'Due to their bicyclic nature, they bind well to plasma proteins.',
                 isCorrect: true,
                 explanation: 'True: 1,4-DHPs are highly lipophilic molecules with plasma protein binding exceeding 90-98%.'
               },
               {
                 id: 'c',
-                text: 'They are associated with multiple drug-drug interactions, particularly with CYP3A4 inhibitors (e.g., grapefruit juice, azoles) and inducers.',
+                text: 'They are associated with multiple drug-drug interactions.',
                 isCorrect: true,
                 explanation: 'True: CYP3A4 is the primary enzyme responsible for DHP aromatization; strong inhibitors can dramatically elevate serum concentrations.'
               },
               {
                 id: 'd',
-                text: 'Dose reductions should be considered in patients with severe hepatic dysfunction.',
+                text: 'Severe hepatic dysfunction should be considered upon the administration of these drugs.',
                 isCorrect: true,
                 explanation: 'True: Because clearance is almost entirely hepatic, liver impairment prolongs half-life and increases drug accumulation.'
               },
               {
                 id: 'e',
-                text: 'Many agents in this class are formulated as sustained- or extended-release to avoid rapid peak-induced reflex tachycardia.',
+                text: 'Many in this class of drugs are administered as sustained (or extended)-release.',
                 isCorrect: true,
-                explanation: 'True: Short-acting immediate-release formulations cause rapid vasodilation and reflex sympathetic tachycardia; extended-release formulations (e.g., Procardia XL, Adalat CC) ensure smooth, gradual BP reduction.'
+                explanation: 'True: Short-acting immediate-release formulations cause rapid vasodilation and reflex sympathetic tachycardia; extended-release formulations ensure smooth, gradual BP reduction.'
               },
               {
                 id: 'f',
-                text: 'They are strongly basic molecules that are 100% protonated at physiological pH.',
+                text: 'They are strong basic molecules.',
                 isCorrect: false,
-                explanation: 'False: The 1,4-dihydropyridine nitrogen is neutral to weakly basic (pKa < 4) due to resonance delocalization with the adjacent C3 and C5 ester carbonyls. (Amlodipine is an exception because of its separate primary aliphatic amine side chain).'
+                explanation: 'False: The 1,4-dihydropyridine nitrogen is neutral to weakly basic (pKa < 4) due to resonance delocalization with the adjacent C3 and C5 ester carbonyls.'
               },
               {
                 id: 'g',
-                text: 'They predominantly block L-type calcium channels in vascular smooth muscle with minimal depression of cardiac contractility at therapeutic doses.',
+                text: 'They predominantly block L-type calcium channels in smooth muscles of blood vessels.',
                 isCorrect: true,
                 explanation: 'True: 1,4-DHPs exhibit high vascular selectivity (vasoselective) compared to non-dihydropyridines (verapamil, diltiazem).'
               }
@@ -142,50 +142,54 @@ export const vasodilatorsPages: ReviewPage[] = [
           {
             id: 504,
             questionNumberLabel: 'Question 4',
-            title: 'Inactive Pyridine Metabolite of 1,4-DHPs',
+            title: 'Inactive Vasodilator Molecule',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following describes the metabolic transformation that renders 1,4-dihydropyridines completely pharmacologically INACTIVE as vasodilators?',
+            questionStem: 'Which of the above molecules is not pharmacologically active as a vasodilator?',
             options: [
-              'Aromatization/oxidation of the 1,4-dihydropyridine ring to a planar pyridine system',
-              'Glucuronidation of the ester groups',
-              'Reduction of the 4-phenyl ring to a cyclohexane ring',
-              'Demethylation of the C2 methyl group'
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure V'
             ],
-            correctIndex: 0,
+            correctIndex: 1,
             optionExplanations: [
-              'Correct: CYP3A4 dehydrogenates the 1,4-dihydropyridine ring to a fully aromatic pyridine ring. This flattens the puckered boat conformation, causing the 4-phenyl ring to become coplanar and completely abolishing calcium channel binding affinity.',
-              'Incorrect: Esters are cleaved to carboxylic acids, not glucuronidated directly.',
-              'Incorrect: The phenyl ring is not reduced.',
-              'Incorrect: Demethylation is a minor pathway and does not primarily abolish activity.'
+              'Incorrect: Structure I (Clevidipine) is an active, ultrashort-acting IV vasodilator.',
+              'Correct: Structure II (Dehydronifedipine) has undergone CYP3A4 aromatization of the 1,4-dihydropyridine ring to a fully planar pyridine ring. Aromatization flattens the boat conformation, placing the phenyl ring in the same plane and completely destroying calcium channel blocking activity.',
+              'Incorrect: Structure III (Isradipine) is a potent, active 1,4-DHP vasodilator.',
+              'Incorrect: Structure IV (Nifedipine) is the prototype active 1,4-DHP vasodilator.',
+              'Incorrect: Structure V (Amlodipine) is a potent, active once-daily 1,4-DHP vasodilator.'
             ],
-            overallExplanation: 'The puckered "boat" conformation of the 1,4-dihydropyridine ring is essential for activity. Oxidation by CYP3A4 into a planar pyridine ring is the primary terminating metabolic pathway.',
-            highYieldPearl: 'CYP3A4 aromatizes the 1,4-DHP ring to a flat pyridine ring -> loss of boat conformation -> complete loss of CCB activity.',
+            overallExplanation: 'Aromatization of the 1,4-dihydropyridine core into a planar pyridine ring (Structure II) destroys the puckered boat conformation required for Cav1.2 channel binding, rendering the molecule completely inactive as a vasodilator.',
+            highYieldPearl: 'Dehydropyridine / aromatized pyridine metabolite (Structure II) = completely inactive. Puckered 1,4-DHP boat conformation is mandatory.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 1, Question 4',
             sourcePageNumber: 1
           },
           {
             id: 505,
             questionNumberLabel: 'Question 5',
-            title: 'Ultrashort-Acting 1,4-DHP: Clevidipine',
+            title: 'Shortest Duration of Action',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the above molecules has the shortest duration of action (elimination half-life ~1 - 2 minutes), and what structural feature is responsible?',
+            questionStem: 'Which of the above molecules has the shortest duration of action? Why?',
             options: [
-              'Nifedipine, due to rapid renal filtration',
-              'Amlodipine, due to active secretion',
-              'Clevidipine (Drug IV), due to an ester linkage rapidly cleaved by blood and tissue esterases',
-              'Felodipine, due to rapid hepatic oxidation'
+              'Structure I, due to rapid blood and extravascular esterase hydrolysis of its butyryloxymethyl ester',
+              'Structure II, due to rapid renal elimination of the aromatized pyridine',
+              'Structure III, due to rapid benzofurazan ring opening',
+              'Structure IV, due to instantaneous CYP3A4 oxidation',
+              'Structure V, due to rapid urinary excretion'
             ],
-            correctIndex: 2,
+            correctIndex: 0,
             optionExplanations: [
-              'Incorrect: Nifedipine has a half-life of 2-5 hours.',
-              'Incorrect: Amlodipine has an ultra-long half-life of 30-50 hours.',
-              'Correct: Clevidipine (Cleviprex) is a soft drug engineered with a butyryloxymethyl ester at position 4/5 that is rapidly hydrolyzed by non-specific blood and tissue esterases, giving an ultrashort half-life of ~1-2 minutes.',
-              'Incorrect: Felodipine has a half-life of 11-16 hours.'
+              'Correct: Structure I (Clevidipine) is engineered as a soft drug with an acyloxyalkyl (butyryloxymethyl) ester that is rapidly hydrolyzed by ubiquitous blood and tissue esterases, conferring an ultrashort elimination half-life of ~1 to 2 minutes.',
+              'Incorrect: Structure II is already an inactive metabolite.',
+              'Incorrect: Structure III (Isradipine) has an elimination half-life of ~8 hours.',
+              'Incorrect: Structure IV (Nifedipine) has an elimination half-life of ~2 to 5 hours.',
+              'Incorrect: Structure V (Amlodipine) has the longest half-life (30 to 50 hours).'
             ],
-            overallExplanation: 'Clevidipine is an ultrashort-acting intravenous 1,4-DHP designed with a labile ester group that undergoes instantaneous hydrolysis by blood and extravascular esterases into an inactive carboxylic acid metabolite.',
-            highYieldPearl: 'Clevidipine = ultrashort IV DHP (t1/2 ~1-2 min) cleaved by blood/tissue esterases. Allows precise BP titration in perioperative/ICU settings.',
+            overallExplanation: 'Structure I (Clevidipine) has the shortest duration of action (~1-2 minutes) because its remote butyryloxymethyl ester is instantaneously hydrolyzed by non-specific blood and extravascular esterases.',
+            highYieldPearl: 'Structure I (Clevidipine) = shortest duration (t1/2 ~1-2 min) via rapid blood esterase cleavage of butyryloxymethyl ester.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 1, Question 5',
             sourcePageNumber: 1
           },
@@ -195,22 +199,24 @@ export const vasodilatorsPages: ReviewPage[] = [
             title: 'Parenteral CCB in Surgery Independent of Organ Dysfunction',
             category: 'Clinical Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the above molecules is administered parenterally (IV) to control acute blood pressure during surgery regardless of hepatic or renal failure?',
+            questionStem: 'Which of the above molecules can be used parenterally to control blood pressure in surgery (i.e., oral is not feasible) irrespective of hepatic and/or renal dysfunction?',
             options: [
-              'Nifedipine',
-              'Clevidipine (Cleviprex)',
-              'Nicardipine',
-              'Amlodipine'
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure V'
             ],
-            correctIndex: 1,
+            correctIndex: 0,
             optionExplanations: [
-              'Incorrect: Nifedipine is not used IV.',
-              'Correct: Clevidipine is formulated as an IV lipid emulsion. Because it is metabolized by ubiquitous blood and tissue esterases rather than hepatic CYPs or renal excretion, its clearance is unaffected by severe liver or kidney dysfunction.',
-              'Incorrect: Nicardipine IV relies on hepatic CYP metabolism.',
-              'Incorrect: Amlodipine is oral only.'
+              'Correct: Structure I (Clevidipine) is formulated as an intravenous lipid emulsion for acute perioperative BP titration. Because it is cleared by ubiquitous blood and tissue esterases rather than hepatic CYPs or renal excretion, its clearance is independent of liver or kidney dysfunction.',
+              'Incorrect: Structure II is inactive.',
+              'Incorrect: Structure III (Isradipine) is oral and cleared hepatically.',
+              'Incorrect: Structure IV (Nifedipine) is oral and cleared hepatically.',
+              'Incorrect: Structure V (Amlodipine) is oral only and requires hepatic metabolism.'
             ],
-            overallExplanation: 'Clevidipine clearance is independent of hepatic or renal function because circulating erythrocyte and tissue esterases rapidly hydrolyze it to inactive metabolites.',
-            highYieldPearl: 'Clevidipine IV = organ-independent elimination (blood esterases) -> safe in severe liver and renal dysfunction.',
+            overallExplanation: 'Structure I (Clevidipine) is an intravenous agent metabolized by circulating red blood cell and extravascular esterases, permitting safe, organ-independent titration during surgery regardless of hepatic or renal failure.',
+            highYieldPearl: 'Structure I (Clevidipine IV) = organ-independent clearance (blood esterases), safe in severe renal or hepatic impairment.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 1, Question 6',
             sourcePageNumber: 1
           },
@@ -220,98 +226,232 @@ export const vasodilatorsPages: ReviewPage[] = [
             title: 'Remote / Double Ester Prodrug Design',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the above molecules exemplifies the design of a remote/double ester (acyloxyalkyl ester) to achieve rapid metabolic inactivation?',
+            questionStem: 'Which of the above molecules demonstrates the design of a remote/double ester to achieve an ultrashort duration of action?',
             options: [
-              'Nifedipine',
-              'Amlodipine',
-              'Clevidipine (Drug IV)',
-              'Felodipine'
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure V'
             ],
-            correctIndex: 2,
+            correctIndex: 0,
             optionExplanations: [
-              'Incorrect: Nifedipine contains simple methyl esters.',
-              'Incorrect: Amlodipine contains simple ethyl/methyl esters.',
-              'Correct: Clevidipine possesses a butyryloxymethyl ester (-COOCH2-O-CO-CH2CH2CH3) at C5. Hydrolysis of the outer ester generates an unstable hydroxymethyl ester that spontaneously expels formaldehyde to yield the inactive monocarboxylic acid.',
-              'Incorrect: Felodipine contains simple ethyl and methyl esters.'
+              'Correct: Structure I (Clevidipine) possesses an acyloxyalkyl double ester (butyryloxymethyl group: -COOCH2-O-CO-CH2CH2CH3). Cleavage by esterases releases an unstable hydroxymethyl intermediate that spontaneously expels formaldehyde to yield the inactive monocarboxylic acid.',
+              'Incorrect: Structure II contains simple methyl esters on an oxidized pyridine ring.',
+              'Incorrect: Structure III (Isradipine) contains isopropyl and methyl esters.',
+              'Incorrect: Structure IV (Nifedipine) contains symmetrical simple dimethyl esters.',
+              'Incorrect: Structure V (Amlodipine) contains ethyl and methyl simple esters.'
             ],
-            overallExplanation: 'Clevidipine contains a butyryloxymethyl double ester. Esterase cleavage of the terminal butyrate releases an unstable hemiketal that collapses into formaldehyde and the inactive carboxylic acid.',
-            highYieldPearl: 'Clevidipine double ester design: Butyryloxymethyl ester -> [esterase] -> hydroxymethyl intermediate -> spontaneous collapse to inactive acid + formaldehyde.',
+            overallExplanation: 'Structure I (Clevidipine) demonstrates the remote/double ester (acyloxyalkyl ester) design: cleavage of the terminal butyrate produces an unstable hemiketal that collapses spontaneously into formaldehyde and an inactive monocarboxylic acid.',
+            highYieldPearl: 'Structure I (Clevidipine) double ester: Butyryloxymethyl ester -> [esterase] -> hydroxymethyl intermediate -> formaldehyde + inactive acid.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 1, Question 7',
             sourcePageNumber: 1
           },
           {
             id: 508,
             questionNumberLabel: 'Question 8',
-            title: 'Longest Elimination Half-Life Among 1,4-DHPs',
+            title: 'Longest Elimination Half-Life',
             category: 'Pharmacokinetics ADME',
             type: 'multiple-choice',
-            questionStem: 'Which of the above 1,4-dihydropyridines has the longest elimination half-life (~30 - 50 hours), permitting true once-daily oral dosing without special delivery systems?',
+            questionStem: 'Which of the above molecules has(have) relatively the longest elimination half-life?',
             options: [
-              'Nifedipine (t1/2 ~2-5 hours)',
-              'Amlodipine (t1/2 ~30-50 hours)',
-              'Nicardipine (t1/2 ~2-4 hours)',
-              'Clevidipine (t1/2 ~1-2 minutes)'
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure V'
             ],
-            correctIndex: 1,
+            correctIndex: 4,
             optionExplanations: [
-              'Incorrect: Nifedipine requires osmotic pump (OROS) technology for once-daily dosing.',
-              'Correct: Amlodipine (Norvasc) has an elimination half-life of 30-50 hours, the longest of all marketed CCBs, due to slow receptor dissociation and a huge volume of distribution (~21 L/kg).',
-              'Incorrect: Nicardipine requires TID or ER formulation.',
-              'Incorrect: Clevidipine is ultrashort-acting.'
+              'Incorrect: Structure I has an ultrashort half-life of 1 to 2 minutes.',
+              'Incorrect: Structure II is an inactive metabolite.',
+              'Incorrect: Structure III has a half-life of ~8 hours.',
+              'Incorrect: Structure IV has a half-life of ~2 to 5 hours.',
+              'Correct: Structure V (Amlodipine) has an elimination half-life of 30 to 50 hours, permitting once-daily oral dosing without extended-release formulation.'
             ],
-            overallExplanation: 'Amlodipine possesses a prolonged terminal elimination half-life of 30-50 hours, conferring sustained, 24-hour blood pressure control with once-daily oral dosing.',
-            highYieldPearl: 'Amlodipine = longest half-life (30-50 h) and highest bioavailability (60-80%) among 1,4-DHPs. True once-daily agent.',
+            overallExplanation: 'Structure V (Amlodipine) possesses an extraordinarily long elimination half-life (30-50 hours) resulting from slow receptor dissociation, large volume of distribution (~21 L/kg), and slow hepatic clearance.',
+            highYieldPearl: 'Structure V (Amlodipine) = longest half-life (30-50 h) among 1,4-DHPs, providing smooth 24-hour BP control with once-daily dosing.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 1, Question 8',
             sourcePageNumber: 1
           },
           {
             id: 509,
             questionNumberLabel: 'Question 9',
-            title: 'Best Oral Bioavailability and the Amlodipine Basic Side Chain',
+            title: 'Best Oral Bioavailability',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs has the best oral bioavailability (60 - 80%), and what chemical feature differentiates it from other 1,4-DHPs?',
+            questionStem: 'Which of the above drugs has the best oral bioavailability?',
             options: [
-              'Nifedipine, due to its symmetrical dimethyl esters',
-              'Amlodipine, due to a basic aminoethoxy side chain at position 2 (pKa ~8.6) that is protonated at physiological pH, slowing hepatic clearance',
-              'Nicardipine, due to its tertiary amine group',
-              'Clevidipine, due to its double ester'
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure V'
             ],
-            correctIndex: 1,
+            correctIndex: 4,
             optionExplanations: [
-              'Incorrect: Nifedipine bioavailability is only 45-65%.',
-              'Correct: Amlodipine incorporates an aminoethoxymethyl (-CH2-O-CH2CH2-NH2) side chain at C2. The basic primary amine (pKa ~8.6) is ~95% protonated at physiological pH, imparting aqueous solubility and protecting against rapid first-pass CYP aromatization, yielding 60-80% bioavailability.',
-              'Incorrect: Nicardipine bioavailability is only ~35% due to extensive first-pass metabolism.',
-              'Incorrect: Clevidipine is not orally bioavailable.'
+              'Incorrect: Structure I has negligible oral bioavailability and is administered IV only.',
+              'Incorrect: Structure II is pharmacologically inactive.',
+              'Incorrect: Structure III has an oral bioavailability of ~15 to 24%.',
+              'Incorrect: Structure IV has an oral bioavailability of ~45 to 65%.',
+              'Correct: Structure V (Amlodipine) has the highest oral bioavailability (60 to 80%) because its basic primary aminoethoxymethyl side chain (pKa ~8.6) is protonated at physiological pH, slowing hepatic first-pass clearance.'
             ],
-            overallExplanation: 'The primary aminoethoxy side chain at C2 of amlodipine provides a positive charge at physiological pH, conferring water solubility, high bioavailability (60-80%), and slow clearance.',
-            highYieldPearl: 'Amlodipine C2 aminoethoxy side chain (pKa ~8.6): protonated at pH 7.4 -> high oral bioavailability (60-80%), slow hepatic clearance, long t1/2 (30-50h).',
+            overallExplanation: 'Structure V (Amlodipine) exhibits 60-80% oral bioavailability, markedly superior to other 1,4-DHPs, due to its basic aminoethoxymethyl side chain that protects against rapid first-pass CYP aromatization.',
+            highYieldPearl: 'Structure V (Amlodipine) = highest oral bioavailability (60-80%) due to protonated basic C2 aminoethoxy side chain.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 1, Question 9',
             sourcePageNumber: 1
-          },
+          }
+        ]
+      }
+    ]
+  },
+
+  // ---------------------------------------------------------------------------
+  // PAGE 2: Inactive DHP SAR Modifications & Ortho/Meta Cl Significance (Questions 10 - 14)
+  // ---------------------------------------------------------------------------
+  {
+    pageNumber: 2,
+    title: '1,4-DHP SAR: Nitro Group, Structural Modifications of Inactive Congeners, and Chlorine Significance',
+    subtitle: 'Conformational locking by ortho/meta substituents, unsubstituted N1-H requirement, ester functionality, and restoring CCB activity',
+    sections: [
+      {
+        sectionTitle: 'Inactive DHP Congeners: Restoring Vasodilatory CCB Activity',
+        block_instructions: 'Consider chemical structures X, Y, and Z to answer questions (10 - 14):',
+        structures: [
+          VASODILATORS_STRUCTURES.dhp_n_methyl,
+          VASODILATORS_STRUCTURES.dhp_unsubstituted_phenyl,
+          VASODILATORS_STRUCTURES.dhp_free_acid,
+        ],
+        questions: [
           {
             id: 510,
-            questionNumberLabel: 'Question 10',
-            title: 'Role of the Nitro Group in 1,4-DHPs',
+            questionNumberLabel: 'Question 1',
+            title: 'Role of the Nitro Group in Drug IV',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'What is the medicinal chemistry significance of the nitro (-NO2) substituent on the 4-phenyl ring in Drug IV (e.g., Nifedipine/Nicardipine)?',
+            questionStem: 'What is the importance of the nitro group in Drug IV (from Page 1)? Electronic, steric, or lipophilic/hydrophilic?',
             options: [
               'Purely hydrophilic to promote urinary excretion',
               'Electronic and steric: it acts as an electron-withdrawing group and sterically forces the 4-phenyl ring into a perpendicular plane relative to the 1,4-DHP ring',
-              'It acts as a prodrug group that releases nitric oxide directly',
-              'It increases alkylation of the calcium channel'
+              'It acts as a prodrug moiety that releases nitric oxide directly',
+              'It causes covalent alkylation of the calcium channel pore'
             ],
             correctIndex: 1,
             optionExplanations: [
               'Incorrect: Nitro is not primarily a solubilizing group.',
-              'Correct: The ortho- or meta-nitro group exerts strong electron-withdrawing effects and steric hindrance against the C3/C5 ester groups, locking the 4-phenyl ring perpendicular (orthogonal) to the 1,4-DHP ring, which is required for channel binding.',
+              'Correct: The ortho-nitro group exerts both strong electron-withdrawing effects and steric hindrance against the adjacent C3/C5 ester groups, locking the 4-phenyl ring perpendicular (orthogonal) to the 1,4-DHP ring, which is the bioactive conformation required for channel binding.',
               'Incorrect: 1,4-DHPs do not release NO; organic nitrates release NO.',
-              'Incorrect: 1,4-DHPs do not alkylate the channel.'
+              'Incorrect: 1,4-DHPs are reversible, non-covalent blockers.'
             ],
             overallExplanation: 'Ortho- and meta-substituents (such as -NO2 or -Cl) on the 4-phenyl ring serve dual electronic (electron-withdrawing) and steric roles, forcing the phenyl ring into a perpendicular orientation relative to the 1,4-DHP ring.',
             highYieldPearl: 'Ortho/meta substituents (-NO2, -Cl) on DHP 4-phenyl ring = steric clash with C3/C5 esters -> locks perpendicular conformation essential for Cav1.2 channel blockade.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 10',
+            sourcePageNumber: 2
+          },
+          {
+            id: 511,
+            questionNumberLabel: 'Question 2',
+            title: 'Restoring Activity in Structure X',
+            category: 'Medicinal Chemistry SAR',
+            type: 'multiple-choice',
+            questionStem: 'The provided Structure X is pharmacologically inactive/weak as a calcium channel blocker; which of the following modifications can be exploited to restore its calcium channel blocking activity, and therefore, to be used as a vasodilatory antihypertensive agent:',
+            options: [
+              'Replacing N-CH3 with N-H at position-1',
+              'Introducing Cl at position-2` or position-3`',
+              'Esterifying the carboxylic group at position-3',
+              'Saturating the phenyl ring at position-4',
+              'Replacing the methyl group at position-2 with a methyl ester'
+            ],
+            correctIndex: 0,
+            optionExplanations: [
+              'Correct: Structure X contains an N-CH3 group at position 1. An unsubstituted secondary amine nitrogen (N1-H) is strictly mandatory for calcium channel blocking activity, where it serves as a crucial hydrogen-bond donor to the receptor pocket. Alkylation of N1 abolishes activity.',
+              'Incorrect: Position-2` already carries a chloro group in Structure X.',
+              'Incorrect: Esters are already present at positions 3 and 5 in Structure X.',
+              'Incorrect: Aromaticity of the 4-phenyl ring is required.',
+              'Incorrect: C2/C6 methyl substituents are optimal.'
+            ],
+            overallExplanation: 'An unsubstituted N1-H group is essential for 1,4-DHP activity because it acts as an indispensable hydrogen-bond donor. Replacing N-CH3 with N-H at position 1 restores activity.',
+            highYieldPearl: '1,4-DHP SAR: Unsubstituted N1-H is mandatory (hydrogen-bond donor). N1-alkylation completely destroys CCB activity.',
+            sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 11',
+            sourcePageNumber: 2
+          },
+          {
+            id: 512,
+            questionNumberLabel: 'Question 3',
+            title: 'Restoring Activity in Structure Y',
+            category: 'Medicinal Chemistry SAR',
+            type: 'multiple-choice',
+            questionStem: 'The provided Structure Y is pharmacologically inactive/weak as a calcium channel blocker; which of the following modifications can be exploited to restore its calcium channel blocking activity, and therefore, to be used as a vasodilatory antihypertensive agent:',
+            options: [
+              'Replacing N-CH3 with N-H at position-1',
+              'Introducing Cl at position-2` or position-3`',
+              'Esterifying the carboxylic group at position-3',
+              'Saturating the phenyl ring at position-4',
+              'Replacing the methyl group at position-2 with a methyl ester'
+            ],
+            correctIndex: 1,
+            optionExplanations: [
+              'Incorrect: Structure Y already has an unsubstituted N1-H.',
+              'Correct: Structure Y has an unsubstituted 4-phenyl ring. Introducing an ortho or meta electron-withdrawing substituent (such as Cl at 2` or 3`) provides the steric bulk required to lock the phenyl ring perpendicular to the 1,4-DHP plane, dramatically enhancing CCB activity.',
+              'Incorrect: Esters are already present at both C3 and C5.',
+              'Incorrect: The phenyl ring must remain planar and aromatic.',
+              'Incorrect: C2 methyl is already optimal.'
+            ],
+            overallExplanation: 'An unsubstituted 4-phenyl ring lacks the steric clash needed to maintain an orthogonal bioactive conformation. Introducing an ortho or meta chloro substituent (2` or 3`) forces perpendicularity and restores potency.',
+            highYieldPearl: '1,4-DHP SAR: Ortho/meta substituents on the 4-phenyl ring (2`-Cl or 3`-Cl) are required to lock the perpendicular bioactive conformation.',
+            sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 12',
+            sourcePageNumber: 2
+          },
+          {
+            id: 513,
+            questionNumberLabel: 'Question 4',
+            title: 'Restoring Activity in Structure Z',
+            category: 'Medicinal Chemistry SAR',
+            type: 'multiple-choice',
+            questionStem: 'The provided Structure Z is pharmacologically inactive/weak as a calcium channel blocker; which of the following modifications can be exploited to restore its calcium channel blocking activity, and therefore, to be used as a vasodilatory antihypertensive agent:',
+            options: [
+              'Replacing N-CH3 with N-H at position-1',
+              'Introducing Cl at position-2` or position-3`',
+              'Esterifying the carboxylic group at position-3',
+              'Saturating the phenyl ring at position-4',
+              'Replacing the methyl group at position-2 with methylester'
+            ],
+            correctIndex: 2,
+            optionExplanations: [
+              'Incorrect: Structure Z already has an unsubstituted N1-H.',
+              'Incorrect: Position-2` already has a chloro substituent.',
+              'Correct: Structure Z possesses a free carboxylic acid (-COOH) at position 3, which is ionized at physiological pH and cannot interact with the lipophilic binding pocket. Esterifying C3-COOH to an alkyl ester (-COOR) restores potency.',
+              'Incorrect: The phenyl ring must not be saturated.',
+              'Incorrect: C2 methyl is optimal.'
+            ],
+            overallExplanation: 'Carboxylic acid esters at both position 3 and position 5 are strictly required for CCB activity. Free carboxylic acid metabolites are inactive; esterification of C3 restores activity.',
+            highYieldPearl: '1,4-DHP SAR: Esters at both C3 and C5 are mandatory (-COOR). Free carboxylic acids at C3/C5 are completely inactive.',
+            sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 13',
+            sourcePageNumber: 2
+          },
+          {
+            id: 514,
+            questionNumberLabel: 'Question 5',
+            title: 'Significance of Chlorine Substituents in Structures X, Y, and Z',
+            category: 'Medicinal Chemistry SAR',
+            type: 'multiple-choice',
+            questionStem: 'Describe the significance of the chlorine substituent(s) in each of the following drugs X, Y, and Z:',
+            options: [
+              'They chelate directly to calcium ions in the channel pore',
+              'They provide steric clash with the C3/C5 ester groups, locking the 4-phenyl ring perpendicular (orthogonal) to the 1,4-DHP plane, which is essential for channel binding',
+              'They serve as leaving groups for covalent inhibition of Cav1.2 channels',
+              'They increase aqueous solubility by accepting hydrogen bonds from water'
+            ],
+            correctIndex: 1,
+            optionExplanations: [
+              'Incorrect: Chlorines do not chelate calcium ions.',
+              'Correct: Bulky ortho/meta chlorine substituents create steric hindrance against the adjacent C3 and C5 ester carbonyls, restricting free rotation and locking the phenyl ring perpendicular to the 1,4-DHP plane, maximizing fit into the Cav1.2 binding pocket.',
+              'Incorrect: 1,4-DHPs are reversible, non-covalent blockers.',
+              'Incorrect: Chlorines increase lipophilicity, not aqueous solubility.'
+            ],
+            overallExplanation: 'Ortho- and meta-chlorine substituents sterically constrain the 4-phenyl ring to adopt a perpendicular orientation relative to the 1,4-dihydropyridine plane, maximizing fit into the Cav1.2 allosteric binding pocket.',
+            highYieldPearl: 'Ortho/meta-Cl substituents: Steric clash locks the 4-phenyl ring perpendicular to the DHP ring for optimal receptor fit.',
+            sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 14',
             sourcePageNumber: 2
           }
         ]
@@ -320,204 +460,105 @@ export const vasodilatorsPages: ReviewPage[] = [
   },
 
   // ---------------------------------------------------------------------------
-  // PAGE 2: SAR Modifications of Inactive DHPs & Direct Vasodilators (Questions 11 - 16)
+  // PAGE 3: Direct Vasodilators Metabolism: Hydralazine vs Minoxidil (Questions 15 - 16)
   // ---------------------------------------------------------------------------
   {
-    pageNumber: 2,
-    title: 'DHP SAR Optimization & Direct Vasodilators: Hydralazine & Minoxidil',
-    subtitle: 'N1-H requirement, ester functionalization, hydralazine acetylation phenotypes, and minoxidil sulfation bioactivation',
+    pageNumber: 3,
+    title: 'Direct Vasodilators: Hydralazine & Minoxidil Metabolism and Pharmacology',
+    subtitle: 'Arylhydrazine vs N-oxide pyrimidinediamine, Phase II NAT2 acetylation inactivation vs SULT1A1 sulfonation bioactivation',
     sections: [
       {
-        sectionTitle: 'Structural Optimization of Inactive DHP Analogs',
-        questions: [
-          {
-            id: 511,
-            questionNumberLabel: 'Question 11',
-            title: 'Restoring Activity in N-Substituted DHP (Structure X)',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Structure X has an N1-methyl group (N-CH3) and is pharmacologically INACTIVE as a calcium channel blocker. Which modification will restore its vasodilatory activity?',
-            options: [
-              'Replacing N-CH3 with an unsubstituted N-H at position 1',
-              'Introducing Cl at position 4 prime',
-              'Hydrolyzing the C3 ester to a free carboxylic acid',
-              'Saturating the 4-phenyl ring to a cyclohexyl group',
-              'Replacing the C2 methyl group with a methyl ester'
-            ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: An unsubstituted secondary amine nitrogen (N1-H) is strictly required for calcium channel blocking activity. The N1-H acts as a critical hydrogen-bond donor to a carbonyl oxygen in the Cav1.2 channel binding pocket. N1-alkylation abolishes activity.',
-              'Incorrect: Para-substitution on the phenyl ring decreases activity.',
-              'Incorrect: Free carboxylic acids at C3/C5 are inactive.',
-              'Incorrect: The phenyl ring must be planar and aromatic.',
-              'Incorrect: C2/C6 methyls are optimal.'
-            ],
-            overallExplanation: 'Unsubstituted N1-H is essential for 1,4-DHP activity because it forms a critical hydrogen bond with the receptor. N-alkylated derivatives are inactive.',
-            highYieldPearl: '1,4-DHP SAR: Unsubstituted N1-H is mandatory (hydrogen-bond donor). N1-alkylation completely destroys CCB activity.',
-            sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 11',
-            sourcePageNumber: 2
-          },
-          {
-            id: 512,
-            questionNumberLabel: 'Question 12',
-            title: 'Restoring Activity in C3-Carboxylate DHP (Structure Y)',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Structure Y possesses a free carboxylic acid at position 3 and is inactive. Which modification restores its CCB activity?',
-            options: [
-              'Replacing N-CH3 with N-H at position 1',
-              'Esterifying the carboxylic acid at position 3 into an alkyl ester',
-              'Removing the phenyl ring at position 4',
-              'Oxidizing the ring to a pyridine',
-              'Introducing a nitro group at position 4 prime'
-            ],
-            correctIndex: 1,
-            optionExplanations: [
-              'Incorrect: If N1 is already N-H, esterification is the missing requirement.',
-              'Correct: Ester groups at both position 3 and position 5 (-COOR) are strictly required for activity. Free carboxylic acids are ionized at pH 7.4 and cannot bind the hydrophobic channel pocket; esterification restores potency.',
-              'Incorrect: The 4-phenyl ring is mandatory.',
-              'Incorrect: Oxidation to pyridine abolishes activity.',
-              'Incorrect: Para-nitro is deleterious.'
-            ],
-            overallExplanation: 'Carboxylic acid esters at C3 and C5 are essential for CCB activity. Free carboxylic acids are inactive metabolites.',
-            highYieldPearl: '1,4-DHP SAR: Esters at C3 and C5 are mandatory (-COOR). Asymmetric esters (e.g., amlodipine, felodipine) enhance vascular selectivity.',
-            sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 12',
-            sourcePageNumber: 2
-          },
-          {
-            id: 513,
-            questionNumberLabel: 'Question 13',
-            title: 'Restoring Activity in Unsubstituted Phenyl DHP (Structure Z)',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Structure Z has an unsubstituted 4-phenyl ring (or a para-substituted phenyl) and exhibits very weak activity. Which modification will dramatically enhance its CCB potency?',
-            options: [
-              'Introducing Cl or NO2 at the ortho (2 prime) or meta (3 prime) position of the 4-phenyl ring',
-              'Introducing Cl at the para (4 prime) position',
-              'Converting the DHP ring into a pyridine',
-              'Replacing C2 methyl with hydrogen',
-              'Eliminating the C5 ester'
-            ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: An ortho or meta electron-withdrawing substituent (e.g., 2-Cl, 2-NO2, 3-NO2) provides the necessary steric bulk to force the 4-phenyl ring into a perpendicular plane relative to the 1,4-DHP ring, which is the bioactive conformation.',
-              'Incorrect: Para-substituents dramatically decrease activity due to steric clash with the binding pocket.',
-              'Incorrect: Aromatization destroys activity.',
-              'Incorrect: C2/C6 methyls are needed.',
-              'Incorrect: C5 ester is mandatory.'
-            ],
-            overallExplanation: 'Ortho- or meta-substitution on the 4-phenyl ring locks the ring in a perpendicular conformation relative to the 1,4-DHP plane, which is optimal for channel blockade. Para-substitution abolishes activity.',
-            highYieldPearl: '1,4-DHP Phenyl Substitution: Ortho > Meta >>> Para (para = inactive). Ortho/meta bulk forces perpendicular bioactive conformation.',
-            sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 13',
-            sourcePageNumber: 2
-          },
-          {
-            id: 514,
-            questionNumberLabel: 'Question 14',
-            title: 'Significance of Chlorine Substituents in Felodipine & Amlodipine',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'What is the conformational significance of the chlorine substituent(s) in drugs such as Felodipine (2,3-dichloro) and Amlodipine (2-chloro)?',
-            options: [
-              'They chelate directly to calcium ions in the channel pore',
-              'They exert steric hindrance against the C3/C5 esters, forcing the phenyl ring into an orthogonal (perpendicular) orientation relative to the 1,4-DHP ring',
-              'They act as leaving groups for covalent bond formation',
-              'They increase water solubility by forming hydrogen bonds'
-            ],
-            correctIndex: 1,
-            optionExplanations: [
-              'Incorrect: Chlorines do not chelate calcium ions.',
-              'Correct: The bulky ortho/meta chlorine substituents create steric clash with the adjacent C3 and C5 ester carbonyls, restricting free rotation and holding the phenyl ring perpendicular to the 1,4-DHP plane.',
-              'Incorrect: 1,4-DHPs are reversible, non-covalent blockers.',
-              'Incorrect: Chlorines increase lipophilicity, not water solubility.'
-            ],
-            overallExplanation: 'Ortho-chlorine substituents sterically constrain the 4-phenyl ring to adopt a perpendicular orientation relative to the 1,4-dihydropyridine plane, maximizing fit into the Cav1.2 allosteric binding pocket.',
-            highYieldPearl: 'Ortho-Cl in Amlodipine & Felodipine: Steric clash locks the 4-phenyl ring perpendicular to the DHP ring for optimal receptor fit.',
-            sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 2, Question 14',
-            sourcePageNumber: 2
-          }
-        ]
-      },
-      {
-        sectionTitle: 'Direct Vasodilators: Hydralazine vs Minoxidil',
+        sectionTitle: 'Direct Vasodilators: Metabolism and Mechanism of Action',
+        block_instructions: 'Consider chemical structures I and II to answer questions (15 - 16):',
         structures: [
           VASODILATORS_STRUCTURES.hydralazine,
           VASODILATORS_STRUCTURES.minoxidil,
-          VASODILATORS_STRUCTURES.minoxidil_sulfate
         ],
         questions: [
           {
             id: 515,
-            questionNumberLabel: 'Question 15',
-            title: 'Hydralazine vs Minoxidil Mechanisms and Metabolism',
+            questionNumberLabel: 'Question 1',
+            title: 'Direct Vasodilators Statements Evaluation',
             category: 'Pharmacology MOA',
             type: 'sub-statements',
-            questionStem: 'Consider the direct vasodilators Drug I (Hydralazine, an arylhydrazine) and Drug II (Minoxidil, an N-oxide pyrimidinediamine) to evaluate each statement:',
+            questionStem: 'Consider the provided structures and state whether each of the following statements is true or false:',
             subStatements: [
               {
                 id: 'a',
-                text: 'Both drugs are direct vasodilators that act through identical molecular mechanisms.',
+                text: 'Both are direct vasodilators with similar mechanisms.',
                 isCorrect: false,
-                explanation: 'False: Hydralazine acts via endothelial nitric oxide release / membrane hyperpolarization; Minoxidil acts by opening ATP-sensitive K+ channels (KATP).'
+                explanation: 'False: Drug I (Hydralazine) acts via endothelial nitric oxide stimulation and hyperpolarization; Drug II (Minoxidil) acts as an active sulfate metabolite opening ATP-sensitive potassium (KATP) channels.'
               },
               {
                 id: 'b',
-                text: 'Both drugs are used orally to treat severe, refractory hypertension.',
+                text: 'Both are used to treat hypertension.',
                 isCorrect: true,
-                explanation: 'True: Both are potent arterial dilators reserved for refractory hypertension (usually paired with a beta-blocker and loop diuretic to prevent reflex tachycardia and fluid retention).'
+                explanation: 'True: Both drugs are potent arterial vasodilators utilized in severe, refractory hypertension.'
               },
               {
                 id: 'c',
-                text: 'Drug I is a phthalazine/arylhydrazine, whereas Drug II is a piperidinopyrimidine-3-oxide.',
+                text: 'Drug I is arylhydrazine whereas Drug II is N-oxide pyrimidine diamine.',
                 isCorrect: true,
-                explanation: 'True: Hydralazine contains a hydrazine attached to phthalazine; minoxidil is a 6-amino-1,2-dihydro-1-hydroxy-2-imino-4-piperidinopyrimidine.'
+                explanation: 'True: Drug I (Hydralazine) is a 1-hydrazinophthalazine (arylhydrazine); Drug II (Minoxidil) is 2,4-diamino-6-piperidinopyrimidine 3-oxide.'
               },
               {
                 id: 'd',
-                text: 'Drug I is inactivated by hepatic sulfonation, and Drug II is activated by acetylation.',
+                text: 'Drug I is inactivated by sulfonation & Drug II is activated by acetylation.',
                 isCorrect: false,
-                explanation: 'False: It is the exact opposite.'
+                explanation: 'False: The exact reverse is true: Drug I is inactivated by acetylation, and Drug II is activated by sulfonation.'
               },
               {
                 id: 'e',
-                text: 'Drug I is inactivated by acetylation (NAT2), whereas Drug II is bioactivated by sulfonation (SULT1A1).',
-                isCorrect: true,
-                explanation: 'True: Hydralazine undergoes N-acetylation by NAT2 to inactive metabolites; Minoxidil is a prodrug bioactivated by sulfotransferase SULT1A1 to minoxidil-O-sulfate.'
+                text: 'Drug I is inactivated by acetylation & Drug II is activated by glucuronidation.',
+                isCorrect: false,
+                explanation: 'False: Drug II is bioactivated by sulfonation (SULT1A1), not glucuronidation.'
               },
               {
                 id: 'f',
-                text: 'Both drugs are primarily metabolized by N-methylation.',
+                text: 'Drug I is inactivated by acetylation & Drug II is activated by sulfonation.',
+                isCorrect: true,
+                explanation: 'True: Drug I is inactivated by hepatic N-acetyltransferase 2 (NAT2); Drug II is a prodrug activated by sulfotransferase (SULT1A1) to minoxidil-O-sulfate.'
+              },
+              {
+                id: 'g',
+                text: 'Drug I is inactivated by methylation & Drug II is activated by sulfonation.',
                 isCorrect: false,
-                explanation: 'False: Neither is primarily cleared by N-methylation.'
+                explanation: 'False: Drug I is inactivated by acetylation, not methylation.'
+              },
+              {
+                id: 'h',
+                text: 'Both are primarily metabolized by N-methylation.',
+                isCorrect: false,
+                explanation: 'False: Neither drug is primarily cleared by N-methylation.'
               }
             ],
-            overallExplanation: 'Hydralazine is inactivated by polymorphic N-acetyltransferase 2 (NAT2). Minoxidil is a prodrug that requires hepatic sulfotransferase (SULT1A1) conversion into minoxidil-O-sulfate, which opens KATP channels.',
+            overallExplanation: 'Hydralazine (Drug I) is an arylhydrazine inactivated by NAT2 acetylation. Minoxidil (Drug II) is an N-oxide pyrimidinediamine prodrug bioactivated by SULT1A1 sulfonation to minoxidil-O-sulfate, a potent KATP channel opener.',
             highYieldPearl: 'Hydralazine = inactivated by acetylation (NAT2). Minoxidil = prodrug bioactivated by sulfonation (SULT1A1) to minoxidil sulfate (KATP opener).',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 3, Question 15',
             sourcePageNumber: 3
           },
           {
             id: 516,
-            questionNumberLabel: 'Question 16',
-            title: 'Metabolites of Hydralazine and Minoxidil',
+            questionNumberLabel: 'Question 2',
+            title: 'Metabolites of Drug I and Drug II',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which pair correctly identifies the INACTIVE metabolite of Hydralazine and the ACTIVE metabolite of Minoxidil?',
+            questionStem: 'Which of the following pairs represent the correct inactive metabolite of Drug I above and the active metabolite of Drug II above?',
             options: [
-              'Inactive Hydralazine metabolite: N-Acetylhydralazine (and 3-methyl-s-triazolo[3,4-a]phthalazine); Active Minoxidil metabolite: Minoxidil-O-sulfate',
-              'Inactive Hydralazine metabolite: Hydralazine-O-sulfate; Active Minoxidil metabolite: N-Acetylminoxidil',
-              'Inactive Hydralazine metabolite: Phthalic acid; Active Minoxidil metabolite: Minoxidil glucuronide',
-              'Inactive Hydralazine metabolite: 4-Hydroxyminoxidil; Active Minoxidil metabolite: Hydralazine N-oxide'
+              'Drug I inactive metabolite: N-Acetylhydralazine (3-methyl-s-triazolo[3,4-a]phthalazine); Drug II active metabolite: Minoxidil-O-sulfate',
+              'Drug I inactive metabolite: Hydralazine-O-sulfate; Drug II active metabolite: N-Acetylminoxidil',
+              'Drug I inactive metabolite: Phthalic acid; Drug II active metabolite: Minoxidil glucuronide',
+              'Drug I inactive metabolite: 4-Hydroxyminoxidil; Drug II active metabolite: Hydralazine N-oxide'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Hydralazine is N-acetylated by NAT2 to N-acetylhydralazine, which spontaneously cyclizes to 3-methyl-s-triazolo[3,4-a]phthalazine (inactive). Minoxidil N-oxide is sulfated by SULT1A1 to minoxidil-O-sulfate (active KATP channel opener).',
+              'Correct: Drug I (Hydralazine) is N-acetylated by NAT2 to N-acetylhydralazine, which rapidly cyclizes to inactive 3-methyl-s-triazolo[3,4-a]phthalazine. Drug II (Minoxidil) undergoes Phase II sulfonation on its N-oxide oxygen by hepatic SULT1A1 to form minoxidil-O-sulfate, the active KATP opener.',
               'Incorrect: Hydralazine is acetylated, not sulfated.',
-              'Incorrect: Glucuronides of minoxidil are inactive.',
-              'Incorrect: Mismatched structures.'
+              'Incorrect: Minoxidil glucuronidation produces inactive metabolites.',
+              'Incorrect: Inverted and mismatched structures.'
             ],
-            overallExplanation: 'Hydralazine undergoes Phase II NAT2 acetylation to inactive triazolophthalazines. Minoxidil is bioactivated by sulfotransferase SULT1A1 into minoxidil-O-sulfate, the active KATP opener.',
-            highYieldPearl: 'Inactive Hydralazine metabolite = N-acetylhydralazine. Active Minoxidil metabolite = Minoxidil-O-sulfate.',
+            overallExplanation: 'Hydralazine is inactivated by polymorphic NAT2 acetylation into a triazolophthalazine derivative. Minoxidil is bioactivated by sulfotransferase SULT1A1 to minoxidil-O-sulfate.',
+            highYieldPearl: 'Inactive Drug I metabolite = N-acetylhydralazine / triazolophthalazine. Active Drug II metabolite = Minoxidil-O-sulfate.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 3, Question 16',
             sourcePageNumber: 3
           }
@@ -527,246 +568,301 @@ export const vasodilatorsPages: ReviewPage[] = [
   },
 
   // ---------------------------------------------------------------------------
-  // PAGE 3: Comprehensive Vasodilator Classification & Mechanisms (Questions 17 - 25)
+  // PAGE 4: Comprehensive Vasodilator Multi-Structure Battery (Questions 17 - 25)
   // ---------------------------------------------------------------------------
   {
-    pageNumber: 3,
-    title: 'Integrated Vasodilator Review: Nitrates, KATP Openers & Clinical Pharmacology',
-    subtitle: 'Acetylation pharmacogenomics, ALDH2 nitrate bioactivation, sodium nitroprusside NO release, and diazoxide',
+    pageNumber: 4,
+    title: 'Comprehensive Vasodilator Classification, Mechanisms & Clinical Pharmacology',
+    subtitle: 'Chemical class identification, prodrug activation, acetylation phenotypes, KATP openers, ALDH2 nitrates, and NO donors',
     sections: [
       {
-        sectionTitle: 'Chemical Classification of Vasodilator Library',
+        sectionTitle: 'Chemical Classification and Mechanisms of Diverse Vasodilators',
+        block_instructions: 'Consider chemical structures I, II, III, IV, V, VI, VII, VIII, IX, and X to answer questions (17 - 25):',
         structures: [
-          VASODILATORS_STRUCTURES.nitroglycerin,
-          VASODILATORS_STRUCTURES.sodium_nitroprusside,
-          VASODILATORS_STRUCTURES.diazoxide,
+          VASODILATORS_STRUCTURES.nifedipine,
+          VASODILATORS_STRUCTURES.amlodipine,
+          VASODILATORS_STRUCTURES.isosorbide_dinitrate,
           VASODILATORS_STRUCTURES.hydralazine,
+          VASODILATORS_STRUCTURES.sodium_nitroprusside,
           VASODILATORS_STRUCTURES.minoxidil,
-          VASODILATORS_STRUCTURES.nifedipine
+          VASODILATORS_STRUCTURES.nitroglycerin,
+          VASODILATORS_STRUCTURES.diazoxide,
+          VASODILATORS_STRUCTURES.ranolazine,
+          VASODILATORS_STRUCTURES.milrinone,
         ],
         questions: [
           {
             id: 517,
-            questionNumberLabel: 'Question 17',
-            title: 'Chemical Class Matching',
+            questionNumberLabel: 'Question 1',
+            title: 'Chemical Class Matching of Vasodilators',
             category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Match each vasodilator to its correct chemical class (Nitroglycerin, Sodium nitroprusside, Hydralazine, Minoxidil, Nifedipine, Diazoxide):',
+            type: 'matching',
+            questionStem: 'Identify the chemical class of each of the provided molecules (Benzothiadiazine-dioxide, Aryloxypropanolamine, Inorganic nitrate, Organic nitrate, Aryl hydrazine, Aminopyrimidine, 1,4-dihydropyridine, and 4-substituted pyridine):',
+            prompt: 'Drag each chemical structure chip (Structure I - Structure X) to its corresponding chemical class:',
             options: [
-              'Nitroglycerin = Organic nitrate; Sodium nitroprusside = Inorganic nitroso-complex; Hydralazine = Arylhydrazine/phthalazine; Minoxidil = Aminopyrimidine N-oxide; Nifedipine = 1,4-DHP; Diazoxide = Benzothiadiazine',
-              'Nitroglycerin = Inorganic nitrate; Sodium nitroprusside = Organic nitrate; Hydralazine = 1,4-DHP; Minoxidil = Arylhydrazine',
-              'All are classified as 1,4-dihydropyridines',
-              'Diazoxide = 1,4-DHP; Nifedipine = Benzothiadiazine'
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure V',
+              'Structure VI',
+              'Structure VII',
+              'Structure VIII',
+              'Structure IX',
+              'Structure X'
             ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: Nitroglycerin is an organic nitrate ester; Sodium nitroprusside is an inorganic sodium ferricyanide nitroso coordination complex; Hydralazine is a phthalazine hydrazine; Minoxidil is a pyrimidinediamine N-oxide; Nifedipine is a 1,4-DHP; Diazoxide is a benzothiadiazine-1,1-dioxide (non-diuretic).',
-              'Incorrect: Incorrect class assignments.',
-              'Incorrect: Structurally diverse classes.',
-              'Incorrect: Inverted classes.'
+            matchingTargets: [
+              {
+                id: 'target-benzothiadiazine',
+                label: 'Benzothiadiazine-dioxide',
+                acceptedStructureIds: ['Structure VIII', 'VIII', 'diazoxide', 'chem-diazoxide'],
+                rationale: 'Structure VIII (Diazoxide) possesses a benzothiadiazine-1,1-dioxide ring system lacking a 7-sulfonamide group.'
+              },
+              {
+                id: 'target-aryloxypropanolamine',
+                label: 'Aryloxypropanolamine',
+                acceptedStructureIds: ['Structure IX', 'IX', 'ranolazine', 'chem-ranolazine'],
+                rationale: 'Structure IX (Ranolazine) is built upon an aryloxypropanolamine framework connected to a piperazine ring.'
+              },
+              {
+                id: 'target-inorganic-nitrate',
+                label: 'Inorganic nitrate',
+                acceptedStructureIds: ['Structure V', 'V', 'sodium_nitroprusside', 'chem-sodium-nitroprusside'],
+                rationale: 'Structure V (Sodium nitroprusside) is an inorganic nitrosyl coordination complex [Na2Fe(CN)5NO].'
+              },
+              {
+                id: 'target-organic-nitrate',
+                label: 'Organic nitrate',
+                acceptedStructureIds: ['Structure III', 'Structure VII', 'III', 'VII', 'isosorbide_dinitrate', 'nitroglycerin', 'chem-isosorbide-dinitrate', 'chem-nitroglycerin'],
+                rationale: 'Structures III (Isosorbide dinitrate) and VII (Nitroglycerin) are organic nitrate esters (-C-O-NO2).'
+              },
+              {
+                id: 'target-aryl-hydrazine',
+                label: 'Aryl hydrazine',
+                acceptedStructureIds: ['Structure IV', 'IV', 'hydralazine', 'chem-hydralazine'],
+                rationale: 'Structure IV (Hydralazine) is a 1-hydrazinophthalazine (aryl hydrazine) derivative.'
+              },
+              {
+                id: 'target-aminopyrimidine',
+                label: 'Aminopyrimidine',
+                acceptedStructureIds: ['Structure VI', 'VI', 'minoxidil', 'chem-minoxidil'],
+                rationale: 'Structure VI (Minoxidil) is an aminopyrimidine N-oxide (2,4-diamino-6-piperidinopyrimidine 3-oxide).'
+              },
+              {
+                id: 'target-dhp',
+                label: '1,4-dihydropyridine',
+                acceptedStructureIds: ['Structure I', 'Structure II', 'I', 'II', 'nifedipine', 'amlodipine', 'chem-nifedipine', 'chem-amlodipine'],
+                rationale: 'Structures I (Nifedipine) and II (Amlodipine) are classic 1,4-dihydropyridine calcium channel blockers.'
+              },
+              {
+                id: 'target-4-sub-pyridine',
+                label: '4-substituted pyridine',
+                acceptedStructureIds: ['Structure X', 'X', 'milrinone', 'chem-milrinone'],
+                rationale: 'Structure X (Milrinone) is a 4-substituted bipyridine (bipyridine phosphodiesterase-3 inhibitor).'
+              }
             ],
-            overallExplanation: 'Antihypertensive vasodilators encompass organic nitrates (nitroglycerin), inorganic complexes (nitroprusside), arylhydrazines (hydralazine), pyrimidine N-oxides (minoxidil), 1,4-DHPs (nifedipine), and benzothiadiazines (diazoxide).',
-            highYieldPearl: 'Vasodilator chemical classes: Nitroglycerin = Organic nitrate; Nitroprusside = Inorganic complex; Diazoxide = Benzothiadiazine; Minoxidil = Pyrimidine N-oxide.',
+            overallExplanation: 'Vasodilator structures span diverse chemical classes: Structure I & II = 1,4-dihydropyridines; Structure III & VII = Organic nitrates; Structure IV = Aryl hydrazine; Structure V = Inorganic nitrate; Structure VI = Aminopyrimidine; Structure VIII = Benzothiadiazine-dioxide; Structure IX = Aryloxypropanolamine; Structure X = 4-substituted pyridine.',
+            highYieldPearl: 'Vasodilators encompass 1,4-DHPs (I, II), organic nitrates (III, VII), arylhydrazines (IV), inorganic nitrates (V), pyrimidine N-oxides (VI), benzothiadiazines (VIII), aryloxypropanolamines (IX), and 4-substituted pyridines (X).',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 17',
             sourcePageNumber: 4
           },
           {
             id: 518,
-            questionNumberLabel: 'Question 18',
+            questionNumberLabel: 'Question 2',
             title: 'Vasodilatory Prodrugs',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following vasodilators are PRODRUGS that require enzymatic or metabolic activation in vivo to promote vasodilation?',
+            questionStem: 'Which of the above molecules is(are) vasodilatory prodrug(s)?',
             options: [
-              'Minoxidil (requires SULT1A1 sulfation) and Nitroglycerin (requires mitochondrial ALDH2 reduction)',
-              'Sodium nitroprusside and Nifedipine',
-              'Diazoxide and Amlodipine',
-              'Hydralazine and Clevidipine'
+              'Structure III, Structure V, Structure VI, and Structure VII',
+              'Structure I, Structure II, and Structure VIII',
+              'Structure IV, Structure IX, and Structure X',
+              'Structure I and Structure IV'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Minoxidil is inactive until sulfated by SULT1A1 into minoxidil-O-sulfate. Nitroglycerin is an organic nitrate prodrug that requires reduction by mitochondrial aldehyde dehydrogenase (ALDH2) to generate active nitric oxide (NO).',
-              'Incorrect: Nitroprusside releases NO non-enzymatically; Nifedipine is an active drug.',
-              'Incorrect: Diazoxide and Amlodipine are active drugs.',
-              'Incorrect: Hydralazine is active; Clevidipine is an active drug rapidly inactivated by esterases.'
+              'Correct: Structure III (Isosorbide dinitrate) and Structure VII (Nitroglycerin) are organic nitrate prodrugs bioactivated by ALDH2 to release NO; Structure V (Sodium nitroprusside) is an inorganic complex prodrug that releases NO; Structure VI (Minoxidil) is an inactive prodrug that must be bioactivated by hepatic sulfotransferase (SULT1A1) to minoxidil-O-sulfate.',
+              'Incorrect: Structures I, II, and VIII are active parent drugs.',
+              'Incorrect: Structures IV, IX, and X are active parent drugs.',
+              'Incorrect: Structures I and IV are active parent drugs.'
             ],
-            overallExplanation: 'Minoxidil (sulfated by SULT1A1) and Nitroglycerin (denitrated by ALDH2) require metabolic bioactivation to exert their vasodilatory actions.',
-            highYieldPearl: 'Vasodilatory Prodrugs: Minoxidil -> [SULT1A1] -> Minoxidil sulfate. Nitroglycerin -> [ALDH2] -> Nitric Oxide (NO).',
+            overallExplanation: 'Structures III (Isosorbide dinitrate), V (Sodium nitroprusside), VI (Minoxidil), and VII (Nitroglycerin) are prodrugs that require in vivo activation or decomposition to produce active vasodilator entities (NO or minoxidil sulfate).',
+            highYieldPearl: 'Vasodilatory prodrugs: Organic/inorganic nitrates (III, V, VII) release NO; Minoxidil (VI) is sulfated to minoxidil sulfate.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 18',
             sourcePageNumber: 4
           },
           {
             id: 519,
-            questionNumberLabel: 'Question 19',
-            title: 'Vasodilator Associated with Acetylation Pharmacogenomics',
+            questionNumberLabel: 'Question 3',
+            title: 'Vasodilator Associated with Acetylation Phenotypes',
             category: 'Pharmacokinetics ADME',
             type: 'multiple-choice',
-            questionStem: 'Which vasodilator is inactivated by N-acetyltransferase 2 (NAT2) and poses a significant risk of Drug-Induced Lupus Erythematosus (DILE) in slow acetylators?',
+            questionStem: 'Which of the provided molecules is vasodilator(s) that is(are) associated with acetylation phenotypes?',
             options: [
-              'Hydralazine',
-              'Minoxidil',
-              'Sodium nitroprusside',
-              'Nifedipine'
+              'Structure IV',
+              'Structure VI',
+              'Structure V',
+              'Structure I'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Hydralazine is metabolized by polymorphic NAT2. Slow acetylators (~50% of Caucasians and African Americans) accumulate hydralazine, greatly increasing the incidence of anti-histone antibody-positive Drug-Induced Lupus Erythematosus (DILE).',
-              'Incorrect: Minoxidil is cleared by glucuronidation/sulfation, not acetylation.',
-              'Incorrect: Nitroprusside reacts with hemoglobin/RBCs.',
-              'Incorrect: Nifedipine is cleared by CYP3A4.'
+              'Correct: Structure IV (Hydralazine) is metabolized by polymorphic N-acetyltransferase 2 (NAT2). Slow acetylators accumulate the drug and are at high risk of Drug-Induced Lupus Erythematosus (DILE).',
+              'Incorrect: Structure VI is cleared by glucuronidation and sulfation, not acetylation.',
+              'Incorrect: Structure V reacts non-enzymatically with hemoglobin.',
+              'Incorrect: Structure I is cleared by CYP3A4 oxidation.'
             ],
-            overallExplanation: 'Hydralazine clearance is governed by NAT2 acetylation status. Slow acetylators achieve higher plasma levels and have a markedly elevated risk of drug-induced lupus erythematosus.',
-            highYieldPearl: 'Hydralazine + Slow Acetylator (NAT2 defect) = Drug-Induced Lupus Erythematosus (DILE) with positive anti-histone antibodies.',
+            overallExplanation: 'Structure IV (Hydralazine) clearance is governed by NAT2 acetylation status; slow acetylators experience greater drug accumulation and markedly elevated incidence of drug-induced lupus erythematosus.',
+            highYieldPearl: 'Structure IV (Hydralazine) + slow acetylator phenotype (NAT2) = high risk of Drug-Induced Lupus Erythematosus (anti-histone antibodies positive).',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 19',
             sourcePageNumber: 4
           },
           {
             id: 520,
-            questionNumberLabel: 'Question 20',
-            title: 'Benzothiadiazine Diuretic Congener with Potent Vasodilation',
+            questionNumberLabel: 'Question 4',
+            title: 'Diuretic Congener with Vasodilatory Effect',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following is a benzothiadiazine derivative that LACKS diuretic activity (lacks a 7-sulfonamide) but acts as a potent arteriolar vasodilator and hyperglycemic agent by opening KATP channels?',
+            questionStem: 'Which of the above molecules is a diuretic with a potential vasodilatory effect?',
             options: [
-              'Chlorothiazide',
-              'Diazoxide (Hyperstat / Proglycem)',
-              'Hydrochlorothiazide',
-              'Metolazone'
+              'Structure VIII',
+              'Structure I',
+              'Structure IV',
+              'Structure X'
             ],
-            correctIndex: 1,
+            correctIndex: 0,
             optionExplanations: [
-              'Incorrect: Chlorothiazide is a diuretic with weak direct vasodilation.',
-              'Correct: Diazoxide is chemically a benzothiadiazine-1,1-dioxide that lacks the unsubstituted 7-sulfonamide needed for carbonic anhydrase and DCT NCC inhibition. Instead, it opens KATP channels in vascular smooth muscle (causing vasodilation) and in pancreatic beta-cells (inhibiting insulin release, causing hyperglycemia).',
-              'Incorrect: HCTZ is a standard diuretic.',
-              'Incorrect: Metolazone is a thiazide-like diuretic.'
+              'Correct: Structure VIII (Diazoxide) is chemically a benzothiadiazine derivative related to thiazide diuretics, but it lacks the 7-sulfonamide group required for carbonic anhydrase and NCC inhibition (so it is not a diuretic). Instead, it opens KATP channels in vascular smooth muscle to cause potent direct vasodilation, and in pancreatic beta-cells to inhibit insulin release.',
+              'Incorrect: Structure I is a 1,4-dihydropyridine calcium channel blocker.',
+              'Incorrect: Structure IV is an arylhydrazine.',
+              'Incorrect: Structure X is a phosphodiesterase-3 inhibitor.'
             ],
-            overallExplanation: 'Diazoxide lacks the 7-sulfonamide required for diuresis; it opens ATP-sensitive K+ channels to induce profound arteriolar vasodilation (for hypertensive emergencies) and suppress insulin secretion (used for hypoglycemia/insulinoma).',
-            highYieldPearl: 'Diazoxide = benzothiadiazine WITHOUT sulfonamide -> opens KATP channels -> arteriolar vasodilation + inhibits insulin release (causes hyperglycemia!).',
+            overallExplanation: 'Structure VIII (Diazoxide) has the benzothiadiazine core of thiazide diuretics but lacks a sulfonamide moiety; it lacks diuretic activity and acts as a direct arteriolar vasodilator by opening KATP channels.',
+            highYieldPearl: 'Structure VIII (Diazoxide): Benzothiadiazine related to thiazides but lacks sulfonamide -> NO diuresis, but potent KATP channel opening vasodilation + hyperglycemia.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 20',
             sourcePageNumber: 4
           },
           {
             id: 521,
-            questionNumberLabel: 'Question 21',
-            title: 'Vasodilating Beta-Blocker in Vasodilator Spectrum',
+            questionNumberLabel: 'Question 5',
+            title: 'Beta-Blocker Evaluation of Provided Molecules',
             category: 'Pharmacology MOA',
             type: 'multiple-choice',
-            questionStem: 'Which beta-adrenergic antagonist provides additional peripheral vasodilation through concurrent alpha-1 receptor blockade?',
+            questionStem: 'Which of the provided molecules is a β-blocker?',
             options: [
-              'Propranolol',
-              'Atenolol',
-              'Carvedilol',
-              'Metoprolol'
+              'None of the provided molecules (Structure IX contains an aryloxypropanolamine fragment but is a cyclic tertiary amine antianginal agent, not a β-blocker)',
+              'Structure IX',
+              'Structure VIII',
+              'Structure X'
             ],
-            correctIndex: 2,
+            correctIndex: 0,
             optionExplanations: [
-              'Incorrect: Propranolol has no alpha-1 blocking or vasodilating properties.',
-              'Incorrect: Atenolol is a pure beta-1 blocker.',
-              'Correct: Carvedilol combines nonselective beta-blockade with alpha-1 adrenergic antagonism, producing arterial vasodilation and reducing systemic vascular resistance.',
-              'Incorrect: Metoprolol does not promote vasodilation.'
+              'Correct: None of the above structures is a beta-blocker. Structure IX (Ranolazine) contains an aryloxypropanolamine fragment characteristic of beta-blockers, but it incorporates a cyclic tertiary amine (piperazine ring) and acts as an inhibitor of the late inward sodium current (late INa) in myocardial cells rather than a beta-blocker.',
+              'Incorrect: Structure IX is Ranolazine, which is not a beta-blocker despite its aryloxypropanolamine moiety.',
+              'Incorrect: Structure VIII is Diazoxide (KATP channel opener).',
+              'Incorrect: Structure X is Milrinone (PDE3 inhibitor).'
             ],
-            overallExplanation: 'Carvedilol lowers systemic vascular resistance through concurrent alpha-1 adrenergic receptor blockade, classifying it as a vasodilatory beta-blocker.',
-            highYieldPearl: 'Carvedilol = vasodilating beta-blocker via alpha-1 receptor antagonism.',
+            overallExplanation: 'Dr. Al-Horani emphasizes: "Ranolazine: β-blocker?? No, it is a cyclic tertiary amine antianginal agent!" None of the provided molecules functions as a beta-adrenergic receptor antagonist.',
+            highYieldPearl: 'Structure IX (Ranolazine): Looks like an aryloxypropanolamine beta-blocker, but is a cyclic tertiary amine late INa inhibitor, NOT a beta-blocker!',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 21',
             sourcePageNumber: 4
           },
           {
             id: 522,
-            questionNumberLabel: 'Question 22',
-            title: 'Enzymatic Bioactivation by Mitochondrial ALDH2',
+            questionNumberLabel: 'Question 6',
+            title: 'Bioactivation by Aldehyde Dehydrogenase',
             category: 'Pharmacology MOA',
             type: 'multiple-choice',
-            questionStem: 'Which of the following vasodilators requires enzymatic bioactivation by mitochondrial aldehyde dehydrogenase (ALDH2) to release nitric oxide (NO)?',
+            questionStem: 'Which of the provided molecules is(are) activated by aldehyde dehydrogenase?',
             options: [
-              'Nitroglycerin (Glyceryl trinitrate) and Isosorbide dinitrate',
-              'Sodium nitroprusside',
-              'Hydralazine',
-              'Minoxidil'
+              'Structure III and Structure VII',
+              'Structure V and Structure VI',
+              'Structure IV and Structure VIII',
+              'Structure I and Structure II'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Organic nitrates (Nitroglycerin, ISDN) are prodrugs bioactivated in vascular smooth muscle mitochondria by ALDH2, which denitrates them and yields 1,2-glyceryl dinitrate and nitric oxide (NO), triggering cGMP-mediated vasodilation.',
-              'Incorrect: Sodium nitroprusside releases NO spontaneously and non-enzymatically.',
-              'Incorrect: Hydralazine does not require ALDH2.',
-              'Incorrect: Minoxidil requires sulfotransferase.'
+              'Correct: Structures III (Isosorbide dinitrate) and VII (Nitroglycerin) are organic nitrates that undergo enzymatic bioactivation by mitochondrial aldehyde dehydrogenase-2 (ALDH2), releasing nitric oxide (NO) which activates soluble guanylyl cyclase.',
+              'Incorrect: Structure V releases NO non-enzymatically; Structure VI requires sulfotransferase.',
+              'Incorrect: Structure IV is acetylated; Structure VIII is active as parent.',
+              'Incorrect: Structures I and II are calcium channel blockers.'
             ],
-            overallExplanation: 'Nitroglycerin bioactivation is mediated by mitochondrial aldehyde dehydrogenase-2 (ALDH2). Inactivation or tolerance to ALDH2 contributes to nitrate tolerance.',
-            highYieldPearl: 'Nitroglycerin = bioactivated by mitochondrial aldehyde dehydrogenase (ALDH2) to NO. Inactivation of ALDH2 drives nitrate tolerance!',
+            overallExplanation: 'Organic nitrates (Structure III: Isosorbide dinitrate and Structure VII: Nitroglycerin) require enzymatic denitration by mitochondrial aldehyde dehydrogenase (ALDH2) to generate free nitric oxide (NO).',
+            highYieldPearl: 'Structures III & VII (Organic nitrates) = bioactivated by mitochondrial aldehyde dehydrogenase (ALDH2) to release NO.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 22',
             sourcePageNumber: 4
           },
           {
             id: 523,
-            questionNumberLabel: 'Question 23',
-            title: 'Bioactivation by Sulfotransferase SULT1A1',
+            questionNumberLabel: 'Question 7',
+            title: 'Bioactivation by Sulfotransferase',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which vasodilator is a prodrug specifically activated by hepatic sulfotransferase (SULT1A1)?',
+            questionStem: 'Which of the provided molecules is(are) activated by sulfotransferase?',
             options: [
-              'Hydralazine',
-              'Minoxidil',
-              'Nitroprusside',
-              'Diazoxide'
+              'Structure VI',
+              'Structure IV',
+              'Structure V',
+              'Structure VII'
             ],
-            correctIndex: 1,
+            correctIndex: 0,
             optionExplanations: [
-              'Incorrect: Hydralazine is acetylated to inactive metabolites.',
-              'Correct: Minoxidil is sulfated on its N-oxide oxygen by hepatic cytosolic sulfotransferase (SULT1A1) to form minoxidil-O-sulfate, which opens KATP channels.',
-              'Incorrect: Nitroprusside reacts non-enzymatically.',
-              'Incorrect: Diazoxide is active as the parent molecule.'
+              'Correct: Structure VI (Minoxidil) is an inactive prodrug that requires Phase II sulfonation on its N-oxide oxygen by hepatic cytosolic sulfotransferase (SULT1A1) to form minoxidil-O-sulfate, which opens KATP channels.',
+              'Incorrect: Structure IV is inactivated by acetylation.',
+              'Incorrect: Structure V releases NO spontaneously without sulfotransferase.',
+              'Incorrect: Structure VII is activated by ALDH2.'
             ],
-            overallExplanation: 'Minoxidil sulfation by SULT1A1 is a rare example of Phase II sulfate conjugation generating an active drug metabolite rather than an excretory product.',
-            highYieldPearl: 'Minoxidil is bioactivated by sulfotransferase SULT1A1 to minoxidil-O-sulfate (rare case where sulfation creates active metabolite).',
+            overallExplanation: 'Structure VI (Minoxidil) requires Phase II metabolic bioactivation by sulfotransferase (SULT1A1) into minoxidil-O-sulfate, an active vascular KATP channel opener.',
+            highYieldPearl: 'Structure VI (Minoxidil) -> [SULT1A1 sulfotransferase] -> active minoxidil-O-sulfate (KATP channel opener).',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 23',
             sourcePageNumber: 4
           },
           {
             id: 524,
-            questionNumberLabel: 'Question 24',
-            title: 'Direct Calcium Channel Blockade in Vascular Tissues',
+            questionNumberLabel: 'Question 8',
+            title: 'Vasodilation via Calcium Channel Blockade',
             category: 'Pharmacology MOA',
             type: 'multiple-choice',
-            questionStem: 'Which class of vasodilators reduces blood pressure by directly binding and blocking L-type calcium channels (Cav1.2) in vascular smooth muscle?',
+            questionStem: 'Which of the provided molecules promotes vasodilation by blocking calcium channels in vascular tissues?',
             options: [
-              '1,4-Dihydropyridines (e.g., Amlodipine, Nifedipine)',
-              'Organic nitrates (e.g., Nitroglycerin)',
-              'KATP channel openers (e.g., Minoxidil)',
-              'Alpha-2 agonists (e.g., Clonidine)'
+              'Structure I and Structure II',
+              'Structure III and Structure VII',
+              'Structure V and Structure VI',
+              'Structure VIII and Structure IX'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: 1,4-Dihydropyridines bind directly to the Cav1.2 channel pore subunit, preventing calcium entry required for calmodulin activation and myosin light chain kinase phosphorylation.',
-              'Incorrect: Nitrates work via cGMP.',
-              'Incorrect: Minoxidil works via KATP channel opening.',
-              'Incorrect: Clonidine works centrally.'
+              'Correct: Structures I (Nifedipine) and II (Amlodipine) are 1,4-dihydropyridines that selectively block L-type Cav1.2 calcium channels in vascular smooth muscle, reducing calcium influx and causing arteriolar vasodilation.',
+              'Incorrect: Structures III and VII act via NO and cGMP.',
+              'Incorrect: Structure V acts via NO; Structure VI acts via KATP channels.',
+              'Incorrect: Structure VIII acts via KATP channels; Structure IX acts via late INa.'
             ],
-            overallExplanation: '1,4-DHPs prevent voltage-dependent Ca2+ influx through Cav1.2 L-type channels, decreasing intracellular calcium and causing arterial vasodilation.',
-            highYieldPearl: '1,4-DHPs block L-type Cav1.2 channels -> decreased intracellular Ca2+ -> decreased MLCK activity -> arteriolar relaxation.',
+            overallExplanation: 'Structures I (Nifedipine) and II (Amlodipine) promote vasodilation specifically through direct allosteric blockade of L-type voltage-gated calcium channels in vascular smooth muscle.',
+            highYieldPearl: 'Structures I & II (1,4-DHPs) = selective vascular L-type Cav1.2 calcium channel blockers.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 24',
             sourcePageNumber: 4
           },
           {
             id: 525,
-            questionNumberLabel: 'Question 25',
-            title: 'Nitric Oxide (NO) Donors: Enzymatic vs Non-Enzymatic',
+            questionNumberLabel: 'Question 9',
+            title: 'NO-Mediated Vasodilation',
             category: 'Pharmacology MOA',
             type: 'multiple-choice',
-            questionStem: 'Which of the following vasodilators promotes nitric oxide-mediated vasodilation spontaneously and non-enzymatically upon contact with vascular smooth muscle / erythrocytes?',
+            questionStem: 'Which of the provided molecules promote(s) NO-mediated vasodilation?',
             options: [
-              'Nitroglycerin (requires enzymatic ALDH2 reduction)',
-              'Sodium nitroprusside [Na2Fe(CN)5NO] (releases NO non-enzymatically upon electron transfer from sulfhydryl groups / oxyhemoglobin)',
-              'Minoxidil',
-              'Diazoxide'
+              'Structure III, Structure V, and Structure VII',
+              'Structure I, Structure II, and Structure IV',
+              'Structure VI and Structure VIII',
+              'Structure IX and Structure X'
             ],
-            correctIndex: 1,
+            correctIndex: 0,
             optionExplanations: [
-              'Incorrect: Nitroglycerin requires enzymatic reduction by ALDH2.',
-              'Correct: Sodium nitroprusside is an inorganic nitrosyl complex that decomposes non-enzymatically in the presence of sulfhydryl groups or oxyhemoglobin in red blood cells, releasing free nitric oxide (NO) and cyanide (CN-).',
-              'Incorrect: Minoxidil opens KATP channels.',
-              'Incorrect: Diazoxide opens KATP channels.'
+              'Correct: Structures III (Isosorbide dinitrate), V (Sodium nitroprusside), and VII (Nitroglycerin) all exert their vasodilatory actions through the release of nitric oxide (NO), stimulating soluble guanylyl cyclase to increase intracellular cGMP.',
+              'Incorrect: Structures I and II block calcium channels.',
+              'Incorrect: Structures VI and VIII open KATP channels.',
+              'Incorrect: Structure IX inhibits late INa; Structure X inhibits PDE3.'
             ],
-            overallExplanation: 'Sodium nitroprusside releases NO spontaneously and non-enzymatically, causing immediate arteriolar and venular dilation. Cyanide toxicity is a known risk during prolonged or high-dose infusions.',
-            highYieldPearl: 'Sodium nitroprusside = NON-enzymatic spontaneous NO release (dilates arteries and veins equally). Watch for cyanide/thiocyanate toxicity!',
+            overallExplanation: 'Structures III (Isosorbide dinitrate), V (Sodium nitroprusside), and VII (Nitroglycerin) are nitric oxide donors that stimulate vascular soluble guanylyl cyclase to generate cGMP and induce profound vasodilation.',
+            highYieldPearl: 'Structures III, V, & VII = NO donors -> stimulate soluble guanylyl cyclase -> increased cGMP -> vascular smooth muscle relaxation.',
             sourceReference: 'Review for Antihypertensive Drugs III (Vasodilators), Page 4, Question 25',
             sourcePageNumber: 4
           }
@@ -787,6 +883,7 @@ export function getDefaultVasodilatorsModule(): ReviewModule {
     semester: 'Spring',
     code: 'MCP-2-05',
     isBuiltIn: true,
+    version: '2.0.0',
     createdAt: new Date().toISOString(),
     chemicalStructures: Object.values(VASODILATORS_STRUCTURES),
     pages: vasodilatorsPages,

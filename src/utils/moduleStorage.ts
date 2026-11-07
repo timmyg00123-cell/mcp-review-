@@ -186,6 +186,14 @@ export function loadAllReviewModules(): ReviewModule[] {
           delete overrides['antihypertensives_2_mcp2'];
           localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
         }
+        if (
+          overrides['antihypertensives_3_mcp2'] &&
+          (overrides['antihypertensives_3_mcp2'].version !== '2.0.0' ||
+            (overrides['antihypertensives_3_mcp2'].pages || []).length < 4)
+        ) {
+          delete overrides['antihypertensives_3_mcp2'];
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        }
       }
     } catch (e) {
       console.warn('Could not parse built-in overrides:', e);
@@ -420,6 +428,34 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
         (overrides['antihypertensives_2_mcp2'].pages || []).length < 7)
     ) {
       delete overrides['antihypertensives_2_mcp2'];
+      try {
+        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+      } catch {}
+    }
+
+    const dexieVasodilators = dexieModules.find((m) => m.id === 'antihypertensives_3_mcp2')?.module;
+    if (dexieVasodilators) {
+      if (dexieVasodilators.version === '2.0.0' && (dexieVasodilators.pages || []).length >= 4) {
+        overrides['antihypertensives_3_mcp2'] = dexieVasodilators;
+      } else {
+        delete overrides['antihypertensives_3_mcp2'];
+        await medChemGraphDb.modules.put({
+          id: 'antihypertensives_3_mcp2',
+          module: defaultVasodilators,
+          updatedAt: new Date().toISOString(),
+        }).catch((e) => console.warn('Dexie put during vasodilators migration warning:', e));
+        try {
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        } catch {}
+      }
+    }
+
+    if (
+      overrides['antihypertensives_3_mcp2'] &&
+      (overrides['antihypertensives_3_mcp2'].version !== '2.0.0' ||
+        (overrides['antihypertensives_3_mcp2'].pages || []).length < 4)
+    ) {
+      delete overrides['antihypertensives_3_mcp2'];
       try {
         localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
       } catch {}
