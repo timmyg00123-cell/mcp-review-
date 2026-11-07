@@ -241,7 +241,7 @@ export const diureticsPages: ReviewPage[] = [
             title: 'Thiazide Diuretics True/False Statements',
             category: 'Medicinal Chemistry SAR',
             type: 'sub-statements',
-            questionStem: 'Consider chemical Structures I - IV to determine whether each statement is true or false:',,
+            questionStem: 'Consider chemical Structures I - IV to determine whether each statement is true or false:',
             subStatements: [
               {
                 id: 'a',
@@ -773,347 +773,455 @@ export const diureticsPages: ReviewPage[] = [
   },
 
   // ---------------------------------------------------------------------------
-  // PAGE 3: Potassium-Sparing Diuretics, ENaC Blockers & RAAS Modifiers (Questions 23 - 33)
+  // REVIEW PAGE 4: Multiclass Comparative Matching Matrix & Efficacy (Questions 1 - 6)
   // ---------------------------------------------------------------------------
   {
-    pageNumber: 3,
-    title: 'Potassium-Sparing Diuretics, Mineralocorticoid Antagonists & Combinations',
-    subtitle: 'Triamterene, Amiloride, Spironolactone, Canrenone, Eplerenone, and Dyazide/Moduretic synergy',
+    pageNumber: 4,
+    title: 'Multiclass Diuretic Comparative Pharmacology & Efficacy',
+    subtitle: 'Loop, Thiazide, Aldosterone Antagonist, and ENaC Blocker: Mechanism, Acid/Base, and Fractional Sodium Excretion',
     sections: [
       {
-        sectionTitle: 'Cross-Class Comparison: Furosemide, HCTZ, Triamterene & Spironolactone',
-        block_instructions: 'Consider structures I (Furosemide), II (Hydrochlorothiazide), III (Triamterene), and IV (Spironolactone) to answer questions 23-28.',
+        sectionTitle: 'Cross-Class Comparison: Furosemide, Hydrochlorothiazide, Spironolactone & Triamterene',
+        block_instructions: 'Consider chemical Structures I - IV to answer questions 1-6.',
         structures: [
           DIURETICS_STRUCTURES.furosemide,
           DIURETICS_STRUCTURES.hydrochlorothiazide,
-          DIURETICS_STRUCTURES.triamterene,
-          DIURETICS_STRUCTURES.spironolactone
+          DIURETICS_STRUCTURES.spironolactone,
+          DIURETICS_STRUCTURES.triamterene
         ],
         questions: [
           {
             id: 323,
-            questionNumberLabel: 'Question 23',
-            title: 'Loop vs Thiazide Identification',
+            questionNumberLabel: 'Question 1',
+            title: 'Multiclass Diuretic Pharmacological Classification Matching',
             category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is a LOOP diuretic? Which is a THIAZIDE diuretic?',
-            options: [
-              'Loop: Drug I (Furosemide); Thiazide: Drug II (Hydrochlorothiazide)',
-              'Loop: Drug II (Hydrochlorothiazide); Thiazide: Drug I (Furosemide)',
-              'Loop: Drug III (Triamterene); Thiazide: Drug IV (Spironolactone)',
-              'Loop: Drug IV (Spironolactone); Thiazide: Drug III (Triamterene)'
+            type: 'matching',
+            questionStem: 'Drag each chemical structure (Structure I - Structure IV) to its matching pharmacological and tubular classification:',
+            prompt: 'Drag each chemical structure (Structure I - Structure IV) to its matching pharmacological and tubular classification:',
+            options: ['Structure I', 'Structure II', 'Structure III', 'Structure IV'],
+            matchingTargets: [
+              {
+                id: 'p4_target_1',
+                label: 'High-ceiling loop diuretic inhibiting the Na+/K+/2Cl- (NKCC2) symporter in the thick ascending limb',
+                acceptedStructureIds: ['Structure I', 'I', 'furosemide'],
+                rationale: 'Structure I (Furosemide) is a high-ceiling loop diuretic targeting NKCC2 in the thick ascending limb of Henle.'
+              },
+              {
+                id: 'p4_target_2',
+                label: 'Thiazide diuretic inhibiting the electroneutral Na+/Cl- (NCC) cotransporter in the distal convoluted tubule',
+                acceptedStructureIds: ['Structure II', 'II', 'hydrochlorothiazide'],
+                rationale: 'Structure II (Hydrochlorothiazide) is a thiazide diuretic that blocks the NCC cotransporter in the distal convoluted tubule.'
+              },
+              {
+                id: 'p4_target_3',
+                label: 'Steroidal mineralocorticoid receptor antagonist converted to active canrenone metabolite',
+                acceptedStructureIds: ['Structure III', 'III', 'spironolactone'],
+                rationale: 'Structure III (Spironolactone) is a synthetic steroid that competitively antagonizes cytoplasmic mineralocorticoid receptors and is metabolized to canrenone.'
+              },
+              {
+                id: 'p4_target_4',
+                label: 'Pteridine-based basic ENaC channel blocker combined with thiazides to prevent hypokalemia',
+                acceptedStructureIds: ['Structure IV', 'IV', 'triamterene'],
+                rationale: 'Structure IV (Triamterene) is a basic pteridine congener that directly blocks luminal epithelial sodium channels (ENaC) in the collecting tubule.'
+              }
             ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: Furosemide is an anthranilic acid loop diuretic; HCTZ is a benzothiadiazine thiazide diuretic.',
-              'Incorrect.',
-              'Incorrect: Triamterene and Spironolactone are potassium-sparing diuretics.',
-              'Incorrect.'
+            matchingPairs: [
+              {
+                id: 'p4_target_1',
+                label: 'High-ceiling loop diuretic inhibiting the Na+/K+/2Cl- (NKCC2) symporter in the thick ascending limb',
+                acceptedStructureIds: ['Structure I', 'I', 'furosemide'],
+                rationale: 'Structure I (Furosemide) is a high-ceiling loop diuretic targeting NKCC2 in the thick ascending limb of Henle.'
+              },
+              {
+                id: 'p4_target_2',
+                label: 'Thiazide diuretic inhibiting the electroneutral Na+/Cl- (NCC) cotransporter in the distal convoluted tubule',
+                acceptedStructureIds: ['Structure II', 'II', 'hydrochlorothiazide'],
+                rationale: 'Structure II (Hydrochlorothiazide) is a thiazide diuretic that blocks the NCC cotransporter in the distal convoluted tubule.'
+              },
+              {
+                id: 'p4_target_3',
+                label: 'Steroidal mineralocorticoid receptor antagonist converted to active canrenone metabolite',
+                acceptedStructureIds: ['Structure III', 'III', 'spironolactone'],
+                rationale: 'Structure III (Spironolactone) is a synthetic steroid that competitively antagonizes cytoplasmic mineralocorticoid receptors and is metabolized to canrenone.'
+              },
+              {
+                id: 'p4_target_4',
+                label: 'Pteridine-based basic ENaC channel blocker combined with thiazides to prevent hypokalemia',
+                acceptedStructureIds: ['Structure IV', 'IV', 'triamterene'],
+                rationale: 'Structure IV (Triamterene) is a basic pteridine congener that directly blocks luminal epithelial sodium channels (ENaC) in the collecting tubule.'
+              }
             ],
-            overallExplanation: 'Furosemide is an anthranilic acid loop diuretic; HCTZ is a benzothiadiazine thiazide diuretic.',
-            highYieldPearl: 'Furosemide = Loop; HCTZ = Thiazide; Triamterene = ENaC blocker; Spironolactone = MR antagonist.',
+            overallExplanation: 'Structure I (Furosemide) is a high-ceiling loop diuretic inhibiting NKCC2 in the thick ascending limb. Structure II (HCTZ) is a thiazide inhibiting NCC in the distal convoluted tubule. Structure III (Spironolactone) is an intracellular mineralocorticoid receptor antagonist converted to canrenone. Structure IV (Triamterene) is an aminopteridine direct ENaC channel blocker in the collecting tubule.',
+            highYieldPearl: 'Nephron site of action: Loop (TAL, NKCC2) > Thiazide (DCT, NCC) > K-sparing (late DCT/collecting duct, ENaC or MR).',
             sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 23',
-            sourcePageNumber: 3
+            sourcePageNumber: 4
           },
           {
             id: 324,
-            questionNumberLabel: 'Question 24',
-            title: 'Potassium-Sparing Diuretic Identification',
-            category: 'Pharmacology',
+            questionNumberLabel: 'Question 2',
+            title: 'Potassium-Sparing Diuretic with Active Metabolite',
+            category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs are POTASSIUM-SPARING diuretics?',
+            questionStem: 'Which of the above drugs (Structures I - IV) is a potassium-sparing diuretic that is metabolized to a major active metabolite?',
             options: [
-              'Drugs III (Triamterene) and IV (Spironolactone)',
-              'Drugs I (Furosemide) and II (Hydrochlorothiazide)',
-              'Only Drug I',
-              'Only Drug II'
+              'Structure III',
+              'Structure IV',
+              'Structure I',
+              'Structure II'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Triamterene (pteridine ENaC blocker) and Spironolactone (mineralocorticoid receptor antagonist) are potassium-sparing diuretics.',
-              'Incorrect: Loop and thiazides are potassium-wasting.',
-              'Incorrect.',
-              'Incorrect.'
+              'Correct: Structure III (Spironolactone) is rapidly dethioacetylated in the liver to canrenone (half-life ~16-20 hours), which contributes significantly to its long-term antimineralocorticoid activity.',
+              'Incorrect: Structure IV (Triamterene) undergoes 4-hydroxylation and sulfate conjugation; its metabolite is less clinically emphasized as the prototypical active steroid metabolite compared to canrenone.',
+              'Incorrect: Structure I (Furosemide) is a loop diuretic, not potassium-sparing.',
+              'Incorrect: Structure II (Hydrochlorothiazide) is a thiazide diuretic, not potassium-sparing.'
             ],
-            overallExplanation: 'Drugs acting at the late DCT and collecting duct (ENaC blockers, aldosterone antagonists) do not stimulate K+ excretion and are therefore potassium-sparing.',
-            highYieldPearl: 'K-sparing agents prevent hypokalemia induced by loop and thiazide diuretics.',
+            overallExplanation: 'Spironolactone (Structure III) is a potassium-sparing mineralocorticoid receptor antagonist that undergoes extensive hepatic metabolism to canrenone, a major active metabolite with an elimination half-life of 16-20 hours.',
+            highYieldPearl: 'Spironolactone is converted by dethioacetylation to canrenone (active metabolite, t1/2 ~16-20h), which provides prolonged mineralocorticoid receptor blockade.',
             sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 24',
-            sourcePageNumber: 3
+            sourcePageNumber: 4
           },
           {
             id: 325,
-            questionNumberLabel: 'Question 25',
-            title: 'Receptor Antagonist vs Transporter Blocker',
+            questionNumberLabel: 'Question 3',
+            title: 'Ascending Limb of Henle Target',
             category: 'Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is an INTRACELLULAR RECEPTOR ANTAGONIST? Which is a direct ION CHANNEL BLOCKER?',
+            questionStem: 'Which of the above diuretics (Structures I - IV) interferes with NaCl reabsorption at the thick ascending limb of the loop of Henle?',
             options: [
-              'Receptor antagonist: Drug IV (Spironolactone); Ion channel blocker: Drug III (Triamterene)',
-              'Receptor antagonist: Drug III (Triamterene); Ion channel blocker: Drug IV (Spironolactone)',
-              'Both are receptor antagonists',
-              'Both are ion channel blockers'
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Spironolactone competitively blocks the intracellular mineralocorticoid receptor (MR) in the cytoplasm of principal cells. Triamterene directly plugs the pore of the apical epithelial sodium channel (ENaC).',
-              'Incorrect: Inverted mechanisms.',
-              'Incorrect: Triamterene is not a nuclear receptor antagonist.',
-              'Incorrect: Spironolactone is an MR antagonist, not a channel blocker.'
+              'Correct: Structure I (Furosemide) is a loop diuretic that selectively inhibits the luminal Na+/K+/2Cl- (NKCC2) cotransporter in the thick ascending limb of the loop of Henle.',
+              'Incorrect: Structure II (Hydrochlorothiazide) acts at the distal convoluted tubule (NCC).',
+              'Incorrect: Structure III (Spironolactone) acts at the late DCT and cortical collecting duct (MR).',
+              'Incorrect: Structure IV (Triamterene) acts at the cortical collecting duct (ENaC).'
             ],
-            overallExplanation: 'Spironolactone binds the cytoplasmic mineralocorticoid receptor to prevent aldosterone-induced transcription of ENaC and Na+/K+-ATPase. Triamterene directly blocks the ENaC channel pore without requiring gene transcription.',
-            highYieldPearl: 'Spironolactone = Mineralocorticoid receptor antagonist (slow onset, genomic). Triamterene/Amiloride = direct ENaC channel blockers (fast onset, non-genomic).',
+            overallExplanation: 'Only loop diuretics (Structure I, Furosemide) inhibit salt reabsorption in the thick ascending limb of Henle. Thiazides act in the distal convoluted tubule, and potassium-sparing agents act in the late DCT and collecting duct.',
+            highYieldPearl: 'Thick ascending limb of Henle is targeted exclusively by loop diuretics (Structure I) via NKCC2 symporter blockade.',
             sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 25',
-            sourcePageNumber: 3
+            sourcePageNumber: 4
           },
           {
             id: 326,
-            questionNumberLabel: 'Question 26',
-            title: 'Ranking Diuretic Efficacy (% Fractional Sodium Excretion)',
-            category: 'Pharmacology',
+            questionNumberLabel: 'Question 4',
+            title: 'Acidic vs Basic Diuretics',
+            category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Rank the four drug classes from HIGHEST to LOWEST maximal diuretic efficacy (% filtered Na+ excreted):',
+            questionStem: 'Which of the following correctly classifies chemical Structures I - IV as acidic, basic, or neutral molecules?',
             options: [
-              'I (Furosemide, ~20-25%) > II (HCTZ, ~5%) > III (Triamterene, ~2%) = IV (Spironolactone, ~2%)',
-              'IV > III > II > I',
-              'II > I > III > IV',
-              'I > III > II > IV'
+              'Acidic: Structure I & Structure II; Basic: Structure IV; Neutral: Structure III',
+              'Acidic: Structure IV; Basic: Structure I & Structure II; Neutral: Structure III',
+              'Acidic: Structure III; Basic: Structure IV; Neutral: Structure I & Structure II',
+              'All four structures are acidic molecules'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Loop diuretics inhibit TAL (~25% Na load), Thiazides inhibit DCT (~5% Na load), and K-sparing agents inhibit collecting duct (~2% Na load).',
-              'Incorrect: Inverted.',
-              'Incorrect: Loop diuretics have far higher efficacy than thiazides.',
-              'Incorrect: Thiazides exceed K-sparing agents.'
+              'Correct: Structure I (Furosemide: carboxylic acid pKa ~3.9, sulfonamide) and Structure II (HCTZ: sulfonamide protons pKa ~7.9 and 9.2) are acidic. Structure IV (Triamterene: amino-substituted pteridine, basic pKa ~6.2) is basic. Structure III (Spironolactone: synthetic steroid lactone) is a neutral molecule.',
+              'Incorrect: Triamterene is basic, not acidic.',
+              'Incorrect: Spironolactone is neutral, not acidic.',
+              'Incorrect: Triamterene is basic and spironolactone is neutral.'
             ],
-            overallExplanation: 'Efficacy corresponds directly to the anatomical segment of the nephron: TAL (~25%) > DCT (~5%) > Collecting Tubule (~2%).',
-            highYieldPearl: 'Maximal Diuretic Efficacy: Loop (~25%) >> Thiazide (~5%) > K-Sparing (ENaC/Aldosterone, ~2%).',
+            overallExplanation: 'Furosemide (carboxylic acid + sulfonamide) and HCTZ (benzothiadiazine sulfonamides) possess acidic protons. Triamterene contains ring nitrogen and exocyclic amine groups that confer basic character (pKa ~6.2). Spironolactone is a neutral steroid spirolactone.',
+            highYieldPearl: 'Acidic diuretics = Loop (Furosemide) and Thiazides (HCTZ). Basic diuretic = Triamterene (pteridine base, pKa 6.2). Neutral = Spironolactone.',
             sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 26',
-            sourcePageNumber: 3
+            sourcePageNumber: 4
           },
           {
             id: 327,
-            questionNumberLabel: 'Question 27',
-            title: 'Drugs Causing Hyperkalemia vs Hypokalemia',
+            questionNumberLabel: 'Question 5',
+            title: 'Combination Partners to Counter Potassium Loss',
             category: 'Clinical Applications',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs carry a significant risk of causing HYPERKALEMIA, especially in renal insufficiency or with ACEIs/ARBs?',
+            questionStem: 'Which of the diuretics (Structures I, III, and/or IV) can be rationally combined with Diuretic II to adjust for and prevent potassium loss?',
             options: [
-              'Drugs III (Triamterene) and IV (Spironolactone)',
-              'Drugs I (Furosemide) and II (Hydrochlorothiazide)',
-              'Only Drug I',
-              'All four drugs cause hyperkalemia'
+              'Structure III and Structure IV',
+              'Only Structure I',
+              'Structure I and Structure III',
+              'None of the above structures'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Potassium-sparing diuretics (Triamterene, Spironolactone) block luminal Na+ entry, abolishing the lumen-negative transepithelial potential and preventing K+ secretion, risking life-threatening hyperkalemia.',
-              'Incorrect: Furosemide and HCTZ cause hypokalemia.',
-              'Incorrect: Furosemide causes potassium wasting.',
-              'Incorrect: Loop and thiazides cause hypokalemia.'
+              'Correct: Structure III (Spironolactone) and Structure IV (Triamterene) are potassium-sparing diuretics that counteract the kaliuretic (potassium-wasting) effect of Diuretic II (Hydrochlorothiazide). Fixed-dose combinations include Aldactazide (Spironolactone + HCTZ) and Dyazide/Maxzide (Triamterene + HCTZ).',
+              'Incorrect: Structure I (Furosemide) is a loop diuretic that also causes severe potassium wasting, worsening hypokalemia.',
+              'Incorrect: Structure I causes potassium loss.',
+              'Incorrect: Structures III and IV are both standard potassium-sparing partners for thiazides.'
             ],
-            overallExplanation: 'Loop and thiazide diuretics cause hypokalemia via increased distal Na+ delivery and aldosterone stimulation. K-sparing diuretics prevent K+ secretion and cause hyperkalemia.',
-            highYieldPearl: 'Hyperkalemia risk: Spironolactone, Eplerenone, Triamterene, Amiloride. Black box warning: avoid combining K-sparing agents with potassium supplements or in severe renal dysfunction.',
+            overallExplanation: 'Thiazides (Diuretic II) cause potassium wasting by increasing distal delivery of sodium and activating aldosterone. Combining Diuretic II with potassium-sparing agents—Structure III (Spironolactone) or Structure IV (Triamterene)—prevents hypokalemia.',
+            highYieldPearl: 'Potassium-sparing diuretics (Structure III Spironolactone, Structure IV Triamterene) are combined with thiazides (Structure II HCTZ) to neutralize potassium wasting.',
             sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 27',
-            sourcePageNumber: 3
+            sourcePageNumber: 4
           },
           {
             id: 328,
-            questionNumberLabel: 'Question 28',
-            title: 'Endocrine Side Effects of Spironolactone (Gynecomastia)',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Drug IV (Spironolactone) is associated with painful gynecomastia, menstrual irregularities, and decreased libido in men. What structural feature and pharmacological promiscuity causes this?',
-            options: [
-              'Steroid core that non-selectively binds to and antagonizes androgen receptors and progesterone receptors',
-              'The 7-alpha-acetylthio group hydrolyzes to toxic cyanide',
-              'The gamma-lactone ring alkylates estrogen receptors',
-              'The 3-keto group inhibits aromatase'
-            ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: Spironolactone has a steroid nucleus that cross-reacts with androgen receptors (as an antagonist) and progesterone receptors (as an agonist), causing anti-androgenic side effects including painful gynecomastia (~10% incidence).',
-              'Incorrect: No cyanide is formed.',
-              'Incorrect: Lactone does not alkylate estrogen receptors.',
-              'Incorrect: Spironolactone does not inhibit aromatase.'
-            ],
-            overallExplanation: 'Spironolactone is non-selective for mineralocorticoid receptors and exhibits antiandrogenic and progestational activity. Eplerenone was designed with a 9,11-epoxy bridge to eliminate sex hormone receptor cross-reactivity.',
-            highYieldPearl: 'Spironolactone = gynecomastia / impotence via non-selective androgen receptor antagonism. Eplerenone = selective aldosterone blocker with 9,11-epoxide, avoiding gynecomastia.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 28',
-            sourcePageNumber: 3
-          }
-        ]
-      },
-      {
-        sectionTitle: 'Mineralocorticoid Antagonists SAR: Spironolactone, Canrenone & Eplerenone',
-        block_instructions: 'Consider structures I (Spironolactone), II (Canrenone), and III (Eplerenone) to answer questions 29-31.',
-        structures: [
-          DIURETICS_STRUCTURES.spironolactone,
-          DIURETICS_STRUCTURES.canrenone,
-          DIURETICS_STRUCTURES.eplerenone
-        ],
-        questions: [
-          {
-            id: 329,
-            questionNumberLabel: 'Question 29',
-            title: 'Active Metabolite of Spironolactone',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Drug II (Canrenone) is the major active metabolite of Drug I (Spironolactone). How is Canrenone formed metabolically?',
-            options: [
-              'Detioacetylation (loss of the 7-alpha-acetylthio group) followed by formation of a 4,6-dien-3-one system',
-              'Hydrolysis of the gamma-lactone ring',
-              'Aromatization of the A ring into an estrogen',
-              'Epoxidation across the 9,11 position'
-            ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: Spironolactone undergoes rapid hepatic dethioacetylation to produce canrenone (accounting for ~70% of spironolactone\'s chronic in vivo antimineralocorticoid activity), which has a long elimination half-life of 16-20 hours.',
-              'Incorrect: Lactone hydrolysis yields canrenoic acid.',
-              'Incorrect: A ring is not aromatized.',
-              'Incorrect: Epoxidation at 9,11 is the synthetic route to eplerenone, not a spironolactone metabolite.'
-            ],
-            overallExplanation: 'Spironolactone is rapidly metabolized (half-life ~1.5 hours) by dethioacetylation to canrenone, its major active circulating metabolite (half-life 16-20 hours).',
-            highYieldPearl: 'Canrenone is the major active metabolite of Spironolactone (half-life 16-20h), formed by dethioacetylation.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 4, Question 29',
-            sourcePageNumber: 4
-          },
-          {
-            id: 330,
-            questionNumberLabel: 'Question 30',
-            title: 'Structural Design of Eplerenone to Prevent Gynecomastia',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Drug III (Eplerenone) is a second-generation selective aldosterone receptor antagonist (SARA). What key structural modification confers high selectivity for the mineralocorticoid receptor over androgen/progesterone receptors?',
-            options: [
-              'A 9,11-alpha-epoxy bridge and a 7-alpha-methoxycarbonyl group',
-              'Removal of the 17-spiro-lactone ring',
-              'Substitution of an isopropyl group at C3',
-              'Introduction of a fluorine atom at C6'
-            ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: The 9,11-alpha-epoxy ring drastically reduces affinity for androgen and progesterone receptors (>1000-fold less potent at sex hormone receptors than spironolactone) while maintaining high affinity for MR.',
-              'Incorrect: Eplerenone retains the 17-spiro-lactone ring.',
-              'Incorrect: There is no C3 isopropyl.',
-              'Incorrect: No C6 fluorine is present.'
-            ],
-            overallExplanation: 'The 9,11-epoxy bridge and 7-ester in eplerenone eliminate binding to androgen and progesterone receptors, virtually eliminating gynecomastia and sexual dysfunction.',
-            highYieldPearl: 'Eplerenone = 9,11-epoxy bridge + 7-methoxycarbonyl -> highly selective MR antagonist; NO gynecomastia or menstrual side effects.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 4, Question 30',
-            sourcePageNumber: 4
-          },
-          {
-            id: 331,
-            questionNumberLabel: 'Question 31',
-            title: 'Metabolism of Eplerenone vs Spironolactone',
+            questionNumberLabel: 'Question 6',
+            title: 'Diuretic Efficacy (% Fractional Sodium Excretion) Ranking',
             category: 'Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the following statements correctly describes the metabolism and drug interaction profile of Eplerenone (III)?',
+            questionStem: 'Rank the diuretic drug classes represented by Structures I - IV according to their maximal diuretic efficacy (% fractional sodium excretion, from highest to lowest):',
             options: [
-              'Eplerenone is primarily metabolized by CYP3A4 into inactive metabolites and is contraindicated with strong CYP3A4 inhibitors (ketoconazole, clarithromycin)',
-              'Eplerenone is excreted 100% unchanged in the urine without hepatic metabolism',
-              'Eplerenone is metabolized by COMT',
-              'Eplerenone forms active dithioacetyl metabolites'
+              'Structure I (~20-25% Na+ excretion) > Structure II (~5-8%) > Structure III / Structure IV (~2-3%)',
+              'Structure IV > Structure III > Structure II > Structure I',
+              'Structure II > Structure I > Structure III > Structure IV',
+              'Structure III = Structure IV > Structure II > Structure I'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Eplerenone is extensively metabolized by hepatic CYP3A4 to inactive open-lactone and hydroxylated metabolites. Strong CYP3A4 inhibitors dramatically increase eplerenone plasma levels and hyperkalemia risk.',
-              'Incorrect: Eplerenone is <5% unchanged renally.',
-              'Incorrect: Eplerenone does not contain catechol groups.',
-              'Incorrect: Eplerenone has no sulfur atom.'
+              'Correct: Maximal diuretic efficacy is determined by the percentage of filtered sodium reabsorbed at each nephron segment: Loop diuretics (Structure I) inhibit TAL (~20-25% filtered Na+), Thiazides (Structure II) inhibit DCT (~5-8%), and Potassium-sparing agents (Structures III & IV) inhibit late DCT/collecting duct (~2-3%).',
+              'Incorrect: Potassium-sparing agents have the lowest efficacy, not the highest.',
+              'Incorrect: Loop diuretics (Structure I) are "high-ceiling" and far exceed thiazides (Structure II).',
+              'Incorrect: Inverted ranking.'
             ],
-            overallExplanation: 'Unlike spironolactone (dethioacetylation), eplerenone depends entirely on CYP3A4 for clearance; co-administration with strong CYP3A4 inhibitors is contraindicated due to severe hyperkalemia.',
-            highYieldPearl: 'Eplerenone is cleared by CYP3A4 -> contraindicated with strong CYP3A4 inhibitors (ketoconazole, itraconazole, clarithromycin).',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 4, Question 31',
+            overallExplanation: 'Efficacy reflects nephron capacity: Thick ascending limb (Loop: ~25%) > Distal convoluted tubule (Thiazide: ~5-8%) > Collecting tubule (K-sparing: ~2-3%).',
+            highYieldPearl: 'Maximal Diuretic Efficacy: Loop (Structure I, ~20-25%) >> Thiazide (Structure II, ~5-8%) > K-Sparing (Structures III & IV, ~2-3%).',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 28',
             sourcePageNumber: 4
           }
         ]
-      },
+      }
+    ]
+  },
+
+  // ---------------------------------------------------------------------------
+  // REVIEW PAGE 5: Head-to-Head Comparative Batteries & Combination Therapy (Questions 1 - 5)
+  // ---------------------------------------------------------------------------
+  {
+    pageNumber: 5,
+    title: 'Head-to-Head Comparative Batteries & Combination Therapy',
+    subtitle: 'Triamterene vs Spironolactone, Aldosterone vs Spironolactone, Amiloride vs Eplerenone, and Dyazide Synergy',
+    sections: [
       {
-        sectionTitle: 'Rational Diuretic Combinations: Dyazide & Moduretic',
-        block_instructions: 'Consider Drug I (Amiloride, aminopyrazine ENaC blocker) and Drug II (Hydrochlorothiazide, thiazide) to answer questions 32-33.',
+        sectionTitle: 'Comparative Pharmacology & Structural Pair Batteries',
+        block_instructions: 'Consider each pair of chemical structures to evaluate the following True/False batteries and clinical pharmacology questions.',
         structures: [
+          DIURETICS_STRUCTURES.triamterene,
+          DIURETICS_STRUCTURES.spironolactone,
+          DIURETICS_STRUCTURES.aldosterone,
           DIURETICS_STRUCTURES.amiloride,
+          DIURETICS_STRUCTURES.eplerenone,
           DIURETICS_STRUCTURES.hydrochlorothiazide
         ],
         questions: [
           {
-            id: 332,
-            questionNumberLabel: 'Question 32',
-            title: 'Chemical Class and Charge of Amiloride vs HCTZ',
+            id: 329,
+            questionNumberLabel: 'Question 1',
+            title: 'Triamterene vs Spironolactone True/False Battery',
             category: 'Medicinal Chemistry SAR',
+            type: 'sub-statements',
+            questionStem: 'Consider chemical Structure I (Triamterene) and Structure II (Spironolactone) to determine whether each statement is true or false:',
+            subStatements: [
+              {
+                id: 'a',
+                text: 'Drug I is a loop diuretic, whereas Drug II is a potassium-sparing diuretic.',
+                isCorrect: false,
+                explanation: 'False: Both Drug I (Triamterene, direct ENaC channel blocker) and Drug II (Spironolactone, mineralocorticoid receptor antagonist) are potassium-sparing diuretics.'
+              },
+              {
+                id: 'b',
+                text: 'Both diuretics inhibit NaCl reabsorption in the late distal convoluted tubule & collecting duct.',
+                isCorrect: true,
+                explanation: 'True: Both agents exert their diuretic action at the principal cells of the late distal convoluted tubule and cortical collecting duct.'
+              },
+              {
+                id: 'c',
+                text: 'The two drugs are basic molecules.',
+                isCorrect: false,
+                explanation: 'False: Drug I (Triamterene) is a basic pteridine amine (pKa ~6.2); Drug II (Spironolactone) is a neutral, highly lipophilic steroidal lactone.'
+              },
+              {
+                id: 'd',
+                text: 'Only Drug I is associated with an active metabolite.',
+                isCorrect: false,
+                explanation: 'False: Drug II (Spironolactone) is extensively dethioacetylated in the liver to canrenone, a prominent active metabolite responsible for much of its chronic clinical efficacy.'
+              },
+              {
+                id: 'e',
+                text: 'Drug I is more potent than Drug II.',
+                isCorrect: false,
+                explanation: 'False: Triamterene daily doses are 100-200 mg, whereas Spironolactone daily doses are 25-100 mg; Spironolactone exhibits higher mg-for-mg potency.'
+              }
+            ],
+            overallExplanation: 'Triamterene is a basic pteridine ENaC blocker, whereas Spironolactone is a neutral steroidal mineralocorticoid receptor antagonist metabolized to active canrenone. Both act in the late DCT and collecting duct.',
+            highYieldPearl: 'Both Triamterene and Spironolactone are K-sparing agents acting at the late DCT/collecting duct, but Triamterene is basic (direct ENaC blocker) and Spironolactone is neutral/steroidal (MR antagonist with active canrenone metabolite).',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 4, Question 29',
+            sourcePageNumber: 5
+          },
+          {
+            id: 330,
+            questionNumberLabel: 'Question 2',
+            title: 'Aldosterone vs Spironolactone True/False Battery',
+            category: 'Medicinal Chemistry SAR',
+            type: 'sub-statements',
+            questionStem: 'Consider Molecule I (Aldosterone) and Molecule II (Spironolactone) to determine whether each statement is true or false:',
+            subStatements: [
+              {
+                id: 'a',
+                text: 'Molecule I is a steroidal agonist whereas Molecule II is an antagonist.',
+                isCorrect: true,
+                explanation: 'True: Aldosterone is the endogenous steroidal mineralocorticoid receptor agonist; Spironolactone is a synthetic competitive antagonist at mineralocorticoid receptors.'
+              },
+              {
+                id: 'b',
+                text: 'The two molecules are diuretics.',
+                isCorrect: false,
+                explanation: 'False: Aldosterone promotes sodium and water retention (anti-diuretic / salt-conserving hormone); only Molecule II (Spironolactone) is a diuretic agent.'
+              },
+              {
+                id: 'c',
+                text: 'The two molecules target the collecting duct as well as the late distal convoluted tubule.',
+                isCorrect: true,
+                explanation: 'True: Both molecules bind to intracellular mineralocorticoid receptors in principal cells located in the late DCT and cortical collecting duct.'
+              },
+              {
+                id: 'd',
+                text: 'Only Molecule II acts as a potassium-sparing diuretic.',
+                isCorrect: true,
+                explanation: 'True: Spironolactone inhibits aldosterone-mediated sodium reabsorption and potassium excretion, sparing potassium; aldosterone itself stimulates potassium excretion.'
+              },
+              {
+                id: 'e',
+                text: 'Only Molecule II can be used to treat hypertension.',
+                isCorrect: true,
+                explanation: 'True: Spironolactone reduces blood pressure by blocking mineralocorticoid receptors; Aldosterone excess causes sodium retention and hypertension (e.g., in primary hyperaldosteronism).'
+              }
+            ],
+            overallExplanation: 'Aldosterone is the endogenous MR agonist promoting Na+ retention and K+ excretion. Spironolactone is a synthetic steroid competitive MR antagonist used to treat hypertension and heart failure by promoting saluresis while sparing potassium.',
+            highYieldPearl: 'Aldosterone = endogenous MR agonist (salt/water retention, K+ wasting). Spironolactone = synthetic competitive MR antagonist (diuretic, K-sparing, antihypertensive).',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 4, Question 30',
+            sourcePageNumber: 5
+          },
+          {
+            id: 331,
+            questionNumberLabel: 'Question 3',
+            title: 'Amiloride vs Eplerenone True/False Battery',
+            category: 'Medicinal Chemistry SAR',
+            type: 'sub-statements',
+            questionStem: 'Consider Drug I (Amiloride) and Drug II (Eplerenone) to determine whether each statement is true or false:',
+            subStatements: [
+              {
+                id: 'a',
+                text: 'Drug I is a pyrazine derivative, whereas Drug II is a steroid derivative.',
+                isCorrect: true,
+                explanation: 'True: Amiloride is an aminopyrazine acylguanidine derivative; Eplerenone is a 9,11-epoxy steroidal spirolactone.'
+              },
+              {
+                id: 'b',
+                text: 'The two drugs target the ascending limb of the loop of Henle.',
+                isCorrect: false,
+                explanation: 'False: Both drugs target principal cells of the late distal convoluted tubule and cortical collecting duct, not the loop of Henle.'
+              },
+              {
+                id: 'c',
+                text: 'The two drugs are metabolized to active metabolites.',
+                isCorrect: false,
+                explanation: 'False: Amiloride is excreted largely unchanged (~50% urine, ~40% feces); Eplerenone is metabolized by CYP3A4 to inactive metabolites.'
+              },
+              {
+                id: 'd',
+                text: 'Only Drug I is associated with the side effect of hyperkalemia.',
+                isCorrect: false,
+                explanation: 'False: Both potassium-sparing diuretics carry a significant risk of hyperkalemia by preventing renal potassium secretion.'
+              },
+              {
+                id: 'e',
+                text: 'Drug I is a receptor antagonist whereas Drug II is a transporter inhibitor.',
+                isCorrect: false,
+                explanation: 'False: Drug I (Amiloride) is a direct ion channel blocker (ENaC inhibitor); Drug II (Eplerenone) is an intracellular nuclear receptor antagonist (selective mineralocorticoid receptor blocker).'
+              },
+              {
+                id: 'f',
+                text: 'Given their molecular target, the two drugs are associated with sexual side effects.',
+                isCorrect: false,
+                explanation: 'False: Amiloride does not interact with steroid receptors, and Eplerenone possesses a 9,11-epoxy ring that confers high selectivity for MR over androgen and progesterone receptors, avoiding the gynecomastia seen with Spironolactone.'
+              }
+            ],
+            overallExplanation: 'Amiloride is an aminopyrazine ENaC channel blocker; Eplerenone is a selective 9,11-epoxy steroidal MR antagonist. Both spare potassium in the collecting duct. Eplerenone lacks sexual side effects due to low androgen/progesterone receptor affinity.',
+            highYieldPearl: 'Eplerenone has a 9,11-epoxy group that confers extreme selectivity for MR, eliminating the gynecomastia and sexual side effects caused by non-selective Spironolactone.',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 4-5, Question 31',
+            sourcePageNumber: 5
+          },
+          {
+            id: 332,
+            questionNumberLabel: 'Question 4',
+            title: 'Molecular Basis for Extended Duration vs Short Half-Life',
+            category: 'Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the following correctly pairs the chemical class and physiological charge of Amiloride (I) and Hydrochlorothiazide (II)?',
+            questionStem: 'Which of the following best explains why mineralocorticoid receptor antagonists (such as Spironolactone) have an extended duration of action (24-48 hours) despite relatively short elimination half-lives of the parent drug?',
             options: [
-              'Drug I is an acylguanidine aminopyrazine (basic, positively charged cation at pH 7.4); Drug II is a benzothiadiazine dioxide (weakly acidic, partially ionized anion at pH 7.4)',
-              'Drug I is acidic; Drug II is basic',
-              'Both are strongly acidic anions',
-              'Both are quaternary ammonium salts'
+              'Genomic latency of mineralocorticoid receptor transcription regulation combined with active metabolite (canrenone) formation and extensive tissue binding',
+              'Irreversible covalent alkylation of the ENaC channel pore via Michael addition',
+              'Enterohepatic recirculation of an intact acyl-glucuronide that regenerates the parent drug in the colon',
+              'Spontaneous non-enzymatic conversion into insoluble renal calculi'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Amiloride contains a pyrazinoylguanidine moiety with a basic guanidinium group (pKa 8.7) that is protonated and positively charged at physiological pH, allowing it to plug the negatively charged pore of ENaC. HCTZ has acidic sulfonamide protons (pKa 7.9 and 9.2).',
-              'Incorrect: Amiloride is basic; HCTZ is acidic.',
-              'Incorrect: Amiloride is a basic cation.',
-              'Incorrect: Neither is a quaternary ammonium.'
+              'Correct: Mineralocorticoid receptor antagonists act by modulating genomic transcription and de novo protein synthesis of ENaC and Na+/K+-ATPase. This genomic latency introduces a multi-hour onset and prolonged biological persistence (24-48h). In addition, spironolactone is converted to canrenone (active metabolite, half-life 16-20h) which exhibits high tissue and protein binding.',
+              'Incorrect: Spironolactone is a competitive reversible antagonist, not an irreversible alkylator (that is ethacrynic acid).',
+              'Incorrect: Enterohepatic acyl-glucuronide recirculation is not the primary driver of its 24-48h duration.',
+              'Incorrect: Spironolactone does not form renal calculi (triamterene stones are rare but unrelated to duration).'
             ],
-            overallExplanation: 'Amiloride\'s basic acylguanidine (pKa 8.7) is positively charged at physiological pH, mimicking hydrated Na+ ions to block the outer vestibule of the ENaC pore. HCTZ is weakly acidic.',
-            highYieldPearl: 'Amiloride = basic acylguanidine (positively charged cation at pH 7.4). Directly plugs the ENaC channel pore in the collecting duct.',
+            overallExplanation: 'Nuclear receptor antagonists require time for genomic transcript modulation to alter membrane transport protein populations. This transcriptional latency, paired with the active metabolite canrenone (t1/2 16-20h), accounts for the 24-48 hour duration despite a short parent half-life.',
+            highYieldPearl: 'MR antagonists have prolonged duration (24-48h) due to genomic transcription latency + active metabolite canrenone (t1/2 16-20h).',
             sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 5, Question 32',
             sourcePageNumber: 5
           },
           {
             id: 333,
-            questionNumberLabel: 'Question 33',
-            title: 'Dyazide / Moduretic True/False Statements',
+            questionNumberLabel: 'Question 5',
+            title: 'Dyazide / Moduretic Combination True/False Battery',
             category: 'Clinical Applications',
             type: 'sub-statements',
-            questionStem: 'Consider the combination of Drug I (Amiloride or Triamterene) and Drug II (Hydrochlorothiazide) as in Moduretic or Dyazide, and state whether each statement is true or false:',
+            questionStem: 'Consider Drug I (Triamterene) and Drug II (Hydrochlorothiazide) as combined in Dyazide/Maxzide, and state whether each statement is true or false:',
             subStatements: [
               {
                 id: 'a',
-                text: 'Both drugs act at the same nephron site.',
-                isCorrect: false,
-                explanation: 'False: Drug I (Amiloride/Triamterene) acts in the cortical collecting tubule (ENaC), whereas Drug II (HCTZ) acts in the distal convoluted tubule (NCC).'
+                text: 'Drug I is a potassium-sparing diuretic, whereas Drug II is a thiazide diuretic.',
+                isCorrect: true,
+                explanation: 'True: Triamterene is an ENaC potassium-sparing diuretic; Hydrochlorothiazide is a benzothiadiazine thiazide diuretic.'
               },
               {
                 id: 'b',
                 text: 'Both inhibit NaCl reabsorption at the collecting duct.',
                 isCorrect: false,
-                explanation: 'False: HCTZ acts in the distal convoluted tubule, not the collecting duct.'
+                explanation: 'False: Drug I (Triamterene) acts at the cortical collecting duct, but Drug II (HCTZ) acts in the distal convoluted tubule.'
               },
               {
                 id: 'c',
                 text: 'Drug I is a basic molecule, whereas Drug II is an acidic molecule.',
                 isCorrect: true,
-                explanation: 'True: Amiloride/triamterene are basic cations; HCTZ is a weakly acidic sulfonamide.'
+                explanation: 'True: Triamterene is basic (pteridine ring pKa ~6.2); HCTZ is acidic (sulfonamide pKa 7.9 and 9.2).'
               },
               {
                 id: 'd',
                 text: 'Both can be used to treat hypertension.',
                 isCorrect: true,
-                explanation: 'True: Thiazides are first-line for HTN; K-sparing agents are co-administered for synergistic BP reduction and K+ balance.'
+                explanation: 'True: Both lower blood pressure and are frequently combined for additive antihypertensive efficacy.'
               },
               {
                 id: 'e',
                 text: 'Drug II is a more effective diuretic than Drug I.',
                 isCorrect: true,
-                explanation: 'True: HCTZ promotes ~5% Na+ excretion compared to ~1-2% for ENaC blockers.'
+                explanation: 'True: HCTZ promotes ~5-8% fractional Na+ excretion, whereas Triamterene promotes only ~2-3%.'
               },
               {
                 id: 'f',
                 text: 'The two drugs can be combined to adjust for potassium ion loss.',
                 isCorrect: true,
-                explanation: 'True: Dyazide / Maxzide (Triamterene + HCTZ) and Moduretic (Amiloride + HCTZ) are standard fixed-dose combinations.'
+                explanation: 'True: Triamterene conserves potassium, compensating for the kaliuretic (K-wasting) effect of HCTZ to maintain normokalemia.'
               },
               {
                 id: 'g',
                 text: 'Only Drug II is associated with the risk of sulfa hypersensitivity reactions.',
                 isCorrect: true,
-                explanation: 'True: HCTZ contains two sulfonamide groups and can trigger sulfa allergy; amiloride and triamterene lack sulfonamide groups.'
+                explanation: 'True: HCTZ possesses aromatic sulfonamide moieties that can trigger sulfa allergy; Triamterene is a pteridine and contains no sulfur.'
               }
             ],
-            overallExplanation: 'HCTZ (acidic, sulfa, DCT, ~5% efficacy) and Triamterene/Amiloride (basic, non-sulfa, collecting duct, ~2% efficacy) are rationally paired in fixed-dose combinations to maintain normokalemia.',
-            highYieldPearl: 'Dyazide / Moduretic: Thiazide (HCTZ: acidic, sulfa, K-wasting) + K-sparing (basic, non-sulfa, K-saving) = optimal synergy and normokalemia.',
+            overallExplanation: 'Dyazide/Maxzide combines basic potassium-sparing Triamterene (collecting duct, non-sulfa, ~2% efficacy) with acidic potassium-wasting HCTZ (DCT, sulfa, ~5% efficacy) to achieve synergistic blood pressure reduction while preserving potassium balance.',
+            highYieldPearl: 'Dyazide / Moduretic synergy: Thiazide (acidic, sulfa, DCT, K-wasting) + K-sparing (basic, non-sulfa, collecting duct, K-saving) = normokalemia and synergistic BP control.',
             sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 5, Question 33',
             sourcePageNumber: 5
           }
@@ -1126,12 +1234,13 @@ export const diureticsPages: ReviewPage[] = [
 export function getDefaultDiureticsModule(): ReviewModule {
   return {
     id: 'antihypertensives_1_mcp2',
+    version: '2.0.0',
     examId: 'exam_2',
     examTitle: 'Exam 2: Antihypertensives & Lipids',
-    title: 'Antihypertensive Agents I: Diuretics',
-    subtitle: 'Thiazides, Loop Diuretics, Potassium-Sparing Diuretics, and Carbonic Anhydrase Inhibitors',
-    course: 'Medicinal Chemistry & Pharmacology II',
-    semester: 'Spring',
+    title: 'Review for Antihypertensive Drugs I (Diuretics)',
+    subtitle: 'Thiazides, Loop Diuretics, Potassium-Sparing Diuretics & Combinations',
+    course: 'Medicinal Chemistry (MCP II)',
+    semester: 'Fall 2026',
     code: 'MCP-2-03',
     isBuiltIn: true,
     createdAt: new Date().toISOString(),

@@ -6,7 +6,8 @@ import {
 } from '../src/utils/documentLabel';
 import { getRenalReviewPages } from '../src/data/renalReviewModuleData';
 import { getRespiratoryReviewPages } from '../src/data/respiratoryReviewModuleData';
-import { getAntiarrhythmicReviewPages } from '../src/data/antiarrhythmicModuleData';
+import { getAntiarrhythmicModuleData, getAntiarrhythmicReviewPages } from '../src/data/antiarrhythmicModuleData';
+import { getDefaultDiureticsModule } from '../src/data/exam2/diureticsModuleData';
 import { antiplateletQuizData } from '../src/data/antiplateletQuizData';
 import {
   AntiplateletQuestion,
@@ -131,6 +132,51 @@ test('audits Exam 2 Antiarrhythmic Review matching questions for clean target bu
   assert.ok(
     matchingQuestions.length >= 1,
     `Expected at least 1 matching question in Antiarrhythmics, found ${matchingQuestions.length}`
+  );
+
+  for (const q of matchingQuestions) {
+    assert.ok(q.matchingTargets && q.matchingTargets.length > 0);
+    q.matchingTargets.forEach((target: MatchingTarget, index: number) => {
+      const bullet = formatTargetBullet(target.id, index);
+      assert.match(
+        bullet,
+        /^[a-z]$/,
+        `Target bullet should be a single lowercase letter, got "${bullet}" for id "${target.id}" in Q${q.id}`
+      );
+      assert.doesNotMatch(
+        bullet,
+        /target[-_]/i,
+        `Target bullet should never contain raw prefixes, got "${bullet}" in Q${q.id}`
+      );
+    });
+
+    if (q.structuresDisplayed && q.structuresDisplayed.length > 0) {
+      q.structuresDisplayed.forEach((str: ChemicalStructure, sIdx: number) => {
+        const roman = extractRomanOrShortLabel(str, sIdx);
+        assert.match(
+          roman,
+          /^[IVXLCDM]+$/i,
+          `Structure label should extract clean Roman numeral, got "${roman}" for label "${str.document_label || (str as any).label || str.id}" in Q${q.id}`
+        );
+        assert.doesNotMatch(
+          roman,
+          /[()]/,
+          `Structure label should not contain drug name parentheses, got "${roman}" in Q${q.id}`
+        );
+      });
+    }
+  }
+});
+
+test('audits Exam 2 Diuretics Review matching questions for clean target bullets and Roman labels', () => {
+  const allQuestions = getAllQuestionsFromPages(getDefaultDiureticsModule().pages);
+  const matchingQuestions = allQuestions.filter(
+    (q) => q.type === 'matching' && q.matchingTargets && q.matchingTargets.length > 0
+  );
+
+  assert.ok(
+    matchingQuestions.length >= 2,
+    `Expected at least 2 matching questions in Diuretics, found ${matchingQuestions.length}`
   );
 
   for (const q of matchingQuestions) {

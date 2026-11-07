@@ -170,6 +170,14 @@ export function loadAllReviewModules(): ReviewModule[] {
           delete overrides['respiratory_review_mcp2'];
           localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
         }
+        if (
+          overrides['antihypertensives_1_mcp2'] &&
+          (overrides['antihypertensives_1_mcp2'].version !== '2.0.0' ||
+            (overrides['antihypertensives_1_mcp2'].pages || []).length < 5)
+        ) {
+          delete overrides['antihypertensives_1_mcp2'];
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        }
       }
     } catch (e) {
       console.warn('Could not parse built-in overrides:', e);
@@ -348,6 +356,34 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
         (overrides['respiratory_review_mcp2'].pages || []).length < 9)
     ) {
       delete overrides['respiratory_review_mcp2'];
+      try {
+        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+      } catch {}
+    }
+
+    const dexieDiuretics = dexieModules.find((m) => m.id === 'antihypertensives_1_mcp2')?.module;
+    if (dexieDiuretics) {
+      if (dexieDiuretics.version === '2.0.0' && (dexieDiuretics.pages || []).length >= 5) {
+        overrides['antihypertensives_1_mcp2'] = dexieDiuretics;
+      } else {
+        delete overrides['antihypertensives_1_mcp2'];
+        await medChemGraphDb.modules.put({
+          id: 'antihypertensives_1_mcp2',
+          module: defaultDiuretics,
+          updatedAt: new Date().toISOString(),
+        }).catch((e) => console.warn('Dexie put during diuretics migration warning:', e));
+        try {
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        } catch {}
+      }
+    }
+
+    if (
+      overrides['antihypertensives_1_mcp2'] &&
+      (overrides['antihypertensives_1_mcp2'].version !== '2.0.0' ||
+        (overrides['antihypertensives_1_mcp2'].pages || []).length < 5)
+    ) {
+      delete overrides['antihypertensives_1_mcp2'];
       try {
         localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
       } catch {}
