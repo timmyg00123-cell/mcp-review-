@@ -65,6 +65,57 @@ export function getStructureDocumentLabel(
 }
 
 /**
+ * Extracts strictly a clean Roman numeral (e.g. 'I', 'II', 'III', 'IV', 'V') or short letter code (e.g. 'A', 'B')
+ * from complex labels like "Structure IV (Acetazolamide)" or "Drug B (Hydrocortisone)".
+ */
+export function extractRomanOrShortLabel(
+  structure?: { id?: string; document_label?: string; name?: string } | null,
+  fallbackIndex?: number
+): string {
+  const fallback =
+    fallbackIndex !== undefined
+      ? ROMAN_NUMERALS_LIST[fallbackIndex] || String(fallbackIndex + 1)
+      : '';
+  if (!structure) return fallback;
+
+  const raw = (structure.document_label || structure.id || '').trim();
+  if (!raw) return fallback;
+
+  // 1. Direct Roman numeral match within label (e.g. "Structure IV (Acetazolamide)", "Structure VII")
+  const romanMatch = raw.match(/\b(X{0,2}(?:IX|IV|V?I{1,3}))\b/i);
+  if (romanMatch && romanMatch[1] && romanMatch[1].toUpperCase() !== '') {
+    const candidate = romanMatch[1].toUpperCase();
+    if (ROMAN_MAP[candidate] !== undefined) {
+      return candidate;
+    }
+  }
+
+  // 2. "Drug A", "Drug B", etc.
+  const drugLetterMatch = raw.match(/\b(?:Drug|Compound|Structure)\s+([A-Z0-9]{1,2})\b/i);
+  if (drugLetterMatch && drugLetterMatch[1]) {
+    return drugLetterMatch[1].toUpperCase();
+  }
+
+  // 3. Short raw string (1-3 chars, e.g. "I", "II", "A", "B")
+  if (raw.length <= 3 && /^[A-Z0-9]+$/i.test(raw)) {
+    return raw.toUpperCase();
+  }
+
+  return fallback || raw.slice(0, 3).toUpperCase();
+}
+
+/**
+ * Formats a matching target identifier into a clean sequential lowercase bullet ('a', 'b', etc.),
+ * stripping out unwanted internal database slugs (e.g., 'target-chem-amiloride' -> 'a').
+ */
+export function formatTargetBullet(targetId: string | undefined, index: number): string {
+  if (targetId && /^[a-z0-9]{1,2}$/i.test(targetId.trim())) {
+    return targetId.trim().toLowerCase();
+  }
+  return String.fromCharCode(97 + (index % 26));
+}
+
+/**
  * Sorts structures strictly by their document_label (or id), preserving original extraction order on ties.
  * Strictly avoids alphabetical sorting by drug name.
  */
