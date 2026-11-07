@@ -38,6 +38,8 @@ export interface ChemicalStructure {
   id: string; // e.g., 'I', 'II', 'III', 'IV'
   document_label?: string; // Exact Roman numeral, number, or letter label assigned in source document (e.g. 'I', 'II', 'IV', 'Drug X')
   name: string; // e.g., 'Tirofiban'
+  genericName?: string; // Common generic international nonproprietary name (INN)
+  brandNames?: string[]; // Trade/brand names
   tradeName?: string; // e.g., 'Aggrastat'
   chemicalClass: string; // e.g., 'N-sulfonyl tyrosine-based peptidomimetic'
   pharmacologicalClass: string; // e.g., 'Glycoprotein IIb/IIIa inhibitor'
@@ -68,7 +70,10 @@ export interface ChemicalStructure {
     bioactivation?: string;
   };
   sarNotes: string;
+  moa?: string; // Mechanism of action
   moa_summary?: string; // Concise Mechanism of Action (MOA) summary
+  clinicalIndications?: string[]; // Approved clinical indications
+  keyStructuralFeatures?: string[]; // Key structural/pharmacophore features
   sar_rationale?: string; // Detailed structure-activity relationship rationale / legacy fallback
   majorToxicityOrLimitation?: string; // Clinical toxicities, adverse reactions or contraindications
   pubchemAudit?: PubChemAuditInfo; // Universal PubChem audit metadata
@@ -100,6 +105,10 @@ export interface MatchingTarget {
   label: string;
   acceptedStructureIds: string[]; // Roman numerals, e.g. ['I'] or ['II', 'IV']
   rationale?: string;
+  description?: string;
+  target?: string;
+  hint?: string;
+  correctStructureId?: string;
 }
 
 export interface RankingItem {

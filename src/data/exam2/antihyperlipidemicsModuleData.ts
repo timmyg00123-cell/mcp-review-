@@ -901,38 +901,38 @@ export const antihyperlipidemicsPages: ReviewPage[] = [
               {
                 id: 'a',
                 label: '3-Carboxylic acid pyridine',
-                description: 'Nicotinic acid derivative bearing a pyridine heteroaromatic ring with a carboxylic acid at C-3',
-                correctStructureId: 'niacin'
+                acceptedStructureIds: ['Structure V', 'V', 'chem-niacin', 'niacin'],
+                rationale: 'Nicotinic acid derivative bearing a pyridine heteroaromatic ring with a carboxylic acid at C-3'
               },
               {
                 id: 'b',
                 label: 'Quaternary ammonium-containing polymer',
-                description: 'Cross-linked insoluble styrene-divinylbenzene resin with permanent positively-charged trimethylammonium groups',
-                correctStructureId: 'cholestyramine'
+                acceptedStructureIds: ['Structure VI', 'VI', 'chem-cholestyramine', 'cholestyramine'],
+                rationale: 'Cross-linked insoluble styrene-divinylbenzene resin with permanent positively-charged trimethylammonium groups'
               },
               {
                 id: 'c',
                 label: 'Isobutyrate derivative',
-                description: 'Phenoxy-isobutyric acid ester derivative mimicking fatty acid geometry',
-                correctStructureId: 'fenofibrate'
+                acceptedStructureIds: ['Structure IV', 'IV', 'chem-fenofibrate', 'fenofibrate'],
+                rationale: 'Phenoxy-isobutyric acid ester derivative mimicking fatty acid geometry'
               },
               {
                 id: 'd',
                 label: '7-Substituted 3,5-dihydroxyheptanoic acid',
-                description: 'HMG-CoA transition state mimetic with a 7-carbon dihydroxy acid chain attached to a pyrrole core',
-                correctStructureId: 'atorvastatin'
+                acceptedStructureIds: ['Structure I', 'I', 'chem-atorvastatin', 'atorvastatin'],
+                rationale: 'HMG-CoA transition state mimetic with a 7-carbon dihydroxy acid chain attached to a pyrrole core'
               },
               {
                 id: 'e',
                 label: 'Trisubstituted β-lactam',
-                description: '1,4-Diaryl-2-azetidinone four-membered cyclic amide ring',
-                correctStructureId: 'ezetimibe'
+                acceptedStructureIds: ['Structure III', 'III', 'chem-ezetimibe', 'ezetimibe'],
+                rationale: '1,4-Diaryl-2-azetidinone four-membered cyclic amide ring'
               },
               {
                 id: 'f',
                 label: 'Hexafluorinated fluorene carboxamide-biphenyl carboxamide',
-                description: 'Large multicyclic lipophilic dicarboxamide derivative containing six fluorine atoms',
-                correctStructureId: 'lomitapide'
+                acceptedStructureIds: ['Structure II', 'II', 'chem-lomitapide', 'lomitapide'],
+                rationale: 'Large multicyclic lipophilic dicarboxamide derivative containing six fluorine atoms'
               }
             ],
             structuresDisplayed: PAGE_3_STRUCTURES,
@@ -952,32 +952,32 @@ export const antihyperlipidemicsPages: ReviewPage[] = [
               {
                 id: 'a',
                 label: 'Bile acids sequestrant',
-                description: 'Binds negatively charged bile acids in intestinal lumen preventing their reabsorption',
-                correctStructureId: 'cholestyramine'
+                acceptedStructureIds: ['Structure VI', 'VI', 'chem-cholestyramine', 'cholestyramine'],
+                rationale: 'Binds negatively charged bile acids in intestinal lumen preventing their reabsorption'
               },
               {
                 id: 'b',
                 label: 'PPARα activator',
-                description: 'Activates nuclear peroxisome proliferator-activated receptor alpha to stimulate lipoprotein lipase',
-                correctStructureId: 'fenofibrate'
+                acceptedStructureIds: ['Structure IV', 'IV', 'chem-fenofibrate', 'fenofibrate'],
+                rationale: 'Activates nuclear peroxisome proliferator-activated receptor alpha to stimulate lipoprotein lipase'
               },
               {
                 id: 'c',
                 label: 'Intestinal cholesterol absorption inhibitor',
-                description: 'Selectively binds and blocks the enterocyte brush border NPC1L1 sterol transporter',
-                correctStructureId: 'ezetimibe'
+                acceptedStructureIds: ['Structure III', 'III', 'chem-ezetimibe', 'ezetimibe'],
+                rationale: 'Selectively binds and blocks the enterocyte brush border NPC1L1 sterol transporter'
               },
               {
                 id: 'd',
                 label: 'Inhibitor of hepatic biosynthesis of cholesterol',
-                description: 'Competitively inhibits HMG-CoA reductase, the rate-limiting enzyme in de novo sterol synthesis',
-                correctStructureId: 'atorvastatin'
+                acceptedStructureIds: ['Structure I', 'I', 'chem-atorvastatin', 'atorvastatin'],
+                rationale: 'Competitively inhibits HMG-CoA reductase, the rate-limiting enzyme in de novo sterol synthesis'
               },
               {
                 id: 'e',
                 label: 'ApoB-containing lipoproteins assembly disruptor',
-                description: 'Directly inhibits microsomal triglyceride transfer protein (MTP) in enterocytes and hepatocytes',
-                correctStructureId: 'lomitapide'
+                acceptedStructureIds: ['Structure II', 'II', 'chem-lomitapide', 'lomitapide'],
+                rationale: 'Directly inhibits microsomal triglyceride transfer protein (MTP) in enterocytes and hepatocytes'
               }
             ],
             structuresDisplayed: PAGE_3_STRUCTURES,

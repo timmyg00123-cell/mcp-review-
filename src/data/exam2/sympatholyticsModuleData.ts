@@ -311,31 +311,43 @@ export const sympatholyticsPages: ReviewPage[] = [
             ],
             matchingPairs: [
               {
+                id: 'target_msa_propranolol',
+                label: 'Prominent quinidine-like membrane-stabilizing activity (cardiac fast inward Na+ channel blockade)',
                 target: 'Prominent quinidine-like membrane-stabilizing activity (cardiac fast inward Na+ channel blockade)',
                 acceptedStructureIds: ['Structure I', 'propranolol', 'chem-propranolol', 'I'],
                 hint: 'Structure I is lipophilic and blocks fast Na+ channels.'
               },
               {
+                id: 'target_isa_pindolol',
+                label: 'Intrinsic sympathomimetic activity (ISA / partial agonist) minimizing resting bradycardia',
                 target: 'Intrinsic sympathomimetic activity (ISA / partial agonist) minimizing resting bradycardia',
                 acceptedStructureIds: ['Structure V', 'pindolol', 'chem-pindolol', 'V'],
                 hint: 'Structure V is an indole derivative possessing partial agonist activity.'
               },
               {
+                id: 'target_esterase_esmolol',
+                label: 'Ultrashort duration of action (t1/2 ~9 min) due to rapid erythrocyte esterase hydrolysis in acute ER/ICU care',
                 target: 'Ultrashort duration of action (t1/2 ~9 min) due to rapid erythrocyte esterase hydrolysis in acute ER/ICU care',
                 acceptedStructureIds: ['Structure III', 'esmolol', 'chem-esmolol', 'III'],
                 hint: 'Structure III contains a labile methyl ester cleaved rapidly by red blood cell esterases.'
               },
               {
+                id: 'target_carbazole_carvedilol',
+                label: 'Tricyclic carbazole nucleus conferring antioxidant and reactive oxygen species scavenging activity in heart failure',
                 target: 'Tricyclic carbazole nucleus conferring antioxidant and reactive oxygen species scavenging activity in heart failure',
                 acceptedStructureIds: ['Structure IV', 'carvedilol', 'chem-carvedilol', 'IV'],
                 hint: 'Structure IV contains an electron-rich carbazole ring system.'
               },
               {
+                id: 'target_nadolol_diol',
+                label: 'Hydrophilic polar diol that evades hepatic first-pass metabolism with the longest half-life (~20-24 h; renally cleared)',
                 target: 'Hydrophilic polar diol that evades hepatic first-pass metabolism with the longest half-life (~20-24 h; renally cleared)',
                 acceptedStructureIds: ['Structure VI', 'nadolol', 'chem-nadolol', 'VI'],
                 hint: 'Structure VI has a cis-diol cyclohexenyl substituent conferring hydrophilicity and renal elimination.'
               },
               {
+                id: 'target_beta1_metoprolol',
+                label: 'Cardioselective beta-1 blocker preferred in patients with a history of bronchospasm or reactive airway disease',
                 target: 'Cardioselective beta-1 blocker preferred in patients with a history of bronchospasm or reactive airway disease',
                 acceptedStructureIds: ['Structure II', 'metoprolol', 'chem-metoprolol', 'II'],
                 hint: 'Structure II contains a para-methoxyethyl group conferring beta-1 selectivity.'
@@ -1542,10 +1554,17 @@ export const sympatholyticsPages: ReviewPage[] = [
 export function getDefaultSympatholyticsModule(): ReviewModule {
   return {
     id: 'antihypertensives_2_mcp2',
+    version: '2.0.0',
+    examId: 'exam_2',
+    examTitle: 'Exam 2: Antihypertensives & Lipids',
     title: 'Antihypertensives II: Sympatholytics',
     subtitle: 'Adrenergic antagonists, central alpha-2 agonists, quinazolines, and pharmacogenomics',
-    version: '2.0.0',
+    course: 'Medicinal Chemistry & Pharmacology II',
+    semester: 'Spring',
+    code: 'MCP-2-04',
+    isBuiltIn: true,
+    createdAt: new Date().toISOString(),
+    chemicalStructures: Object.values(SYMPATHOLYTICS_STRUCTURES),
     pages: sympatholyticsPages,
-    examId: 'exam2',
   };
 }

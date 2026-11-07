@@ -6,7 +6,7 @@ import {
 } from '../src/utils/documentLabel';
 import { getRenalReviewPages } from '../src/data/renalReviewModuleData';
 import { getRespiratoryReviewPages } from '../src/data/respiratoryReviewModuleData';
-import { getAntiarrhythmicModuleData, getAntiarrhythmicReviewPages } from '../src/data/antiarrhythmicModuleData';
+import { getDefaultAntiarrhythmicModule, getAntiarrhythmicReviewPages } from '../src/data/antiarrhythmicModuleData';
 import { getDefaultDiureticsModule } from '../src/data/exam2/diureticsModuleData';
 import { getDefaultSympatholyticsModule } from '../src/data/exam2/sympatholyticsModuleData';
 import { getDefaultVasodilatorsModule } from '../src/data/exam2/vasodilatorsModuleData';
