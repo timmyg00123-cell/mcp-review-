@@ -473,247 +473,299 @@ export const diureticsPages: ReviewPage[] = [
         questions: [
           {
             id: 314,
-            questionNumberLabel: 'Question 14',
-            title: 'Potency Comparison: Furosemide vs Bumetanide',
+            questionNumberLabel: 'Question 1',
+            title: 'High-Ceiling Loop Diuretics Landmark Properties Matching',
             category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Which is more potent: Furosemide (I) or Bumetanide (II)? By what approximate factor?',
-            options: [
-              'Bumetanide (II) is ~40-fold more potent than Furosemide (I)',
-              'Furosemide (I) is ~40-fold more potent than Bumetanide (II)',
-              'Both have identical molar potency (1:1 equivalence)',
-              'Bumetanide is ~2-fold less potent than Furosemide'
+            type: 'matching',
+            prompt: 'Drag each chemical structure (Structure I - Structure IV) to its matching medicinal chemistry or clinical pharmacology property:',
+            options: ['Structure I', 'Structure II', 'Structure III', 'Structure IV'],
+            matchingTargets: [
+              {
+                id: 'target_bumetanide_potency',
+                label: 'Most potent loop diuretic congener (~40x furosemide)',
+                acceptedStructureIds: ['Structure II', 'II', 'bumetanide'],
+                rationale: 'Structure II (Bumetanide) replaces the 4-chloro of furosemide with a 4-phenoxy group and positions a 5-butylamino chain, conferring ~40-fold greater molar potency at NKCC2.'
+              },
+              {
+                id: 'target_torsemide_duration',
+                label: 'Sulfonylurea congener with longest duration of action and negligible ototoxicity',
+                acceptedStructureIds: ['Structure III', 'III', 'torsemide'],
+                rationale: 'Structure III (Torsemide) is a pyridine-sulfonylurea loop diuretic with prolonged receptor occupancy (~6-8 hour duration) and negligible risk of ototoxicity.'
+              },
+              {
+                id: 'target_ethacrynic_sulfa',
+                label: 'Phenoxyacetic acid derivative / Michael acceptor lacking a sulfonamide group (safe in severe sulfa allergy)',
+                acceptedStructureIds: ['Structure IV', 'IV', 'ethacrynic_acid'],
+                rationale: 'Structure IV (Ethacrynic acid) is a dichloro-phenoxyacetic acid derivative lacking a sulfonamide moiety, making it the only loop diuretic safe in true sulfa anaphylaxis.'
+              },
+              {
+                id: 'target_furosemide_amphoteric',
+                label: 'Amphoteric anthranilic acid prototype bearing both a carboxylic acid and secondary amine',
+                acceptedStructureIds: ['Structure I', 'I', 'furosemide'],
+                rationale: 'Structure I (Furosemide) is an anthranilic acid (2-aminobenzoic acid) with both an acidic carboxylate/sulfonamide and basic secondary amine, rendering it amphoteric.'
+              },
+              {
+                id: 'target_ethacrynic_ototox',
+                label: 'Irreversible alkylating diuretic associated with highest risk of permanent ototoxicity',
+                acceptedStructureIds: ['Structure IV', 'IV', 'ethacrynic_acid'],
+                rationale: 'Structure IV (Ethacrynic acid) contains an electrophilic alpha,beta-unsaturated ketone that covalently alkylates inner ear hair cell sulfhydryl groups, causing permanent sensorineural hearing loss.'
+              }
             ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: Bumetanide is ~40 times more potent than furosemide on a milligram-for-milligram basis (1 mg bumetanide ~ 40 mg oral furosemide).',
-              'Incorrect: Bumetanide is far more potent than furosemide.',
-              'Incorrect: 1 mg bumetanide is equivalent to 40 mg furosemide.',
-              'Incorrect: Bumetanide is 40x more potent, not less potent.'
+            matchingPairs: [
+              {
+                id: 'target_bumetanide_potency',
+                label: 'Most potent loop diuretic congener (~40x furosemide)',
+                acceptedStructureIds: ['Structure II', 'II', 'bumetanide'],
+                rationale: 'Structure II (Bumetanide) replaces the 4-chloro of furosemide with a 4-phenoxy group and positions a 5-butylamino chain, conferring ~40-fold greater molar potency at NKCC2.'
+              },
+              {
+                id: 'target_torsemide_duration',
+                label: 'Sulfonylurea congener with longest duration of action and negligible ototoxicity',
+                acceptedStructureIds: ['Structure III', 'III', 'torsemide'],
+                rationale: 'Structure III (Torsemide) is a pyridine-sulfonylurea loop diuretic with prolonged receptor occupancy (~6-8 hour duration) and negligible risk of ototoxicity.'
+              },
+              {
+                id: 'target_ethacrynic_sulfa',
+                label: 'Phenoxyacetic acid derivative / Michael acceptor lacking a sulfonamide group (safe in severe sulfa allergy)',
+                acceptedStructureIds: ['Structure IV', 'IV', 'ethacrynic_acid'],
+                rationale: 'Structure IV (Ethacrynic acid) is a dichloro-phenoxyacetic acid derivative lacking a sulfonamide moiety, making it the only loop diuretic safe in true sulfa anaphylaxis.'
+              },
+              {
+                id: 'target_furosemide_amphoteric',
+                label: 'Amphoteric anthranilic acid prototype bearing both a carboxylic acid and secondary amine',
+                acceptedStructureIds: ['Structure I', 'I', 'furosemide'],
+                rationale: 'Structure I (Furosemide) is an anthranilic acid (2-aminobenzoic acid) with both an acidic carboxylate/sulfonamide and basic secondary amine, rendering it amphoteric.'
+              },
+              {
+                id: 'target_ethacrynic_ototox',
+                label: 'Irreversible alkylating diuretic associated with highest risk of permanent ototoxicity',
+                acceptedStructureIds: ['Structure IV', 'IV', 'ethacrynic_acid'],
+                rationale: 'Structure IV (Ethacrynic acid) contains an electrophilic alpha,beta-unsaturated ketone that covalently alkylates inner ear hair cell sulfhydryl groups, causing permanent sensorineural hearing loss.'
+              }
             ],
-            overallExplanation: 'Replacing the 4-chloro of furosemide with a 4-phenoxy group and shifting the amino group to position 5 with a butyl chain in bumetanide dramatically increases affinity for the NKCC2 transporter, yielding a 40-fold potency gain.',
-            highYieldPearl: 'Bumetanide is 40x more potent than Furosemide (1 mg bumetanide = 40 mg oral furosemide = 20 mg torsemide = 50 mg ethacrynic acid).',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 14',
-            sourcePageNumber: 2
+            overallExplanation: 'Loop diuretics block the luminal NKCC2 symporter in the thick ascending limb of Henle. Structure II (Bumetanide) is the most potent (~40x), Structure III (Torsemide) has the longest duration, Structure IV (Ethacrynic acid) is sulfa-safe but carries the highest permanent ototoxicity risk, and Structure I (Furosemide) is the amphoteric prototype.',
+            highYieldPearl: 'Potency: Bumetanide (~40x) > Torsemide (~2-3x) > Furosemide (1x). Sulfa allergy: Ethacrynic acid is safe. Ototoxicity: Ethacrynic acid (highest, irreversible) >> Furosemide > Torsemide > Bumetanide (lowest).',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 14-20',
+            sourcePageNumber: 3
           },
           {
             id: 315,
-            questionNumberLabel: 'Question 15',
-            title: 'Oral Bioavailability: Furosemide vs Bumetanide vs Torsemide',
-            category: 'Pharmacology',
+            questionNumberLabel: 'Question 2',
+            title: 'Potency Comparison: Structure I vs Structure II',
+            category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the loop diuretics has erratic and variable oral bioavailability (10-90%, mean ~50%), whereas Bumetanide and Torsemide have high, predictable oral bioavailability (>80-100%)?',
+            questionStem: 'Which of the following correctly compares the diuretic potency of Structure I versus Structure II?',
             options: [
-              'Furosemide (I)',
-              'Bumetanide (II)',
-              'Torsemide (III)',
-              'Ethacrynic acid (IV)'
+              'Structure II is ~40-fold more potent than Structure I',
+              'Structure I is ~40-fold more potent than Structure II',
+              'Both have identical molar potency (1:1 equivalence)',
+              'Structure II is ~2-fold less potent than Structure I'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Furosemide has notoriously erratic oral bioavailability ranging from 10% to 90% (average ~50%), heavily affected by food and intestinal edema in decompensated heart failure. Torsemide and Bumetanide have >80-100% predictable bioavailability.',
-              'Incorrect: Bumetanide has ~80-90% oral bioavailability.',
-              'Incorrect: Torsemide has ~80-100% oral bioavailability.',
-              'Incorrect: Ethacrynic acid has ~100% oral bioavailability.'
+              'Correct: Structure II (Bumetanide) is ~40 times more potent than Structure I (Furosemide) on a milligram-for-milligram basis (1 mg bumetanide ~ 40 mg oral furosemide).',
+              'Incorrect: Structure II is far more potent than Structure I.',
+              'Incorrect: 1 mg bumetanide is equivalent to 40 mg furosemide.',
+              'Incorrect: Structure II is 40x more potent, not less potent.'
             ],
-            overallExplanation: 'Furosemide oral bioavailability is erratic (~50%), requiring double the IV dose when converting from IV to oral (IV:PO ratio = 1:2). Torsemide and bumetanide have near 1:1 IV:PO bioequivalence.',
-            highYieldPearl: 'Oral Bioavailability: Torsemide (80-100%) and Bumetanide (80-90%) are predictable; Furosemide is erratic (10-90%, avg ~50%). IV:PO ratio is 1:2 for furosemide, 1:1 for bumetanide/torsemide.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 15',
-            sourcePageNumber: 2
+            overallExplanation: 'Replacing the 4-chloro of furosemide with a 4-phenoxy group and shifting the amino group to position 5 with a butyl chain in bumetanide dramatically increases affinity for the NKCC2 transporter, yielding a 40-fold potency gain.',
+            highYieldPearl: 'Bumetanide is 40x more potent than Furosemide (1 mg bumetanide = 40 mg oral furosemide = 20 mg torsemide = 50 mg ethacrynic acid).',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 14',
+            sourcePageNumber: 3
           },
           {
             id: 316,
-            questionNumberLabel: 'Question 16',
-            title: 'Elimination Half-Life of Loop Diuretics',
-            category: 'Pharmacology',
+            questionNumberLabel: 'Question 3',
+            title: 'Diuretic Potency Ranking of Loop Diuretics',
+            category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the loop diuretics has the LONGEST elimination half-life and longest duration of action (~6-8 hours), making it ideal for once-daily dosing in heart failure?',
+            questionStem: 'Rank chemical Structures I - III according to their diuretic potency on a milligram-for-milligram basis (most potent to weakest):',
             options: [
-              'Torsemide (III) (half-life ~3-4 hours, duration ~6-8 hours)',
-              'Furosemide (I) (half-life ~1.5 hours, duration ~4-6 hours)',
-              'Bumetanide (II) (half-life ~1 hour, duration ~3-4 hours)',
-              'Ethacrynic acid (IV) (half-life ~1 hour)'
+              'Structure II > Structure III > Structure I',
+              'Structure I > Structure II > Structure III',
+              'Structure III > Structure II > Structure I',
+              'Structure I > Structure III > Structure II'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Torsemide has an elimination half-life of 3-4 hours (vs 1.5h for furosemide and 1h for bumetanide) and a duration of action of 6-8 hours, providing smoother diuresis with once-daily dosing.',
-              'Incorrect: Furosemide has a shorter half-life (~1.5 hours).',
-              'Incorrect: Bumetanide has the shortest half-life (~1 hour).',
-              'Incorrect: Ethacrynic acid has a short half-life (~1 hour).'
+              'Correct: Structure II (Bumetanide, 1 mg dose) > Structure III (Torsemide, 20 mg dose) > Structure I (Furosemide, 40 mg oral dose).',
+              'Incorrect: Structure II is the most potent loop congener.',
+              'Incorrect: Structure II is approximately 20-fold more potent than Structure III.',
+              'Incorrect: Structure I is the least potent on a milligram basis among these three.'
             ],
-            overallExplanation: 'Torsemide is a sulfonylurea-containing loop diuretic with prolonged receptor occupancy and hepatic metabolism (CYP2C9), giving it the longest half-life and duration among standard loop diuretics.',
-            highYieldPearl: 'Torsemide has the longest half-life (3-4h) and duration of action among loop diuretics, yielding less rebound sodium retention.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 16',
-            sourcePageNumber: 2
+            overallExplanation: 'Potency ranking by equivalent oral dose: Bumetanide (1 mg, ~40x) > Torsemide (20 mg, ~2x) > Furosemide (40 mg, 1x). Ethacrynic acid is ~50 mg (~0.8x).',
+            highYieldPearl: 'Loop Diuretic Potency: Bumetanide (40x) > Torsemide (2x) > Furosemide (1x). Clinical conversion rule: 1 mg bumetanide = 20 mg torsemide = 40 mg oral furosemide.',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 16',
+            sourcePageNumber: 3
           },
           {
             id: 317,
-            questionNumberLabel: 'Question 17',
-            title: 'Loop Diuretic for Patients with Severe Sulfa Hypersensitivity',
-            category: 'Clinical Applications',
+            questionNumberLabel: 'Question 4',
+            title: 'Loop Diuretic with Longest Duration of Action',
+            category: 'Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the loop diuretics lacks a sulfonamide moiety and can be safely administered to a patient with a documented severe, life-threatening anaphylactic sulfa allergy?',
+            questionStem: 'Which of the chemical structures (Structures I - IV) has the LONGEST duration of action and longest elimination half-life?',
             options: [
-              'Ethacrynic acid (IV) (phenoxyacetic acid derivative lacking sulfonamide)',
-              'Furosemide (I)',
-              'Bumetanide (II)',
-              'Torsemide (III)'
+              'Structure III',
+              'Structure I',
+              'Structure II',
+              'Structure IV'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Ethacrynic acid is an alpha,beta-unsaturated ketone-containing phenoxyacetic acid derivative completely lacking a sulfonamide group, making it the only loop diuretic safe in true sulfa allergy.',
-              'Incorrect: Furosemide has a sulfonamide group.',
-              'Incorrect: Bumetanide has a sulfonamide group.',
-              'Incorrect: Torsemide has a sulfonamide/sulfonylurea moiety.'
+              'Correct: Structure III (Torsemide) has an elimination half-life of 3-4 hours and a duration of action of 6-8 hours, providing smoother diuresis with once-daily dosing.',
+              'Incorrect: Structure I (Furosemide) has a shorter half-life (~1.5 hours) and 4-6 hour duration.',
+              'Incorrect: Structure II (Bumetanide) has the shortest half-life (~1 hour).',
+              'Incorrect: Structure IV (Ethacrynic acid) has a short half-life (~1 hour).'
             ],
-            overallExplanation: 'Furosemide, bumetanide, and torsemide are all sulfonamides and cross-react in patients with severe sulfa allergy. Ethacrynic acid is a phenoxyacetic acid derivative with NO sulfonamide group.',
-            highYieldPearl: 'Ethacrynic acid is the ONLY loop diuretic without a sulfonamide group. It is the drug of choice for severe edema in patients with documented sulfa anaphylaxis.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 17',
-            sourcePageNumber: 2
+            overallExplanation: 'Torsemide is a sulfonylurea-containing loop diuretic with prolonged receptor occupancy and hepatic metabolism (CYP2C9), giving it the longest half-life and duration among standard loop diuretics.',
+            highYieldPearl: 'Torsemide has the longest half-life (3-4h) and duration of action among loop diuretics, yielding less rebound sodium retention.',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 15',
+            sourcePageNumber: 3
           },
           {
             id: 318,
-            questionNumberLabel: 'Question 18',
-            title: 'Highest Ototoxicity Risk Among Loop Diuretics',
-            category: 'Clinical Applications',
+            questionNumberLabel: 'Question 5',
+            title: 'Irreversible Michael Acceptor Diuretic',
+            category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the loop diuretics carries the HIGHEST risk of permanent, irreversible ototoxicity (hearing loss and tinnitus), particularly when co-administered with aminoglycoside antibiotics?',
+            questionStem: 'Which of the above drugs (Structures I - IV) acts as an irreversible diuretic by functioning as an electrophilic Michael acceptor?',
             options: [
-              'Ethacrynic acid (IV)',
-              'Bumetanide (II)',
-              'Torsemide (III)',
-              'Furosemide (I)'
+              'Structure IV',
+              'Structure I',
+              'Structure II',
+              'Structure III'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Ethacrynic acid carries the highest risk of ototoxicity, which is frequently irreversible, because its electrophilic alpha,beta-unsaturated carbonyl reacts covalently with sulfhydryl groups in inner ear hair cells.',
-              'Incorrect: Bumetanide has the lowest ototoxicity risk among loop diuretics.',
-              'Incorrect: Torsemide has low ototoxicity.',
-              'Incorrect: Furosemide causes dose-dependent ototoxicity, but it is typically reversible and less severe than ethacrynic acid.'
+              'Correct: Structure IV (Ethacrynic acid) contains an electrophilic alpha,beta-unsaturated ketone (2-methylenebutyryl group) that undergoes Michael addition with nucleophilic sulfhydryl (-SH) groups on renal transport proteins.',
+              'Incorrect: Structure I (Furosemide) binds reversibly.',
+              'Incorrect: Structure II (Bumetanide) binds reversibly.',
+              'Incorrect: Structure III (Torsemide) binds reversibly.'
             ],
-            overallExplanation: 'Ethacrynic acid causes significantly higher rates of permanent sensorineural hearing loss than sulfonamide loop diuretics. Bumetanide has the lowest risk of ototoxicity.',
-            highYieldPearl: 'Ototoxicity risk: Ethacrynic acid (highest, often irreversible) >> Furosemide (reversible) > Torsemide > Bumetanide (lowest ototoxicity).',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 18',
-            sourcePageNumber: 2
+            overallExplanation: 'The terminal =CH2 of the alpha,beta-unsaturated acyl group in ethacrynic acid acts as an electrophilic Michael acceptor, forming covalent thiol adducts with renal NKCC2 proteins.',
+            highYieldPearl: 'Ethacrynic acid = Michael acceptor (alpha,beta-unsaturated ketone). Covalently reacts with sulfhydryl (-SH) groups of cysteine and glutathione.',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 18',
+            sourcePageNumber: 3
           },
           {
             id: 319,
-            questionNumberLabel: 'Question 19',
-            title: 'Chemical Class of Torsemide',
-            category: 'Medicinal Chemistry SAR',
+            questionNumberLabel: 'Question 6',
+            title: 'Loop Diuretic for Patients with Severe Sulfa Allergy',
+            category: 'Clinical Applications',
             type: 'multiple-choice',
-            questionStem: 'What is the chemical class of Torsemide (Drug III)?',
+            questionStem: 'Which of the above drugs (Structures I - IV) lacks a sulfonamide moiety and can be safely administered to a patient with a severe, life-threatening sulfa allergy?',
             options: [
-              'Sulfonylurea / pyridine-sulfonylurea derivative',
-              'Sulfamoyl anthranilic acid',
-              'Phenoxyacetic acid derivative',
-              'Benzothiadiazine-1,1-dioxide'
+              'Structure IV',
+              'Structure I',
+              'Structure II',
+              'Structure III'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Torsemide consists of a pyridine ring linked via a sulfonylurea bridge (-SO2-NH-CO-NH-) to an isopropylamino group and a meta-toluidine substituent.',
-              'Incorrect: Furosemide is a sulfamoyl anthranilic acid.',
-              'Incorrect: Ethacrynic acid is a phenoxyacetic acid.',
-              'Incorrect: Thiazides are benzothiadiazines.'
+              'Correct: Structure IV (Ethacrynic acid) is a phenoxyacetic acid derivative completely lacking a sulfonamide group, making it the only loop diuretic safe in true sulfa allergy.',
+              'Incorrect: Structure I (Furosemide) possesses a sulfonamide group and cross-reacts.',
+              'Incorrect: Structure II (Bumetanide) possesses a sulfonamide group and cross-reacts.',
+              'Incorrect: Structure III (Torsemide) possesses a sulfonylurea/sulfonamide moiety and cross-reacts.'
             ],
-            overallExplanation: 'Torsemide is structurally unique among loop diuretics: it replaces the carboxylate and primary sulfonamide with a sulfonylurea linkage and pyridine ring.',
-            highYieldPearl: 'Torsemide = Pyridine-sulfonylurea loop diuretic. Does not cause hypoglycemia despite sulfonylurea linkage.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 19',
-            sourcePageNumber: 2
+            overallExplanation: 'Furosemide, bumetanide, and torsemide are all sulfonamides and cross-react in patients with severe sulfa allergy. Ethacrynic acid is a phenoxyacetic acid derivative with NO sulfonamide group.',
+            highYieldPearl: 'Ethacrynic acid is the ONLY loop diuretic without a sulfonamide group. It is the drug of choice for severe edema in patients with documented sulfa anaphylaxis.',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 19',
+            sourcePageNumber: 3
           },
           {
             id: 320,
-            questionNumberLabel: 'Question 20',
-            title: 'Chemical Reactivity of Ethacrynic Acid (Michael Acceptor)',
-            category: 'Medicinal Chemistry SAR',
+            questionNumberLabel: 'Question 7',
+            title: 'Highest Ototoxicity Risk Among Loop Diuretics',
+            category: 'Clinical Applications',
             type: 'multiple-choice',
-            questionStem: 'Ethacrynic acid (IV) undergoes a classic Michael addition reaction in vivo. What functional group acts as the Michael acceptor, and what nucleophile reacts with it?',
+            questionStem: 'Which of the above drugs (Structures I - IV) carries the HIGHEST risk of permanent, irreversible ototoxicity?',
             options: [
-              'The alpha,beta-unsaturated carbonyl (methylene group C=C) reacts with endogenous sulfhydryl (-SH) groups such as glutathione or cysteine',
-              'The carboxylic acid reacts with amino groups on albumin',
-              'The dichloro-substituted benzene ring reacts with water via nucleophilic aromatic substitution',
-              'The ether oxygen reacts with glucuronic acid'
+              'Structure IV',
+              'Structure I',
+              'Structure II',
+              'Structure III'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: The 2-methylenebutyryl group contains an alpha,beta-unsaturated ketone that serves as an electrophilic Michael acceptor, undergoing 1,4-conjugate addition with nucleophilic sulfhydryl (-SH) groups on renal enzymes, glutathione, and inner ear proteins.',
-              'Incorrect: Michael additions involve alpha,beta-unsaturated carbonyls, not carboxylates.',
-              'Incorrect: The aromatic chlorines are not Michael acceptors.',
-              'Incorrect: Glucuronidation is not a Michael addition.'
+              'Correct: Structure IV (Ethacrynic acid) carries the highest risk of ototoxicity, which is frequently permanent, because its electrophilic alpha,beta-unsaturated carbonyl reacts covalently with sulfhydryl groups in inner ear hair cells.',
+              'Incorrect: Structure I causes dose-dependent ototoxicity, but it is typically reversible.',
+              'Incorrect: Structure II (Bumetanide) has the lowest ototoxicity risk among loop diuretics.',
+              'Incorrect: Structure III (Torsemide) has minimal ototoxicity.'
             ],
-            overallExplanation: 'The terminal =CH2 of the alpha,beta-unsaturated acyl group in ethacrynic acid is an electrophilic Michael acceptor that forms covalent adducts with cysteine thiols in the NKCC2 transporter and inner ear proteins (contributing to ototoxicity).',
-            highYieldPearl: 'Ethacrynic acid = Michael acceptor (alpha,beta-unsaturated ketone). Covalently reacts with sulfhydryl (-SH) groups of cysteine and glutathione.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 20',
-            sourcePageNumber: 2
+            overallExplanation: 'Ethacrynic acid causes significantly higher rates of permanent sensorineural hearing loss than sulfonamide loop diuretics due to covalent hair-cell alkylation. Bumetanide has the lowest risk of ototoxicity.',
+            highYieldPearl: 'Ototoxicity risk: Ethacrynic acid (highest, often irreversible) >> Furosemide (reversible) > Torsemide > Bumetanide (lowest ototoxicity).',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 17',
+            sourcePageNumber: 3
           },
           {
             id: 321,
-            questionNumberLabel: 'Question 21',
-            title: 'Is Ethacrynic Acid a Prodrug?',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Is Ethacrynic acid considered a prodrug, and is its cysteine adduct active?',
-            options: [
-              'Yes, the ethacrynic acid-cysteine / glutathione adduct is formed in vivo and is ~2-3 fold MORE potent as an NKCC2 inhibitor than parent ethacrynic acid',
-              'No, ethacrynic acid is completely active as administered and metabolites are completely inactive',
-              'Yes, it requires hepatic esterase hydrolysis to become active',
-              'No, it is an irreversible suicide inhibitor that permanently destroys NKCC2'
-            ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: The cysteine conjugate of ethacrynic acid formed in the kidney is actively secreted into tubular lumen and is 2- to 3-fold more potent than parent ethacrynic acid.',
-              'Incorrect: The cysteine conjugate is actually more potent.',
-              'Incorrect: Ethacrynic acid does not contain an ester.',
-              'Incorrect: Its binding is reversible in equilibrium with thiol pools.'
-            ],
-            overallExplanation: 'Ethacrynic acid is rapidly conjugated with cysteine in renal tubular cells; the resulting cysteine adduct is actively secreted via organic anion transporters and is a more potent inhibitor of NKCC2 than parent drug.',
-            highYieldPearl: 'Ethacrynic acid-cysteine adduct is formed via Michael addition and is 2-3x MORE potent than parent drug.',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 21',
-            sourcePageNumber: 2
-          },
-          {
-            id: 322,
-            questionNumberLabel: 'Question 22',
-            title: 'Loop Diuretics True/False Statements',
+            questionNumberLabel: 'Question 8',
+            title: 'Loop Diuretics True/False Battery',
             category: 'Medicinal Chemistry SAR',
             type: 'sub-statements',
-            questionStem: 'Consider the chemical and clinical properties of loop diuretics (Furosemide, Bumetanide, Torsemide, Ethacrynic acid) and state whether each statement is true or false:',
+            questionStem: 'Consider the chemical and clinical properties of loop diuretics (Structures I - IV) and state whether each statement is true or false:',
             subStatements: [
               {
                 id: 'a',
-                text: 'Loop diuretics promote calcium excretion, whereas thiazide diuretics decrease urinary calcium excretion (promote calcium reabsorption).',
+                text: 'The above diuretics inhibit the NaCl reabsorption at the ascending limb of the loop of Henle.',
                 isCorrect: true,
-                explanation: 'True: Loop diuretics inhibit NKCC2, abolishing the positive lumen-potential (+10 mV) that drives paracellular Ca2+ and Mg2+ reabsorption (hypercalciuria). Thiazides enhance DCT paracellular Ca2+ reabsorption (hypocalciuria).'
+                explanation: 'True: All loop diuretics selectively block the luminal Na+/K+/2Cl- (NKCC2) cotransporter in the thick ascending limb of the loop of Henle.'
               },
               {
                 id: 'b',
-                text: 'Loop diuretics are high-ceiling diuretics because the thick ascending limb reabsorbs ~20-25% of filtered sodium load.',
+                text: 'All of the above drugs possess acidic characteristics.',
                 isCorrect: true,
-                explanation: 'True: The TAL has massive sodium transport capacity (~25%), so blocking NKCC2 yields profound diuresis.'
+                explanation: 'True: Furosemide, bumetanide, and ethacrynic acid possess free carboxylic acids (pKa ~3-4), and torsemide possesses an acidic sulfonylurea proton (pKa ~6.4). All four are acidic.'
               },
               {
                 id: 'c',
-                text: 'Furosemide is photosensitive and undergoes hydrolytic cleavage of the furylmethylamine bond under UV light.',
-                isCorrect: true,
-                explanation: 'True: Furosemide must be protected from light; UV exposure cleaves the furan-2-ylmethylamino moiety, producing free 4-chloro-5-sulfamoylanthranilic acid.'
+                text: 'The above drugs are extensively metabolized by the liver.',
+                isCorrect: false,
+                explanation: 'False: Furosemide and Bumetanide are predominantly eliminated unchanged by renal excretion (>60-80%); only Torsemide undergoes extensive hepatic metabolism (~80% by CYP2C9).'
               },
               {
                 id: 'd',
-                text: 'All loop diuretics cause hypokalemia, hypomagnesemia, and metabolic alkalosis.',
-                isCorrect: true,
-                explanation: 'True: Massive delivery of Na+ and fluid to the late DCT and collecting duct stimulates ENaC and aldosterone-driven K+ and H+ secretion, causing hypokalemic metabolic alkalosis and Mg2+ wasting.'
+                text: 'The above drugs are the least effective among all diuretics.',
+                isCorrect: false,
+                explanation: 'False: Loop diuretics are "high-ceiling" diuretics, the MOST effective among all diuretic classes, capable of excreting 20-25% of filtered sodium load.'
               },
               {
                 id: 'e',
-                text: 'All four loop diuretics can cause sulfa allergy.',
-                isCorrect: false,
-                explanation: 'False: Ethacrynic acid contains NO sulfonamide group and does not cross-react in sulfa-allergic patients.'
+                text: 'The above diuretics have a relatively fast onset of action given their strong acidic characteristics.',
+                isCorrect: true,
+                explanation: 'True: Their acidic carboxylate/sulfonamide functional groups facilitate rapid active secretion into the tubular lumen via proximal tubular Organic Anion Transporters (OAT1/OAT3), resulting in a rapid onset of diuresis (~30 min PO, ~5 min IV).'
               }
             ],
-            overallExplanation: 'Loop diuretics abolish the lumen-positive potential in the TAL, causing Ca2+ and Mg2+ wasting. Thiazides enhance Ca2+ reabsorption. Ethacrynic acid is sulfa-free.',
-            highYieldPearl: 'Loop = Hypercalciuria (calcium wasting, treats severe hypercalcemia). Thiazide = Hypocalciuria (calcium retention, protects bone mineral density / prevents renal stones).',
-            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 22',
-            sourcePageNumber: 2
+            overallExplanation: 'Loop diuretics block NKCC2 in the thick ascending limb of Henle (~25% fractional Na+ excretion), are acidic molecules actively secreted by OATs with rapid onset, and are the most efficacious diuretics available.',
+            highYieldPearl: 'Loop Diuretics: High-ceiling (~25% Na excretion), acidic (OAT secretion, rapid onset), NKCC2 blockade in TAL. Torsemide = hepatic; Furosemide/Bumetanide = renal elimination.',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 21',
+            sourcePageNumber: 3
+          },
+          {
+            id: 322,
+            questionNumberLabel: 'Question 9',
+            title: 'Simplest Structural Form of Loop Diuretics',
+            category: 'Medicinal Chemistry SAR',
+            type: 'multiple-choice',
+            questionStem: 'Which of the following structures represents one of the simplest forms of loop diuretics?',
+            options: [
+              '5-Sulfamoyl-2-aminobenzoic acid (5-sulfamoylanthranilic acid core)',
+              '6-Chloro-7-sulfamoylbenzothiadiazine',
+              '4-Chloro-3-sulfamoylpyridine',
+              '2-Methyl-1,4-naphthoquinone'
+            ],
+            correctIndex: 0,
+            optionExplanations: [
+              'Correct: 5-Sulfamoyl-2-aminobenzoic acid (5-sulfamoylanthranilic acid) represents the fundamental minimal pharmacophoric core of the anthranilic acid class of loop diuretics (exemplified by furosemide without position-2/4 substitutions).',
+              'Incorrect: 6-Chloro-7-sulfamoylbenzothiadiazine is the core of thiazide diuretics.',
+              'Incorrect: Pyridine sulfamoyl is related to torsemide but lacks the anthranilic core.',
+              'Incorrect: Naphthoquinone is a vitamin K analog.'
+            ],
+            overallExplanation: 'The simplest prototype loop diuretic structure is 5-sulfamoylanthranilic acid (5-sulfamoyl-2-aminobenzoic acid), which retains basic NKCC2 inhibitory activity.',
+            highYieldPearl: 'The simplest loop diuretic pharmacophore core is 5-sulfamoylanthranilic acid (benzoic acid with C5 sulfonamide and C2 amine).',
+            sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 3, Question 22',
+            sourcePageNumber: 3
           }
         ]
       }

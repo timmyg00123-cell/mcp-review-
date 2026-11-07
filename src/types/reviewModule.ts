@@ -187,6 +187,7 @@ export interface AntiplateletQuestion {
   structuresDisplayed?: ChemicalStructure[];
   type: 'multiple-choice' | 'sub-statements' | 'matching' | 'ranking' | 'structural-workbench';
   matchingTargets?: MatchingTarget[];
+  matchingPairs?: MatchingTarget[];
   drop_zones?: MatchingTarget[];
   draggable_items?: string[];
   options?: string[];
