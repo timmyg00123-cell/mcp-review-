@@ -178,6 +178,14 @@ export function loadAllReviewModules(): ReviewModule[] {
           delete overrides['antihypertensives_1_mcp2'];
           localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
         }
+        if (
+          overrides['antihypertensives_2_mcp2'] &&
+          (overrides['antihypertensives_2_mcp2'].version !== '2.0.0' ||
+            (overrides['antihypertensives_2_mcp2'].pages || []).length < 7)
+        ) {
+          delete overrides['antihypertensives_2_mcp2'];
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        }
       }
     } catch (e) {
       console.warn('Could not parse built-in overrides:', e);
@@ -384,6 +392,34 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
         (overrides['antihypertensives_1_mcp2'].pages || []).length < 5)
     ) {
       delete overrides['antihypertensives_1_mcp2'];
+      try {
+        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+      } catch {}
+    }
+
+    const dexieSympatholytics = dexieModules.find((m) => m.id === 'antihypertensives_2_mcp2')?.module;
+    if (dexieSympatholytics) {
+      if (dexieSympatholytics.version === '2.0.0' && (dexieSympatholytics.pages || []).length >= 7) {
+        overrides['antihypertensives_2_mcp2'] = dexieSympatholytics;
+      } else {
+        delete overrides['antihypertensives_2_mcp2'];
+        await medChemGraphDb.modules.put({
+          id: 'antihypertensives_2_mcp2',
+          module: defaultSympatholytics,
+          updatedAt: new Date().toISOString(),
+        }).catch((e) => console.warn('Dexie put during sympatholytics migration warning:', e));
+        try {
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        } catch {}
+      }
+    }
+
+    if (
+      overrides['antihypertensives_2_mcp2'] &&
+      (overrides['antihypertensives_2_mcp2'].version !== '2.0.0' ||
+        (overrides['antihypertensives_2_mcp2'].pages || []).length < 7)
+    ) {
+      delete overrides['antihypertensives_2_mcp2'];
       try {
         localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
       } catch {}

@@ -3,16 +3,16 @@ import { SYMPATHOLYTICS_STRUCTURES } from './exam2Structures';
 
 export const sympatholyticsPages: ReviewPage[] = [
   // ---------------------------------------------------------------------------
-  // PAGE 1: Beta-Blockers Overview & SAR (Questions 1 - 16)
+  // PAGE 1: Beta-Blockers Overview & SAR (Questions 1 - 7)
   // ---------------------------------------------------------------------------
   {
     pageNumber: 1,
-    title: 'Adrenergic Receptor Antagonists: Beta-Blockers SAR & Clinical Pharmacology',
-    subtitle: 'Aryloxypropanolamines, cardioselectivity, intrinsic sympathomimetic activity, membrane stabilization, and vasodilating beta-blockers',
+    title: 'Adrenergic Receptor Antagonists: Beta-Blockers Overview & SAR',
+    subtitle: 'Aryloxypropanolamine pharmacophore, cardioselectivity, bronchospasm precautions, and mixed alpha/beta blockade',
     sections: [
       {
         sectionTitle: 'Beta-Blocker Prototypes & Chemical Classification',
-        block_instructions: 'Consider Structures I (Propranolol), II (Metoprolol), III (Esmolol), IV (Carvedilol), V (Pindolol), and VI (Nadolol) to answer questions 1 - 16.',
+        block_instructions: 'Consider Structures I through VI to answer questions 1–7.',
         structures: [
           SYMPATHOLYTICS_STRUCTURES.propranolol,
           SYMPATHOLYTICS_STRUCTURES.metoprolol,
@@ -28,7 +28,7 @@ export const sympatholyticsPages: ReviewPage[] = [
             title: 'Chemical Class of Standard Beta-Blockers',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following best describes the chemical class of the above drugs (Propranolol, Metoprolol, Esmolol, Carvedilol, Pindolol, Nadolol)?',
+            questionStem: 'Which of the following best describes the chemical class of the above drugs (Structures I through VI)?',
             options: [
               'Benzothiadiazine-1,1-dioxide',
               '1,4-Dihydropyridine',
@@ -65,7 +65,7 @@ export const sympatholyticsPages: ReviewPage[] = [
               'Loop diuretics',
               'Thiazide diuretics',
               'Calcium channel blockers',
-              'β-Blockers (Adrenergic beta-receptor antagonists)',
+              'β-Blockers',
               'Angiotensin-converting enzyme inhibitors',
               'Angiotensin II receptor antagonists'
             ],
@@ -90,26 +90,28 @@ export const sympatholyticsPages: ReviewPage[] = [
             title: 'Therapeutic Indications',
             category: 'Clinical Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'The above drugs are primarily indicated to treat which of the following cardiovascular diseases?',
+            questionStem: 'The above drugs are primarily used to treat which of the following diseases?',
             options: [
-              'Diabetes mellitus',
-              'Hypertension, angina pectoris, heart failure, and cardiac arrhythmias',
-              'Chronic obstructive pulmonary disease',
-              'Peptic ulcer disease',
+              'Diabetes',
+              'Hypertension',
+              'Chronic obstructive pulmonary diseases',
+              'Peptic ulcer',
               'Bacterial infection',
+              'Cancer',
               'Depression'
             ],
             correctIndex: 1,
             optionExplanations: [
-              'Incorrect: Beta-blockers can mask hypoglycemia in diabetes.',
-              'Correct: Beta-blockers are foundational agents for hypertension, ischemic heart disease / angina, post-MI cardioprotection, systolic heart failure (carvedilol, metoprolol succinate, bisoprolol), and supraventricular / ventricular arrhythmias.',
-              'Incorrect: Nonselective beta-blockers are contraindicated in asthma/COPD due to bronchoconstriction.',
-              'Incorrect: Not used for ulcers.',
+              'Incorrect: Beta-blockers can mask hypoglycemia symptoms in diabetes.',
+              'Correct: Beta-blockers are foundational antihypertensive agents that lower blood pressure through negative chronotropy, negative inotropy, and suppression of renal renin release.',
+              'Incorrect: Nonselective beta-blockers are contraindicated in COPD/asthma due to bronchoconstriction.',
+              'Incorrect: Not used for peptic ulcer disease.',
               'Incorrect: Not antibacterial agents.',
+              'Incorrect: Not antineoplastic agents.',
               'Incorrect: Propranolol can worsen depression due to central monoamine dampening.'
             ],
-            overallExplanation: 'Beta-blockers manage hypertension, ischemic heart disease, tachyarrhythmias, and compensated systolic heart failure.',
-            highYieldPearl: 'Key guideline-directed heart failure beta-blockers: Bisoprolol, Carvedilol, Metoprolol succinate (extended release).',
+            overallExplanation: 'Beta-blockers are used as first- or second-line agents for hypertension, particularly in patients with compelling indications such as ischemic heart disease, post-myocardial infarction, or heart failure.',
+            highYieldPearl: 'Beta-blockers treat hypertension by reducing cardiac output and suppressing renin release from renal juxtaglomerular cells.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 1, Question 3',
             sourcePageNumber: 1
           },
@@ -119,7 +121,7 @@ export const sympatholyticsPages: ReviewPage[] = [
             title: 'Adrenergic Classification',
             category: 'Pharmacology MOA',
             type: 'multiple-choice',
-            questionStem: 'Which of the following descriptions accurately classifies the adrenergic site and mechanism of the listed beta-blockers?',
+            questionStem: 'Which of the following is true describing the above drugs?',
             options: [
               'Centrally-acting, direct sympatholytics',
               'Peripherally-acting, indirect sympatholytics',
@@ -144,24 +146,24 @@ export const sympatholyticsPages: ReviewPage[] = [
             title: 'Cardioselectivity (Beta-1 Selective Agents)',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is(are) cardioselective beta-1 blockers (second generation)?',
+            questionStem: 'Which of the above drugs is(are) selective β1-blocker(s) (cardioselective)?',
             options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol) and Drug III (Esmolol)',
-              'Drug IV (Carvedilol)',
-              'Drug V (Pindolol)',
-              'Drug VI (Nadolol)'
+              'Structure I',
+              'Structure II and Structure III',
+              'Structure IV',
+              'Structure V',
+              'Structure VI'
             ],
             correctIndex: 1,
             optionExplanations: [
-              'Incorrect: Propranolol is a nonselective beta-1/beta-2 blocker.',
-              'Correct: Metoprolol and Esmolol contain para-substituted phenyl rings with hydrogen-bonding or ester groups that selectively fit the beta-1 receptor binding pocket over beta-2.',
-              'Incorrect: Carvedilol is a nonselective beta-blocker with additional alpha-1 blocking activity.',
-              'Incorrect: Pindolol is a nonselective beta-blocker with intrinsic sympathomimetic activity.',
-              'Incorrect: Nadolol is a nonselective beta-1/beta-2 blocker.'
+              'Incorrect: Structure I (Propranolol) is a nonselective beta-1/beta-2 blocker.',
+              'Correct: Structure II (Metoprolol) and Structure III (Esmolol) contain para-substituted phenyl rings that selectively fit the beta-1 receptor binding pocket over beta-2.',
+              'Incorrect: Structure IV (Carvedilol) is a nonselective beta-blocker with additional alpha-1 blocking activity.',
+              'Incorrect: Structure V (Pindolol) is a nonselective beta-blocker with intrinsic sympathomimetic activity.',
+              'Incorrect: Structure VI (Nadolol) is a nonselective beta-1/beta-2 blocker.'
             ],
-            overallExplanation: 'Cardioselective (beta-1) agents possess a para-substituent on the phenoxy ring (e.g., metoprolol, atenolol, esmolol, bisoprolol). The para-group engages with specific residues in the beta-1 binding crevice that are absent or steric hindrances in beta-2 receptors.',
-            highYieldPearl: 'Beta-1 Cardioselective = para-substituted aryloxypropanolamines (Metoprolol, Atenolol, Esmolol, Bisoprolol, Nebivolol).',
+            overallExplanation: 'Cardioselective (beta-1) agents possess a para-substituent on the phenoxy ring (e.g., Metoprolol, Esmolol). The para-group engages with specific hydrogen-bonding residues in the beta-1 binding crevice that are absent or sterically hindered in beta-2 receptors.',
+            highYieldPearl: 'Beta-1 Cardioselective = para-substituted aryloxypropanolamines (Structure II = Metoprolol, Structure III = Esmolol).',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 1, Question 5',
             sourcePageNumber: 1
           },
@@ -171,24 +173,24 @@ export const sympatholyticsPages: ReviewPage[] = [
             title: 'Beta-Blocker Selection in Bronchospastic Disease',
             category: 'Clinical Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is more appropriately preferred in hypertensive patients with a history of bronchospasm or mild COPD?',
+            questionStem: 'Which of the above drugs is(are) more likely to be used to treat hypertensive patients with a history of bronchospasm?',
             options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol)',
-              'Drug IV (Carvedilol)',
-              'Drug V (Pindolol)',
-              'Drug VI (Nadolol)'
+              'Structure I',
+              'Structure II',
+              'Structure IV',
+              'Structure V',
+              'Structure VI'
             ],
             correctIndex: 1,
             optionExplanations: [
-              'Incorrect: Nonselective beta-blockers like propranolol block bronchial beta-2 receptors, precipitating life-threatening bronchospasm.',
-              'Correct: Cardioselective beta-1 blockers (e.g., Metoprolol, Atenolol) preferentially block cardiac beta-1 receptors and spare bronchial smooth muscle beta-2 receptors at low-to-moderate therapeutic doses.',
-              'Incorrect: Carvedilol blocks beta-2 receptors and can cause bronchospasm.',
-              'Incorrect: Pindolol is nonselective.',
-              'Incorrect: Nadolol is nonselective.'
+              'Incorrect: Structure I is nonselective and blocks bronchial beta-2 receptors, precipitating life-threatening bronchospasm.',
+              'Correct: Structure II (Metoprolol) is a cardioselective beta-1 blocker that preferentially blocks cardiac beta-1 receptors and largely spares bronchial smooth muscle beta-2 receptors at low-to-moderate therapeutic doses.',
+              'Incorrect: Structure IV blocks beta-2 receptors and can provoke bronchospasm.',
+              'Incorrect: Structure V is nonselective.',
+              'Incorrect: Structure VI is nonselective.'
             ],
-            overallExplanation: 'While all beta-blockers require caution in severe reactive airway disease, cardioselective (beta-1) antagonists (Metoprolol, Bisoprolol) minimize beta-2 mediated bronchoconstriction.',
-            highYieldPearl: 'In asthma/COPD, select cardioselective beta-1 blockers (e.g., Metoprolol) to avoid blocking bronchodilating beta-2 receptors.',
+            overallExplanation: 'While all beta-blockers require caution in reactive airway disease, cardioselective (beta-1) antagonists like Structure II (Metoprolol) minimize beta-2-mediated bronchoconstriction.',
+            highYieldPearl: 'In asthma/COPD, select cardioselective beta-1 blockers (Structure II) to avoid blocking bronchodilating beta-2 receptors.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 1, Question 6',
             sourcePageNumber: 1
           },
@@ -198,257 +200,26 @@ export const sympatholyticsPages: ReviewPage[] = [
             title: 'Mixed Alpha/Beta Adrenergic Antagonists',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is a mixed alpha-1 / beta-adrenergic antagonist (third-generation vasodilating beta-blocker)?',
+            questionStem: 'Which of the above drugs is(are) mixed α1/β-antagonist(s)?',
             options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol)',
-              'Drug III (Esmolol)',
-              'Drug IV (Carvedilol)',
-              'Drug VI (Nadolol)'
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure VI'
             ],
             correctIndex: 3,
             optionExplanations: [
-              'Incorrect: Propranolol has no alpha-1 blocking activity.',
-              'Incorrect: Metoprolol is a selective beta-1 blocker.',
-              'Incorrect: Esmolol is a selective beta-1 blocker.',
-              'Correct: Carvedilol incorporates a carbazole moiety with an aryloxypropanolamine chain (beta-blockade) linked to a phenoxyethylamine substituent (alpha-1 blockade), imparting vasodilatory properties.',
-              'Incorrect: Nadolol lacks alpha-1 blocking activity.'
+              'Incorrect: Structure I has no alpha-1 blocking activity.',
+              'Incorrect: Structure II is a selective beta-1 blocker.',
+              'Incorrect: Structure III is a selective beta-1 blocker.',
+              'Correct: Structure IV (Carvedilol) incorporates a carbazole moiety with an aryloxypropanolamine chain (beta-blockade) linked to a bulky phenoxyethylamine substituent (alpha-1 blockade), imparting vasodilatory properties.',
+              'Incorrect: Structure VI lacks alpha-1 blocking activity.'
             ],
-            overallExplanation: 'Carvedilol and Labetalol are dual alpha-1 and beta-antagonists. Alpha-1 antagonism lowers peripheral vascular resistance, reducing afterload without causing reflex tachycardia because beta-1 receptors are concurrently blocked.',
-            highYieldPearl: 'Mixed alpha/beta blockers = Carvedilol and Labetalol. Alpha-1 block = vasodilation/decreased SVR; Beta-1 block = prevents reflex tachycardia.',
+            overallExplanation: 'Structure IV (Carvedilol) is a dual alpha-1 and beta-antagonist. Alpha-1 antagonism lowers peripheral vascular resistance, reducing afterload without causing reflex tachycardia because beta-1 receptors are concurrently blocked.',
+            highYieldPearl: 'Mixed alpha/beta blockers = Structure IV (Carvedilol). Alpha-1 block = vasodilation; Beta-1 block = prevents reflex tachycardia.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 1, Question 7',
             sourcePageNumber: 1
-          },
-          {
-            id: 408,
-            questionNumberLabel: 'Question 8',
-            title: 'Membrane-Stabilizing Activity (MSA)',
-            category: 'Pharmacology MOA',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs possesses significant quinidine-like membrane-stabilizing activity (cardiac fast Na+ channel blocking effect)?',
-            options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol)',
-              'Drug III (Esmolol)',
-              'Drug VI (Nadolol)'
-            ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: Propranolol exhibits prominent membrane-stabilizing activity (MSA / local anesthetic effect) via blockade of cardiac fast inward Na+ channels at elevated concentrations.',
-              'Incorrect: Metoprolol has minimal to no MSA at therapeutic doses.',
-              'Incorrect: Esmolol has no MSA.',
-              'Incorrect: Nadolol is hydrophilic and devoid of MSA.'
-            ],
-            overallExplanation: 'Membrane-stabilizing activity (MSA), also termed quinidine-like or local anesthetic activity, occurs in lipophilic beta-blockers like propranolol that block fast voltage-gated Na+ channels.',
-            highYieldPearl: 'Membrane-Stabilizing Activity (MSA) = Na+ channel blockade / local anesthetic effect. Highest in Propranolol; absent in Nadolol, Atenolol, and Esmolol.',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 8',
-            sourcePageNumber: 2
-          },
-          {
-            id: 409,
-            questionNumberLabel: 'Question 9',
-            title: 'Intrinsic Sympathomimetic Activity (ISA)',
-            category: 'Pharmacology MOA',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs possesses intrinsic sympathomimetic activity (ISA / partial agonist activity)?',
-            options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol)',
-              'Drug III (Esmolol)',
-              'Drug IV (Carvedilol)',
-              'Drug V (Pindolol)'
-            ],
-            correctIndex: 4,
-            optionExplanations: [
-              'Incorrect: Propranolol is a pure competitive antagonist without ISA.',
-              'Incorrect: Metoprolol is a pure antagonist.',
-              'Incorrect: Esmolol is a pure antagonist.',
-              'Incorrect: Carvedilol has no ISA.',
-              'Correct: Pindolol acts as a partial beta-receptor agonist, stimulating the receptor weakly while preventing full agonist (epinephrine/norepinephrine) binding, resulting in less resting bradycardia.'
-            ],
-            overallExplanation: 'ISA agents (Pindolol, Acebutolol) stimulate beta-receptors at rest with low efficacy while blocking intense catecholamine stimulation during exercise, minimizing excessive resting bradycardia.',
-            highYieldPearl: 'Intrinsic Sympathomimetic Activity (ISA) = partial agonist. Prototype = Pindolol. Avoid in post-MI and heart failure patients.',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 9',
-            sourcePageNumber: 2
-          },
-          {
-            id: 410,
-            questionNumberLabel: 'Question 10',
-            title: 'Ultrashort-Acting Beta-Blocker in Emergency Settings',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is preferred for acute IV titration in the emergency room / ICU for hypertensive emergencies or supraventricular tachycardias, and what structural feature governs this property?',
-            options: [
-              'Drug I (Propranolol), due to high lipophilicity',
-              'Drug II (Metoprolol), due to oral sustained release',
-              'Drug III (Esmolol), due to a methyl ester linkage rapidly hydrolyzed by erythrocyte esterases (half-life ~9 minutes)',
-              'Drug VI (Nadolol), due to lack of hepatic metabolism'
-            ],
-            correctIndex: 2,
-            optionExplanations: [
-              'Incorrect: Propranolol has a multi-hour half-life and variable clearance.',
-              'Incorrect: Metoprolol is not ultrashort-acting.',
-              'Correct: Esmolol incorporates a para-methyl ester substituent that is rapidly cleaved by red blood cell cytosolic esterases to an inactive carboxylic acid metabolite, giving an elimination half-life of ~9 minutes.',
-              'Incorrect: Nadolol has an ultra-long half-life (~20-24 hours).'
-            ],
-            overallExplanation: 'Esmolol is an ultrashort-acting soft drug designed with a metabolically labile ester function that erythrocyte esterases rapidly cleave into an inactive acid metabolite, enabling rapid on/off titration in acute care.',
-            highYieldPearl: 'Esmolol = ultrashort beta-1 blocker (t1/2 ~9 min) due to rapid hydrolysis by RBC esterases. Ideal for ICU/ER acute titration.',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 10',
-            sourcePageNumber: 2
-          },
-          {
-            id: 411,
-            questionNumberLabel: 'Question 11',
-            title: 'Antioxidant Properties in Heart Failure',
-            category: 'Medicinal Chemistry SAR',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs possesses unique antioxidant properties that scavenge reactive oxygen species and inhibit lipid peroxidation in heart failure?',
-            options: [
-              'Drug I (Propranolol)',
-              'Drug III (Esmolol)',
-              'Drug IV (Carvedilol), due to its electron-rich carbazole ring system',
-              'Drug V (Pindolol)',
-              'Drug VI (Nadolol)'
-            ],
-            correctIndex: 2,
-            optionExplanations: [
-              'Incorrect: Propranolol does not exhibit meaningful antioxidant properties.',
-              'Incorrect: Esmolol lacks carbazole antioxidant features.',
-              'Correct: Carvedilol contains a fused tricyclic carbazole nucleus that functions as a potent scavenger of oxygen free radicals, suppressing neutrophil-mediated myocardial lipid peroxidation.',
-              'Incorrect: Pindolol lacks this antioxidant activity.',
-              'Incorrect: Nadolol lacks carbazole antioxidant features.'
-            ],
-            overallExplanation: 'Carvedilol provides cardioprotection in chronic systolic heart failure beyond beta-blockade through carbazole-mediated free radical scavenging and reduction of oxidative stress.',
-            highYieldPearl: 'Carvedilol = mixed alpha-1/beta-blocker with a carbazole ring that provides potent antioxidant activity in heart failure.',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 11',
-            sourcePageNumber: 2
-          },
-          {
-            id: 412,
-            questionNumberLabel: 'Question 12',
-            title: 'Dual ISA and Membrane-Stabilizing Effects',
-            category: 'Pharmacology MOA',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs displays both intrinsic sympathomimetic activity (ISA) and a membrane-stabilizing effect?',
-            options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol)',
-              'Drug V (Pindolol)',
-              'Drug VI (Nadolol)'
-            ],
-            correctIndex: 2,
-            optionExplanations: [
-              'Incorrect: Propranolol has strong MSA but zero ISA.',
-              'Incorrect: Metoprolol has neither significant ISA nor MSA.',
-              'Correct: Pindolol uniquely possesses prominent partial agonist activity (ISA) alongside weak-to-moderate membrane-stabilizing activity.',
-              'Incorrect: Nadolol is devoid of both ISA and MSA.'
-            ],
-            overallExplanation: 'Pindolol is a nonselective beta-blocker characterized by both intrinsic sympathomimetic activity and membrane-stabilizing properties.',
-            highYieldPearl: 'Pindolol combines nonselective beta-blockade, partial agonist activity (ISA), and mild membrane stabilization.',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 12',
-            sourcePageNumber: 2
-          },
-          {
-            id: 413,
-            questionNumberLabel: 'Question 13',
-            title: 'Lipophilicity & Blood-Brain Barrier Penetration',
-            category: 'Pharmacokinetics ADME',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs has sufficient lipophilicity to readily cross the blood-brain barrier to treat performance anxiety/migraines, but also poses risks for central CNS adverse effects (depression, vivid dreams, insomnia)?',
-            options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol)',
-              'Drug III (Esmolol)',
-              'Drug VI (Nadolol)'
-            ],
-            correctIndex: 0,
-            optionExplanations: [
-              'Correct: Propranolol is highly lipophilic (LogP ~2.6), readily penetrating the BBB into the CNS, making it effective for migraine prophylaxis and stage fright, but predisposing to nightmares, fatigue, and depression.',
-              'Incorrect: Metoprolol has moderate lipophilicity.',
-              'Incorrect: Esmolol is hydrophilic and metabolized rapidly in the periphery.',
-              'Incorrect: Nadolol is highly hydrophilic (LogP ~0.7) and does not cross the BBB.'
-            ],
-            overallExplanation: 'Propranolol is the most lipophilic classical beta-blocker, easily traversing the blood-brain barrier to exert central sympatholytic effects (and CNS toxicities).',
-            highYieldPearl: 'Propranolol = high lipophilicity -> crosses BBB -> treats stage fright & migraine, but causes vivid dreams/depression. Contrast with Nadolol/Atenolol (polar, minimal CNS penetration).',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 13',
-            sourcePageNumber: 2
-          },
-          {
-            id: 414,
-            questionNumberLabel: 'Question 14',
-            title: 'Avoidance of Hepatic First-Pass Metabolism',
-            category: 'Pharmacokinetics ADME',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs largely avoids hepatic first-pass metabolism because it is primarily cleared unchanged by renal excretion?',
-            options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol)',
-              'Drug IV (Carvedilol)',
-              'Drug VI (Nadolol)'
-            ],
-            correctIndex: 3,
-            optionExplanations: [
-              'Incorrect: Propranolol undergoes extensive, saturable hepatic first-pass metabolism (>70-80%).',
-              'Incorrect: Metoprolol undergoes substantial CYP2D6 first-pass metabolism (~50%).',
-              'Incorrect: Carvedilol undergoes extensive stereoselective hepatic first-pass metabolism.',
-              'Correct: Nadolol is highly water-soluble (polar dihydroxy cyclohexane ring) and is excreted >75% unchanged in urine, avoiding extensive hepatic first-pass metabolism and CYP interactions.'
-            ],
-            overallExplanation: 'Hydrophilic beta-blockers such as Nadolol and Atenolol exhibit low hepatic CYP metabolism and are excreted unchanged in the urine, providing predictable bioavailability and low drug interaction risk.',
-            highYieldPearl: 'Nadolol & Atenolol = hydrophilic -> low hepatic first-pass -> excreted unchanged by kidneys -> adjust dose in renal impairment.',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 14',
-            sourcePageNumber: 2
-          },
-          {
-            id: 415,
-            questionNumberLabel: 'Question 15',
-            title: 'Longest Elimination Half-Life',
-            category: 'Pharmacokinetics ADME',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs has the most extended elimination half-life (~20 - 24 hours), enabling once-daily dosing?',
-            options: [
-              'Drug I (Propranolol, t1/2 ~3-4 hours)',
-              'Drug II (Metoprolol tartrate, t1/2 ~3-4 hours)',
-              'Drug III (Esmolol, t1/2 ~9 minutes)',
-              'Drug VI (Nadolol, t1/2 ~20-24 hours)'
-            ],
-            correctIndex: 3,
-            optionExplanations: [
-              'Incorrect: Propranolol immediate release has a short half-life of 3-4 hours.',
-              'Incorrect: Metoprolol tartrate has a half-life of 3-4 hours.',
-              'Incorrect: Esmolol has an ultrashort half-life of 9 minutes.',
-              'Correct: Nadolol has an elimination half-life of 20-24 hours, the longest among classical beta-blockers, owing to minimal hepatic clearance and slow renal filtration.'
-            ],
-            overallExplanation: 'Nadolol exhibits an elimination half-life of 20-24 hours, permitting true once-daily administration without special extended-release formulation technology.',
-            highYieldPearl: 'Nadolol has the longest half-life (~20-24 h) among classical beta-blockers due to renal clearance.',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 15',
-            sourcePageNumber: 2
-          },
-          {
-            id: 416,
-            questionNumberLabel: 'Question 16',
-            title: 'Vasodilatory Beta-Blockers',
-            category: 'Pharmacology MOA',
-            type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is classified as a vasodilatory beta-blocker?',
-            options: [
-              'Drug I (Propranolol)',
-              'Drug II (Metoprolol)',
-              'Drug IV (Carvedilol)',
-              'Drug V (Pindolol)',
-              'Drug VI (Nadolol)'
-            ],
-            correctIndex: 2,
-            optionExplanations: [
-              'Incorrect: Propranolol causes peripheral vasoconstriction initially due to unopposed alpha-1 tone.',
-              'Incorrect: Metoprolol does not promote direct vasodilation.',
-              'Correct: Carvedilol lowers systemic vascular resistance through concurrent alpha-1 adrenergic receptor blockade, making it a third-generation vasodilatory beta-blocker.',
-              'Incorrect: Pindolol does not block alpha-1 receptors.',
-              'Incorrect: Nadolol is not vasodilatory.'
-            ],
-            overallExplanation: 'Third-generation beta-blockers reduce peripheral vascular resistance either via alpha-1 receptor blockade (Carvedilol, Labetalol) or endothelial nitric oxide release (Nebivolol).',
-            highYieldPearl: 'Vasodilatory beta-blockers: Carvedilol & Labetalol (via alpha-1 block); Nebivolol (via endothelial NO release).',
-            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 16',
-            sourcePageNumber: 2
           }
         ]
       }
@@ -456,19 +227,307 @@ export const sympatholyticsPages: ReviewPage[] = [
   },
 
   // ---------------------------------------------------------------------------
-  // PAGE 2: Central Sympatholytics: Clonidine & Methyldopa (Questions 17 - 24)
+  // PAGE 2: Beta-Blocker Landmark Properties & Central Alpha-2 Intro (Questions 8 - 19)
   // ---------------------------------------------------------------------------
   {
     pageNumber: 2,
-    title: 'Central Sympatholytics & Alpha-2 Adrenergic Agonists',
-    subtitle: 'Clonidine 2-aminoimidazoline SAR, methyldopa central bioactivation, LAT1 transport, and neurotransmitter depleters',
+    title: 'Beta-Blocker Landmark Properties & Central Alpha-2 Agonists Introduction',
+    subtitle: 'Membrane stabilization, intrinsic sympathomimetic activity, ultrashort esterase duration, antioxidant carbazole, and clonidine SAR',
     sections: [
       {
-        sectionTitle: 'Beta-Blocker Stereochemical Requirements',
+        sectionTitle: 'Beta-Blocker Landmark Pharmacodynamic & Pharmacokinetic Properties',
+        block_instructions: 'Consider Structures I through VI and Clonidine to answer questions 1–12.',
+        structures: [
+          SYMPATHOLYTICS_STRUCTURES.propranolol,
+          SYMPATHOLYTICS_STRUCTURES.metoprolol,
+          SYMPATHOLYTICS_STRUCTURES.esmolol,
+          SYMPATHOLYTICS_STRUCTURES.carvedilol,
+          SYMPATHOLYTICS_STRUCTURES.pindolol,
+          SYMPATHOLYTICS_STRUCTURES.nadolol,
+          SYMPATHOLYTICS_STRUCTURES.clonidine,
+        ],
         questions: [
           {
+            id: 408,
+            questionNumberLabel: 'Question 1',
+            title: 'Landmark Pharmacodynamic & Pharmacokinetic Properties Matching',
+            category: 'Medicinal Chemistry SAR',
+            type: 'matching',
+            questionStem: 'Drag and drop each landmark pharmacological or pharmacokinetic property to its corresponding beta-blocker structure (Structures I through VI):',
+            prompt: 'Drag and drop each landmark pharmacological or pharmacokinetic property to its corresponding beta-blocker structure (Structures I through VI):',
+            options: [
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure V',
+              'Structure VI'
+            ],
+            structuresDisplayed: [
+              SYMPATHOLYTICS_STRUCTURES.propranolol,
+              SYMPATHOLYTICS_STRUCTURES.metoprolol,
+              SYMPATHOLYTICS_STRUCTURES.esmolol,
+              SYMPATHOLYTICS_STRUCTURES.carvedilol,
+              SYMPATHOLYTICS_STRUCTURES.pindolol,
+              SYMPATHOLYTICS_STRUCTURES.nadolol,
+            ],
+            matchingTargets: [
+              {
+                id: 'target_msa_propranolol',
+                label: 'Prominent quinidine-like membrane-stabilizing activity (cardiac fast inward Na+ channel blockade)',
+                acceptedStructureIds: ['Structure I', 'propranolol', 'chem-propranolol', 'I'],
+                rationale: 'Structure I (Propranolol) is lipophilic and blocks fast Na+ channels.'
+              },
+              {
+                id: 'target_isa_pindolol',
+                label: 'Intrinsic sympathomimetic activity (ISA / partial agonist) minimizing resting bradycardia',
+                acceptedStructureIds: ['Structure V', 'pindolol', 'chem-pindolol', 'V'],
+                rationale: 'Structure V (Pindolol) is an indole derivative possessing partial agonist activity.'
+              },
+              {
+                id: 'target_esterase_esmolol',
+                label: 'Ultrashort duration of action (t1/2 ~9 min) due to rapid erythrocyte esterase hydrolysis in acute ER/ICU care',
+                acceptedStructureIds: ['Structure III', 'esmolol', 'chem-esmolol', 'III'],
+                rationale: 'Structure III (Esmolol) contains a labile methyl ester cleaved rapidly by red blood cell esterases.'
+              },
+              {
+                id: 'target_carbazole_carvedilol',
+                label: 'Tricyclic carbazole nucleus conferring antioxidant and reactive oxygen species scavenging activity in heart failure',
+                acceptedStructureIds: ['Structure IV', 'carvedilol', 'chem-carvedilol', 'IV'],
+                rationale: 'Structure IV (Carvedilol) contains an electron-rich carbazole ring system.'
+              },
+              {
+                id: 'target_nadolol_diol',
+                label: 'Hydrophilic polar diol that evades hepatic first-pass metabolism with the longest half-life (~20-24 h; renally cleared)',
+                acceptedStructureIds: ['Structure VI', 'nadolol', 'chem-nadolol', 'VI'],
+                rationale: 'Structure VI (Nadolol) has a cis-diol cyclohexenyl substituent conferring hydrophilicity and renal elimination.'
+              },
+              {
+                id: 'target_beta1_metoprolol',
+                label: 'Cardioselective beta-1 blocker preferred in patients with a history of bronchospasm or reactive airway disease',
+                acceptedStructureIds: ['Structure II', 'metoprolol', 'chem-metoprolol', 'II'],
+                rationale: 'Structure II (Metoprolol) contains a para-methoxyethyl group conferring beta-1 selectivity.'
+              }
+            ],
+            matchingPairs: [
+              {
+                target: 'Prominent quinidine-like membrane-stabilizing activity (cardiac fast inward Na+ channel blockade)',
+                acceptedStructureIds: ['Structure I', 'propranolol', 'chem-propranolol', 'I'],
+                hint: 'Structure I is lipophilic and blocks fast Na+ channels.'
+              },
+              {
+                target: 'Intrinsic sympathomimetic activity (ISA / partial agonist) minimizing resting bradycardia',
+                acceptedStructureIds: ['Structure V', 'pindolol', 'chem-pindolol', 'V'],
+                hint: 'Structure V is an indole derivative possessing partial agonist activity.'
+              },
+              {
+                target: 'Ultrashort duration of action (t1/2 ~9 min) due to rapid erythrocyte esterase hydrolysis in acute ER/ICU care',
+                acceptedStructureIds: ['Structure III', 'esmolol', 'chem-esmolol', 'III'],
+                hint: 'Structure III contains a labile methyl ester cleaved rapidly by red blood cell esterases.'
+              },
+              {
+                target: 'Tricyclic carbazole nucleus conferring antioxidant and reactive oxygen species scavenging activity in heart failure',
+                acceptedStructureIds: ['Structure IV', 'carvedilol', 'chem-carvedilol', 'IV'],
+                hint: 'Structure IV contains an electron-rich carbazole ring system.'
+              },
+              {
+                target: 'Hydrophilic polar diol that evades hepatic first-pass metabolism with the longest half-life (~20-24 h; renally cleared)',
+                acceptedStructureIds: ['Structure VI', 'nadolol', 'chem-nadolol', 'VI'],
+                hint: 'Structure VI has a cis-diol cyclohexenyl substituent conferring hydrophilicity and renal elimination.'
+              },
+              {
+                target: 'Cardioselective beta-1 blocker preferred in patients with a history of bronchospasm or reactive airway disease',
+                acceptedStructureIds: ['Structure II', 'metoprolol', 'chem-metoprolol', 'II'],
+                hint: 'Structure II contains a para-methoxyethyl group conferring beta-1 selectivity.'
+              }
+            ],
+            overallExplanation: 'Matching summary:\n- Structure I (Propranolol): Membrane-stabilizing activity (Na+ channel block).\n- Structure V (Pindolol): Intrinsic sympathomimetic activity (ISA).\n- Structure III (Esmolol): Ultrashort duration (RBC esterase hydrolysis).\n- Structure IV (Carvedilol): Carbazole antioxidant & free radical scavenger.\n- Structure VI (Nadolol): Hydrophilic diol, no first-pass hepatic loss, longest t1/2.\n- Structure II (Metoprolol): Beta-1 cardioselectivity for reactive airway patients.',
+            highYieldPearl: 'High-Yield Landmark Beta-Blocker Properties: I = Na+ channel block (MSA); II = beta-1 selective; III = RBC esterase ultrashort; IV = carbazole antioxidant; V = ISA partial agonist; VI = renal excretion / longest t1/2.',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Questions 8-16',
+            sourcePageNumber: 2
+          },
+          {
+            id: 410,
+            questionNumberLabel: 'Question 2',
+            title: 'Ultrashort-Acting Beta-Blocker in Emergency Settings',
+            category: 'Medicinal Chemistry SAR',
+            type: 'multiple-choice',
+            questionStem: 'Which of the above drugs is(are) preferred for use in the emergency room to treat hypertensive or arrhythmic events? Why?',
+            options: [
+              'Structure I, due to high lipophilicity and rapid brain penetration',
+              'Structure II, due to sustained oral release profile',
+              'Structure III, due to a methyl ester linkage rapidly hydrolyzed by erythrocyte esterases (half-life ~9 minutes)',
+              'Structure VI, due to complete lack of hepatic metabolism'
+            ],
+            correctIndex: 2,
+            optionExplanations: [
+              'Incorrect: Structure I has a multi-hour half-life and variable clearance.',
+              'Incorrect: Structure II is not ultrashort-acting.',
+              'Correct: Structure III (Esmolol) incorporates a para-methyl ester substituent that is rapidly cleaved by red blood cell cytosolic esterases to an inactive carboxylic acid metabolite, giving an elimination half-life of ~9 minutes for precise IV titration.',
+              'Incorrect: Structure VI has an ultra-long half-life (~20-24 hours).'
+            ],
+            overallExplanation: 'Structure III (Esmolol) is an ultrashort-acting soft drug designed with a metabolically labile ester function that erythrocyte esterases rapidly cleave into an inactive acid metabolite, enabling rapid on/off titration in acute care.',
+            highYieldPearl: 'Structure III (Esmolol) = ultrashort beta-1 blocker (t1/2 ~9 min) due to rapid hydrolysis by RBC esterases. Ideal for ICU/ER acute titration.',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 10',
+            sourcePageNumber: 2
+          },
+          {
+            id: 411,
+            questionNumberLabel: 'Question 3',
+            title: 'Antioxidant Characteristics in Heart Failure',
+            category: 'Medicinal Chemistry SAR',
+            type: 'multiple-choice',
+            questionStem: 'Which of the above drugs has(have) an antioxidant characteristic that may benefit patients with heart failure? Why?',
+            options: [
+              'Structure I, because the naphthalene ring donates electrons',
+              'Structure III, because the ester group scavenges hydroxyl radicals',
+              'Structure IV, because its electron-rich carbazole ring system scavenges reactive oxygen species and inhibits lipid peroxidation',
+              'Structure V, because the indole ring undergoes rapid auto-oxidation',
+              'Structure VI, because the diol group binds free radicals'
+            ],
+            correctIndex: 2,
+            optionExplanations: [
+              'Incorrect: Structure I does not exhibit meaningful antioxidant properties.',
+              'Incorrect: Structure III lacks carbazole antioxidant features.',
+              'Correct: Structure IV (Carvedilol) contains a fused tricyclic carbazole nucleus that functions as a potent scavenger of oxygen free radicals, suppressing neutrophil-mediated myocardial lipid peroxidation.',
+              'Incorrect: Structure V lacks this specific antioxidant cardioprotection.',
+              'Incorrect: Structure VI lacks carbazole antioxidant features.'
+            ],
+            overallExplanation: 'Structure IV (Carvedilol) provides cardioprotection in chronic systolic heart failure beyond beta-blockade through carbazole-mediated free radical scavenging and reduction of oxidative stress.',
+            highYieldPearl: 'Structure IV (Carvedilol) = mixed alpha-1/beta-blocker with a carbazole ring that provides potent antioxidant activity in heart failure.',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 11',
+            sourcePageNumber: 2
+          },
+          {
+            id: 412,
+            questionNumberLabel: 'Question 4',
+            title: 'Dual ISA and Membrane-Stabilizing Effects',
+            category: 'Pharmacology MOA',
+            type: 'multiple-choice',
+            questionStem: 'Which of the above drugs has(have) intrinsic sympathomimetic activity as well as a potentially membrane-stabilizing effect?',
+            options: [
+              'Structure I',
+              'Structure II',
+              'Structure V',
+              'Structure VI'
+            ],
+            correctIndex: 2,
+            optionExplanations: [
+              'Incorrect: Structure I has strong MSA but zero ISA.',
+              'Incorrect: Structure II has neither significant ISA nor MSA.',
+              'Correct: Structure V (Pindolol) uniquely possesses prominent partial agonist activity (ISA) alongside weak-to-moderate membrane-stabilizing activity.',
+              'Incorrect: Structure VI is devoid of both ISA and MSA.'
+            ],
+            overallExplanation: 'Structure V (Pindolol) is a nonselective beta-blocker characterized by both intrinsic sympathomimetic activity and membrane-stabilizing properties.',
+            highYieldPearl: 'Structure V (Pindolol) combines nonselective beta-blockade, partial agonist activity (ISA), and mild membrane stabilization.',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 12',
+            sourcePageNumber: 2
+          },
+          {
+            id: 413,
+            questionNumberLabel: 'Question 5',
+            title: 'Lipophilicity & Central Nervous System Penetration',
+            category: 'Pharmacokinetics ADME',
+            type: 'multiple-choice',
+            questionStem: 'Which of the above drugs has(have) sufficient lipophilicity to be used to treat anxiety or has CNS toxicity (depression, confusion, vivid dreams)?',
+            options: [
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure VI'
+            ],
+            correctIndex: 0,
+            optionExplanations: [
+              'Correct: Structure I (Propranolol) is the most lipophilic beta-blocker (logP ~3.0), readily crossing the blood-brain barrier to alleviate somatic anxiety, but also causing central side effects like depression, confusion, and vivid nightmares.',
+              'Incorrect: Structure II has moderate lipophilicity and lower CNS penetration.',
+              'Incorrect: Structure III is hydrophilic and rapidly cleaved in blood.',
+              'Incorrect: Structure VI is hydrophilic (logP ~0.7) and cannot easily cross the BBB.'
+            ],
+            overallExplanation: 'Structure I (Propranolol) possesses high lipophilicity due to its bicyclic naphthyloxy ring, permitting rapid blood-brain barrier penetration. This enables its off-label use for performance anxiety and essential tremor, but predisposes to CNS adverse reactions.',
+            highYieldPearl: 'Structure I (Propranolol) = most lipophilic beta-blocker -> high BBB penetration -> somatic anxiety relief, but risks fatigue, depression, and vivid dreams.',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 13',
+            sourcePageNumber: 2
+          },
+          {
+            id: 414,
+            questionNumberLabel: 'Question 6',
+            title: 'Evasion of First-Pass Hepatic Metabolism',
+            category: 'Pharmacokinetics ADME',
+            type: 'multiple-choice',
+            questionStem: 'Which of the above drugs is more likely to avoid the first-pass effect?',
+            options: [
+              'Structure I',
+              'Structure II',
+              'Structure IV',
+              'Structure VI'
+            ],
+            correctIndex: 3,
+            optionExplanations: [
+              'Incorrect: Structure I undergoes extensive first-pass hepatic metabolism (~70-80% metabolized before reaching systemic circulation).',
+              'Incorrect: Structure II undergoes substantial hepatic clearance via CYP2D6 (~50% first-pass loss).',
+              'Incorrect: Structure IV undergoes heavy hepatic glucuronidation and CYP2D6 oxidation.',
+              'Correct: Structure VI (Nadolol) is highly hydrophilic (due to its cis-cyclohexanediol moiety), is not significantly metabolized by hepatic enzymes, and is eliminated predominantly unchanged via renal excretion, thus avoiding first-pass hepatic loss.'
+            ],
+            overallExplanation: 'Hydrophilic beta-blockers like Structure VI (Nadolol) are not substrates for hepatic CYP enzymes; they are excreted unchanged by the kidneys and bypass hepatic first-pass extraction.',
+            highYieldPearl: 'Structure VI (Nadolol) is water-soluble (hydrophilic diol) -> evades first-pass hepatic clearance -> excreted unchanged renally.',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 14',
+            sourcePageNumber: 2
+          },
+          {
+            id: 415,
+            questionNumberLabel: 'Question 7',
+            title: 'Elimination Half-Life Comparison',
+            category: 'Pharmacokinetics ADME',
+            type: 'multiple-choice',
+            questionStem: 'Which of the above drugs has the most extended elimination half-life? Why?',
+            options: [
+              'Structure I, due to enterohepatic recirculation',
+              'Structure II, due to lipophilic tissue accumulation',
+              'Structure III, due to slow plasma protein dissociation',
+              'Structure VI, due to its hydrophilic nature and lack of hepatic clearance resulting in slow renal elimination (t1/2 ~20-24 hours)'
+            ],
+            correctIndex: 3,
+            optionExplanations: [
+              'Incorrect: Structure I has a short half-life of ~3-5 hours.',
+              'Incorrect: Structure II has a half-life of ~3-7 hours.',
+              'Incorrect: Structure III has an ultrashort half-life of ~9 minutes.',
+              'Correct: Structure VI (Nadolol) has an elimination half-life of 20 to 24 hours, the longest of standard beta-blockers, because it is water-soluble and cleared slowly by glomerular filtration without hepatic metabolism.'
+            ],
+            overallExplanation: 'Structure VI (Nadolol) has the longest half-life (~20-24 hours) among nonselective beta-blockers, permitting once-daily dosing. Its polar diol structure resists hepatic metabolism and relies entirely on renal excretion.',
+            highYieldPearl: 'Structure VI (Nadolol) = longest beta-blocker half-life (~20-24 h), renally eliminated. Requires dose reduction in renal impairment.',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 15',
+            sourcePageNumber: 2
+          },
+          {
+            id: 416,
+            questionNumberLabel: 'Question 8',
+            title: 'Vasodilatory Beta-Blockers',
+            category: 'Pharmacology MOA',
+            type: 'multiple-choice',
+            questionStem: 'Which of the above drugs is a vasodilatory β-blocker?',
+            options: [
+              'Structure I',
+              'Structure II',
+              'Structure III',
+              'Structure IV',
+              'Structure VI'
+            ],
+            correctIndex: 3,
+            optionExplanations: [
+              'Incorrect: Structure I is a pure nonselective beta-blocker without vasodilating properties.',
+              'Incorrect: Structure II has no intrinsic vasodilatory effect.',
+              'Incorrect: Structure III is not vasodilatory.',
+              'Correct: Structure IV (Carvedilol) is a third-generation beta-blocker that produces peripheral vasodilation by concurrently blocking vascular post-junctional alpha-1 adrenergic receptors.',
+              'Incorrect: Structure VI is not vasodilatory.'
+            ],
+            overallExplanation: 'Third-generation beta-blockers reduce peripheral vascular resistance either via alpha-1 receptor blockade (Carvedilol, Labetalol) or endothelial nitric oxide release (Nebivolol).',
+            highYieldPearl: 'Vasodilatory beta-blockers: Structure IV (Carvedilol) and Labetalol (via alpha-1 block); Nebivolol (via endothelial NO release).',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 16',
+            sourcePageNumber: 2
+          },
+          {
             id: 417,
-            questionNumberLabel: 'Question 17',
+            questionNumberLabel: 'Question 9',
             title: 'Active Beta-Blocker Stereochemistry',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
@@ -490,20 +549,14 @@ export const sympatholyticsPages: ReviewPage[] = [
             highYieldPearl: 'Active beta-blockers: (2S)-aryloxypropanolamine superimposes 3D-wise with (1R)-arylethanolamine.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 17',
             sourcePageNumber: 2
-          }
-        ]
-      },
-      {
-        sectionTitle: 'Clonidine SAR & Central Alpha-2 Mechanism',
-        structures: [SYMPATHOLYTICS_STRUCTURES.clonidine],
-        questions: [
+          },
           {
             id: 418,
-            questionNumberLabel: 'Question 18',
+            questionNumberLabel: 'Question 10',
             title: 'Clonidine Chemical & Mechanistic Classification',
             category: 'Medicinal Chemistry SAR',
             type: 'sub-statements',
-            questionStem: 'Considering the chemical structure of clonidine (Catapres), state whether each of the following statements is true or false:',
+            questionStem: 'Considering the chemical structure of clonidine, state whether each of the following statements is true or false:',
             subStatements: [
               {
                 id: 'a',
@@ -513,7 +566,7 @@ export const sympatholyticsPages: ReviewPage[] = [
               },
               {
                 id: 'b',
-                text: 'Clonidine is a selective alpha-2 adrenergic receptor agonist.',
+                text: 'Clonidine is a selective alpha-2 agonist.',
                 isCorrect: true,
                 explanation: 'True: Clonidine stimulates presynaptic alpha-2A autoreceptors in the nucleus tractus solitarius, inhibiting peripheral sympathetic outflow.'
               },
@@ -525,7 +578,7 @@ export const sympatholyticsPages: ReviewPage[] = [
               },
               {
                 id: 'd',
-                text: 'Clonidine is a direct sympatholytic at the receptor level.',
+                text: 'Clonidine is a direct sympatholytic.',
                 isCorrect: false,
                 explanation: 'False: While its net clinical effect is sympatholytic (lowers blood pressure and heart rate), its molecular mechanism is receptor agonism at inhibitory alpha-2 autoreceptors.'
               },
@@ -543,17 +596,17 @@ export const sympatholyticsPages: ReviewPage[] = [
           },
           {
             id: 419,
-            questionNumberLabel: 'Question 19',
-            title: 'Role of Ortho-Chloro Substituents in Clonidine',
+            questionNumberLabel: 'Question 11',
+            title: 'Role of Ortho-Substituents in Clonidine',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following statements is NOT true regarding the ortho-chloro substituents of clonidine?',
+            questionStem: 'Which of the following statements is NOT true about the ortho-substituents in clonidine?',
             options: [
-              'Chlorines increase drug lipophilicity by increasing the hydrophobic surface area',
-              'Chlorines electronically compromise the basicity of the cyclic guanidine through their electron-withdrawing inductive effect, lowering pKa to ~8.0',
-              'Chlorines sterically dictate a perpendicular (orthogonal) 3D orientation between the phenyl and imidazoline rings, ensuring optimal receptor fit',
+              'Chlorines increase the drug lipophilicity by increasing the molecular weight',
+              'Chlorines electronically compromise the basicity of cyclic guanidine by their withdrawing properties',
+              'Chlorines sterically dictate a perpendicular 3D orientation of the two rings, allowing better fit to the receptor',
               'Replacement of the two chlorines with two methoxy groups significantly increases the adrenergic agonist activity of clonidine',
-              'Statements a, b, and c collectively explain why clonidine crosses the blood-brain barrier to act centrally'
+              'a, b, and c justify why the drug can pass the blood-brain barrier and act centrally'
             ],
             correctIndex: 3,
             optionExplanations: [
@@ -567,29 +620,69 @@ export const sympatholyticsPages: ReviewPage[] = [
             highYieldPearl: 'Clonidine ortho-chlorines: (1) lower pKa to 8.0 (allows non-ionized form to cross BBB), (2) steric hindrance locks perpendicular 3D conformation for alpha-2 fit.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Question 19',
             sourcePageNumber: 2
+          },
+          {
+            id: 420,
+            questionNumberLabel: 'Question 12',
+            title: 'Central Alpha-2 Agonist Hemodynamic Consequences',
+            category: 'Clinical Pharmacology',
+            type: 'multiple-choice',
+            questionStem: 'What is the primary hemodynamic consequence of central alpha-2 receptor stimulation by clonidine in the medulla oblongata?',
+            options: [
+              'Direct systemic vasodilation through vascular smooth muscle alpha-2 receptor activation',
+              'Decreased central sympathetic outflow resulting in reduced peripheral vascular resistance, heart rate, and cardiac output',
+              'Increased renal renin secretion through juxtaglomerular beta-1 stimulation',
+              'Depletion of intraneuronal catecholamine storage vesicles'
+            ],
+            correctIndex: 1,
+            optionExplanations: [
+              'Incorrect: Peripheral vascular post-synaptic alpha-2 receptors cause vasoconstriction, which is briefly seen with rapid IV injection before central effects dominate.',
+              'Correct: Agonism at central presynaptic alpha-2 receptors in the nucleus tractus solitarius dampens sympathetic discharge, lowering peripheral vascular resistance and heart rate.',
+              'Incorrect: Renin secretion is decreased, not increased.',
+              'Incorrect: Catecholamine depletion is the mechanism of reserpine, not clonidine.'
+            ],
+            overallExplanation: 'Clonidine stimulates inhibitory alpha-2 autoreceptors in the brainstem, attenuating efferent sympathetic nerve firing to the heart, vasculature, and kidneys.',
+            highYieldPearl: 'Central alpha-2 agonism = decreased sympathetic outflow -> reduced peripheral resistance, bradycardia, and reduced renin.',
+            sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 2, Summary of Central Agonists',
+            sourcePageNumber: 2
           }
         ]
-      },
+      }
+    ]
+  },
+
+  // ---------------------------------------------------------------------------
+  // PAGE 3: Methyldopa Bioactivation & Central Sympatholytics (Questions 20 - 24)
+  // ---------------------------------------------------------------------------
+  {
+    pageNumber: 3,
+    title: 'Methyldopa Central Bioactivation & False Transmitter Mechanism',
+    subtitle: 'Active transport via LAT1, two-step enzymatic cascade, false neurotransmitter pharmacology, and direct vs indirect sympatholytics',
+    sections: [
       {
-        sectionTitle: 'Methyldopa Central Bioactivation & Transport',
+        sectionTitle: 'Methyldopa Activation Cascade & Comparative Sympatholytics',
+        block_instructions: 'Consider Methyldopa, its active metabolite, and Drugs I through IV to answer questions 1–5.',
         structures: [
           SYMPATHOLYTICS_STRUCTURES.methyldopa,
-          SYMPATHOLYTICS_STRUCTURES.alpha_methylnorepinephrine
+          SYMPATHOLYTICS_STRUCTURES.alpha_methylnorepinephrine,
+          SYMPATHOLYTICS_STRUCTURES.clonidine,
+          SYMPATHOLYTICS_STRUCTURES.reserpine,
+          SYMPATHOLYTICS_STRUCTURES.prazosin,
         ],
         questions: [
           {
-            id: 420,
-            questionNumberLabel: 'Question 20',
+            id: 421,
+            questionNumberLabel: 'Question 1',
             title: 'Methyldopa Pharmacokinetics & Properties',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'All of the following statements are true about methyldopa (Aldomet) EXCEPT:',
+            questionStem: 'All of the following statements are true about methyldopa EXCEPT:',
             options: [
-              'Methyldopa crosses the blood-brain barrier via the L-type amino acid transporter (LAT1)',
-              'Methyldopa is metabolized by COMT and sulfotransferase, limiting its oral bioavailability',
-              'It is a prodrug that must be bioactivated in central adrenergic neurons',
-              'It has a fast onset of action and high oral bioavailability',
-              'It is a centrally-acting antihypertensive agent with a well-established safety profile in pregnancy'
+              'Methyldopa can pass the blood-brain barrier in significant quantities',
+              'Methyldopa is metabolized by COMT, which limits its oral bioavailability',
+              'It is a prodrug that has to be activated centrally',
+              'It has a fast onset of action and a high oral bioavailability',
+              'It is a centrally-acting antihypertensive agent'
             ],
             correctIndex: 3,
             optionExplanations: [
@@ -597,7 +690,7 @@ export const sympatholyticsPages: ReviewPage[] = [
               'Incorrect (statement is true): COMT O-methylates the catechol diol, giving oral bioavailability of ~25-50%.',
               'Incorrect (statement is true): It is bioactivated centrally to alpha-methylnorepinephrine.',
               'Correct (statement is FALSE): Methyldopa has a SLOW onset of action (2-4 hours, peak at 4-6 hours) because it requires active uptake and two-step enzymatic bioactivation; its bioavailability is low and variable.',
-              'Incorrect (statement is true): Methyldopa is considered a preferred first-line agent for chronic hypertension in pregnancy.'
+              'Incorrect (statement is true): Methyldopa is a centrally-acting agent with an established safety profile in pregnancy.'
             ],
             overallExplanation: 'Methyldopa is an amino acid prodrug requiring active central transport via LAT1 and enzymatic conversion by DOPA decarboxylase and dopamine beta-hydroxylase to the active alpha-2 agonist (1R,2S)-alpha-methylnorepinephrine, resulting in a delayed onset.',
             highYieldPearl: 'Methyldopa = prodrug -> LAT1 carrier across BBB -> decarboxylase + beta-hydroxylase -> (1R,2S)-alpha-methylnorepinephrine. Safe in pregnancy!',
@@ -605,12 +698,12 @@ export const sympatholyticsPages: ReviewPage[] = [
             sourcePageNumber: 3
           },
           {
-            id: 421,
-            questionNumberLabel: 'Question 21',
+            id: 422,
+            questionNumberLabel: 'Question 2',
             title: 'Active Metabolite of Methyldopa',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which chemical structure represents the true active antihypertensive metabolite of methyldopa in the central nervous system?',
+            questionStem: 'Considering the central activation of methyldopa, which of the following chemical structures represents the active form of methyldopa:',
             options: [
               'alpha-Methyldopamine',
               '(1R,2S)-alpha-Methylnorepinephrine',
@@ -630,116 +723,109 @@ export const sympatholyticsPages: ReviewPage[] = [
             sourcePageNumber: 3
           },
           {
-            id: 422,
-            questionNumberLabel: 'Question 22',
+            id: 423,
+            questionNumberLabel: 'Question 3',
             title: 'Enzymes in Methyldopa Bioactivation',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following enzymes directly contribute to the central bioactivation of methyldopa to its active false neurotransmitter? (Select the correct pair)',
+            questionStem: 'Which of the following enzymes contribute(s) to methyldopa bioactivation? (Select all that apply)',
             options: [
-              'Sulfotransferase and Acetyltransferase',
-              'Aromatic L-amino acid decarboxylase and Dopamine beta-hydroxylase',
-              'Catechol-O-methyltransferase (COMT) and Monoamine oxidase (MAO)',
-              'CYP2D6 and Carboxylesterase'
+              'Sulfotransferase',
+              'Decarboxylase (Aromatic L-amino acid decarboxylase)',
+              'β-Hydroxylase (Dopamine β-hydroxylase)',
+              'Acetyltransferase',
+              'Catechol-O-methyltransferase (COMT)',
+              'Monoamine oxidase (MAO)'
             ],
             correctIndex: 1,
             optionExplanations: [
-              'Incorrect: Sulfotransferases inactivate methyldopa in the gut wall.',
-              'Correct: Methyldopa is decarboxylated by aromatic L-amino acid decarboxylase to alpha-methyldopamine, which is then stereospecifically hydroxylated by dopamine beta-hydroxylase to active (1R,2S)-alpha-methylnorepinephrine.',
-              'Incorrect: COMT and MAO degrade catecholamines into inactive metabolites.',
-              'Incorrect: CYPs and esterases are not involved in methyldopa bioactivation.'
+              'Incorrect: Sulfotransferase inactivates methyldopa in the gut wall.',
+              'Correct: Aromatic L-amino acid decarboxylase converts methyldopa to alpha-methyldopamine. Dopamine beta-hydroxylase then hydroxylates it to (1R,2S)-alpha-methylnorepinephrine.',
+              'Correct: Dopamine beta-hydroxylase installs the chiral beta-OH group.',
+              'Incorrect: Acetyltransferase is not involved in methyldopa bioactivation.',
+              'Incorrect: COMT degrades catecholamines into inactive 3-O-methyl metabolites.',
+              'Incorrect: MAO degrades biogenic amines.'
             ],
             overallExplanation: 'Bioactivation of methyldopa requires: (1) Aromatic L-amino acid decarboxylase (removes carboxylic acid), followed by (2) Dopamine beta-hydroxylase (introduces the chiral beta-hydroxyl group).',
             highYieldPearl: 'Methyldopa bioactivation pathway: Methyldopa -> [L-Aromatic amino acid decarboxylase] -> alpha-Methyldopamine -> [Dopamine beta-hydroxylase] -> (1R,2S)-alpha-Methylnorepinephrine.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 3, Question 22',
             sourcePageNumber: 3
-          }
-        ]
-      },
-      {
-        sectionTitle: 'Direct vs Indirect Sympatholytics & Sites of Action',
-        structures: [
-          SYMPATHOLYTICS_STRUCTURES.clonidine,
-          SYMPATHOLYTICS_STRUCTURES.reserpine,
-          SYMPATHOLYTICS_STRUCTURES.prazosin,
-          SYMPATHOLYTICS_STRUCTURES.methyldopa
-        ],
-        questions: [
+          },
           {
-            id: 423,
-            questionNumberLabel: 'Question 23',
-            title: 'Mechanisms of Drugs I - IV (Clonidine, Reserpine, Prazosin, Methyldopa)',
+            id: 424,
+            questionNumberLabel: 'Question 4',
+            title: 'Mechanisms of Drugs I - IV',
             category: 'Pharmacology MOA',
             type: 'sub-statements',
-            questionStem: 'Consider the antihypertensive drugs I (Clonidine), II (Reserpine), III (Prazosin), and IV (Methyldopa) to evaluate the truth of each mechanistic statement:',
+            questionStem: 'True or False (considering the mechanism of Drugs I through IV):',
             subStatements: [
               {
                 id: 'a',
-                text: 'Drug I (Clonidine) is a selective alpha-2 adrenergic agonist.',
+                text: 'Drug I is a selective alpha-2 agonist.',
                 isCorrect: true,
-                explanation: 'True: Clonidine stimulates presynaptic alpha-2 receptors.'
+                explanation: 'True: Drug I (Clonidine) selectively stimulates presynaptic alpha-2 receptors.'
               },
               {
                 id: 'b',
-                text: 'Drug II (Reserpine) is an adrenergic neurotransmitter-depleting agent.',
+                text: 'Drug II is an adrenergic neurotransmitter-depleting agent.',
                 isCorrect: true,
-                explanation: 'True: Reserpine irreversibly inhibits VMAT2, preventing vesicular storage and causing intraneuronal degradation of norepinephrine, dopamine, and serotonin.'
+                explanation: 'True: Drug II (Reserpine) irreversibly inhibits VMAT2, preventing vesicular storage and causing intraneuronal degradation of norepinephrine, dopamine, and serotonin.'
               },
               {
                 id: 'c',
-                text: 'Drug III (Prazosin) is a selective alpha-1 antagonist with a vasodilatory effect.',
+                text: 'Drug III is a selective alpha-1 antagonist with a vasodilatory effect.',
                 isCorrect: true,
-                explanation: 'True: Prazosin selectively blocks post-synaptic vascular alpha-1 receptors, causing arterial and venous dilation.'
+                explanation: 'True: Drug III (Prazosin) selectively blocks post-synaptic vascular alpha-1 receptors, causing arterial and venous dilation.'
               },
               {
                 id: 'd',
-                text: 'Drug IV (Methyldopa) is a prodrug that gets activated centrally to become an alpha-2 agonist.',
+                text: 'Drug IV is a prodrug that gets activated to become an alpha-2 agonist.',
                 isCorrect: true,
-                explanation: 'True: Methyldopa is converted to alpha-methylnorepinephrine in brainstem neurons.'
+                explanation: 'True: Drug IV (Methyldopa) is converted to alpha-methylnorepinephrine in brainstem neurons.'
               }
             ],
-            overallExplanation: 'Clonidine (alpha-2 agonist), Reserpine (VMAT2 depleter), Prazosin (selective alpha-1 blocker), and Methyldopa (prodrug to alpha-2 agonist) represent distinct classes of sympatholytic agents.',
+            overallExplanation: 'Drug I (Clonidine: alpha-2 agonist), Drug II (Reserpine: VMAT2 depleter), Drug III (Prazosin: selective alpha-1 blocker), and Drug IV (Methyldopa: prodrug to alpha-2 agonist) represent distinct classes of sympatholytic agents.',
             highYieldPearl: 'Reserpine = VMAT2 irreversible blocker -> catecholamine depletion -> depression and severe sedation. Prazosin = selective alpha-1 antagonist -> first-dose syncope.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 3, Question 23',
             sourcePageNumber: 3
           },
           {
-            id: 424,
-            questionNumberLabel: 'Question 24',
+            id: 425,
+            questionNumberLabel: 'Question 5',
             title: 'Sites of Action: Central vs Peripheral',
             category: 'Pharmacology MOA',
             type: 'sub-statements',
-            questionStem: 'Regarding the primary anatomical site of action for Drugs I - IV (Clonidine, Reserpine, Prazosin, Methyldopa):',
+            questionStem: 'True or False (considering the sites of action of Drugs I through IV):',
             subStatements: [
               {
                 id: 'a',
-                text: 'Drug I (Clonidine) is a centrally acting sympatholytic.',
+                text: 'Drug I is a centrally acting sympatholytic.',
                 isCorrect: true,
-                explanation: 'True: Acts on alpha-2 receptors in the medulla.'
+                explanation: 'True: Clonidine acts on alpha-2 receptors in the medulla.'
               },
               {
                 id: 'b',
-                text: 'Drug II (Reserpine) acts centrally and peripherally by depleting catecholamines.',
+                text: 'Drug II is centrally acting sympatholytic.',
                 isCorrect: true,
                 explanation: 'True: Reserpine penetrates the CNS (causing severe depression) and also depletes peripheral sympathetic nerve terminals.'
               },
               {
                 id: 'c',
-                text: 'Drug III (Prazosin) is a centrally acting sympatholytic.',
+                text: 'Drug III is a centrally acting sympatholytic.',
                 isCorrect: false,
                 explanation: 'False: Prazosin acts peripherally on vascular smooth muscle post-junctional alpha-1 receptors.'
               },
               {
                 id: 'd',
-                text: 'Drug IV (Methyldopa) is a peripherally acting sympatholytic.',
+                text: 'Drug IV is peripherally acting sympatholytic.',
                 isCorrect: false,
                 explanation: 'False: Methyldopa must enter the brain via LAT1 to exert central sympatholytic action.'
               },
               {
                 id: 'e',
-                text: 'Drugs I and IV are centrally acting, whereas Drug III is peripherally acting.',
-                isCorrect: true,
-                explanation: 'True: Clonidine and Methyldopa are central; Prazosin is peripheral.'
+                text: 'Drugs I and IV are peripherally acting sympatholytics whereas drugs II and III are centrally acting sympatholytics.',
+                isCorrect: false,
+                explanation: 'False: Drugs I and IV are centrally acting; Drug III is peripherally acting.'
               }
             ],
             overallExplanation: 'Clonidine and Methyldopa reduce sympathetic drive centrally in the vasomotor center of the medulla. Prazosin acts peripherally directly on vascular smooth muscle alpha-1 receptors.',
@@ -753,63 +839,76 @@ export const sympatholyticsPages: ReviewPage[] = [
   },
 
   // ---------------------------------------------------------------------------
-  // PAGE 3: Alpha-1 Antagonists & Nebivolol Pharmacogenomics (Questions 25 - 43)
+  // PAGE 4: Aryloxypropanolamines vs Arylethanolamines & Postganglionic Agents (Questions 25 - 27)
   // ---------------------------------------------------------------------------
   {
-    pageNumber: 3,
-    title: 'Alpha-1 Blockers, Quinazoline SAR & Nebivolol CYP2D6 Polymorphism',
-    subtitle: 'Aryloxypropanolamine vs arylethanolamine comparisons, uroselective BPH agents, and nebivolol metabolic phenotypes',
+    pageNumber: 4,
+    title: 'Aryloxypropanolamine vs. Arylethanolamine SAR & Postganglionic Agents',
+    subtitle: 'Oxymethylene spacer insertion, chiral priority reversal, COMT resistance, and basicity of central vs. peripheral guanidines',
     sections: [
       {
-        sectionTitle: 'Aryloxypropanolamine vs Arylethanolamine SAR Comparison',
+        sectionTitle: 'Comparative Stereochemistry & Adrenergic Neuron Blockers',
+        block_instructions: 'Consider Molecules I & II, Sympatholytic I, and Drugs I & II to answer questions 1–3.',
+        structures: [
+          SYMPATHOLYTICS_STRUCTURES.propranolol,
+          SYMPATHOLYTICS_STRUCTURES.pindolol,
+          SYMPATHOLYTICS_STRUCTURES.guanfacine,
+          SYMPATHOLYTICS_STRUCTURES.guanethidine,
+        ],
         questions: [
           {
-            id: 425,
-            questionNumberLabel: 'Question 25',
-            title: 'Propranolol vs Isoproterenol Structure-Activity Comparison',
+            id: 426,
+            questionNumberLabel: 'Question 1',
+            title: 'Aryloxypropanolamine vs Arylethanolamine SAR Comparison',
             category: 'Medicinal Chemistry SAR',
             type: 'sub-statements',
-            questionStem: 'Consider the chemical structures of Molecule I (Propranolol, an aryloxypropanolamine) and Molecule II (Isoproterenol, an arylethanolamine) to evaluate each statement:',
+            questionStem: 'Consider the chemical structures of Molecules I and II to indicate whether each of the following statements is true or false:',
             subStatements: [
               {
                 id: 'a',
-                text: 'Molecule I is an aryloxypropanolamine, whereas Molecule II is an arylethanolamine.',
+                text: 'Molecule I is aryloxypropanolamine whereas Molecule II is arylethanolamine.',
                 isCorrect: true,
-                explanation: 'True: Propranolol contains an ether oxymethylene spacer; isoproterenol lacks this spacer.'
+                explanation: 'True: Molecule I (Propranolol) contains an ether oxymethylene spacer; Molecule II (Isoproterenol) lacks this spacer.'
               },
               {
                 id: 'b',
-                text: 'Molecule I is a beta-antagonist, whereas Molecule II is a beta-agonist.',
+                text: 'Molecule I is beta-antagonist whereas Molecule II is beta-agonist.',
                 isCorrect: true,
                 explanation: 'True: Propranolol is an antagonist; catecholamine isoproterenol is a nonselective beta-agonist.'
               },
               {
                 id: 'c',
-                text: 'The two molecules do not discriminate between beta-1 and beta-2 receptors (nonselective).',
+                text: 'The two molecules do not discriminate between beta-1 and beta-2 receptors.',
                 isCorrect: true,
                 explanation: 'True: Neither drug has cardioselectivity.'
               },
               {
                 id: 'd',
-                text: 'Molecule I is used to treat cardiovascular diseases, whereas Molecule II has minimal routine clinical use.',
+                text: 'Molecule I can be used to treat a host of cardiovascular diseases whereas Molecule II is not used clinically for routine hypertension.',
                 isCorrect: true,
-                explanation: 'True: Propranolol is widely used; isoproterenol is limited to acute heart block/bradycardia.'
+                explanation: 'True: Propranolol is widely used in cardiovascular disease; isoproterenol is limited to acute bradycardia/heart block.'
               },
               {
                 id: 'e',
-                text: 'The active orientation of the chiral OH in Molecule I is (2S) and in Molecule II is (1R).',
+                text: 'The orientation of -OH in Molecule I is -(2S) and in Molecule II is -(1R).',
                 isCorrect: true,
                 explanation: 'True: Due to Cahn-Ingold-Prelog priorities, (2S)-aryloxypropanolamine superimposes on (1R)-arylethanolamine.'
               },
               {
                 id: 'f',
-                text: 'Both molecules are metabolized by Catechol-O-methyltransferase (COMT).',
+                text: 'The two molecules are metabolized by COMT.',
                 isCorrect: false,
-                explanation: 'False: Propranolol has a naphthalene ring without catechol hydroxyls and is NOT a substrate for COMT; isoproterenol has a catechol diol and is rapidly metabolized by COMT.'
+                explanation: 'False: Molecule I (Propranolol) has a naphthalene ring without catechol hydroxyls and is NOT a substrate for COMT; Molecule II has a catechol diol and is rapidly metabolized by COMT.'
               },
               {
                 id: 'g',
-                text: 'Molecule I oral bioavailability is substantially higher than that of Molecule II.',
+                text: 'The two molecules are potentially associated with CNS effects.',
+                isCorrect: false,
+                explanation: 'False: Molecule I is lipophilic and crosses the BBB; Molecule II is a catecholamine that does not cross the BBB.'
+              },
+              {
+                id: 'h',
+                text: 'Molecule I oral bioavailability will likely be higher than that of Molecule II.',
                 isCorrect: true,
                 explanation: 'True: Propranolol can be taken orally (~25-30% bioavailable after first-pass); catecholamines have negligible oral bioavailability due to intestinal sulfation and COMT.'
               }
@@ -820,63 +919,81 @@ export const sympatholyticsPages: ReviewPage[] = [
             sourcePageNumber: 4
           },
           {
-            id: 426,
-            questionNumberLabel: 'Question 26',
+            id: 427,
+            questionNumberLabel: 'Question 2',
             title: 'Cardioselective Beta-Blocker with ISA',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following describes Sympatholytic I (Acebutolol)?',
+            questionStem: 'Which of the following statements is correct describing sympatholytic I?',
             options: [
-              'Highly lipophilic nonselective beta-blocker',
-              'Associated with pure quinidine-like effect without receptor blockade',
-              'Cardioselective (beta-1) blocker with intrinsic sympathomimetic activity (ISA)',
-              'Selective alpha-1 antagonist',
-              'Irreversible neurotransmitter depleter'
+              'It is highly lipophilic nonselective beta-blocker',
+              'It is associated with quinidine-like membrane stabilizing effect',
+              'It has intrinsic sympathomimetic activity',
+              'It can be used to treat hypertensive patients with a history of asthma or COPD',
+              'Statements c and d are correct'
             ],
             correctIndex: 2,
             optionExplanations: [
-              'Incorrect: Acebutolol is cardioselective.',
-              'Incorrect: It is a beta-receptor antagonist.',
-              'Correct: Acebutolol is a second-generation cardioselective beta-1 blocker that uniquely possesses intrinsic sympathomimetic activity (ISA) and mild membrane-stabilizing activity.',
-              'Incorrect: Acebutolol does not block alpha-1 receptors.',
-              'Incorrect: Not a depleter.'
+              'Incorrect: Sympatholytic I (Pindolol) is moderately lipophilic and has partial agonist activity.',
+              'Incorrect: It has weak membrane stabilizing activity, but its primary hallmark is ISA.',
+              'Correct: Sympatholytic I (Pindolol) is the prototypical beta-blocker with marked intrinsic sympathomimetic activity (ISA / partial agonist).',
+              'Incorrect: As a nonselective beta-blocker, it is contraindicated in asthma or COPD.',
+              'Incorrect: Statement d is false.'
             ],
-            overallExplanation: 'Acebutolol is a cardioselective beta-1 antagonist with intrinsic sympathomimetic activity and mild membrane-stabilizing properties.',
-            highYieldPearl: 'Acebutolol = Cardioselective (beta-1) + Intrinsic Sympathomimetic Activity (ISA). Metabolized to active diacetolol.',
+            overallExplanation: 'Sympatholytic I (Pindolol) has prominent intrinsic sympathomimetic activity, acting as a partial agonist that minimizes resting bradycardia, but remains contraindicated in reactive airway disease due to beta-2 blockade.',
+            highYieldPearl: 'Pindolol = nonselective beta-blocker with prominent Intrinsic Sympathomimetic Activity (ISA). Avoid in asthma/COPD.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 4, Question 26',
             sourcePageNumber: 4
           },
           {
-            id: 427,
-            questionNumberLabel: 'Question 27',
-            title: 'Centrally Acting Guanidines: Guanfacine vs Guanethidine',
+            id: 428,
+            questionNumberLabel: 'Question 3',
+            title: 'Centrally Acting Guanidines vs Peripheral Neuron Blockers',
             category: 'Medicinal Chemistry SAR',
             type: 'sub-statements',
-            questionStem: 'Consider the chemical structures of Drug I (Guanfacine) and Drug II (Guanethidine) to evaluate each statement:',
+            questionStem: 'Consider the chemical structures of Drugs I and II and state whether each of the following statements is true or false:',
             subStatements: [
               {
                 id: 'a',
-                text: 'Both drugs contain a guanidine-like nitrogenous functional group.',
+                text: 'The two drugs are guanidine-containing molecules.',
                 isCorrect: true,
-                explanation: 'True: Guanfacine has an acylguanidine; guanethidine has an alkylguanidine attached to an azocine ring.'
+                explanation: 'True: Drug I (Guanfacine) has an acylguanidine; Drug II (Guanethidine) has an alkylguanidine attached to an azocine ring.'
               },
               {
                 id: 'b',
-                text: 'Drug I (Guanfacine) is more lipophilic than Drug II (Guanethidine).',
+                text: 'Drug I is more lipophilic than Drug II.',
                 isCorrect: true,
                 explanation: 'True: Guanfacine has a dichlorophenyl group and lower pKa (~7.1), allowing it to penetrate the CNS; guanethidine has a pKa >12 and is completely ionized, preventing CNS penetration.'
               },
               {
                 id: 'c',
-                text: 'Drug I (Guanfacine) is more basic than Drug II (Guanethidine).',
+                text: 'Drug I is more basic than Drug II.',
                 isCorrect: false,
                 explanation: 'False: The carbonyl group in guanfacine is electron-withdrawing, lowering guanidine basicity (pKa ~7.1); guanethidine is a strongly basic alkylguanidine (pKa ~12-13).'
               },
               {
                 id: 'd',
-                text: 'Drug I is a direct central alpha-2 agonist, whereas Drug II is a peripheral adrenergic neuron blocker.',
+                text: 'The two drugs are direct sympatholytics.',
+                isCorrect: false,
+                explanation: 'False: Drug I is a central alpha-2 agonist; Drug II is an indirect postganglionic adrenergic neuron blocker.'
+              },
+              {
+                id: 'e',
+                text: 'Drug I is direct sympatholytic whereas Drug II is indirect sympatholytic.',
                 isCorrect: true,
-                explanation: 'True: Guanfacine stimulates central alpha-2A receptors; guanethidine is taken up by NET into peripheral terminals where it displaces norepinephrine and destroys vesicles.'
+                explanation: 'True: Drug I acts directly at central receptors (sympatholytic net effect), while Drug II acts indirectly by displacing norepinephrine.'
+              },
+              {
+                id: 'f',
+                text: 'Drug I is alpha-2 agonist whereas Drug II is adrenergic neuronal depleting agent.',
+                isCorrect: true,
+                explanation: 'True: Guanfacine stimulates central alpha-2A receptors; guanethidine destroys/depletes peripheral storage vesicles.'
+              },
+              {
+                id: 'g',
+                text: 'The two drugs are used as centrally acting antihypertensive agents.',
+                isCorrect: false,
+                explanation: 'False: Only Drug I acts centrally; Drug II is permanently protonated and restricted to the periphery.'
               }
             ],
             overallExplanation: 'Guanfacine contains an electron-withdrawing acyl group that reduces guanidine basicity (pKa ~7.1), permitting BBB entry and central alpha-2 agonism. Guanethidine is strongly basic (pKa ~12), permanently protonated, restricted to the periphery, and acts as an adrenergic neuron depleter.',
@@ -885,28 +1002,46 @@ export const sympatholyticsPages: ReviewPage[] = [
             sourcePageNumber: 4
           }
         ]
-      },
+      }
+    ]
+  },
+
+  // ---------------------------------------------------------------------------
+  // PAGE 5: Mixed Alpha/Beta Antagonists & Quinazolines Introduction (Questions 28 - 33)
+  // ---------------------------------------------------------------------------
+  {
+    pageNumber: 5,
+    title: 'Mixed Alpha/Beta Antagonists (Carvedilol Domains) & Quinazolines Introduction',
+    subtitle: 'Carvedilol structural domains for binding, subtype selectivity, and pharmacokinetics; quinazoline-piperazine chemical classification',
+    sections: [
       {
-        sectionTitle: 'Carvedilol Structural Domains & Triple Mechanism',
-        structures: [SYMPATHOLYTICS_STRUCTURES.carvedilol],
+        sectionTitle: 'Carvedilol Domains & Quinazoline Chemistry',
+        block_instructions: 'Consider the chemical structure of Drug C (Carvedilol with structural domains a, b, c) and Structures I through IV to answer questions 1–6.',
+        structures: [
+          SYMPATHOLYTICS_STRUCTURES.carvedilol,
+          SYMPATHOLYTICS_STRUCTURES.prazosin,
+          SYMPATHOLYTICS_STRUCTURES.terazosin,
+          SYMPATHOLYTICS_STRUCTURES.doxazosin,
+          SYMPATHOLYTICS_STRUCTURES.tamsulosin,
+        ],
         questions: [
           {
-            id: 428,
-            questionNumberLabel: 'Question 28',
-            title: 'Mechanistic Classification of Carvedilol',
+            id: 429,
+            questionNumberLabel: 'Question 1',
+            title: 'Mechanistic Classification of Drug C',
             category: 'Pharmacology MOA',
             type: 'multiple-choice',
-            questionStem: 'What is the complete pharmacological mechanistic classification of Carvedilol (Coreg)?',
+            questionStem: 'What is the pharmacological mechanistic class of Drug C (Carvedilol)?',
             options: [
               'Selective beta-1 antagonist only',
-              'Nonselective beta-blocker (beta-1 and beta-2) with concurrent selective alpha-1 adrenergic receptor blockade and antioxidant activity',
+              'Nonselective beta-blocker with concurrent selective alpha-1 adrenergic receptor blockade and antioxidant activity',
               'Direct-acting smooth muscle calcium channel blocker',
               'Centrally-acting alpha-2 agonist'
             ],
             correctIndex: 1,
             optionExplanations: [
-              'Incorrect: Carvedilol blocks beta-1, beta-2, and alpha-1 receptors.',
-              'Correct: Carvedilol is a nonselective beta-blocker (beta-1/beta-2) that also competitively blocks vascular alpha-1 receptors (promoting vasodilation) and provides carbazole-mediated free-radical scavenging.',
+              'Incorrect: Drug C blocks beta-1, beta-2, and alpha-1 receptors.',
+              'Correct: Drug C (Carvedilol) is a nonselective beta-blocker (beta-1/beta-2) that also competitively blocks vascular alpha-1 receptors (promoting vasodilation) and provides carbazole-mediated free-radical scavenging.',
               'Incorrect: It is not a CCB.',
               'Incorrect: It is not an alpha-2 agonist.'
             ],
@@ -916,98 +1051,87 @@ export const sympatholyticsPages: ReviewPage[] = [
             sourcePageNumber: 5
           },
           {
-            id: 429,
-            questionNumberLabel: 'Question 29',
-            title: 'Receptor Binding Domains in Carvedilol',
+            id: 430,
+            questionNumberLabel: 'Question 2',
+            title: 'Receptor Binding Domains in Drug C',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which structural domain of Carvedilol is responsible for binding to beta-adrenergic receptors vs alpha-1 adrenergic receptors?',
+            questionStem: 'Which structural domain(s) of Drug C is(are) responsible for binding to receptors?',
             options: [
-              'The carbazole ring binds alpha-1; the methoxyphenyl ring binds beta',
-              'The aryloxypropanolamine chain binds beta-receptors; the bulky phenoxyethylamino extension binds alpha-1 receptors',
-              'The methyl group binds beta; the ether binds alpha-1',
-              'The secondary amine alone binds both receptors identically'
+              'Structural domain "a" (carbazole ring) alone',
+              'Structural domain "b" (aryloxypropanolamine chain) for beta-receptors, and domain "c" (phenoxyethylamine extension) for alpha-1 receptors',
+              'Structural domain "c" alone for both receptors',
+              'Only the secondary hydroxyl without the aromatic ring'
             ],
             correctIndex: 1,
             optionExplanations: [
-              'Incorrect: Incorrect assignment of structural domains.',
-              'Correct: The classical aryloxypropanolamine motif with its chiral hydroxyl and secondary amine mimics norepinephrine to bind beta-1/beta-2 receptors, while the extended, bulky phenoxyethylamine aromatic substituent fits the deeper accessory hydrophobic pocket of alpha-1 receptors.',
-              'Incorrect: Non-mechanistic.',
-              'Incorrect: Binding requires the entire pharmacophoric array.'
+              'Incorrect: The carbazole ring contributes to antioxidant and lipophilic properties, but binding requires the ethanolamine/propanolamine motif.',
+              'Correct: Structural domain "b" (the classical aryloxypropanolamine chain with chiral hydroxyl and amine) binds beta-receptors, while structural domain "c" (the extended phenoxyethylamino tail) fits the accessory hydrophobic pocket of alpha-1 receptors.',
+              'Incorrect: Domain "c" alone does not confer beta-blockade.',
+              'Incorrect: Receptor binding requires the entire pharmacophoric array.'
             ],
-            overallExplanation: 'Carvedilol incorporates two distinct pharmacophores in one molecule: the aryloxypropanolamine core binds beta-receptors, while the bulky phenoxyethyl extension confers alpha-1 receptor affinity.',
-            highYieldPearl: 'Carvedilol dual pharmacophore: Aryloxypropanolamine = Beta-blockade. Phenoxyethylamine tail = Alpha-1 blockade.',
+            overallExplanation: 'Drug C incorporates two distinct pharmacophores in one molecule: domain "b" (aryloxypropanolamine core) binds beta-receptors, while domain "c" (bulky phenoxyethyl extension) confers alpha-1 receptor affinity.',
+            highYieldPearl: 'Carvedilol dual pharmacophore: Domain b (aryloxypropanolamine) = Beta-blockade. Domain c (phenoxyethylamine tail) = Alpha-1 blockade.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 5, Question 29',
             sourcePageNumber: 5
           },
           {
-            id: 430,
-            questionNumberLabel: 'Question 30',
-            title: 'Tissue / Subtype Specificity Domain in Carvedilol',
+            id: 431,
+            questionNumberLabel: 'Question 3',
+            title: 'Tissue / Subtype Specificity Domain in Drug C',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which domain in Carvedilol is responsible for imparting alpha-1 receptor selectivity over other adrenergic subtypes?',
+            questionStem: 'Which structural domain(s) is(are) responsible for tissue specificity (or receptor subtype specificity)?',
             options: [
-              'The central secondary hydroxyl group',
-              'The substituted phenoxyethyl group on the amine terminus',
-              'The 1,2,4-thiadiazine ring',
-              'The sulfamoyl group'
+              'Structural domain "a" (carbazole nucleus)',
+              'Structural domain "b" (aryloxypropanolamine bridge)',
+              'Structural domain "c" (substituted phenoxyethylamino tail)',
+              'The methoxy substituent on the carbazole ring'
             ],
-            correctIndex: 1,
+            correctIndex: 2,
             optionExplanations: [
-              'Incorrect: Hydroxyl group is shared among all beta-blockers.',
-              'Correct: Bulky arylalkyl substituents on the amino nitrogen (e.g., phenoxyethyl) provide steric interactions that favor alpha-1 receptor interaction over standard beta-selectivity.',
-              'Incorrect: Thiadiazine is found in thiazides, not carvedilol.',
-              'Incorrect: Sulfamoyl is absent in carvedilol.'
+              'Incorrect: Domain "a" confers lipophilicity and antioxidant scavenging.',
+              'Incorrect: Domain "b" provides standard nonselective beta-antagonist affinity.',
+              'Correct: Structural domain "c" (the bulky substituted phenoxyethyl group on the amine nitrogen) provides steric and hydrophobic interactions that selectively engage vascular post-junctional alpha-1 adrenergic receptors, conferring vasodilatory tissue selectivity.',
+              'Incorrect: Methoxy substituent does not determine subtype selectivity.'
             ],
-            overallExplanation: 'The bulky phenoxyethyl group attached to the amino nitrogen projects into an accessory hydrophobic binding region of the alpha-1 adrenergic receptor, providing alpha-1 antagonism.',
-            highYieldPearl: 'N-phenoxyethyl substituent in Carvedilol = essential domain for alpha-1 receptor affinity and vasodilation.',
+            overallExplanation: 'The bulky phenoxyethyl extension (domain "c") attached to the amino nitrogen projects into an accessory hydrophobic binding region of the alpha-1 adrenergic receptor, providing alpha-1 antagonism.',
+            highYieldPearl: 'Domain c (N-phenoxyethyl substituent) = essential domain for alpha-1 receptor affinity and vasodilatory action.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 5, Question 30',
             sourcePageNumber: 5
           },
           {
-            id: 431,
-            questionNumberLabel: 'Question 31',
-            title: 'Pharmacokinetic Determinants of Carvedilol',
+            id: 432,
+            questionNumberLabel: 'Question 4',
+            title: 'Pharmacokinetic Determinants of Drug C',
             category: 'Pharmacokinetics ADME',
             type: 'multiple-choice',
-            questionStem: 'Which structural domain governs the extensive plasma protein binding (>98%) and hepatic CYP2D6/CYP2C9 metabolism of Carvedilol?',
+            questionStem: 'Which structural domain(s) influence(s) the pharmacokinetic aspects of Drug C?',
             options: [
-              'The tricyclic lipophilic carbazole ring system',
-              'The aliphatic hydroxyl group',
-              'The secondary amine nitrogen',
-              'The methoxy ether'
+              'Structural domain "a" (lipophilic tricyclic carbazole ring system)',
+              'Structural domain "b" exclusively',
+              'The aliphatic secondary hydroxyl group alone',
+              'The central secondary amine alone'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: The planar, highly lipophilic carbazole ring confers high lipid solubility and drives extensive plasma albumin binding (~98%) and extensive hepatic CYP2D6/CYP2C9 clearance.',
+              'Correct: Structural domain "a" (the planar, highly lipophilic carbazole ring) confers high lipid solubility and drives extensive plasma albumin binding (~98%), large volume of distribution, and extensive hepatic CYP2D6/CYP2C9 clearance.',
+              'Incorrect: Domain "b" is hydrophilic and polar.',
               'Incorrect: Hydroxyl increases water solubility.',
-              'Incorrect: The amine is basic and protonated at pH 7.4.',
-              'Incorrect: The methoxy group contributes minor metabolic clearance.'
+              'Incorrect: The amine is basic and protonated at pH 7.4.'
             ],
-            overallExplanation: 'Carvedilol high lipophilicity is driven by its fused tricyclic carbazole core, resulting in high protein binding, extensive hepatic clearance, and stereoselective first-pass metabolism.',
-            highYieldPearl: 'Carbazole core = lipophilicity, >98% protein binding, extensive hepatic clearance, and antioxidant activity.',
+            overallExplanation: 'Carvedilol high lipophilicity is driven by domain "a" (fused tricyclic carbazole core), resulting in high protein binding, extensive hepatic clearance, and stereoselective first-pass metabolism.',
+            highYieldPearl: 'Domain a (carbazole core) = high lipophilicity, >98% protein binding, extensive hepatic clearance, and antioxidant activity.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 5, Question 31',
             sourcePageNumber: 5
-          }
-        ]
-      },
-      {
-        sectionTitle: 'Quinazoline Alpha-1 Antagonists SAR & Uroselectivity',
-        structures: [
-          SYMPATHOLYTICS_STRUCTURES.prazosin,
-          SYMPATHOLYTICS_STRUCTURES.terazosin,
-          SYMPATHOLYTICS_STRUCTURES.doxazosin,
-          SYMPATHOLYTICS_STRUCTURES.tamsulosin
-        ],
-        questions: [
+          },
           {
-            id: 432,
-            questionNumberLabel: 'Question 32',
-            title: 'Chemical Class of Prazosin and Terazosin',
+            id: 433,
+            questionNumberLabel: 'Question 5',
+            title: 'Chemical Class of Drugs I and II',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'What is the chemical class of Drugs I (Prazosin) and II (Terazosin)?',
+            questionStem: 'What is the chemical class of Drugs I and II?',
             options: [
               'Catecholamines',
               'Quinazoline-piperazines',
@@ -1018,7 +1142,7 @@ export const sympatholyticsPages: ReviewPage[] = [
             correctIndex: 1,
             optionExplanations: [
               'Incorrect: Not catecholamines.',
-              'Correct: Prazosin, Terazosin, and Doxazosin contain a 4-amino-6,7-dimethoxyquinazoline fused bicyclic ring linked to a central piperazine ring.',
+              'Correct: Drug I (Prazosin) and Drug II (Terazosin) contain a 4-amino-6,7-dimethoxyquinazoline fused bicyclic ring linked to a central piperazine ring.',
               'Incorrect: They possess a piperazine heterocycle, not an acyclic propylenediamine.',
               'Incorrect: Not benzenesulfonamides.',
               'Incorrect: Silodosin contains an indoline, but prazosin and terazosin are quinazoline-piperazines.'
@@ -1029,39 +1153,65 @@ export const sympatholyticsPages: ReviewPage[] = [
             sourcePageNumber: 5
           },
           {
-            id: 433,
-            questionNumberLabel: 'Question 33',
-            title: 'Adrenergic Category of Quinazolines',
+            id: 434,
+            questionNumberLabel: 'Question 6',
+            title: 'Adrenergic Category of Drugs I - IV',
             category: 'Pharmacology MOA',
             type: 'multiple-choice',
-            questionStem: 'What is the adrenergic category of Prazosin, Terazosin, and Doxazosin?',
+            questionStem: 'What is the adrenergic category of the above drugs (Drugs I through IV)?',
             options: [
               'Direct sympathomimetics',
               'Indirect sympathomimetics',
               'Direct sympatholytics',
-              'Indirect sympatholytics'
+              'Indirect sympatholytics',
+              'a and d'
             ],
             correctIndex: 2,
             optionExplanations: [
               'Incorrect: They do not stimulate adrenergic receptors.',
               'Incorrect: They do not release catecholamines.',
-              'Correct: They directly bind and competitively block post-junctional alpha-1 adrenergic receptors on vascular smooth muscle.',
-              'Incorrect: They are not depleters or false transmitters.'
+              'Correct: They directly bind and competitively block post-junctional alpha-1 adrenergic receptors on vascular smooth muscle and/or prostatic tissue.',
+              'Incorrect: They are not depleters or false transmitters.',
+              'Incorrect: Option c is the single correct classification.'
             ],
-            overallExplanation: 'Quinazoline alpha-1 antagonists are direct sympatholytics because they block the receptor directly without interfering with neurotransmitter synthesis or vesicular release.',
-            highYieldPearl: 'Quinazolines = direct-acting selective alpha-1 sympatholytics.',
+            overallExplanation: 'Quinazoline and sulfonamide alpha-1 antagonists are direct sympatholytics because they block the receptor directly without interfering with neurotransmitter synthesis or vesicular release.',
+            highYieldPearl: 'Alpha-1 blockers (Prazosin, Terazosin, Doxazosin, Tamsulosin) = direct-acting selective alpha-1 sympatholytics.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 5, Question 33',
             sourcePageNumber: 5
-          },
+          }
+        ]
+      }
+    ]
+  },
+
+  // ---------------------------------------------------------------------------
+  // PAGE 6: Quinazoline SAR, BPH & Nebivolol Pharmacogenomics (Questions 34 - 42)
+  // ---------------------------------------------------------------------------
+  {
+    pageNumber: 6,
+    title: 'Quinazoline SAR, Uroselectivity & Nebivolol CYP2D6 Pharmacogenomics',
+    subtitle: 'Selective alpha-1 antagonism, alpha-1A uroselectivity in BPH, furan ring modification, and CYP2D6 metabolizer phenotypes',
+    sections: [
+      {
+        sectionTitle: 'Quinazoline SAR & BPH Selectivity',
+        block_instructions: 'Consider Drugs I through IV and Drug N to answer questions 1–9.',
+        structures: [
+          SYMPATHOLYTICS_STRUCTURES.prazosin,
+          SYMPATHOLYTICS_STRUCTURES.terazosin,
+          SYMPATHOLYTICS_STRUCTURES.doxazosin,
+          SYMPATHOLYTICS_STRUCTURES.tamsulosin,
+          SYMPATHOLYTICS_STRUCTURES.nebivolol,
+        ],
+        questions: [
           {
-            id: 434,
-            questionNumberLabel: 'Question 34',
+            id: 435,
+            questionNumberLabel: 'Question 1',
             title: 'Pharmacological Mechanistic Class',
             category: 'Pharmacology MOA',
             type: 'multiple-choice',
-            questionStem: 'What is the exact pharmacological mechanistic class of Prazosin, Terazosin, and Doxazosin?',
+            questionStem: 'What is the pharmacological mechanistic class of the above drugs (Drugs I through IV)?',
             options: [
-              'Nonselective alpha-antagonists (alpha-1 and alpha-2)',
+              'Nonselective alpha-antagonists',
               'Selective alpha-1 antagonists',
               'Selective alpha-2 agonists',
               'Nonselective beta-antagonists',
@@ -1070,174 +1220,175 @@ export const sympatholyticsPages: ReviewPage[] = [
             correctIndex: 1,
             optionExplanations: [
               'Incorrect: Phenoxybenzamine and Phentolamine are nonselective alpha-antagonists.',
-              'Correct: Prazosin, Terazosin, and Doxazosin are highly selective for alpha-1 over alpha-2 receptors (>1000-fold selectivity), avoiding the reflex tachycardia caused by presynaptic alpha-2 blockade.',
+              'Correct: Drugs I through IV are selective alpha-1 antagonists that spare presynaptic alpha-2 autoreceptors, leaving the negative feedback loop intact and causing less reflex tachycardia than nonselective alpha-blockers.',
               'Incorrect: Clonidine is an alpha-2 agonist.',
               'Incorrect: Propranolol is a nonselective beta-blocker.',
               'Incorrect: Metoprolol is a selective beta-1 blocker.'
             ],
-            overallExplanation: 'By sparing presynaptic alpha-2 autoreceptors, selective alpha-1 blockers leave the negative feedback mechanism intact, resulting in less reflex tachycardia than nonselective alpha-blockers like phentolamine.',
-            highYieldPearl: 'Selective alpha-1 blockade spares presynaptic alpha-2 autoreceptors -> less reflex tachycardia than nonselective alpha blockers (phentolamine).',
+            overallExplanation: 'Selective alpha-1 antagonists competitively block post-junctional alpha-1 receptors on vascular and prostatic smooth muscle, causing vasodilation and relief of bladder outlet obstruction.',
+            highYieldPearl: 'Selective alpha-1 blockade spares presynaptic alpha-2 autoreceptors -> intact negative feedback -> less reflex tachycardia than nonselective alpha blockers.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 6, Question 34',
             sourcePageNumber: 6
           },
           {
-            id: 435,
-            questionNumberLabel: 'Question 35',
-            title: 'Subtype Selectivity Ranking: Alpha-1A (Prostate) vs Alpha-1B (Vascular)',
+            id: 436,
+            questionNumberLabel: 'Question 2',
+            title: 'Selectivity Ranking Towards Alpha-1A Receptors',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Rank the following drugs from MOST selective to LEAST selective towards the alpha-1A receptor subtype found predominantly in the prostate and bladder neck (Tamsulosin, Silodosin, Prazosin, Terazosin):',
+            questionStem: 'Rank the above drugs from the most selective to the least selective towards α1A-receptor:',
             options: [
-              'Silodosin / Tamsulosin > Terazosin and Prazosin',
-              'Prazosin and Terazosin > Tamsulosin > Silodosin',
-              'Terazosin > Prazosin > Tamsulosin > Silodosin',
-              'All drugs display equal selectivity across all alpha-1 subtypes'
+              'Drug IV > Drug III > Drugs II and I',
+              'Drugs I and II > Drug III > Drug IV',
+              'Drug III > Drug IV > Drugs II and I',
+              'Drug I > Drug II > Drug III > Drug IV',
+              'Drug III > Drug IV > Drug II > Drug I'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Silodosin (~160-fold) and Tamsulosin (~10-20 fold) are uroselective alpha-1A antagonists. In contrast, quinazolines (Prazosin, Terazosin, Doxazosin) are non-subtype selective (equiponent at alpha-1A, 1B, and 1D).',
-              'Incorrect: Prazosin and terazosin do not discriminate between alpha-1 subtypes.',
-              'Incorrect: Terazosin is not subtype-selective.',
-              'Incorrect: Tamsulosin and silodosin are distinctly uroselective.'
+              'Correct: Drug IV (Tamsulosin) exhibits high selectivity (~10-20 fold) for the alpha-1A subtype localized in the prostate and bladder neck over the alpha-1B subtype in blood vessels. In contrast, quinazolines (Prazosin, Terazosin, Doxazosin) show little to no subtype selectivity (alpha-1A = alpha-1B = alpha-1D).',
+              'Incorrect: Drugs I and II are non-subtype selective.',
+              'Incorrect: Drug III does not surpass Drug IV in alpha-1A selectivity.',
+              'Incorrect: Drug IV is by far the most selective for alpha-1A.',
+              'Incorrect: Drug IV must be at the top of the ranking.'
             ],
-            overallExplanation: 'Tamsulosin and Silodosin are uroselective alpha-1A blockers that target smooth muscle in the prostate and bladder neck with minimal effect on vascular alpha-1B receptors, avoiding significant blood pressure drops.',
-            highYieldPearl: 'Uroselective Alpha-1A blockers = Tamsulosin & Silodosin (relieve BPH without lowering BP). Non-subtype selective = Prazosin, Terazosin, Doxazosin (treat both HTN and BPH).',
+            overallExplanation: 'Tamsulosin (Drug IV) is an arylalkylsulfonamide uroselective alpha-1A antagonist, whereas the classical quinazolines (Drugs I, II, III) are equipotent across alpha-1A, 1B, and 1D subtypes.',
+            highYieldPearl: 'Uroselectivity rank: Drug IV (Tamsulosin, selective alpha-1A) >> Drugs I, II, III (non-subtype selective quinazolines).',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 6, Question 35',
             sourcePageNumber: 6
           },
           {
-            id: 436,
-            questionNumberLabel: 'Question 36',
-            title: 'Quinazoline SAR: Essential vs Non-Essential Pharmacophoric Groups',
+            id: 437,
+            questionNumberLabel: 'Question 3',
+            title: 'Essential Pharmacophoric Groups for Drug I Binding',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'All of the following functional groups are essential for Prazosin binding to the alpha-1 adrenergic receptor EXCEPT:',
+            questionStem: 'All of the following functional groups are essential for Drug I binding to the adrenergic receptor EXCEPT:',
             options: [
-              'Methoxy groups at positions 6 and 7 of the quinazoline system',
-              'The furan-containing acyl group attached to the piperazine ring',
-              'The primary amino group at position 4 of the quinazoline ring',
-              'The ring nitrogen atom at position 1 of the quinazoline ring'
+              'Methoxy groups at positions-6 and 7 of the bicyclic heteroaromatic system',
+              'Furan-containing acyl group',
+              'The primary amino group at position-4 of the bicyclic heteroaromatic system',
+              'The nitrogen atom at position-1 of the bicyclic heteroaromatic system',
+              'c and d'
             ],
             correctIndex: 1,
             optionExplanations: [
-              'Incorrect: The 6,7-dimethoxy groups are critical for receptor binding affinity.',
-              'Correct: The acyl/furan substituent on the piperazine nitrogen dictates pharmacokinetic properties (half-life, clearance, solubility) rather than core receptor binding affinity. Replacing furan with tetrahydrofuran gives Terazosin (longer t1/2), and benzodioxan gives Doxazosin (longest t1/2).',
-              'Incorrect: The 4-amino group is part of the essential protonated pharmacophore.',
-              'Incorrect: The N1 nitrogen is protonated to form an ionic bond with the conserved Asp residue in the alpha-1 receptor.'
+              'Incorrect (essential): The 6,7-dimethoxy groups are critical for hydrogen bonding to receptor serine residues.',
+              'Correct (NOT essential): The furan ring of prazosin can be modified or replaced without loss of affinity. For example, reduction to tetrahydrofuran (Terazosin) or substitution with a benzodioxan (Doxazosin) maintains or enhances affinity and extends half-life.',
+              'Incorrect (essential): The 4-amino group is crucial for protonation and ionic anchoring.',
+              'Incorrect (essential): The N-1 nitrogen participates in essential hydrogen bonding.',
+              'Incorrect: Both c and d are essential.'
             ],
-            overallExplanation: 'The 4-amino-6,7-dimethoxyquinazoline scaffold is the core pharmacophore required for alpha-1 binding. The pendant acyl group on the piperazine nitrogen governs pharmacokinetics (Prazosin: 2-3h; Terazosin: 12h; Doxazosin: 20h).',
-            highYieldPearl: 'In quinazolines: 4-amino + 6,7-dimethoxy + N1 = binding pharmacophore. Piperazine acyl group = PK tuner (Prazosin t1/2 ~2h < Terazosin ~12h < Doxazosin ~20h).',
+            overallExplanation: 'The 4-amino-6,7-dimethoxyquinazoline core represents the essential pharmacophore. The acyl substituent on the piperazine nitrogen governs pharmacokinetics (duration of action) rather than receptor affinity.',
+            highYieldPearl: 'Quinazoline SAR: 4-amino, 6,7-dimethoxy, and N-1 are essential for receptor binding. The piperazine acyl substituent (furan/THF/benzodioxan) modulates PK and half-life.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 6, Question 36',
             sourcePageNumber: 6
           },
           {
-            id: 437,
-            questionNumberLabel: 'Question 37',
-            title: 'Dual Treatment: Hypertension and Benign Prostatic Hyperplasia',
+            id: 438,
+            questionNumberLabel: 'Question 4',
+            title: 'Dual Indication: Hypertension and Benign Prostatic Hyperplasia',
             category: 'Clinical Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the following alpha-1 blockers is clinically indicated to treat BOTH hypertension and symptoms of benign prostatic hyperplasia (BPH)?',
+            questionStem: 'Which of the above drugs can be used to treat hypertension as well as to alleviate symptoms of benign prostate hyperplasia?',
             options: [
-              'Prazosin, Terazosin, and Doxazosin',
-              'Tamsulosin only',
-              'Silodosin only',
-              'Esmolol'
+              'Drugs I, II, and III',
+              'Drug IV only',
+              'Drug I only',
+              'Drug N only'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Because quinazolines (Terazosin, Doxazosin, Prazosin) block both vascular alpha-1B receptors (lowering blood pressure) and prostatic alpha-1A receptors (relaxing bladder neck), they are uniquely suited for patients with co-existing HTN and BPH.',
-              'Incorrect: Tamsulosin is uroselective and not approved for hypertension.',
-              'Incorrect: Silodosin is uroselective and not approved for hypertension.',
-              'Incorrect: Esmolol is a beta-blocker.'
+              'Correct: Drugs I (Prazosin), II (Terazosin), and III (Doxazosin) block alpha-1B receptors in blood vessels (lowering blood pressure) and alpha-1A receptors in the prostate stroma (relaxing bladder neck smooth muscle), making them ideal for patients with concurrent hypertension and BPH.',
+              'Incorrect: Drug IV lacks significant vascular alpha-1B activity at standard doses.',
+              'Incorrect: Terazosin and Doxazosin are also approved for both.',
+              'Incorrect: Drug N is a beta-blocker, not an alpha-1 antagonist.'
             ],
-            overallExplanation: 'Non-subtype selective alpha-1 blockers (Doxazosin, Terazosin) relax both vascular smooth muscle (anti-HTN) and prostatic/bladder neck smooth muscle (anti-BPH).',
-            highYieldPearl: 'Terazosin & Doxazosin = dual indication for Hypertension + BPH. Tamsulosin & Silodosin = BPH only (uroselective).',
+            overallExplanation: 'Non-subtype selective alpha-1 blockers (Prazosin, Terazosin, Doxazosin) relax vascular smooth muscle (vasodilation for hypertension) and prostatic smooth muscle (urinary relief for BPH).',
+            highYieldPearl: 'Dual HTN + BPH indication: Prazosin, Terazosin, Doxazosin (block both alpha-1B in vessels and alpha-1A in prostate).',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 6, Question 37',
             sourcePageNumber: 6
           },
           {
-            id: 438,
-            questionNumberLabel: 'Question 38',
-            title: 'Once-Daily BPH Agent with Minimal Cardiovascular Effect',
+            id: 439,
+            questionNumberLabel: 'Question 5',
+            title: 'Once-Daily Uroselective BPH Management',
             category: 'Clinical Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is administered once daily to manage BPH with limited-to-no cardiovascular effects (minimal orthostatic hypotension)?',
+            questionStem: 'Which of the above drugs is used once daily to manage the symptoms of benign prostate hyperplasia with limited-to none cardiovascular effects?',
             options: [
-              'Prazosin',
-              'Terazosin',
-              'Doxazosin',
-              'Tamsulosin (Flomax)'
+              'Drug I',
+              'Drug II',
+              'Drug III',
+              'Drug IV',
+              'Drug N'
             ],
             correctIndex: 3,
             optionExplanations: [
-              'Incorrect: Prazosin causes significant first-dose orthostatic hypotension.',
-              'Incorrect: Terazosin lowers blood pressure significantly.',
-              'Incorrect: Doxazosin lowers blood pressure significantly.',
-              'Correct: Tamsulosin is a sulfonamide arylethylamine with selective antagonist activity for the alpha-1A subtype over alpha-1B, relieving bladder outlet obstruction without substantially lowering systemic arterial pressure.'
+              'Incorrect: Drug I requires multiple daily doses and causes first-dose hypotension.',
+              'Incorrect: Drug II lowers blood pressure.',
+              'Incorrect: Drug III lowers blood pressure.',
+              'Correct: Drug IV (Tamsulosin) selectively antagonizes alpha-1A receptors in prostatic smooth muscle over vascular alpha-1B receptors, providing relief of BPH symptoms without significant reduction in blood pressure or orthostatic syncope.',
+              'Incorrect: Drug N is nebivolol.'
             ],
-            overallExplanation: 'Tamsulosin selective blockade of alpha-1A receptors in the prostate reduces urethral resistance while sparing vascular alpha-1B receptors, minimizing orthostatic hypotension.',
-            highYieldPearl: 'Tamsulosin = selective alpha-1A blocker -> once-daily for BPH with minimal blood pressure lowering.',
+            overallExplanation: 'Drug IV (Tamsulosin) is a uroselective alpha-1A blocker indicated specifically for BPH. Its receptor selectivity minimizes vascular dilation, making it preferable in normotensive elderly patients.',
+            highYieldPearl: 'Drug IV (Tamsulosin) = uroselective alpha-1A antagonist for BPH with minimal blood pressure or cardiovascular effects.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 6, Question 38',
             sourcePageNumber: 6
           },
           {
-            id: 439,
-            questionNumberLabel: 'Question 39',
-            title: 'Equipotent Action on All Alpha-1 Receptor Subtypes',
-            category: 'Pharmacology MOA',
+            id: 440,
+            questionNumberLabel: 'Question 6',
+            title: 'Equipotent Subtype Non-Discrimination',
+            category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following drugs non-selectively blocks all alpha-1 receptor subtypes (alpha-1A, alpha-1B, and alpha-1D) with equal potency?',
+            questionStem: 'Which of the above drugs equally affect(s) all subtypes of α1-receptor?',
             options: [
-              'Prazosin, Terazosin, and Doxazosin',
-              'Tamsulosin',
-              'Silodosin',
-              'Clonidine'
+              'Drugs I, II, and III',
+              'Drug IV only',
+              'Drug N only',
+              'Drug I only'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: The quinazolines (Prazosin, Terazosin, Doxazosin) show identical affinity for alpha-1A, alpha-1B, and alpha-1D subtypes.',
-              'Incorrect: Tamsulosin prefers alpha-1A and alpha-1D over alpha-1B.',
-              'Incorrect: Silodosin has >100-fold selectivity for alpha-1A.',
-              'Incorrect: Clonidine is an alpha-2 agonist.'
+              'Correct: Drugs I (Prazosin), II (Terazosin), and III (Doxazosin) are classical quinazolines that display equal affinity across alpha-1A, alpha-1B, and alpha-1D adrenergic receptor subtypes.',
+              'Incorrect: Drug IV is selective for alpha-1A.',
+              'Incorrect: Drug N is a beta-blocker.',
+              'Incorrect: Terazosin and Doxazosin also equally affect all subtypes.'
             ],
-            overallExplanation: 'Prazosin, Terazosin, and Doxazosin block all alpha-1 subtypes equipotently.',
-            highYieldPearl: 'Prazosin / Terazosin / Doxazosin = non-subtype selective across alpha-1A/1B/1D.',
+            overallExplanation: 'Quinazoline-piperazines do not discriminate among alpha-1 receptor subtypes, blocking alpha-1A (prostate), alpha-1B (blood vessels), and alpha-1D (bladder dome/spinal cord) with equal potency.',
+            highYieldPearl: 'Non-subtype selective alpha-1 blockers: Drugs I, II, III (Prazosin, Terazosin, Doxazosin). Subtype selective: Drug IV (Tamsulosin).',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 6, Question 39',
             sourcePageNumber: 6
           },
           {
-            id: 440,
-            questionNumberLabel: 'Question 40',
-            title: 'Reflex Tachycardia & First-Dose Syncope',
+            id: 441,
+            questionNumberLabel: 'Question 7',
+            title: 'Reflex Tachycardia Potential',
             category: 'Clinical Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'Which of the above drugs is associated with pronounced first-dose orthostatic hypotension and potential reflex tachycardia due to rapid peripheral arterial and venous vasodilation?',
+            questionStem: 'Which of the above drugs may be associated with reflex tachycardia because of it(their) vasodilatory effect(s)?',
             options: [
-              'Prazosin',
-              'Tamsulosin',
-              'Atenolol',
-              'Methyldopa'
+              'Drugs I, II, and III',
+              'Drug IV',
+              'Drug N',
+              'None of the above'
             ],
             correctIndex: 0,
             optionExplanations: [
-              'Correct: Prazosin causes potent peripheral arterial and venous dilation, frequently triggering "first-dose phenomenon" (severe orthostatic hypotension, syncope, and baroreceptor-mediated reflex tachycardia). Patients are advised to take the initial dose at bedtime.',
-              'Incorrect: Tamsulosin has minimal vascular effects.',
-              'Incorrect: Atenolol is a beta-blocker and slows heart rate.',
-              'Incorrect: Methyldopa reduces sympathetic outflow centrally without reflex tachycardia.'
+              'Correct: Rapid vasodilation induced by Drugs I, II, and III (Prazosin, Terazosin, Doxazosin) can trigger baroreceptor-mediated reflex sympathetic discharge leading to reflex tachycardia, especially upon initial titration (first-dose effect).',
+              'Incorrect: Drug IV produces minimal vasodilation and rarely triggers reflex tachycardia.',
+              'Incorrect: Drug N is a beta-blocker and slows heart rate.',
+              'Incorrect: Option a is correct.'
             ],
-            overallExplanation: 'The first-dose phenomenon with Prazosin produces precipitous postural hypotension and reflex tachycardia; taking the first dose at bedtime mitigates syncopal episodes.',
-            highYieldPearl: 'Prazosin = first-dose syncope / orthostatic hypotension & reflex tachycardia -> start with low dose at bedtime!',
+            overallExplanation: 'Peripheral arterial vasodilation lowers systemic vascular resistance and blood pressure, triggering baroreceptor reflexes. While selective alpha-1 blockers cause far less reflex tachycardia than nonselective alpha blockers, mild reflex tachycardia can still occur.',
+            highYieldPearl: 'Alpha-1 blockers lower SVR -> baroreceptor activation -> potential reflex tachycardia and first-dose orthostatic hypotension.',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 6, Question 40',
             sourcePageNumber: 6
-          }
-        ]
-      },
-      {
-        sectionTitle: 'Nebivolol CYP2D6 Polymorphism & Third-Generation Comparison',
-        questions: [
+          },
           {
-            id: 441,
-            questionNumberLabel: 'Question 41',
+            id: 442,
+            questionNumberLabel: 'Question 8',
             title: 'CYP2D6 Pharmacogenomic Phenotypes in Nebivolol Metabolism',
             category: 'Pharmacokinetics ADME',
             type: 'multiple-choice',
@@ -1245,14 +1396,14 @@ export const sympatholyticsPages: ReviewPage[] = [
             options: [
               'In PMs, nebivolol is cleared faster and is more cardioselective',
               'In PMs, parent nebivolol accumulates with a much longer half-life (~19-30 hours vs ~12 hours in EMs), higher oral bioavailability, and diminished beta-1 cardioselectivity at high doses',
-              'In EMs, parent drug accumulates and causes severe beta-2 bronchospasm',
+              'In EMs, nebivolol has zero active metabolites',
               'CYP2D6 polymorphism has no measurable effect on nebivolol pharmacology'
             ],
             correctIndex: 1,
             optionExplanations: [
-              'Incorrect: In PMs, clearance is slower, not faster.',
-              'Correct: In poor metabolizers (PMs, ~7-10% of Caucasians), deficient CYP2D6 prevents alicyclic hydroxylation, causing parent drug AUC to rise 5- to 10-fold and half-life to extend from ~12 hours to ~19-30 hours. At these high circulating concentrations, beta-1 cardioselectivity is compromised.',
-              'Incorrect: EMs clear parent drug rapidly to active hydroxylated metabolites that preserve cardioselectivity.',
+              'Incorrect: PMs clear parent drug much slower.',
+              'Correct: In CYP2D6 Poor Metabolizers (PMs), parent nebivolol clearance is severely reduced, prolonging half-life to 19-30 hours (vs 12 hours in EMs) and increasing bioavailability. At elevated plasma levels, strict beta-1 cardioselectivity is compromised.',
+              'Incorrect: In EMs, hydroxylated metabolites are active and contribute to cardioselective beta-blockade.',
               'Incorrect: CYP2D6 status significantly impacts nebivolol kinetics.'
             ],
             overallExplanation: 'Nebivolol undergoes CYP2D6 alicyclic hydroxylation. In extensive metabolizers (EMs), hydroxylated metabolites contribute to beta-blockade with high cardioselectivity (t1/2 ~12h). In poor metabolizers (PMs), parent drug accumulates, half-life lengthens to ~19-30h, and cardioselectivity decreases.',
@@ -1261,90 +1412,124 @@ export const sympatholyticsPages: ReviewPage[] = [
             sourcePageNumber: 6
           },
           {
-            id: 442,
-            questionNumberLabel: 'Question 42',
+            id: 443,
+            questionNumberLabel: 'Question 9',
             title: 'Nebivolol Mechanistic Properties',
             category: 'Medicinal Chemistry SAR',
             type: 'sub-statements',
-            questionStem: 'State whether each of the following statements is true or false regarding Nebivolol (Bystolic):',
+            questionStem: 'State whether each of the following statements is true or false describing Drug N (Nebivolol):',
             subStatements: [
               {
                 id: 'a',
-                text: 'Nebivolol is a nonselective beta-blocker.',
+                text: 'It is a nonselective beta-blocker.',
                 isCorrect: false,
                 explanation: 'False: Nebivolol has the highest beta-1 selectivity among currently available beta-blockers at standard therapeutic doses.'
               },
               {
                 id: 'b',
-                text: 'It is associated with quinidine-like membrane-stabilizing activity.',
+                text: 'It is associated with quinidine-like membrane stabilizing effect.',
                 isCorrect: false,
                 explanation: 'False: Nebivolol lacks membrane-stabilizing activity (MSA).'
               },
               {
                 id: 'c',
-                text: 'It possesses intrinsic sympathomimetic activity (ISA).',
+                text: 'It has intrinsic sympathomimetic activity.',
                 isCorrect: false,
                 explanation: 'False: Nebivolol lacks ISA.'
               },
               {
                 id: 'd',
-                text: 'It is clinically administered as a racemic mixture of d-nebivolol (SRRR) and l-nebivolol (RSSS).',
+                text: 'It is clinically used as a mixture of symmetrical isomers (racemic d- and l-enantiomers).',
                 isCorrect: true,
                 explanation: 'True: d-Nebivolol provides potent, highly selective beta-1 blockade, whereas l-nebivolol stimulates endothelial nitric oxide synthase (eNOS) via beta-3 agonism to cause vasodilation.'
               },
               {
                 id: 'e',
-                text: 'It is orally active for the management of hypertension.',
+                text: 'It can orally be used to treat hypertension.',
                 isCorrect: true,
-                explanation: 'True: Administered once daily orally for hypertension.'
+                explanation: 'True: Nebivolol is orally administered once daily for hypertension.'
               },
               {
                 id: 'f',
-                text: 'Extensive metabolizers enjoy a longer-acting effect than poor metabolizers.',
+                text: 'It is most cardio-selective in poor metabolizers.',
                 isCorrect: false,
-                explanation: 'False: Poor metabolizers have a significantly longer elimination half-life (~19-30 hours vs ~12 hours in extensive metabolizers).'
+                explanation: 'False: In poor metabolizers, high drug concentrations begin to spill over and block beta-2 receptors, diminishing cardioselectivity.'
+              },
+              {
+                id: 'g',
+                text: 'It is most orally bioavailable in extensive metabolizers.',
+                isCorrect: false,
+                explanation: 'False: Oral bioavailability is much higher in poor metabolizers (~96%) than in extensive metabolizers (~12%) due to absent first-pass CYP2D6 hydroxylation.'
+              },
+              {
+                id: 'h',
+                text: 'Extensive metabolizers enjoy long-acting effect of Drug N.',
+                isCorrect: true,
+                explanation: 'True: Even in EMs, active hydroxylated metabolites maintain beta-blocking action over a 24-hour interval.'
               }
             ],
             overallExplanation: 'Nebivolol is a racemic mixture where d-nebivolol is an ultra-selective beta-1 blocker and l-nebivolol stimulates endothelial NO release. It lacks ISA and MSA.',
             highYieldPearl: 'Nebivolol = d-isomer (potent beta-1 blocker) + l-isomer (endothelial NO release via beta-3). Highest beta-1 cardioselectivity!',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 6, Question 42',
             sourcePageNumber: 6
-          },
+          }
+        ]
+      }
+    ]
+  },
+
+  // ---------------------------------------------------------------------------
+  // PAGE 7: Head-to-Head Comparative Battery: Nebivolol vs Carvedilol vs Propranolol (Question 43)
+  // ---------------------------------------------------------------------------
+  {
+    pageNumber: 7,
+    title: 'Head-to-Head Beta-Blocker Comparison: Nebivolol vs. Carvedilol vs. Propranolol',
+    subtitle: 'Direct comparative matrix across cardioselectivity, vasodilatory mechanisms, CNS adverse potential, and membrane stabilization',
+    sections: [
+      {
+        sectionTitle: 'Comparative Pharmacology of Drug N, Drug C, and Drug P',
+        block_instructions: 'Compare the following three beta-blockers (Drug N = Nebivolol, Drug C = Carvedilol, and Drug P = Propranolol) to answer Question 1.',
+        structures: [
+          SYMPATHOLYTICS_STRUCTURES.nebivolol,
+          SYMPATHOLYTICS_STRUCTURES.carvedilol,
+          SYMPATHOLYTICS_STRUCTURES.propranolol,
+        ],
+        questions: [
           {
-            id: 443,
-            questionNumberLabel: 'Question 43',
-            title: 'Comparison of Third-Generation vs Classical Beta-Blockers',
+            id: 444,
+            questionNumberLabel: 'Question 1',
+            title: 'Comprehensive Head-to-Head Comparative Battery (Drugs N, C, P)',
             category: 'Clinical Pharmacology',
             type: 'sub-statements',
-            questionStem: 'Compare Drug N (Nebivolol), Drug P (Propranolol), and Drug C (Carvedilol) across pharmacodynamic properties:',
+            questionStem: 'Compare the following three beta-blockers (Drug N, Drug C, and Drug P) considering cardioselectivity, vasodilation, CNS effects, and membrane stabilization:',
             subStatements: [
               {
                 id: 'a',
-                text: 'Cardioselectivity rank is: Nebivolol (highly beta-1 selective) >> Propranolol (nonselective) = Carvedilol (nonselective).',
+                text: 'Cardioselectivity: Drug N is highly beta-1 selective, whereas Drug P and Drug C are nonselective beta-blockers.',
                 isCorrect: true,
-                explanation: 'True: Nebivolol is highly cardioselective; Propranolol and Carvedilol block both beta-1 and beta-2 receptors.'
+                explanation: 'True: Nebivolol has the highest beta-1 selectivity; Propranolol and Carvedilol block both beta-1 and beta-2 receptors equipotently.'
               },
               {
                 id: 'b',
-                text: 'Vasodilatory mechanism: Nebivolol vasodilates via endothelial nitric oxide (NO) release, whereas Carvedilol vasodilates via alpha-1 adrenergic receptor blockade.',
+                text: 'Vasodilatory effect and its mechanism: Drug N vasodilates via endothelial nitric oxide (NO) release, Drug C vasodilates via alpha-1 adrenergic receptor blockade, and Drug P lacks vasodilatory activity.',
                 isCorrect: true,
-                explanation: 'True: Nebivolol stimulates eNOS; Carvedilol competitively antagonizes vascular alpha-1 receptors. Propranolol has no vasodilatory effect.'
+                explanation: 'True: Nebivolol stimulates eNOS via beta-3 agonism; Carvedilol competitively antagonizes vascular post-junctional alpha-1 receptors; Propranolol has no vasodilatory action.'
               },
               {
                 id: 'c',
-                text: 'Potential for CNS adverse effects (depression, vivid dreams): Propranolol >> Carvedilol > Nebivolol.',
+                text: 'Potential of CNS side effects: Drug P has the highest potential for CNS side effects (fatigue, depression, vivid dreams), Drug C has intermediate potential, and Drug N has the lowest potential.',
                 isCorrect: true,
-                explanation: 'True: Propranolol is the most lipophilic and readily crosses the BBB.'
+                explanation: 'True: Propranolol is highly lipophilic (logP ~3.0) and readily crosses the blood-brain barrier; Nebivolol and Carvedilol have much lower incidence of central CNS adverse effects.'
               },
               {
                 id: 'd',
-                text: 'Membrane-stabilizing activity (Na+ channel block): Propranolol (strongest) > Carvedilol (weak) > Nebivolol (none).',
+                text: 'Potential of membrane-stabilizing effect: Drug P has prominent quinidine-like membrane-stabilizing activity (fast Na+ channel block), Drug C has weak activity, and Drug N has no membrane-stabilizing activity.',
                 isCorrect: true,
-                explanation: 'True: Propranolol has the most pronounced quinidine-like local anesthetic activity.'
+                explanation: 'True: Propranolol exhibits marked local anesthetic / membrane-stabilizing activity at elevated doses; Nebivolol is devoid of MSA.'
               }
             ],
-            overallExplanation: 'Nebivolol (selective beta-1 + NO release), Carvedilol (nonselective beta + alpha-1 block + antioxidant), and Propranolol (classical nonselective + MSA + high CNS entry) represent the three key evolutionary stages of beta-blocker drug design.',
-            highYieldPearl: 'Beta-blocker comparison: Nebivolol = beta-1 selective + NO vasodilation. Carvedilol = nonselective beta + alpha-1 block + antioxidant. Propranolol = nonselective + CNS entry + membrane stabilization.',
+            overallExplanation: 'Summary comparison:\n- Drug N (Nebivolol): Highly beta-1 cardioselective, vasodilates via endothelial NO release, low CNS penetration, zero MSA.\n- Drug C (Carvedilol): Nonselective beta-blocker, vasodilates via alpha-1 blockade, antioxidant carbazole, weak MSA.\n- Drug P (Propranolol): Nonselective beta-blocker, zero vasodilation, highest lipophilicity and CNS adverse effects, strong membrane-stabilizing activity (fast Na+ channel block).',
+            highYieldPearl: 'Beta-Blocker Comparative Triad:\n- Nebivolol = Beta-1 selective + NO vasodilation.\n- Carvedilol = Nonselective Beta + Alpha-1 vasodilation + Antioxidant.\n- Propranolol = Nonselective Beta + High CNS entry + Strong Membrane-Stabilizing Activity (MSA).',
             sourceReference: 'Review for Antihypertensive Drugs II (Sympatholytics), Page 7, Question 43',
             sourcePageNumber: 7
           }
@@ -1357,16 +1542,10 @@ export const sympatholyticsPages: ReviewPage[] = [
 export function getDefaultSympatholyticsModule(): ReviewModule {
   return {
     id: 'antihypertensives_2_mcp2',
-    examId: 'exam_2',
-    examTitle: 'Exam 2: Antihypertensives & Lipids',
-    title: 'Antihypertensive Agents II: Sympatholytics',
-    subtitle: 'Beta-Blockers, Central Alpha-2 Agonists, and Alpha-1 Adrenergic Receptor Antagonists',
-    course: 'Medicinal Chemistry & Pharmacology II',
-    semester: 'Spring',
-    code: 'MCP-2-04',
-    isBuiltIn: true,
-    createdAt: new Date().toISOString(),
-    chemicalStructures: Object.values(SYMPATHOLYTICS_STRUCTURES),
+    title: 'Antihypertensives II: Sympatholytics',
+    subtitle: 'Adrenergic antagonists, central alpha-2 agonists, quinazolines, and pharmacogenomics',
+    version: '2.0.0',
     pages: sympatholyticsPages,
+    examId: 'exam2',
   };
 }

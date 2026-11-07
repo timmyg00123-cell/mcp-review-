@@ -3578,6 +3578,52 @@ export const EXAM_2_STRUCTURES: Record<string, ChemicalStructure> = {
       pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/5839"
     }
   },
+  "nebivolol": {
+    id: "nebivolol",
+    name: "Nebivolol",
+    document_label: "Drug N (Nebivolol) - Highly Selective Beta-1 Blocker with Endothelial NO Vasodilation",
+    tradeName: "Bystolic",
+    smiles: "C1CC2=C(COC1C(CNCC(C3CCC4=C(CO3)C=CC(=C4)F)O)O)C=CC(=C2)F",
+    canonical_smiles: "C1CC2=C(COC1C(CNCC(C3CCC4=C(CO3)C=CC(=C4)F)O)O)C=CC(=C2)F",
+    canonicalSmiles: "C1CC2=C(COC1C(CNCC(C3CCC4=C(CO3)C=CC(=C4)F)O)O)C=CC(=C2)F",
+    cid: 98214,
+    mw: 405.43,
+    logP: 3.5,
+    chemicalClass: "Bis-fluorochroman beta-blocker",
+    pharmacologicalClass: "Cardioselective Beta-1 Adrenergic Receptor Antagonist & Endothelial Nitric Oxide Enhancer",
+    target: "Beta-1 Adrenergic Receptor & Endothelial Nitric Oxide Synthase (eNOS via Beta-3)",
+    target_receptor: "Beta-1 / Beta-3 GPCRs",
+    reversibility: "Reversible Competitive",
+    drug_state: "Active drug",
+    route: "Oral",
+    keyFunctionalGroups: [
+      "Bis-6-fluorochroman rings",
+      "Central secondary amine with flanking beta-hydroxy groups",
+      "Four chiral centers (administered as racemic d-SRRR and l-RSSS mixture)"
+    ],
+    pkPdHighlights: {
+      onset: "1-4 hours",
+      duration: "24 hours",
+      halfLife: "12 hours (CYP2D6 EMs) / 19-30 hours (CYP2D6 PMs)",
+      elimination: "Extensive CYP2D6 alicyclic and aromatic hydroxylation and glucuronidation",
+      bioactivation: "Active as administered"
+    },
+    sarNotes: "Administered as a 1:1 mixture of two enantiomers: d-nebivolol (SRRR) is an extraordinarily potent and highly selective beta-1 blocker, while l-nebivolol (RSSS) stimulates endothelial nitric oxide synthase (eNOS) via beta-3 agonism, conferring vasodilation. Lacks ISA and membrane stabilizing activity (MSA). Highly dependent on CYP2D6 metabolizer phenotype.",
+    moa_summary: "Selectively antagonizes cardiac beta-1 receptors to decrease heart rate and contractility, while concurrently promoting endothelial nitric oxide-mediated vasodilation to reduce systemic vascular resistance.",
+    pngUrl: "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/98214/PNG",
+    pubchemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/98214",
+    pubchemAudit: {
+      cid: 98214,
+      status: "verified",
+      source: "nih_pug_rest",
+      canonicalSmiles: "C1CC2=C(COC1C(CNCC(C3CCC4=C(CO3)C=CC(=C4)F)O)O)C=CC(=C2)F",
+      iupacName: "1-(6-fluoro-3,4-dihydro-2H-chromen-2-yl)-2-[[2-(6-fluoro-3,4-dihydro-2H-chromen-2-yl)-2-hydroxyethyl]amino]ethanol",
+      molecularFormula: "C22H25F2NO4",
+      molecularWeight: 405.43,
+      xlogp: 3.5,
+      pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/98214"
+    }
+  },
 };
 
 export const DIURETICS_STRUCTURES: Record<string, ChemicalStructure> = Object.fromEntries(
@@ -3594,7 +3640,7 @@ export const SYMPATHOLYTICS_STRUCTURES: Record<string, ChemicalStructure> = Obje
     'propranolol', 'metoprolol', 'atenolol', 'esmolol', 'carvedilol', 'labetalol',
     'pindolol', 'nadolol', 'clonidine', 'guanfacine', 'methyldopa',
     'alpha_methylnorepinephrine', 'prazosin', 'terazosin', 'doxazosin',
-    'tamsulosin', 'reserpine', 'guanethidine'
+    'tamsulosin', 'reserpine', 'guanethidine', 'nebivolol'
   ].includes(k))
 );
 
