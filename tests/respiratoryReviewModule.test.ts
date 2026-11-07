@@ -141,18 +141,18 @@ assert.equal(ISOPROTERENOL_STRUCTURE.cid, 3779);
 assert.equal(DOBUTAMINE_STRUCTURE.cid, 36811);
 assert.equal(ALBUTEROL_STRUCTURE.cid, 2083);
 assert.equal(LEVALBUTEROL_STRUCTURE.cid, 123600);
-assert.equal(PIRBUTEROL_STRUCTURE.cid, 4849);
+assert.equal(PIRBUTEROL_STRUCTURE.cid, 4845);
 assert.equal(SALMETEROL_STRUCTURE.cid, 5152);
 assert.equal(FORMOTEROL_STRUCTURE.cid, 3410);
-assert.equal(INDACATEROL_STRUCTURE.cid, 9811566);
-assert.equal(OLODATEROL_STRUCTURE.cid, 11508379);
-assert.equal(VILANTEROL_STRUCTURE.cid, 9871188);
-assert.equal(IPRATROPIUM_STRUCTURE.cid, 37497);
-assert.equal(TIOTROPIUM_STRUCTURE.cid, 28864);
-assert.equal(ACLIDINIUM_STRUCTURE.cid, 11556094);
-assert.equal(UMECLIDINIUM_STRUCTURE.cid, 44419894);
+assert.equal(INDACATEROL_STRUCTURE.cid, 6918554);
+assert.equal(OLODATEROL_STRUCTURE.cid, 11504295);
+assert.equal(VILANTEROL_STRUCTURE.cid, 10184665);
+assert.equal(IPRATROPIUM_STRUCTURE.cid, 25897919);
+assert.equal(TIOTROPIUM_STRUCTURE.cid, 5487427);
+assert.equal(ACLIDINIUM_STRUCTURE.cid, 11434515);
+assert.equal(UMECLIDINIUM_STRUCTURE.cid, 11519070);
 assert.equal(GLYCOPYRROLATE_STRUCTURE.cid, 3494);
-assert.equal(DARIFENACIN_STRUCTURE.cid, 217415);
+assert.equal(DARIFENACIN_STRUCTURE.cid, 444031);
 assert.equal(TRIHEXYPHENIDYL_STRUCTURE.cid, 5572);
 assert.equal(HYDROCORTISONE_STRUCTURE.cid, 5754);
 assert.equal(CORTISONE_STRUCTURE.cid, 222786);
@@ -162,17 +162,17 @@ assert.equal(METHYLPREDNISOLONE_STRUCTURE.cid, 6741);
 assert.equal(DEXAMETHASONE_STRUCTURE.cid, 5743);
 assert.equal(ALDOSTERONE_STRUCTURE.cid, 5839);
 assert.equal(TRIAMCINOLONE_ACETONIDE_STRUCTURE.cid, 6436);
-assert.equal(BECLOMETHASONE_DIPROPIONATE_STRUCTURE.cid, 20469);
-assert.equal(FLUTICASONE_PROPIONATE_STRUCTURE.cid, 5311101);
-assert.equal(FLUTICASONE_FUROATE_STRUCTURE.cid, 9854483);
+assert.equal(BECLOMETHASONE_DIPROPIONATE_STRUCTURE.cid, 21700);
+assert.equal(FLUTICASONE_PROPIONATE_STRUCTURE.cid, 444036);
+assert.equal(FLUTICASONE_FUROATE_STRUCTURE.cid, 9854489);
 assert.equal(MOMETASONE_FUROATE_STRUCTURE.cid, 441336);
-assert.equal(CICLESONIDE_STRUCTURE.cid, 214347);
+assert.equal(CICLESONIDE_STRUCTURE.cid, 6918155);
 assert.equal(CLOBETASOL_PROPIONATE_STRUCTURE.cid, 32798);
-assert.equal(HYDROCORTISONE_SODIUM_PHOSPHATE_STRUCTURE.cid, 23663980);
-assert.equal(HYDROCORTISONE_SODIUM_SUCCINATE_STRUCTURE.cid, 23663981);
+assert.equal(HYDROCORTISONE_SODIUM_PHOSPHATE_STRUCTURE.cid, 441407);
+assert.equal(HYDROCORTISONE_SODIUM_SUCCINATE_STRUCTURE.cid, 16623);
 assert.equal(THEOPHYLLINE_STRUCTURE.cid, 2153);
-assert.equal(ROFLUMILAST_STRUCTURE.cid, 5282414);
-assert.equal(ENSIFENTRINE_STRUCTURE.cid, 9871419);
+assert.equal(ROFLUMILAST_STRUCTURE.cid, 449193);
+assert.equal(ENSIFENTRINE_STRUCTURE.cid, 9934746);
 assert.equal(ZILEUTON_STRUCTURE.cid, 60490);
 assert.equal(MONTELUKAST_STRUCTURE.cid, 5281040);
 assert.equal(ZAFIRLUKAST_STRUCTURE.cid, 5717);
@@ -331,21 +331,21 @@ const p6SubStmts = p6Questions.flatMap((q) => q.subStatements || []);
 assert.ok(p6SubStmts.length >= 4, 'Slide 6 must have at least 4 True/False sub-statements');
 
 // 4 explicit sub-statements from Slide 6:
-const stmt16Acetal = p6SubStmts.find((s) => (s.text || s.statement || '').toLowerCase().includes('16,17-acetal') || (s.text || s.statement || '').toLowerCase().includes('acetonide'));
-assert.ok(stmt16Acetal, 'Slide 6 must test 16,17-acetal/acetonide lipophilicity and mineralocorticoid reduction');
-assert.equal(stmt16Acetal.isCorrect, true);
+const stmtDual = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('hydrocortisone') && (s.text || '').toLowerCase().includes('mineralocorticoid'));
+assert.ok(stmtDual, 'Slide 6 must test hydrocortisone, cortisone, prednisone, prednisolone have both glucocorticoid and mineralocorticoid activities');
+assert.equal(stmtDual.isCorrect, true);
 
-const stmt9Fluor = p6SubStmts.find((s) => (s.text || s.statement || '').toLowerCase().includes('9alpha') || (s.text || s.statement || '').toLowerCase().includes('9-alpha') || (s.text || s.statement || '').toLowerCase().includes('9a-f'));
-assert.ok(stmt9Fluor, 'Slide 6 must test 9alpha-fluorination');
-assert.equal(stmt9Fluor.isCorrect, true);
+const stmtSkeleton = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('all-trans') || (s.text || '').toLowerCase().includes('ene-one'));
+assert.ok(stmtSkeleton, 'Slide 6 must test steroid skeleton, all-trans backbone, ring A ene-one, C-17 required for anti-inflammatory');
+assert.equal(stmtSkeleton.isCorrect, true);
 
-const stmtSoftSteroid = p6SubStmts.find((s) => (s.text || s.statement || '').toLowerCase().includes('carbothioate') || (s.text || s.statement || '').toLowerCase().includes('cyp3a4'));
-assert.ok(stmtSoftSteroid, 'Slide 6 must test soft steroid carbothioate hydrolysis by CYP3A4');
-assert.equal(stmtSoftSteroid.isCorrect, true);
+const stmtC21Lipophilic = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('c21-lipophilic'));
+assert.ok(stmtC21Lipophilic, 'Slide 6 must test C21-lipophilic esters prodrug properties');
+assert.equal(stmtC21Lipophilic.isCorrect, true);
 
-const stmtHydroPhosphate = p6SubStmts.find((s) => (s.text || s.statement || '').toLowerCase().includes('phosphate') && (s.text || s.statement || '').toLowerCase().includes('inhaled'));
-assert.ok(stmtHydroPhosphate, 'Slide 6 must test that hydrocortisone sodium phosphate is for IV, NOT inhaled maintenance');
-assert.equal(stmtHydroPhosphate.isCorrect, false);
+const stmt1Dehydro = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('1-dehydro'));
+assert.ok(stmt1Dehydro, 'Slide 6 must test 1-dehydro modification increases anti-inflammatory activity and limits metabolism');
+assert.equal(stmt1Dehydro.isCorrect, true);
 
 // 10. Slide 7 (Page 7): Glucocorticoid SAR Items, Biotransformations & Theophylline vs Roflumilast
 const page7 = pages[6]!;
@@ -376,13 +376,19 @@ assert.ok(
 );
 
 // Theophylline vs Roflumilast comparison
-assert.ok(
-  p7Questions.some((q) =>
-    (q.questionStem + (q.overallExplanation || '')).toLowerCase().includes('theophylline') &&
-    (q.questionStem + (q.overallExplanation || '')).toLowerCase().includes('roflumilast')
-  ),
-  'Slide 7 must include Drug A (Theophylline) vs Drug B (Roflumilast) comparison'
-);
+const qTheoRof = p7Questions.find((q) => q.id === 703 || (q.title?.toLowerCase().includes('theophylline') && q.title?.toLowerCase().includes('roflumilast')));
+assert.ok(qTheoRof, 'Slide 7 must include Drug A (Theophylline) vs Drug B (Roflumilast) comparison');
+assert.ok(qTheoRof.subStatements && qTheoRof.subStatements.length === 5, 'Q703 must have 5 True/False sub-statements');
+const theoStmt1 = qTheoRof.subStatements.find((s) => (s.text ?? '').toLowerCase().includes('methylxanthine') && (s.text ?? '').toLowerCase().includes('dichloropyridine'));
+assert.ok(theoStmt1 && theoStmt1.isCorrect === true);
+const theoStmt2 = qTheoRof.subStatements.find((s) => (s.text ?? '').toLowerCase().includes('bronchodilators'));
+assert.ok(theoStmt2 && theoStmt2.isCorrect === false);
+const theoStmt3 = qTheoRof.subStatements.find((s) => (s.text ?? '').toLowerCase().includes('antimuscarinic'));
+assert.ok(theoStmt3 && theoStmt3.isCorrect === false);
+const theoStmt4 = qTheoRof.subStatements.find((s) => (s.text ?? '').toLowerCase().includes('asthma'));
+assert.ok(theoStmt4 && theoStmt4.isCorrect === false);
+const theoStmt5 = qTheoRof.subStatements.find((s) => (s.text ?? '').toLowerCase().includes('cyp1a2'));
+assert.ok(theoStmt5 && theoStmt5.isCorrect === false);
 
 // 11. Slide 8 (Page 8): Theophylline vs Roflumilast (cont.), Mechanism Matching & Beclomethasone vs Hydrocortisone Succinate
 const page8 = pages[7]!;
@@ -437,6 +443,13 @@ const qBecloHydro = p9Questions.find((q) =>
 );
 assert.ok(qBecloHydro, 'Slide 9 must contain the 10-statement True/False battery comparing Beclomethasone dipropionate vs Hydrocortisone sodium succinate');
 assert.equal(qBecloHydro.subStatements!.length, 10, 'Must have exactly 10 sub-statements');
+const bdpSubStmts = qBecloHydro.subStatements!;
+const bdpStmt1 = bdpSubStmts.find((s) => (s.text ?? '').includes('Drug A is a glucocorticoid whereas Drug B is a mineralocorticoid.'));
+assert.ok(bdpStmt1 && bdpStmt1.isCorrect === false, 'Q901 statement 1 must be False');
+const bdpStmt2 = bdpSubStmts.find((s) => (s.text ?? '').includes('The two drugs are adrenocorticoids.'));
+assert.ok(bdpStmt2 && bdpStmt2.isCorrect === true, 'Q901 statement 2 must be True');
+const bdpStmt10 = bdpSubStmts.find((s) => (s.text ?? '').includes('Drug A is a diester, lipophilic prodrug whereas Drug B is a locally acting, soft steroid.'));
+assert.ok(bdpStmt10 && bdpStmt10.isCorrect === false, 'Q901 statement 10 must be False');
 
 // Tiotropium vs Pirbuterol (5 T/F items)
 const qTioPir = p9Questions.find((q) =>
@@ -446,6 +459,13 @@ const qTioPir = p9Questions.find((q) =>
 );
 assert.ok(qTioPir, 'Slide 9 must contain the 5-statement True/False battery comparing Tiotropium (Drug A) vs Pirbuterol (Drug B)');
 assert.equal(qTioPir.subStatements!.length, 5, 'Must have exactly 5 sub-statements');
+const tioSubStmts = qTioPir.subStatements!;
+const tioStmt1 = tioSubStmts.find((s) => (s.text ?? '').includes('Drug A is amino-ester whereas Drug B is a phenyl-ethanol amine.'));
+assert.ok(tioStmt1 && tioStmt1.isCorrect === true, 'Q902 statement 1 must be True');
+const tioStmt2 = tioSubStmts.find((s) => (s.text ?? '').includes('Drug A is a bronchodilator whereas Drug B is a glucocorticoid agonist.'));
+assert.ok(tioStmt2 && tioStmt2.isCorrect === false, 'Q902 statement 2 must be False');
+const tioStmt5 = tioSubStmts.find((s) => (s.text ?? '').includes('The two drugs are used via oral inhalation and metabolized extensively by hepatic enzymes.'));
+assert.ok(tioStmt5 && tioStmt5.isCorrect === false, 'Q902 statement 5 must be False');
 
 // 13. Comprehensive Sub-statement Quality & Completeness across all 9 pages
 const allQuestions = pages.flatMap((p) => p.sections.flatMap((s) => s.questions));

@@ -257,7 +257,7 @@ export const PIRBUTEROL_STRUCTURE: ChemicalStructure = {
   smiles: 'CC(C)(C)NCC(O)c1ccc(O)c(CO)n1',
   canonical_smiles: 'CC(C)(C)NCC(O)c1ccc(O)c(CO)n1',
   canonicalSmiles: 'CC(C)(C)NCC(O)c1ccc(O)c(CO)n1',
-  cid: 4849,
+  cid: 4845,
   mw: 240.30,
   logP: 0.1,
   chemicalClass: 'Pyridine Bioisostere of Albuterol',
@@ -284,8 +284,8 @@ export const PIRBUTEROL_STRUCTURE: ChemicalStructure = {
     'Classic pyridine bioisostere of albuterol where one aromatic CH carbon is replaced with a basic pyridine nitrogen atom. Maintains high beta-2 selectivity and complete resistance to COMT. Serves as a rapid-onset short-acting rescue inhaler (SABA) with a 4-5 hour duration.',
   moa_summary:
     'Pyridine bioisosteric congener of albuterol that selectively activates bronchial beta-2 receptors, providing rapid bronchodilation for acute bronchospasm relief.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/4849/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/4849',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/4845/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/4845',
 };
 
 export const SALMETEROL_STRUCTURE: ChemicalStructure = {
@@ -374,8 +374,8 @@ export const INDACATEROL_STRUCTURE: ChemicalStructure = {
   smiles: 'CCc1cc2CC(NC[C@H](O)c3ccc(O)c4[nH]c(=O)ccc34)Cc2cc1CC',
   canonical_smiles: 'CCc1cc2CC(NC[C@H](O)c3ccc(O)c4[nH]c(=O)ccc34)Cc2cc1CC',
   canonicalSmiles: 'CCc1cc2CC(NC[C@H](O)c3ccc(O)c4[nH]c(=O)ccc34)Cc2cc1CC',
-  cid: 9811566,
-  mw: 392.49,
+  cid: 6918554,
+  mw: 392.5,
   logP: 2.8,
   chemicalClass: '8-Hydroxyquinolin-2(1H)-one derivative',
   pharmacologicalClass: 'Ultra-Long-Acting Beta-2 Agonist (Ultra-LABA)',
@@ -401,8 +401,8 @@ export const INDACATEROL_STRUCTURE: ChemicalStructure = {
     'Incorporates an 8-hydroxyquinolin-2(1H)-one bicyclic core mimicking the catechol hydrogen-bonding network while resisting COMT. The rigid, lipophilic 5,6-diethylindan-2-yl tail partitions deeply into the cell membrane lipid rafts, providing a sustained 24-hour microdepot for once-daily dosing.',
   moa_summary:
     'Ultra-LABA offering rapid bronchodilation within 5 minutes and sustained 24-hour efficacy from deep lipid membrane partitioning, approved for once-daily COPD maintenance.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/9811566/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/9811566',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/6918554/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/6918554',
 };
 
 export const OLODATEROL_STRUCTURE: ChemicalStructure = {
@@ -413,8 +413,8 @@ export const OLODATEROL_STRUCTURE: ChemicalStructure = {
   smiles: 'COc1ccc(CC(C)(C)NC[C@H](O)c2cc(O)c3[nH]c(=O)coc3c2)cc1',
   canonical_smiles: 'COc1ccc(CC(C)(C)NC[C@H](O)c2cc(O)c3[nH]c(=O)coc3c2)cc1',
   canonicalSmiles: 'COc1ccc(CC(C)(C)NC[C@H](O)c2cc(O)c3[nH]c(=O)coc3c2)cc1',
-  cid: 11508379,
-  mw: 386.44,
+  cid: 11504295,
+  mw: 386.4,
   logP: 2.2,
   chemicalClass: 'Benzoxazinone / Arylethanolamine',
   pharmacologicalClass: 'Ultra-Long-Acting Beta-2 Agonist (Ultra-LABA)',
@@ -440,8 +440,8 @@ export const OLODATEROL_STRUCTURE: ChemicalStructure = {
     'Features a rigid 6-hydroxy-benzoxazinone heterocyclic core mimicking catechol binding without COMT susceptibility. The gem-dimethyl branched aralkyl tail protects against enzymatic deamination and locks the ligand in the active receptor pocket, enabling sustained 24-hour bronchodilation.',
   moa_summary:
     'Highly selective ultra-LABA with 24-hour duration of action providing once-daily bronchodilation for maintenance treatment of COPD.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/11508379/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/11508379',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/11504295/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/11504295',
 };
 
 export const VILANTEROL_STRUCTURE: ChemicalStructure = {
@@ -449,11 +449,11 @@ export const VILANTEROL_STRUCTURE: ChemicalStructure = {
   document_label: 'Vilanterol',
   name: 'Vilanterol',
   tradeName: 'Component of Breo / Anoro / Trelegy Ellipta',
-  smiles: 'OCCc1cc(ccc1O)[C@@H](O)CNCCCCCCOCCOCc2c(Cl)cccc2Cl',
-  canonical_smiles: 'OCCc1cc(ccc1O)[C@@H](O)CNCCCCCCOCCOCc2c(Cl)cccc2Cl',
-  canonicalSmiles: 'OCCc1cc(ccc1O)[C@@H](O)CNCCCCCCOCCOCc2c(Cl)cccc2Cl',
-  cid: 9871188,
-  mw: 474.42,
+  smiles: 'C1=CC(=C(C(=C1)Cl)COCCOCCCCCCNC[C@@H](C2=CC(=C(C=C2)O)CO)O)Cl',
+  canonical_smiles: 'C1=CC(=C(C(=C1)Cl)COCCOCCCCCCNC[C@@H](C2=CC(=C(C=C2)O)CO)O)Cl',
+  canonicalSmiles: 'C1=CC(=C(C(=C1)Cl)COCCOCCCCCCNC[C@@H](C2=CC(=C(C=C2)O)CO)O)Cl',
+  cid: 10184665,
+  mw: 486.4,
   logP: 3.2,
   chemicalClass: 'Saligenin / Arylethanolamine',
   pharmacologicalClass: 'Ultra-Long-Acting Beta-2 Agonist (Ultra-LABA)',
@@ -479,8 +479,8 @@ export const VILANTEROL_STRUCTURE: ChemicalStructure = {
     'Saligenin core linked to an extended lipophilic tail terminating in a 2,6-dichlorobenzyl ether. Confers high beta-2 selectivity and 24-hour duration while swallowed drug is rapidly metabolized by hepatic CYP3A4, minimizing systemic exposure.',
   moa_summary:
     'Ultra-LABA formulated in fixed-dose combination inhalers for once-daily maintenance therapy of asthma and COPD.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/9871188/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/9871188',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/10184665/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/10184665',
 };
 
 export const IPRATROPIUM_STRUCTURE: ChemicalStructure = {
@@ -491,8 +491,8 @@ export const IPRATROPIUM_STRUCTURE: ChemicalStructure = {
   smiles: 'C[N+]1(C(C)C)[C@H]2CC[C@@H]1C[C@@H](C2)OC(=O)[C@H](CO)c3ccccc3',
   canonical_smiles: 'C[N+]1(C(C)C)[C@H]2CC[C@@H]1C[C@@H](C2)OC(=O)[C@H](CO)c3ccccc3',
   canonicalSmiles: 'C[N+]1(C(C)C)[C@H]2CC[C@@H]1C[C@@H](C2)OC(=O)[C@H](CO)c3ccccc3',
-  cid: 37497,
-  mw: 332.46,
+  cid: 25897919,
+  mw: 332.5,
   logP: -1.8,
   chemicalClass: 'Quaternary Ammonium Tropane Ester',
   pharmacologicalClass: 'Short-Acting Muscarinic Antagonist (SAMA)',
@@ -518,8 +518,8 @@ export const IPRATROPIUM_STRUCTURE: ChemicalStructure = {
     'Quaternary N-isopropyl congener of atropine. The permanent positive charge renders the molecule polar and hydrophilic, preventing oral absorption (<2%) and blood-brain barrier penetration. Confines anticholinergic action strictly to the bronchial airways.',
   moa_summary:
     'Competitively blocks bronchial M3 muscarinic receptors, inhibiting acetylcholine-induced bronchoconstriction and excessive mucus secretion without central adverse effects.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/37497/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/37497',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/25897919/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/25897919',
 };
 
 export const TIOTROPIUM_STRUCTURE: ChemicalStructure = {
@@ -530,8 +530,8 @@ export const TIOTROPIUM_STRUCTURE: ChemicalStructure = {
   smiles: 'C[N+]1(C)[C@H]2C[C@@H]3O[C@H]3[C@@H]1C[C@@H](C2)OC(=O)C(O)(c4cccs4)c5cccs5',
   canonical_smiles: 'C[N+]1(C)[C@H]2C[C@@H]3O[C@H]3[C@@H]1C[C@@H](C2)OC(=O)C(O)(c4cccs4)c5cccs5',
   canonicalSmiles: 'C[N+]1(C)[C@H]2C[C@@H]3O[C@H]3[C@@H]1C[C@@H](C2)OC(=O)C(O)(c4cccs4)c5cccs5',
-  cid: 28864,
-  mw: 392.51,
+  cid: 5487427,
+  mw: 392.5,
   logP: -1.2,
   chemicalClass: 'Quaternary Ammonium Scopine Ester',
   pharmacologicalClass: 'Long-Acting Muscarinic Antagonist (LAMA)',
@@ -557,8 +557,8 @@ export const TIOTROPIUM_STRUCTURE: ChemicalStructure = {
     'Possesses a quaternary scopine core esterified with a bulky di-(2-thienyl) glycolate moiety. Exhibits kinetic selectivity: dissociates very slowly from M3 receptors (t1/2 ~35 hours) but dissociates rapidly from presynaptic M2 autoreceptors (t1/2 ~3.6 hours), allowing once-daily bronchodilation without preserving M2-mediated ACh surge.',
   moa_summary:
     'Long-acting muscarinic antagonist with kinetic selectivity for M3 receptors, producing sustained 24-hour bronchodilation and reduction of COPD exacerbations.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/28864/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/28864',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/5487427/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/5487427',
 };
 
 export const ACLIDINIUM_STRUCTURE: ChemicalStructure = {
@@ -569,8 +569,8 @@ export const ACLIDINIUM_STRUCTURE: ChemicalStructure = {
   smiles: '[N+]12CCC(CC1)(OC(=O)C(O)(c3cccs3)c4cccs4)CC2CCCOCc5ccccc5',
   canonical_smiles: '[N+]12CCC(CC1)(OC(=O)C(O)(c3cccs3)c4cccs4)CC2CCCOCc5ccccc5',
   canonicalSmiles: '[N+]12CCC(CC1)(OC(=O)C(O)(c3cccs3)c4cccs4)CC2CCCOCc5ccccc5',
-  cid: 11556094,
-  mw: 574.75,
+  cid: 11434515,
+  mw: 484.7,
   logP: 1.5,
   chemicalClass: 'Quaternary Ammonium Quinuclidine Ester',
   pharmacologicalClass: 'Long-Acting Muscarinic Antagonist (LAMA) / Soft Anticholinergic',
@@ -596,8 +596,8 @@ export const ACLIDINIUM_STRUCTURE: ChemicalStructure = {
     'Prototypical soft anticholinergic: provides sustained local M3 blockade in airway smooth muscle, but any drug absorbed into systemic circulation is rapidly hydrolyzed by plasma esterases (t1/2 ~2.4 min) to inactive metabolites, virtually eliminating systemic anticholinergic adverse effects.',
   moa_summary:
     'Soft anticholinergic bronchodilator that blocks bronchial M3 receptors but undergoes rapid ester cleavage upon systemic entry, ensuring an optimal safety profile.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/11556094/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/11556094',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/11434515/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/11434515',
 };
 
 export const UMECLIDINIUM_STRUCTURE: ChemicalStructure = {
@@ -608,8 +608,8 @@ export const UMECLIDINIUM_STRUCTURE: ChemicalStructure = {
   smiles: '[N+]12CCC(CC1)(C(O)(c3ccccc3)c4ccccc4)CC2CCOCC5=CC=CC=C5',
   canonical_smiles: '[N+]12CCC(CC1)(C(O)(c3ccccc3)c4ccccc4)CC2CCOCC5=CC=CC=C5',
   canonicalSmiles: '[N+]12CCC(CC1)(C(O)(c3ccccc3)c4ccccc4)CC2CCOCC5=CC=CC=C5',
-  cid: 44419894,
-  mw: 426.59,
+  cid: 11519070,
+  mw: 428.6,
   logP: 2.1,
   chemicalClass: 'Quaternary Ammonium Quinuclidine Alcohol',
   pharmacologicalClass: 'Long-Acting Muscarinic Antagonist (LAMA)',
@@ -635,8 +635,8 @@ export const UMECLIDINIUM_STRUCTURE: ChemicalStructure = {
     'Quinuclidine-based non-ester anticholinergic. Replaces the ester bond with a direct carbon-carbon bond to a 1,1-diphenylmethanol unit, conferring metabolic resistance to esterases while the quaternary ammonium center confines exposure strictly to the pulmonary system.',
   moa_summary:
     'Once-daily LAMA with slow receptor dissociation from M3 receptors providing sustained 24-hour bronchodilation.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/44419894/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/44419894',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/11519070/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/11519070',
 };
 
 export const GLYCOPYRROLATE_STRUCTURE: ChemicalStructure = {
@@ -686,8 +686,8 @@ export const DARIFENACIN_STRUCTURE: ChemicalStructure = {
   smiles: 'NC(=O)C(c1ccccc1)(c2ccccc2)[C@@H]3CCN(CCc4ccc5OCCc5c4)C3',
   canonical_smiles: 'NC(=O)C(c1ccccc1)(c2ccccc2)[C@@H]3CCN(CCc4ccc5OCCc5c4)C3',
   canonicalSmiles: 'NC(=O)C(c1ccccc1)(c2ccccc2)[C@@H]3CCN(CCc4ccc5OCCc5c4)C3',
-  cid: 217415,
-  mw: 426.55,
+  cid: 444031,
+  mw: 426.5,
   logP: 2.8,
   chemicalClass: 'Tertiary Amine Pyrrolidine Acetamide',
   pharmacologicalClass: 'Selective M3 Muscarinic Antagonist (Overactive Bladder)',
@@ -713,8 +713,8 @@ export const DARIFENACIN_STRUCTURE: ChemicalStructure = {
     'Tertiary amine anticholinergic with 9-fold selectivity for M3 receptors over M1 and 12-fold over M2. Indicated for overactive bladder with urge urinary incontinence, NOT for asthma or COPD bronchodilation.',
   moa_summary:
     'Selectively antagonizes bladder M3 muscarinic receptors to suppress involuntary detrusor muscle contractions in overactive bladder.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/217415/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/217415',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/444031/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/444031',
 };
 
 export const TRIHEXYPHENIDYL_STRUCTURE: ChemicalStructure = {
@@ -1076,8 +1076,8 @@ export const BECLOMETHASONE_DIPROPIONATE_STRUCTURE: ChemicalStructure = {
   smiles: 'CCC(=O)OCC(=O)C1(C(CC2C1(CC(C3(C2CCC4=CC(=O)C=CC43C)Cl)O)C)C)OC(=O)CC',
   canonical_smiles: 'CCC(=O)OCC(=O)C1(C(CC2C1(CC(C3(C2CCC4=CC(=O)C=CC43C)Cl)O)C)C)OC(=O)CC',
   canonicalSmiles: 'CCC(=O)OCC(=O)C1(C(CC2C1(CC(C3(C2CCC4=CC(=O)C=CC43C)Cl)O)C)C)OC(=O)CC',
-  cid: 20469,
-  mw: 521.04,
+  cid: 21700,
+  mw: 521.0,
   logP: 3.5,
   chemicalClass: '17,21-Diester Corticosteroid Prodrug',
   pharmacologicalClass: 'Inhaled Corticosteroid (ICS) Prodrug',
@@ -1103,8 +1103,8 @@ export const BECLOMETHASONE_DIPROPIONATE_STRUCTURE: ChemicalStructure = {
     'Lipophilic diester prodrug. Upon inhalation into the lungs, carboxylesterases cleave the C21-propionate ester, generating beclomethasone 17-monopropionate (17-BMP), which has ~25-fold higher affinity for GR than parent BDP. Swallowed drug is extensively metabolized during first-pass, preventing systemic toxicity.',
   moa_summary:
     'Inhaled diester prodrug bioactivated in lung tissue to potent 17-monopropionate, providing targeted airway anti-inflammatory therapy.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/20469/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/20469',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/21700/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/21700',
 };
 
 export const FLUTICASONE_PROPIONATE_STRUCTURE: ChemicalStructure = {
@@ -1115,8 +1115,8 @@ export const FLUTICASONE_PROPIONATE_STRUCTURE: ChemicalStructure = {
   smiles: 'CCC(=O)OC1(C(CC2C1(CC(C3(C2CC(C4=CC(=O)C=CC43C)F)F)O)C)C)C(=O)SCF',
   canonical_smiles: 'CCC(=O)OC1(C(CC2C1(CC(C3(C2CC(C4=CC(=O)C=CC43C)F)F)O)C)C)C(=O)SCF',
   canonicalSmiles: 'CCC(=O)OC1(C(CC2C1(CC(C3(C2CC(C4=CC(=O)C=CC43C)F)F)O)C)C)C(=O)SCF',
-  cid: 5311101,
-  mw: 500.57,
+  cid: 444036,
+  mw: 500.6,
   logP: 4.2,
   chemicalClass: 'Fluorinated 17-beta-Carbothioate Soft Steroid',
   pharmacologicalClass: 'Inhaled Corticosteroid (ICS) / Soft Steroid',
@@ -1142,8 +1142,8 @@ export const FLUTICASONE_PROPIONATE_STRUCTURE: ChemicalStructure = {
     'Classic soft steroid: possesses exceptional local GR binding affinity (3-fold higher than dexamethasone) due to the lipophilic C17-beta-S-CH2F fluoromethyl carbothioate. Swallowed drug undergoes >99% first-pass hepatic metabolism by CYP3A4 to an inert 17-beta-carboxylic acid metabolite, virtually eliminating systemic side effects.',
   moa_summary:
     'Soft steroid delivering high local anti-inflammatory potency in the lung with negligible systemic bioavailability due to rapid CYP3A4 inactivation.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/5311101/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/5311101',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/444036/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/444036',
 };
 
 export const FLUTICASONE_FUROATE_STRUCTURE: ChemicalStructure = {
@@ -1154,8 +1154,8 @@ export const FLUTICASONE_FUROATE_STRUCTURE: ChemicalStructure = {
   smiles: 'CC1CC2C3CC(C4=CC(=O)C=CC4(C3(C(CC2(C1(C(=O)SCF)OC(=O)c5ccco5)C)O)F)C)F',
   canonical_smiles: 'CC1CC2C3CC(C4=CC(=O)C=CC4(C3(C(CC2(C1(C(=O)SCF)OC(=O)c5ccco5)C)O)F)C)F',
   canonicalSmiles: 'CC1CC2C3CC(C4=CC(=O)C=CC4(C3(C(CC2(C1(C(=O)SCF)OC(=O)c5ccco5)C)O)F)C)F',
-  cid: 9854483,
-  mw: 538.58,
+  cid: 9854489,
+  mw: 538.6,
   logP: 4.6,
   chemicalClass: '17-alpha-Furoate 17-beta-Carbothioate Soft Steroid',
   pharmacologicalClass: 'Ultra-Potent Once-Daily Inhaled Corticosteroid',
@@ -1181,8 +1181,8 @@ export const FLUTICASONE_FUROATE_STRUCTURE: ChemicalStructure = {
     'Replaces the 17-alpha-propionate of fluticasone with a lipophilic 2-furoate ester. Confers exceptionally high affinity for GR (higher than fluticasone propionate) and slower dissociation kinetics, enabling once-daily administration.',
   moa_summary:
     'Once-daily inhaled corticosteroid exhibiting high GR affinity and prolonged tissue retention for asthma and COPD maintenance.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/9854483/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/9854483',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/9854489/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/9854489',
 };
 
 export const MOMETASONE_FUROATE_STRUCTURE: ChemicalStructure = {
@@ -1232,8 +1232,8 @@ export const CICLESONIDE_STRUCTURE: ChemicalStructure = {
   smiles: 'CC(C)C(=O)OCC(=O)C12CC(C3C(C1(OC(O2)C4CCCCC4)O)CC(C5(C3CCC6=CC(=O)C=CC65C)O)C)C',
   canonical_smiles: 'CC(C)C(=O)OCC(=O)C12CC(C3C(C1(OC(O2)C4CCCCC4)O)CC(C5(C3CCC6=CC(=O)C=CC65C)O)C)C',
   canonicalSmiles: 'CC(C)C(=O)OCC(=O)C12CC(C3C(C1(OC(O2)C4CCCCC4)O)CC(C5(C3CCC6=CC(=O)C=CC65C)O)C)C',
-  cid: 214347,
-  mw: 540.69,
+  cid: 6918155,
+  mw: 540.7,
   logP: 4.8,
   chemicalClass: 'Cyclic Acetal Soft Steroid Prodrug',
   pharmacologicalClass: 'Inhaled Corticosteroid (ICS) Prodrug',
@@ -1259,8 +1259,8 @@ export const CICLESONIDE_STRUCTURE: ChemicalStructure = {
     'Inhaled as an inactive 21-isobutyrate ester prodrug. Airway carboxylesterase 1 cleaves the ester to form des-ciclesonide (RM1), which exhibits 100-fold greater GR affinity. Swallowed drug is unactivated and cleared by liver, minimizing oral candidiasis and dysphonia.',
   moa_summary:
     'On-site activated prodrug yielding potent active metabolite specifically within airway epithelial cells, reducing local oropharyngeal side effects.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/214347/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/214347',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/6918155/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/6918155',
 };
 
 export const CLOBETASOL_PROPIONATE_STRUCTURE: ChemicalStructure = {
@@ -1310,8 +1310,8 @@ export const HYDROCORTISONE_SODIUM_PHOSPHATE_STRUCTURE: ChemicalStructure = {
   smiles: 'CC12CCC(=O)C=C1CCC3C2C(CC4(C3CCC4(C(=O)COP(=O)(O)O)O)C)O',
   canonical_smiles: 'CC12CCC(=O)C=C1CCC3C2C(CC4(C3CCC4(C(=O)COP(=O)(O)O)O)C)O',
   canonicalSmiles: 'CC12CCC(=O)C=C1CCC3C2C(CC4(C3CCC4(C(=O)COP(=O)(O)O)O)C)O',
-  cid: 23663980,
-  mw: 442.44,
+  cid: 441407,
+  mw: 442.4,
   logP: -1.2,
   chemicalClass: 'Hydrophilic C21-Phosphate Ester Prodrug',
   pharmacologicalClass: 'Water-Soluble Parenteral Corticosteroid Prodrug',
@@ -1337,8 +1337,8 @@ export const HYDROCORTISONE_SODIUM_PHOSPHATE_STRUCTURE: ChemicalStructure = {
     'Esterification of the C21-OH with phosphoric acid creates a highly polar, water-soluble prodrug (>500 mg/mL). Ideal for rapid IV bolus administration in acute emergency situations (status asthmaticus, anaphylaxis, acute adrenal insufficiency). NOT for inhaled maintenance!',
   moa_summary:
     'Hydrophilic phosphate ester prodrug formulated for rapid emergency IV injection, rapidly dephosphorylated in vivo to active hydrocortisone.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/23663980/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/23663980',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/441407/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/441407',
 };
 
 export const HYDROCORTISONE_SODIUM_SUCCINATE_STRUCTURE: ChemicalStructure = {
@@ -1349,8 +1349,8 @@ export const HYDROCORTISONE_SODIUM_SUCCINATE_STRUCTURE: ChemicalStructure = {
   smiles: 'CC12CCC(=O)C=C1CCC3C2C(CC4(C3CCC4(C(=O)COC(=O)CCC(=O)O)O)C)O',
   canonical_smiles: 'CC12CCC(=O)C=C1CCC3C2C(CC4(C3CCC4(C(=O)COC(=O)CCC(=O)O)O)C)O',
   canonicalSmiles: 'CC12CCC(=O)C=C1CCC3C2C(CC4(C3CCC4(C(=O)COC(=O)CCC(=O)O)O)C)O',
-  cid: 23663981,
-  mw: 462.53,
+  cid: 16623,
+  mw: 462.5,
   logP: 0.3,
   chemicalClass: 'Hydrophilic C21-Hemisuccinate Ester Prodrug',
   pharmacologicalClass: 'Water-Soluble Parenteral Corticosteroid Prodrug',
@@ -1376,8 +1376,8 @@ export const HYDROCORTISONE_SODIUM_SUCCINATE_STRUCTURE: ChemicalStructure = {
     'Esterification of C21 with succinic acid introduces a terminal carboxylic acid that forms a highly soluble sodium salt (>500 mg/mL). Formulated as a lyophilized powder reconstituted for emergency IV/IM injection in status asthmaticus and adrenal crisis.',
   moa_summary:
     'Water-soluble hemisuccinate prodrug for emergency parenteral administration, rapidly cleaved by esterases to active hydrocortisone.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/23663981/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/23663981',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/16623/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/16623',
 };
 
 export const THEOPHYLLINE_STRUCTURE: ChemicalStructure = {
@@ -1427,8 +1427,8 @@ export const ROFLUMILAST_STRUCTURE: ChemicalStructure = {
   smiles: 'O=C(Nc1c(Cl)cncc1Cl)c2ccc(OC(F)F)c(OCC3CC3)c2',
   canonical_smiles: 'O=C(Nc1c(Cl)cncc1Cl)c2ccc(OC(F)F)c(OCC3CC3)c2',
   canonicalSmiles: 'O=C(Nc1c(Cl)cncc1Cl)c2ccc(OC(F)F)c(OCC3CC3)c2',
-  cid: 5282414,
-  mw: 403.21,
+  cid: 449193,
+  mw: 403.2,
   logP: 3.3,
   chemicalClass: 'Dichloropyridine Benzamide',
   pharmacologicalClass: 'Selective Phosphodiesterase-4 (PDE4) Inhibitor',
@@ -1454,8 +1454,8 @@ export const ROFLUMILAST_STRUCTURE: ChemicalStructure = {
     'Potent and selective inhibitor of PDE4 (IC50 ~0.8 nM), sparing PDE1, PDE2, PDE3, and PDE5, and lacking adenosine receptor antagonism. Does NOT cause the cardiac tachyarrhythmias seen with theophylline. Indicated to reduce COPD exacerbations in severe COPD with chronic bronchitis.',
   moa_summary:
     'Selective PDE4 inhibitor suppressing cyclic AMP breakdown in inflammatory leukocytes (neutrophils, macrophages, CD8+ lymphocytes) to reduce COPD exacerbations.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/5282414/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/5282414',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/449193/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/449193',
 };
 
 export const ENSIFENTRINE_STRUCTURE: ChemicalStructure = {
@@ -1463,11 +1463,11 @@ export const ENSIFENTRINE_STRUCTURE: ChemicalStructure = {
   document_label: 'Ensifentrine',
   name: 'Ensifentrine',
   tradeName: 'Ohtuvayre',
-  smiles: 'COc1cc2c(cc1OC)CCN3C(=O)N(CCN2C3=O)c4c(C)cc(C)cc4C',
-  canonical_smiles: 'COc1cc2c(cc1OC)CCN3C(=O)N(CCN2C3=O)c4c(C)cc(C)cc4C',
-  canonicalSmiles: 'COc1cc2c(cc1OC)CCN3C(=O)N(CCN2C3=O)c4c(C)cc(C)cc4C',
-  cid: 9871419,
-  mw: 478.58,
+  smiles: 'CC1=CC(=C(C(=C1)C)N=C2C=C3C4=CC(=C(C=C4CCN3C(=O)N2CCNC(=O)N)OC)OC)C',
+  canonical_smiles: 'CC1=CC(=C(C(=C1)C)N=C2C=C3C4=CC(=C(C=C4CCN3C(=O)N2CCNC(=O)N)OC)OC)C',
+  canonicalSmiles: 'CC1=CC(=C(C(=C1)C)N=C2C=C3C4=CC(=C(C=C4CCN3C(=O)N2CCNC(=O)N)OC)OC)C',
+  cid: 9934746,
+  mw: 477.6,
   logP: 2.7,
   chemicalClass: 'Pyrimido-isoquinoline derivative',
   pharmacologicalClass: 'First-in-Class Dual PDE3 and PDE4 Inhibitor',
@@ -1493,8 +1493,8 @@ export const ENSIFENTRINE_STRUCTURE: ChemicalStructure = {
     'Dual inhibitor combining PDE3 inhibition (relaxing airway smooth muscle to induce bronchodilation) with PDE4 inhibition (suppressing inflammatory cell activation). Inhaled nebulized route delivers high lung concentrations while avoiding systemic cardiovascular toxicities of oral PDE3/4 inhibitors.',
   moa_summary:
     'First-in-class dual PDE3/PDE4 inhibitor providing both bronchodilation (via PDE3) and anti-inflammatory activity (via PDE4) in COPD.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/9871419/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/9871419',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/9934746/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/9934746',
 };
 
 export const ZILEUTON_STRUCTURE: ChemicalStructure = {
@@ -1580,9 +1580,9 @@ export const ZAFIRLUKAST_STRUCTURE: ChemicalStructure = {
   document_label: 'Zafirlukast',
   name: 'Zafirlukast',
   tradeName: 'Accolate',
-  smiles: 'Cc1cc(NC(=O)OCc2ccccc2)c(C)cc1S(=O)(=O)Nc3ccc(cc3)C(=O)N(C)c4cc(Cc5ccccc5)n(C)c4',
-  canonical_smiles: 'Cc1cc(NC(=O)OCc2ccccc2)c(C)cc1S(=O)(=O)Nc3ccc(cc3)C(=O)N(C)c4cc(Cc5ccccc5)n(C)c4',
-  canonicalSmiles: 'Cc1cc(NC(=O)OCc2ccccc2)c(C)cc1S(=O)(=O)Nc3ccc(cc3)C(=O)N(C)c4cc(Cc5ccccc5)n(C)c4',
+  smiles: 'CC1=CC=CC=C1S(=O)(=O)NC(=O)C2=CC(=C(C=C2)CC3=CN(C4=C3C=C(C=C4)NC(=O)OC5CCCC5)C)OC',
+  canonical_smiles: 'CC1=CC=CC=C1S(=O)(=O)NC(=O)C2=CC(=C(C=C2)CC3=CN(C4=C3C=C(C=C4)NC(=O)OC5CCCC5)C)OC',
+  canonicalSmiles: 'CC1=CC=CC=C1S(=O)(=O)NC(=O)C2=CC(=C(C=C2)CC3=CN(C4=C3C=C(C=C4)NC(=O)OC5CCCC5)C)OC',
   cid: 5717,
   mw: 575.68,
   logP: 4.8,
@@ -2401,39 +2401,39 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               type: 'sub-statements',
               title: 'Glucocorticoid Prodrugs, Soft Steroids & SAR Sub-statements',
               prompt:
-                'Evaluate the following True/False statements regarding the medicinal chemistry of Structures I–VI from Slide 6:',
+                'Evaluate the following True/False statements regarding the medicinal chemistry and SAR of corticosteroids from Slide 6:',
               subStatements: [
                 {
                   id: 'p6_s1_1',
-                  text: 'Introduction of a 16,17-acetal/acetonide (as in Triamcinolone acetonide and Ciclesonide) increases local lipophilicity and topical airway retention while significantly decreasing mineralocorticoid (salt-retaining) activity.',
+                  text: 'Hydrocortisone, "cortisone", "prednisone", and prednisolone have both glucocorticoid & mineralocorticoid activities.',
                   isCorrect: true,
                   explanation:
-                    'The bulky, hydrophobic 16,17-acetonide/acetal ketal bridges the 16alpha- and 17alpha-hydroxyl groups. This modification increases local lipophilicity for sustained airway epithelial retention, enhances topical glucocorticoid potency, and sterically prevents binding to mineralocorticoid receptors, completely eliminating salt and water retention.',
+                    'True. Hydrocortisone, cortisone, prednisone, and prednisolone possess both anti-inflammatory glucocorticoid activity and salt-retaining mineralocorticoid activity because they lack bulky C16 substituents (such as 16alpha/beta-methyl, 16alpha-OH, or 16,17-acetonide) that selectively abolish mineralocorticoid receptor binding.',
                 },
                 {
                   id: 'p6_s1_2',
-                  text: 'A 9alpha-fluoro substituent withdraws electron density via induction, increasing the hydrogen-bonding acidity of the adjacent 11beta-hydroxyl group and enhancing glucocorticoid receptor binding affinity.',
+                  text: 'The skeleton, all-trans backbone, ring A ene-one, and substituents at C-17 are required to promote anti-inflammatory activity.',
                   isCorrect: true,
                   explanation:
-                    'Fluorine at C9 is strongly electronegative and inductively withdraws electron density from the adjacent C11 carbon, significantly increasing the partial positive charge on the 11beta-OH hydrogen. This strengthens the vital hydrogen bond formed with Asn564 in the GR ligand-binding pocket.',
+                    'True. The intact steroid skeleton, all-trans junction backbone, Ring A 3-keto-Delta-4-ene system, and C17 substituents are essential pharmacophoric requirements for binding and activating the glucocorticoid receptor.',
                 },
                 {
                   id: 'p6_s1_3',
-                  text: 'Fluticasone propionate is designed as a soft steroid containing a 17beta-carbothioate fluoromethyl ester that is rapidly metabolized on systemic entry by hepatic CYP3A4 into an inactive 17beta-carboxylic acid metabolite, minimizing systemic toxicity.',
+                  text: 'C21-lipophilic esters are prodrugs that esterases must activate. They have a long duration of action, better compliance, and slower onset of action, when applied locally, they have limited systemic absorption.',
                   isCorrect: true,
                   explanation:
-                    'Fluticasone propionate incorporates a labile 17beta-S-fluoromethyl carbothioate ester. Any swallowed or systemically absorbed drug is rapidly cleaved during hepatic first pass by CYP3A4 into an inactive 17beta-carboxylic acid metabolite (affinity <1% of parent), ensuring very low systemic bioavailability (<1%) and preventing HPA-axis suppression.',
+                    'True. C21-lipophilic esters (e.g. propionates, acetates) are inactive prodrugs requiring cleavage by endogenous esterases. Their increased lipophilicity prolongs airway/skin tissue retention, yields slower onset with longer duration, improves compliance, and restricts systemic absorption.',
                 },
                 {
                   id: 'p6_s1_4',
-                  text: 'Hydrocortisone sodium phosphate (Structure IV) is formulated as an inhaled aerosol for long-term maintenance of persistent asthma.',
-                  isCorrect: false,
+                  text: '1-Dehydro modification increases the anti-inflammatory activity and limits metabolism.',
+                  isCorrect: true,
                   explanation:
-                    'Hydrocortisone sodium phosphate (Structure IV) is a highly water-soluble inorganic ester salt (>500 mg/mL) designed exclusively for intravenous (IV) or intramuscular (IM) injection in acute emergency status asthmaticus, anaphylactic shock, and acute adrenal crisis. It is not formulated as an inhaled maintenance steroid.',
+                    'True. Introducing the 1,2-double bond (Delta-1-dehydro modification, as in prednisone/prednisolone) flattens Ring A, enhancing glucocorticoid receptor binding affinity while sterically protecting Ring A from hepatic 5-reductase reduction, thereby extending plasma half-life.',
                 },
               ],
               overallExplanation:
-                'Structural modifications optimize therapeutic index: 16,17-acetonides increase local airway retention and abolish mineralocorticoid activity; 9alpha-fluorination boosts 11beta-OH hydrogen-bonding acidity; 17beta-carbothioate esters confer soft-steroid rapid metabolic inactivation; and polar 21-phosphate esters provide water solubility for parenteral injection.',
+                'Key corticosteroid SAR principles: Hydrocortisone, cortisone, prednisone, and prednisolone retain dual glucocorticoid and mineralocorticoid actions; the all-trans skeleton, Ring A ene-one, and C17 substituents are mandatory for anti-inflammatory efficacy; C21-lipophilic esters are esterase-activated prodrugs with prolonged local action and low systemic absorption; and 1-dehydrogenation (Delta-1) enhances anti-inflammatory potency while shielding Ring A from metabolic reduction.',
             },
             {
               id: 602,
@@ -2576,22 +2576,52 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               explanation:
                 'Three hallmark biotransformations govern clinical steroid therapy: (1) Inhaled Beclomethasone dipropionate (BDP) is a prodrug rapidly hydrolyzed by human airway carboxylesterases at C21 to generate Beclomethasone 17-monopropionate (17-BMP), which exhibits a 25-fold higher affinity for the glucocorticoid receptor than parent BDP; (2) Orally administered Prednisone is an inactive prodrug bearing an 11-keto group that must be stereospecifically reduced by hepatic 11beta-HSD1 to active Prednisolone (11beta-OH); and (3) Fluticasone propionate is a soft steroid whose 17beta-carbothioate fluoromethyl ester is rapidly hydrolyzed upon systemic entry by hepatic CYP3A4 into an inactive 17beta-carboxylic acid metabolite.',
             },
-            // Q703 (Theophylline vs Roflumilast)
+            // Q703 (Theophylline vs Roflumilast True/False battery)
             {
               id: 703,
-              type: 'multiple-choice',
-              title: 'Comparative Pharmacology: Theophylline (Drug A) vs Roflumilast (Drug B)',
-              questionStem:
-                'Compare the chemistry, molecular targets, pharmacokinetics, and clinical utility of Drug A (Theophylline) versus Drug B (Roflumilast):',
-              options: [
-                'Drug A (Theophylline) is a nonselective methylxanthine PDE inhibitor (PDE3/4/5) and adenosine receptor antagonist with a narrow therapeutic index requiring TDM; Drug B (Roflumilast) is a selective non-xanthine PDE4 inhibitor administered orally once daily for severe COPD with chronic bronchitis',
-                'Drug A is a selective PDE4 inhibitor, whereas Drug B is a nonselective methylxanthine alkaloid',
-                'Both drugs are formulated exclusively as dry powder inhalers with zero oral absorption',
-                'Drug B has a narrow therapeutic window causing fatal cardiac arrhythmias, while Drug A has no known toxicities',
+              type: 'sub-statements',
+              title: 'Comparative Chemistry & Pharmacology: Theophylline (Drug A) vs Roflumilast (Drug B)',
+              prompt:
+                'Evaluate the following 5 True/False statements comparing Theophylline (Drug A) and Roflumilast (Drug B) from Slide 7/8:',
+              subStatements: [
+                {
+                  id: 'p7_s3_1',
+                  text: 'Drug A is methylxanthine whereas Drug B is a dichloropyridine-benzamide derivative.',
+                  isCorrect: true,
+                  explanation:
+                    'True. Drug A (Theophylline) is a 1,3-dimethylxanthine alkaloid, whereas Drug B (Roflumilast) is a synthetic 3,5-dichloropyridine-4-carboxamide (benzamide) derivative.',
+                },
+                {
+                  id: 'p7_s3_2',
+                  text: 'The two drugs are bronchodilators.',
+                  isCorrect: false,
+                  explanation:
+                    'False. Theophylline (Drug A) has mild-to-moderate bronchodilator activity via PDE3/4/5 inhibition and adenosine antagonism, but Roflumilast (Drug B) is a selective PDE4 inhibitor with purely anti-inflammatory actions; it does not relax airway smooth muscle and is NOT a bronchodilator.',
+                },
+                {
+                  id: 'p7_s3_3',
+                  text: 'Drug A is an antimuscarinic agent whereas Drug B is a β2-agonist.',
+                  isCorrect: false,
+                  explanation:
+                    'False. Neither drug belongs to these classes. Drug A is a nonselective PDE inhibitor and adenosine receptor antagonist; Drug B is a selective PDE4 inhibitor.',
+                },
+                {
+                  id: 'p7_s3_4',
+                  text: 'The two drugs can be used in the management of asthma.',
+                  isCorrect: false,
+                  explanation:
+                    'False. Although Theophylline (Drug A) has historically been used in asthma, Roflumilast (Drug B) is approved and indicated strictly to reduce exacerbations in severe COPD associated with chronic bronchitis; it is not indicated for asthma.',
+                },
+                {
+                  id: 'p7_s3_5',
+                  text: 'The two drugs are metabolized by CYP1A2 resulting in more active, and long-acting metabolites.',
+                  isCorrect: false,
+                  explanation:
+                    'False. Theophylline is cleared by CYP1A2 to inactive metabolites (1,3-dimethyluric acid, 1-methylxanthine, 3-methylxanthine), so both drugs do not yield more active long-acting metabolites via CYP1A2.',
+                },
               ],
-              correctIndex: 0,
-              explanation:
-                'Drug A (Theophylline) is a 1,3-dimethylxanthine alkaloid that nonselectively inhibits PDE3, PDE4, and PDE5, competitively antagonizes adenosine A1/A2A receptors, and stimulates histone deacetylase-2 (HDAC2). It has a narrow therapeutic index (5-15 mcg/mL) requiring routine Therapeutic Drug Monitoring (TDM) due to life-threatening toxicities (cardiac arrhythmias, seizures). It is metabolized by CYP1A2, which is heavily induced by cigarette smoking. Drug B (Roflumilast) is a selective, non-xanthine phosphodiesterase-4 (PDE4) inhibitor bearing a dichloropyridine and difluoromethoxy group. Administered orally once daily, Roflumilast reduces exacerbations in severe COPD with chronic bronchitis; its major adverse effects are diarrhea, weight loss, nausea, and psychiatric changes (depression/insomnia).',
+              overallExplanation:
+                'Comparison of Theophylline (Drug A) vs Roflumilast (Drug B): Drug A is a methylxanthine and bronchodilator; Drug B is a dichloropyridine-benzamide selective PDE4 anti-inflammatory agent (NOT a bronchodilator). Drug B is indicated for COPD, not asthma. CYP1A2 metabolizes Theophylline into inactive excretory products.',
             },
           ],
         },
@@ -2790,77 +2820,77 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               subStatements: [
                 {
                   id: 'p9_s1_1',
-                  text: 'Drug A (Beclomethasone dipropionate) is a lipophilic diester prodrug formulated for inhalation, whereas Drug B (Hydrocortisone sodium succinate) is a water-soluble ester salt formulated for IV injection.',
-                  isCorrect: true,
+                  text: 'Drug A is a glucocorticoid whereas Drug B is a mineralocorticoid.',
+                  isCorrect: false,
                   explanation:
-                    'True. Drug A is a dipropionate diester optimized for airway deposition and mucosal absorption, while Drug B contains a polar sodium succinate ester salt providing high aqueous solubility (>500 mg/mL) for emergency IV infusion.',
+                    'False. Both drugs are glucocorticoids. Drug B (hydrocortisone sodium succinate) is the synthetic hemisuccinate salt of cortisol, the natural endogenous glucocorticoid, not a mineralocorticoid (aldosterone is the mineralocorticoid).',
                 },
                 {
                   id: 'p9_s1_2',
-                  text: 'Drug B contains a sodium hemisuccinate ester at C21 that ionizes at physiological pH (pKa ~4.5), providing high water solubility for emergency parenteral administration in status asthmaticus.',
+                  text: 'The two drugs are adrenocorticoids.',
                   isCorrect: true,
                   explanation:
-                    'True. The C21 hemisuccinate moiety possesses a terminal carboxylate that forms a sodium salt, fully ionizing at blood pH to enable rapid reconstitution and intravenous delivery in acute severe status asthmaticus.',
+                    'True. Both drugs are adrenocorticoids (steroids derived from or mimicking hormones of the adrenal cortex).',
                 },
                 {
                   id: 'p9_s1_3',
-                  text: 'Drug A has high oral bioavailability (>80%) and low pulmonary deposition.',
-                  isCorrect: false,
+                  text: 'The two drugs are glucocorticoid receptor agonists (hydrocortisone-like).',
+                  isCorrect: true,
                   explanation:
-                    'False. Drug A undergoes extensive first-pass hepatic metabolism by esterases and CYP3A4, resulting in low oral bioavailability (<15-20%), which protects against systemic corticosteroid toxicity from swallowed medication.',
+                    'True. Both drugs bind to and activate the intracellular glucocorticoid receptor (GR) to mediate anti-inflammatory responses.',
                 },
                 {
                   id: 'p9_s1_4',
-                  text: 'Drug A undergoes rapid local pulmonary hydrolysis by airway esterases to generate beclomethasone 17-monopropionate (17-BMP), which possesses ~25-fold higher GR binding affinity than parent Drug A.',
+                  text: 'The two drugs are anti-inflammatory.',
                   isCorrect: true,
                   explanation:
-                    'True. Pulmonary carboxylesterases selectively cleave the C21-propionate ester while preserving the 17alpha-propionate, yielding 17-BMP, the principal active metabolite with markedly enhanced glucocorticoid receptor affinity.',
+                    'True. Both agents exert powerful anti-inflammatory effects by suppressing pro-inflammatory cytokine and chemokine gene expression.',
                 },
                 {
                   id: 'p9_s1_5',
-                  text: 'Drug B is an active glucocorticoid before ester cleavage occurs in the bloodstream.',
+                  text: 'The two drugs exhibit strong salt-retaining properties.',
                   isCorrect: false,
                   explanation:
-                    'False. Steric bulk at the C21 position blocks essential hydrogen-bonding interactions with receptor residues (Thr739); therefore, Drug B is an inactive prodrug that requires cleavage by circulating blood and tissue esterases to release free hydrocortisone.',
+                    'False. Drug A (Beclomethasone dipropionate) has negligible mineralocorticoid salt-retaining activity due to its 16beta-methyl group, and Drug B has only modest physiological salt retention; neither exhibits strong salt-retaining activity.',
                 },
                 {
                   id: 'p9_s1_6',
-                  text: 'Drug A contains a 9alpha-chloro substituent and a 16beta-methyl substituent, which increases glucocorticoid affinity and minimizes mineralocorticoid sodium retention.',
+                  text: 'Drug A is more active than Drug B.',
                   isCorrect: true,
                   explanation:
-                    'True. The 9alpha-chloro group withdraws electron density to enhance 11beta-OH binding, while the 16beta-methyl group sterically suppresses mineralocorticoid receptor affinity, virtually eliminating salt and water retention.',
+                    'True. Beclomethasone dipropionate (and its active metabolite 17-BMP) has hundreds of times higher glucocorticoid receptor affinity and topical anti-inflammatory potency than hydrocortisone.',
                 },
                 {
                   id: 'p9_s1_7',
-                  text: 'Drug B has greater anti-inflammatory potency on a milligram-for-milligram basis than Drug A.',
-                  isCorrect: false,
+                  text: 'Drug A can be used via inhalation whereas Drug B is used parenterally via IV.',
+                  isCorrect: true,
                   explanation:
-                    'False. Beclomethasone dipropionate and its 17-BMP metabolite are hundreds of times more potent at the glucocorticoid receptor on a molar and milligram basis than hydrocortisone (Drug B).',
+                    'True. Drug A is a lipophilic diester optimized for aerosol inhalation in chronic asthma, whereas Drug B is a water-soluble ester salt designed for rapid IV injection in acute emergency status asthmaticus.',
                 },
                 {
                   id: 'p9_s1_8',
-                  text: 'Swallowed portions of Drug A that enter the gastrointestinal tract undergo extensive first-pass hepatic clearance, limiting systemic side effects like adrenal suppression.',
+                  text: 'Drug A has a longer duration of action than Drug B.',
                   isCorrect: true,
                   explanation:
-                    'True. Due to efficient hepatic first-pass hydrolysis and phase II metabolism, swallowed beclomethasone is rapidly converted into inactive polar metabolites, minimizing systemic circulation and hypothalamic-pituitary-adrenal (HPA) axis suppression.',
+                    'True. Inhaled beclomethasone dipropionate has prolonged local pulmonary retention and a 12-24 hour duration of action, whereas parenteral hydrocortisone has a short biological half-life and duration (8-12 hours).',
                 },
                 {
                   id: 'p9_s1_9',
-                  text: 'Drug B is indicated for long-term daily controller therapy of mild persistent asthma via dry powder inhaler.',
-                  isCorrect: false,
+                  text: 'The two drugs can be used in the management of asthma and/or COPD.',
+                  isCorrect: true,
                   explanation:
-                    'False. Hydrocortisone sodium succinate is an injectable rescue agent reserved for severe status asthmaticus, anaphylaxis, and acute adrenal insufficiency; it is never used as an inhaled controller for mild asthma.',
+                    'True. Both are established agents in respiratory therapeutics: Drug A for chronic maintenance control and Drug B for acute severe exacerbations.',
                 },
                 {
                   id: 'p9_s1_10',
-                  text: 'Both Drug A and Drug B mediate their anti-inflammatory actions through binding to the intracellular glucocorticoid receptor (GR) and transrepressing NF-kB.',
-                  isCorrect: true,
+                  text: 'Drug A is a diester, lipophilic prodrug whereas Drug B is a locally acting, soft steroid.',
+                  isCorrect: false,
                   explanation:
-                    'True. Upon intracellular esterase cleavage, the active glucocorticoids bind the cytosolic GR, dimerize/translocate to the nucleus, and physically transrepress NF-kB and AP-1 to shut down pro-inflammatory cytokine and chemokine transcription.',
+                    'False. Drug A is indeed a lipophilic diester prodrug, but Drug B is an injectable water-soluble prodrug, NOT a locally acting soft steroid (fluticasone propionate is an example of a soft steroid).',
                 },
               ],
               overallExplanation:
-                'Drug A (Beclomethasone dipropionate) is an inhaled lipophilic diester prodrug bioactivated in the lungs to 17-BMP for local maintenance control with minimal systemic toxicity. Drug B (Hydrocortisone sodium succinate) is a polar water-soluble C21 ester salt prodrug for emergency intravenous administration in acute severe status asthmaticus.',
+                'Slide 9 Head-to-Head Comparison: BDP (Drug A) is an inhaled lipophilic diester prodrug with high GR potency, long duration, and no mineralocorticoid effect. Hydrocortisone sodium succinate (Drug B) is a water-soluble C21 ester salt prodrug for emergency IV administration in acute status asthmaticus.',
             },
             // Question 902: 5 Sub-statements comparing Tiotropium vs Pirbuterol
             {
@@ -2872,42 +2902,42 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               subStatements: [
                 {
                   id: 'p9_s2_1',
-                  text: 'Drug A (Tiotropium) is a muscarinic M3 receptor antagonist, whereas Drug B (Pirbuterol) is a selective beta-2 adrenergic receptor agonist.',
+                  text: 'Drug A is amino-ester whereas Drug B is a phenyl-ethanol amine.',
                   isCorrect: true,
                   explanation:
-                    'True. Tiotropium is a long-acting muscarinic antagonist (LAMA) blocking M3 receptors on bronchial smooth muscle, whereas Pirbuterol is a selective short-acting beta-2 agonist (SABA) stimulating adenylyl cyclase.',
+                    'True. Tiotropium (Drug A) is an amino-ester (quaternary tropine ester of dithienylglycolic acid), whereas Pirbuterol (Drug B) is a bioisosteric pyridine-ethanolamine congener of phenylethanolamines.',
                 },
                 {
                   id: 'p9_s2_2',
-                  text: 'Drug A produces bronchodilation by inhibiting acetylcholine-induced Gq protein signaling and intracellular calcium release in airway smooth muscle.',
-                  isCorrect: true,
+                  text: 'Drug A is a bronchodilator whereas Drug B is a glucocorticoid agonist.',
+                  isCorrect: false,
                   explanation:
-                    'True. By competitively antagonizing M3 muscarinic receptors, Tiotropium blocks parasympathetic cholinergic bronchoconstriction mediated by Gq coupling, PLC activation, and IP3-induced calcium release from sarcoplasmic reticulum.',
+                    'False. Both drugs are bronchodilators. Drug B (Pirbuterol) is a selective beta-2 adrenergic agonist, NOT a glucocorticoid agonist.',
                 },
                 {
                   id: 'p9_s2_3',
-                  text: 'Drug B produces bronchodilation by stimulating Gs protein coupled adenylyl cyclase, increasing intracellular cAMP and activating protein kinase A (PKA).',
+                  text: 'Drug A is an antimuscarinic agent whereas Drug B is a β2-agonist.',
                   isCorrect: true,
                   explanation:
-                    'True. Pirbuterol binds beta-2 adrenergic receptors, activating Gs-alpha, which stimulates adenylyl cyclase to synthesize cyclic AMP, activating PKA to phosphorylate MLCK and lower intracellular calcium, resulting in smooth muscle relaxation.',
+                    'True. Tiotropium (Drug A) is a long-acting muscarinic M3 antagonist (LAMA), whereas Pirbuterol (Drug B) is a short-acting selective beta-2 agonist (SABA).',
                 },
                 {
                   id: 'p9_s2_4',
-                  text: 'Drug A possesses a permanent quaternary ammonium charge that restricts its absorption across respiratory membranes and the blood-brain barrier, providing localized pulmonary action.',
+                  text: 'The two drugs can be used in the management of asthma and/or COPD.',
                   isCorrect: true,
                   explanation:
-                    'True. The permanently cationic quaternary dimethyl-ammonium nitrogen of tiotropium cannot cross hydrophobic cell membranes or the blood-brain barrier, ensuring high topical airway efficacy with minimal central or systemic anticholinergic adverse effects.',
+                    'True. Both drugs are bronchodilators indicated for the management of bronchospasm in asthma and/or COPD.',
                 },
                 {
                   id: 'p9_s2_5',
-                  text: 'Drug B is an ultra-long-acting bronchodilator (ultra-LABA) with a 24-hour duration of action suitable for once-daily dosing.',
+                  text: 'The two drugs are used via oral inhalation and metabolized extensively by hepatic enzymes.',
                   isCorrect: false,
                   explanation:
-                    'False. Pirbuterol is a short-acting beta-2 agonist (SABA) with a duration of action of approximately 4 to 6 hours, utilized for rapid relief of acute bronchospasm, not once-daily maintenance therapy.',
+                    'False. While both are administered via oral inhalation, neither is extensively metabolized by hepatic CYP enzymes; Tiotropium is eliminated largely unchanged renally with minimal non-enzymatic cleavage, and Pirbuterol is primarily conjugated or excreted unchanged.',
                 },
               ],
               overallExplanation:
-                'Tiotropium (Drug A) is a quaternary ammonium LAMA that halts acetylcholine-Gq-IP3-Ca2+ bronchoconstriction for >24 hours. Pirbuterol (Drug B) is a pyridine-containing SABA that stimulates beta2-Gs-cAMP-PKA smooth muscle relaxation for 4-6 hours.',
+                'Slide 9 Head-to-Head Comparison: Tiotropium (Drug A) is a quaternary amino-ester LAMA blocking M3 receptors for >24 hours. Pirbuterol (Drug B) is a pyridine-ethanolamine SABA activating beta-2 adrenoceptors for 4-6 hours. Both are bronchodilators used in asthma/COPD.',
             },
           ],
         },
