@@ -82,108 +82,80 @@ Comprehensively overhaul `respiratoryReviewModuleData.ts` to establish a gold-st
 
 ### Slide 2: Adrenergic Bronchodilator SAR (Structures I–VII)
 - **Header**: Structures I–VII:
-  - `Structure I`: Isoproterenol
-  - `Structure II`: Dobutamine
-  - `Structure III`: Olodaterol
-  - `Structure IV`: Salmeterol
-  - `Structure V`: Indacaterol
-  - `Structure VI`: Pirbuterol
-  - `Structure VII`: Norepinephrine
-- **Questions**:
+  - `Structure I`: Isoproterenol (unlabeled chip: `Structure I`)
+  - `Structure II`: Dobutamine (unlabeled chip: `Structure II`)
+  - `Structure III`: Olodaterol (unlabeled chip: `Structure III`)
+  - `Structure IV`: Salmeterol (unlabeled chip: `Structure IV`)
+  - `Structure V`: Indacaterol (unlabeled chip: `Structure V`)
+  - `Structure VI`: Pirbuterol (unlabeled chip: `Structure VI`)
+  - `Structure VII`: Norepinephrine (unlabeled chip: `Structure VII`)
+- **8 Distinct Worksheet Questions (Questions 1–8)**:
   - `Question 1` (`type: 'multiple-choice'`): Core active pharmacophore of adrenergic agonists ($\beta$-phenylethanolamine / aryl-$\beta$-ethanolamine with chiral $(R)$-$\beta$-OH, 2-carbon ethyl spacer, and amine).
-  - `Question 2` (`type: 'matching'`): **Adrenergic Receptor Selectivity Classification**:
-    - Target: *Nonselective $\alpha/\beta$-agonist* $\to$ Accepted: `['VII']` (Norepinephrine)
-    - Target: *Selective $\beta_1/\beta_2$-agonist* $\to$ Accepted: `['I']` (Isoproterenol)
-    - Target: *Selective $\beta_1$-agonist (inotropic/shock)* $\to$ Accepted: `['II']` (Dobutamine)
-    - Target: *Selective $\beta_2$-agonists (bronchodilators)* $\to$ Accepted: `['III', 'IV', 'V', 'VI']` (Olodaterol, Salmeterol, Indacaterol, Pirbuterol)
-  - `Question 3` (`type: 'matching'`): **$\beta_2$-Agonist Duration of Action Classification**:
-    - Target: *Short-Acting $\beta_2$-Agonist (SABA, 4–6 hr)* $\to$ Accepted: `['VI']` (Pirbuterol)
-    - Target: *Long-Acting $\beta_2$-Agonist (LABA, 12 hr)* $\to$ Accepted: `['IV']` (Salmeterol)
-    - Target: *Ultra-Long-Acting $\beta_2$-Agonist (Ultra-LABA, 24 hr)* $\to$ Accepted: `['III', 'V']` (Olodaterol, Indacaterol)
-  - `Question 4` (`type: 'matching'`): **Clinical Indication Differentiation**:
-    - Target: *Asthma and COPD Maintenance/Relief* $\to$ Accepted: `['III', 'IV', 'V', 'VI']`
-    - Target: *Acute Decompensated Heart Failure / Cardiogenic Shock* $\to$ Accepted: `['II']`
-    - Target: *Vasodilatory / Septic Shock* $\to$ Accepted: `['VII']`
-  - `Question 5` (`type: 'matching'`): **Metabolic Vulnerability (COMT vs MAO)**:
-    - Target: *Substrate for COMT (Intact 3,4-dihydroxy catechol ring)* $\to$ Accepted: `['I', 'II', 'VII']`
-    - Target: *Resistant to COMT (Saligenin / Carbostyril / Indane bioisosteres)* $\to$ Accepted: `['III', 'IV', 'V', 'VI']`
-    - Target: *Substrate for MAO deamination (Unsubstituted primary amine)* $\to$ Accepted: `['VII']`
+  - `Question 2` (`type: 'multiple-choice'`): Nonselective $\alpha/\beta$-agonist identification. Options use clean Roman numerals (`Structure VII`, `Structure I`, `Structure II`, `Structure IV`) **without spoiled drug names**.
+  - `Question 3` (`type: 'multiple-choice'`): Nonselective $\beta_1/\beta_2$-agonist identification. Options use clean Roman numerals (`Structure I`, `Structure II`, `Structure VI`, `Structure VII`) **without spoiled drug names**.
+  - `Question 4` (`type: 'multiple-choice'`): Selective $\beta_1$-agonist identification. Options use clean Roman numerals (`Structure II`, `Structure I`, `Structure III`, `Structure V`) **without spoiled drug names**.
+  - `Question 5` (`type: 'multiple-choice'`): Selective $\beta_2$-agonists identification. Options use clean Roman numerals (`Structures III, IV, V, and VI`, `Structures I, II, and VII`, etc.) **without spoiled drug names**.
+  - `Question 6` (`type: 'multiple-choice'`): SABA vs LABA vs Ultra-LABA duration categorization referencing clean Roman numerals (`Structure VI = SABA; Structure IV = LABA; Structures III & V = Ultra-LABA`) **without spoiled drug names**.
+  - `Question 7` (`type: 'multiple-choice'`): Clinical indication differentiation (Asthma/COPD maintenance vs cardiogenic shock vs septic shock) referencing clean Roman numerals **without spoiled drug names**.
+  - `Question 8` (`type: 'multiple-choice'`): Metabolic vulnerability (COMT vs MAO) referencing clean Roman numerals (`Structures I, II, and VII metabolized by COMT; Structure VII deaminated by MAO; Structures III, IV, V, VI resistant to COMT`) **without spoiled drug names**.
 
 ### Slide 3: Anticholinergic Bronchodilators & Glucocorticoid Prototype Foundations
-- **Section A**: Anticholinergics (Structures I–V: Ipratropium, Tiotropium, Aclidinium, Umeclidinium, Glycopyrrolate):
-  - `Question 1` (`type: 'multiple-choice'`): Pharmacological class (competitive $M_3$ muscarinic antagonist) and chemical classes (amino ester, quinuclidine alcohol, pyrrolidinium ester).
-  - `Question 2` (`type: 'multiple-choice'`): Anticholinergic pharmacophore requirements (bulky lipophilic aryl/cycloalkyl groups, ester or ether linker, basic or quaternary nitrogen spaced by 2–3 carbons).
-  - `Question 3` (`type: 'matching'`): **Pharmacokinetic Localization & Metabolism**:
-    - Target: *Quaternary ammonium center (permanently charged, limits oral/systemic absorption)* $\to$ Accepted: `['I', 'II', 'III', 'IV', 'V']`
-    - Target: *Soft drug engineered for rapid plasma butyrylcholinesterase cleavage* $\to$ Accepted: `['III']` (Aclidinium)
-    - Target: *Non-ester quinuclidine alcohol resistant to esterase hydrolysis* $\to$ Accepted: `['IV']` (Umeclidinium)
+- **Section A**: Anticholinergic SAR (Structures I–V: Darifenacin, Trihexyphenidyl, Tiotropium, Aclidinium, Ipratropium):
+  - `Question 1` (`type: 'multiple-choice'`): Chemical and pharmacological classes (distinguishing aminoamide Darifenacin and amino alcohol Trihexyphenidyl from quaternary amino ester/ether bronchodilators).
+  - `Question 2` (`type: 'multiple-choice'`): Anticholinergic pharmacophore requirements.
+  - `Question 3` (`type: 'multiple-choice'`): Pharmacokinetic localization: Quaternary ammonium center preventing blood-brain barrier penetration and confining action to the pulmonary tract.
+  - `Question 4` (`type: 'multiple-choice'`): Soft drug esterase metabolism (Aclidinium plasma butyrylcholinesterase cleavage).
 - **Section B**: Prototype Glucocorticoid (Hydrocortisone):
-  - `Question 4` (`type: 'sub-statements'`): Terminology and classification (Adrenocorticoids vs Glucocorticoids vs Mineralocorticoids).
-  - `Question 5` (`type: 'multiple-choice'`): Steroid carbon numbering system (C1 through C21) and key pharmacophoric substituents ($\Delta^4$-3-one, $11\beta$-OH, $17\alpha$-OH, C20 ketone, C21 primary alcohol).
-  - `Question 6` (`type: 'multiple-choice'`): Cortisone vs Hydrocortisone structural and activity relationship ($11$-keto requires $11\beta$-HSD1 reduction to active $11\beta$-OH).
+  - `Question 5` (`type: 'sub-statements'`): Terminology and classification (Adrenocorticoids vs Glucocorticoids vs Mineralocorticoids).
+  - `Question 6` (`type: 'multiple-choice'`): Steroid carbon numbering system (C1 through C21) and key pharmacophoric substituents ($\Delta^4$-3-one, $11\beta$-OH, $17\alpha$-OH, C20 ketone, C21 primary alcohol).
+  - `Question 7` (`type: 'multiple-choice'`): Cortisone vs Hydrocortisone structural and activity relationship ($11$-keto requires $11\beta$-HSD1 reduction to active $11\beta$-OH).
 
-### Slide 4 & 5: Glucocorticoid Biosynthesis, Receptor Mechanism & Metabolism
+### Slide 4 & 5: Glucocorticoid Biosynthesis, Receptor Mechanism, Metabolism & Potency Ranking
 - **Biosynthesis & Receptor Mechanism**:
-  - `Question 1` (`type: 'multiple-choice'`): Adrenal cortex steroidogenesis sequence (Cholesterol $\to$ Pregnenolone $\to$ $17\alpha$-OH Pregnenolone $\to$ $17\alpha$-OH Progesterone $\to$ 11-Deoxycortisol $\to$ Hydrocortisone via CYP11A1, CYP17A1, CYP21A2, and CYP11B1).
-  - `Question 2` (`type: 'matching'`): Glucocorticoid receptor architecture (DBD, LBD, AF-1, AF-2) and molecular activation steps (chaperone dissociation, ligand binding, homodimerization, nuclear translocation, GRE binding/transrepression of NF-$\kappa$B).
-- **Metabolism & Duration Optimization**:
-  - `Question 3` (`type: 'matching'`): Match metabolic pathways to enzymes and metabolites (Pathway 1: $11\beta$-HSD2 oxidation to cortisone; Pathway 2: $5\alpha/\beta$-reductase and $3\alpha$-hydroxysteroid dehydrogenase reduction of Ring A; Pathway 3: C20 reduction).
-  - `Question 4` (`type: 'multiple-choice'`): Structural modifications that retard metabolism and enhance anti-inflammatory potency ($\Delta^1$-dehydrogenation, $6\alpha$/$9\alpha$-halogenation, $16\alpha$-methylation/acetalation).
+  - `Question 1` (`type: 'multiple-choice'`): Adrenal cortex steroidogenesis sequence (CYP11A1, CYP17A1, CYP21A2, CYP11B1).
+  - `Question 2` (`type: 'multiple-choice'`): Glucocorticoid receptor architecture (DBD, LBD, HSP90 chaperone dissociation, GRE binding, transrepression of NF-$\kappa$B/AP-1).
+- **Metabolism & Potency Ranking**:
+  - `Question 3` (`type: 'multiple-choice'`): Metabolic pathways (11$\beta$-HSD2 renal inactivation, ring-A 5-reduction to tetrahydrocortisol).
+  - `Question 4` (`type: 'ranking'`): **Glucocorticoid Anti-inflammatory Potency Ranking**: Interactive ranking of 6 steroids (Dexamethasone > Methylprednisolone > Prednisolone > Hydrocortisone > Cortisone > Aldosterone).
 
-### Slide 5 & 6: Inhaled Corticosteroid (ICS) Prodrugs & Formulations (Structures I–VI)
-- **Header**: Structures I–VI:
-  - `Structure I`: Hydrocortisone sodium succinate
-  - `Structure II`: Hydrocortisone sodium phosphate
-  - `Structure III`: Beclomethasone dipropionate
-  - `Structure IV`: Fluticasone propionate
-  - `Structure V`: Ciclesonide
-  - `Structure VI`: Mometasone furoate
-- **Questions**:
-  - `Question 1` (`type: 'matching'`): **Prodrug & Physicochemical Classification**:
-    - Target: *Hydrophilic water-soluble ester prodrug for emergency IV parenteral administration* $\to$ Accepted: `['I', 'II']`
-    - Target: *Lipophilic di-ester prodrug activated by pulmonary esterases* $\to$ Accepted: `['III']` (Beclomethasone dipropionate)
-    - Target: *Lipophilic soft steroid prodrug containing a cyclic acetal (converted to active des-ciclesonide in lung)* $\to$ Accepted: `['V']` (Ciclesonide)
-    - Target: *Active, ultra-lipophilic inhaled corticosteroid with extensive first-pass hepatic clearance* $\to$ Accepted: `['IV', 'VI']`
-  - `Question 2` (`type: 'sub-statements'`): **Glucocorticoid SAR Truth Matrix**:
-    - All-trans cyclopentanoperhydrophenanthrene backbone and $\Delta^4$-3-one are essential for anti-inflammatory activity.
-    - $11\beta$-hydroxyl group is strictly required for glucocorticoid receptor agonist activity.
-    - $\Delta^1$-double bond (prednisolone/dexamethasone) flattens ring A, increasing anti-inflammatory potency ~4-fold and reducing mineralocorticoid activity.
-    - $9\alpha$-fluoro substitution substantially increases glucocorticoid potency via electron withdrawal enhancing $11\beta$-OH hydrogen bonding.
-    - $16\alpha,17\alpha$-acetal/ketal or $16\alpha$-methyl groups eliminate mineralocorticoid salt-retaining activity.
-  - `Question 3` (`type: 'matching'`): **Metabolic Activation & Inactivation Transformations**:
-    - Target: *Activation in lung via esterase cleavage of C21 isobutyrate* $\to$ Accepted: `['V']` (Ciclesonide)
-    - Target: *Activation in lung via sequential ester cleavage (dipropionate $\to$ 17-monopropionate)* $\to$ Accepted: `['III']` (Beclomethasone dipropionate)
-    - Target: *Rapid metabolic inactivation in blood/liver via CYP3A4 17$\beta$-carbothioate hydrolysis* $\to$ Accepted: `['IV']` (Fluticasone propionate)
+### Slide 6 & 7: Inhaled Corticosteroid (ICS) Prodrugs, Formulations & SAR (Structures I–VI)
+- **Header**: Structures I–VI (Triamcinolone acetonide, Beclomethasone dipropionate, Fluticasone propionate, Mometasone furoate, Ciclesonide, Hydrocortisone sodium succinate/phosphate):
+  - `Question 1` (`type: 'sub-statements'`): 4-statement True/False battery regarding glucocorticoid backbone requirements, $11\beta$-OH, $\Delta^1$-dehydrogenation, and C21 lipophilic esters.
+  - `Question 2` (`type: 'sub-statements'`): 3-statement True/False battery regarding $16\alpha,17\alpha$-acetal/ketal eliminating mineralocorticoid activity, $9\alpha$-fluoro enhancing potency, and non-mineralocorticoid synthetic derivatives.
+  - `Question 3` (`type: 'multiple-choice'`): Formulation chemistry & metabolic activation of Beclomethasone dipropionate (pulmonary esterase cleavage to 17-BMP).
 
 ### Slide 7 & 8: Non-Steroidal Controllers: Xanthines, PDE4 Inhibitors & Leukotriene Modulators
 - **Header**: Drug A (Theophylline) vs Drug B (Roflumilast):
-  - `Question 1` (`type: 'sub-statements'`): True/False propositions distinguishing Drug A (methylxanthine, nonselective PDE inhibitor, adenosine receptor antagonist, narrow therapeutic window) from Drug B (dichloropyridine-benzamide, selective PDE4 inhibitor, once-daily oral tablet for severe COPD with chronic bronchitis).
-  - `Question 2` (`type: 'multiple-choice'`): Second messenger signaling consequences of PDE inhibition (elevation of intracellular cAMP $\to$ PKA activation $\to$ relaxation of airway smooth muscle and suppression of inflammatory mediator release).
-  - `Question 3` (`type: 'sub-statements'`): Leukotriene pathway pharmacology: Zileuton (5-lipoxygenase inhibitor, requires LFT monitoring) vs Montelukast / Zafirlukast (CysLT1 receptor antagonists blocking $LTC_4, LTD_4, LTE_4$).
+  - `Question 1` (`type: 'sub-statements'`): 5 True/False statements distinguishing Drug A (methylxanthine, nonselective PDE inhibitor, adenosine antagonist) from Drug B (dichloropyridine-benzamide, selective PDE4 inhibitor).
+  - `Question 2` (`type: 'multiple-choice'`): Second messenger signaling consequences of PDE inhibition (cAMP elevation $\to$ PKA activation).
+  - `Question 3` (`type: 'sub-statements'`): Leukotriene pathway pharmacology: Zileuton (5-LOX inhibitor, LFT monitoring) vs Montelukast (CysLT1 receptor antagonist, boxed warning for neuropsychiatric events).
 
-### Slide 8: Comprehensive Structure-to-Mechanism Matching (Structures I–VII to Mechanisms A–F)
-- **Header**: Structures I–VII (unlabeled):
-  - `Structure I`: Salmeterol ($\beta_2$-agonist)
-  - `Structure II`: Tiotropium ($M_3$ muscarinic antagonist)
-  - `Structure III`: Theophylline (Nonselective PDE inhibitor) / Roflumilast (PDE4 inhibitor)
-  - `Structure IV`: Zileuton (5-Lipoxygenase inhibitor)
-  - `Structure V`: Montelukast (CysLT1 leukotriene receptor antagonist)
-  - `Structure VI`: Fluticasone propionate (Glucocorticoid receptor agonist)
-  - `Structure VII`: Ipratropium ($M_3$ muscarinic antagonist)
-- **Questions**:
-  - `Question 1` (`type: 'matching'`): **Structure-to-Mechanism Matching**:
-    - Target: *Mechanism A: $\beta_2$-Adrenergic Receptor Agonist* $\to$ Accepted: `['I']`
-    - Target: *Mechanism B: $M_3$ Muscarinic Receptor Antagonist* $\to$ Accepted: `['II', 'VII']`
-    - Target: *Mechanism C: Phosphodiesterase (PDE) Inhibitor* $\to$ Accepted: `['III']`
-    - Target: *Mechanism D: 5-Lipoxygenase (5-LOX) Inhibitor* $\to$ Accepted: `['IV']`
-    - Target: *Mechanism E: Cysteinyl Leukotriene 1 (CysLT1) Receptor Antagonist* $\to$ Accepted: `['V']`
-    - Target: *Mechanism F: Glucocorticoid Receptor (GR) Nuclear Agonist* $\to$ Accepted: `['VI']`
+### Slide 8: Comprehensive Structure-to-Mechanism Matching (Structures I–VII to Mechanisms A–G)
+- **Header**: Structures I–VII (unlabeled chips: `Structure I` through `Structure VII`):
+  - `Structure I`: Aclidinium
+  - `Structure II`: Methylprednisolone
+  - `Structure III`: Ensifentrine
+  - `Structure IV`: Montelukast
+  - `Structure V`: Zileuton
+  - `Structure VI`: Olodaterol
+  - `Structure VII`: Theophylline
+- **Interactive Drag & Drop Matching (Question 1)**:
+  - Clean target labels **without spoiled structure names**:
+    - Target A: *Muscarinic M3 receptor antagonist* $\to$ Accepted: `['I', 'aclidinium']`
+    - Target B: *Phospholipase A2 (cPLA2) indirect inhibitor via Annexin A1 induction* $\to$ Accepted: `['II', 'methylprednisolone']`
+    - Target C: *Dual Phosphodiesterase-3 and Phosphodiesterase-4 (PDE3/PDE4) inhibitor* $\to$ Accepted: `['III', 'ensifentrine']`
+    - Target D: *Cysteinyl Leukotriene 1 (CysLT1) receptor antagonist* $\to$ Accepted: `['IV', 'montelukast']`
+    - Target E: *5-Lipoxygenase (5-LOX) inhibitor* $\to$ Accepted: `['V', 'zileuton']`
+    - Target F: *Selective beta-2 adrenergic receptor agonist* $\to$ Accepted: `['VI', 'olodaterol']`
+    - Target G: *Nonselective Phosphodiesterase (PDE) inhibitor & adenosine receptor antagonist* $\to$ Accepted: `['VII', 'theophylline']`
+  - `Question 2` (`type: 'multiple-choice'`): Formulation chemistry: Hydrocortisone sodium succinate (water-soluble IV prodrug for status asthmaticus) vs Beclomethasone dipropionate (lipophilic aerosol).
+  - `Question 3` (`type: 'sub-statements'`): Leukotriene modulators: Montelukast vs Zileuton.
 
 ### Slide 9: Comparative Drug Analysis & Clinical Practice Scenarios
-- **Section A**: Drug A (Inhaled Fluticasone) vs Drug B (IV Hydrocortisone sodium succinate):
-  - `Question 1` (`type: 'sub-statements'`): True/False statements evaluating route, onset, prodrug nature, mineralocorticoid activity, and emergency vs maintenance roles.
-- **Section B**: Drug A (Antimuscarinic Glycopyrrolate) vs Drug B (Adrenergic Indacaterol):
-  - `Question 2` (`type: 'sub-statements'`): True/False statements contrasting amino-ester antimuscarinic bronchodilators with $\beta$-phenylethanolamine adrenergic agonists.
+- **Section A**: Drug A (Beclomethasone dipropionate) vs Drug B (Hydrocortisone sodium succinate):
+  - `Question 1` (`type: 'sub-statements'`): 10-statement True/False battery matching authentic Slide 9 handout items.
+- **Section B**: Drug A (Tiotropium) vs Drug B (Pirbuterol):
+  - `Question 2` (`type: 'sub-statements'`): 5-statement True/False battery matching authentic Slide 9 handout items.
 
 ---
 
