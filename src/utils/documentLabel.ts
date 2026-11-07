@@ -69,7 +69,7 @@ export function getStructureDocumentLabel(
  * from complex labels like "Structure IV (Acetazolamide)" or "Drug B (Hydrocortisone)".
  */
 export function extractRomanOrShortLabel(
-  structure?: { id?: string; document_label?: string; name?: string } | null,
+  structure?: { id?: string; document_label?: string; label?: string; name?: string } | null,
   fallbackIndex?: number
 ): string {
   const fallback =
@@ -78,7 +78,7 @@ export function extractRomanOrShortLabel(
       : '';
   if (!structure) return fallback;
 
-  const raw = (structure.document_label || structure.id || '').trim();
+  const raw = (structure.document_label || structure.label || structure.id || '').trim();
   if (!raw) return fallback;
 
   // 1. Direct Roman numeral match within label (e.g. "Structure IV (Acetazolamide)", "Structure VII")

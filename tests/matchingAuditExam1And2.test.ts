@@ -8,8 +8,12 @@ import { getRenalReviewPages } from '../src/data/renalReviewModuleData';
 import { getRespiratoryReviewPages } from '../src/data/respiratoryReviewModuleData';
 import { getAntiarrhythmicReviewPages } from '../src/data/antiarrhythmicModuleData';
 import { antiplateletQuizData } from '../src/data/antiplateletQuizData';
-import { AntiplateletQuestion } from '../src/types/quiz';
-import { ReviewPage } from '../src/types/reviewModule';
+import {
+  AntiplateletQuestion,
+  ReviewPage,
+  MatchingTarget,
+  ChemicalStructure,
+} from '../src/types/reviewModule';
 
 function getAllQuestionsFromPages(pages: ReviewPage[]): AntiplateletQuestion[] {
   const result: AntiplateletQuestion[] = [];
@@ -41,7 +45,7 @@ test('audits Exam 1 Renal Review matching questions for clean target bullets and
 
   for (const q of matchingQuestions) {
     assert.ok(q.matchingTargets && q.matchingTargets.length > 0);
-    q.matchingTargets.forEach((target, index) => {
+    q.matchingTargets.forEach((target: MatchingTarget, index: number) => {
       const bullet = formatTargetBullet(target.id, index);
       assert.match(
         bullet,
@@ -56,12 +60,12 @@ test('audits Exam 1 Renal Review matching questions for clean target bullets and
     });
 
     if (q.structuresDisplayed && q.structuresDisplayed.length > 0) {
-      q.structuresDisplayed.forEach((str, sIdx) => {
+      q.structuresDisplayed.forEach((str: ChemicalStructure, sIdx: number) => {
         const roman = extractRomanOrShortLabel(str, sIdx);
         assert.match(
           roman,
           /^[IVXLCDM]+$/i,
-          `Structure label should extract clean Roman numeral, got "${roman}" for label "${str.label}" in Q${q.id}`
+          `Structure label should extract clean Roman numeral, got "${roman}" for label "${str.document_label || (str as any).label || str.id}" in Q${q.id}`
         );
         assert.doesNotMatch(
           roman,
@@ -86,7 +90,7 @@ test('audits Exam 1 Respiratory Review matching questions for clean target bulle
 
   for (const q of matchingQuestions) {
     assert.ok(q.matchingTargets && q.matchingTargets.length > 0);
-    q.matchingTargets.forEach((target, index) => {
+    q.matchingTargets.forEach((target: MatchingTarget, index: number) => {
       const bullet = formatTargetBullet(target.id, index);
       assert.match(
         bullet,
@@ -101,12 +105,12 @@ test('audits Exam 1 Respiratory Review matching questions for clean target bulle
     });
 
     if (q.structuresDisplayed && q.structuresDisplayed.length > 0) {
-      q.structuresDisplayed.forEach((str, sIdx) => {
+      q.structuresDisplayed.forEach((str: ChemicalStructure, sIdx: number) => {
         const roman = extractRomanOrShortLabel(str, sIdx);
         assert.match(
           roman,
           /^[IVXLCDM]+$/i,
-          `Structure label should extract clean Roman numeral, got "${roman}" for label "${str.label}" in Q${q.id}`
+          `Structure label should extract clean Roman numeral, got "${roman}" for label "${str.document_label || (str as any).label || str.id}" in Q${q.id}`
         );
         assert.doesNotMatch(
           roman,
@@ -131,7 +135,7 @@ test('audits Exam 2 Antiarrhythmic Review matching questions for clean target bu
 
   for (const q of matchingQuestions) {
     assert.ok(q.matchingTargets && q.matchingTargets.length > 0);
-    q.matchingTargets.forEach((target, index) => {
+    q.matchingTargets.forEach((target: MatchingTarget, index: number) => {
       const bullet = formatTargetBullet(target.id, index);
       assert.match(
         bullet,
@@ -146,12 +150,12 @@ test('audits Exam 2 Antiarrhythmic Review matching questions for clean target bu
     });
 
     if (q.structuresDisplayed && q.structuresDisplayed.length > 0) {
-      q.structuresDisplayed.forEach((str, sIdx) => {
+      q.structuresDisplayed.forEach((str: ChemicalStructure, sIdx: number) => {
         const roman = extractRomanOrShortLabel(str, sIdx);
         assert.match(
           roman,
           /^[IVXLCDM]+$/i,
-          `Structure label should extract clean Roman numeral, got "${roman}" for label "${str.label}" in Q${q.id}`
+          `Structure label should extract clean Roman numeral, got "${roman}" for label "${str.document_label || (str as any).label || str.id}" in Q${q.id}`
         );
         assert.doesNotMatch(
           roman,
@@ -175,7 +179,7 @@ test('audits Exam 2 Antiplatelet Review matching questions for clean target bull
 
   for (const q of matchingQuestions) {
     assert.ok(q.matchingTargets && q.matchingTargets.length > 0);
-    q.matchingTargets.forEach((target, index) => {
+    q.matchingTargets.forEach((target: MatchingTarget, index: number) => {
       const bullet = formatTargetBullet(target.id, index);
       assert.match(
         bullet,
@@ -190,12 +194,12 @@ test('audits Exam 2 Antiplatelet Review matching questions for clean target bull
     });
 
     if (q.structuresDisplayed && q.structuresDisplayed.length > 0) {
-      q.structuresDisplayed.forEach((str, sIdx) => {
+      q.structuresDisplayed.forEach((str: ChemicalStructure, sIdx: number) => {
         const roman = extractRomanOrShortLabel(str, sIdx);
         assert.match(
           roman,
           /^[IVXLCDM]+|[A-Z]|\d+$/i,
-          `Structure label should be clean short symbol, got "${roman}" for label "${str.label}" in Q${q.id}`
+          `Structure label should be clean short symbol, got "${roman}" for label "${str.document_label || (str as any).label || str.id}" in Q${q.id}`
         );
         assert.doesNotMatch(
           roman,
