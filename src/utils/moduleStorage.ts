@@ -162,6 +162,14 @@ export function loadAllReviewModules(): ReviewModule[] {
           delete overrides['anticoagulants_mcp2'];
           localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
         }
+        if (
+          overrides['respiratory_review_mcp2'] &&
+          (overrides['respiratory_review_mcp2'].version !== '2.0.0' ||
+            (overrides['respiratory_review_mcp2'].pages || []).length < 9)
+        ) {
+          delete overrides['respiratory_review_mcp2'];
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        }
       }
     } catch (e) {
       console.warn('Could not parse built-in overrides:', e);
@@ -282,7 +290,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     // Check if Dexie has a newer or existing override for built-ins
     ALL_BUILTIN_MODULE_IDS.forEach((id) => {
-      if (id === 'anticoagulants_mcp2') return;
+      if (id === 'anticoagulants_mcp2' || id === 'respiratory_review_mcp2') return;
       const dm = dexieModules.find((m) => m.id === id)?.module;
       if (dm) {
         overrides[id] = dm;
@@ -312,6 +320,34 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
         (overrides['anticoagulants_mcp2'].pages || []).length < 8)
     ) {
       delete overrides['anticoagulants_mcp2'];
+      try {
+        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+      } catch {}
+    }
+
+    const dexieRespReview = dexieModules.find((m) => m.id === 'respiratory_review_mcp2')?.module;
+    if (dexieRespReview) {
+      if (dexieRespReview.version === '2.0.0' && (dexieRespReview.pages || []).length >= 9) {
+        overrides['respiratory_review_mcp2'] = dexieRespReview;
+      } else {
+        delete overrides['respiratory_review_mcp2'];
+        await medChemGraphDb.modules.put({
+          id: 'respiratory_review_mcp2',
+          module: defaultRespReview,
+          updatedAt: new Date().toISOString(),
+        }).catch((e) => console.warn('Dexie put during respiratory review migration warning:', e));
+        try {
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        } catch {}
+      }
+    }
+
+    if (
+      overrides['respiratory_review_mcp2'] &&
+      (overrides['respiratory_review_mcp2'].version !== '2.0.0' ||
+        (overrides['respiratory_review_mcp2'].pages || []).length < 9)
+    ) {
+      delete overrides['respiratory_review_mcp2'];
       try {
         localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
       } catch {}

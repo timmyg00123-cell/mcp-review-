@@ -2997,7 +2997,7 @@ export function getDefaultRespiratoryReviewModule(): ReviewModule {
     examTitle: 'Exam 1: Renal & Respiratory Medicinal Chemistry',
     isBuiltIn: true,
     createdAt: new Date().toISOString(),
-    version: '1.0.0',
+    version: '2.0.0',
     chemicalStructures: Object.values(RESPIRATORY_REVIEW_STRUCTURES),
     pages: getRespiratoryReviewPages(),
   };
