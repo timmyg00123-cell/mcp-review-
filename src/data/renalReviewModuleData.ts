@@ -14,10 +14,10 @@ export const AMILORIDE_STRUCTURE: ChemicalStructure = {
   document_label: 'Structure I (Amiloride)',
   name: 'Amiloride',
   tradeName: 'Midamor',
-  smiles: 'NC(=O)C1=NC(Cl)=C(N)N=C1N=C(N)N',
-  canonical_smiles: 'NC(=O)C1=NC(Cl)=C(N)N=C1N=C(N)N',
-  canonicalSmiles: 'NC(=O)C1=NC(Cl)=C(N)N=C1N=C(N)N',
-  cid: 2162,
+  smiles: 'C1(=C(N=C(C(=N1)Cl)N)N)C(=O)N=C(N)N',
+  canonical_smiles: 'C1(=C(N=C(C(=N1)Cl)N)N)C(=O)N=C(N)N',
+  canonicalSmiles: 'C1(=C(N=C(C(=N1)Cl)N)N)C(=O)N=C(N)N',
+  cid: 16231,
   mw: 229.63,
   logP: -0.4,
   chemicalClass: 'Pyrazinopyrimidine derivative',
@@ -44,8 +44,8 @@ export const AMILORIDE_STRUCTURE: ChemicalStructure = {
     'Pyrazine ring with an acylguanidino side chain. The strongly basic guanidino group (pKa 8.7) is protonated (positively charged) at physiological pH, electrostatically mimicking hydrated Na+ to plug the selectivity filter of the luminal ENaC channel. Lacks sulfonamide (no sulfa cross-reactivity).',
   moa_summary:
     'Directly blocks luminal ENaC channels in principal cells of late distal tubules and cortical collecting ducts, preventing Na+ influx, dissipating the lumen-negative transepithelial potential, and halting secondary K+ and H+ secretion.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/2162/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/2162',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/16231/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/16231',
 };
 
 export const FUROSEMIDE_STRUCTURE: ChemicalStructure = {
@@ -245,10 +245,10 @@ export const TOLVAPTAN_STRUCTURE: ChemicalStructure = {
   document_label: 'Structure III (Tolvaptan) - V2 Antagonist',
   name: 'Tolvaptan',
   tradeName: 'Samsca / Jynarque',
-  smiles: 'CC1=CC=C(C=C1C(=O)NC2=CC=C(C=C2)C(=O)N3CCC(CC3)O)NC(=O)C4=CC=CC=C4Cl',
-  canonical_smiles: 'CC1=CC=C(C=C1C(=O)NC2=CC=C(C=C2)C(=O)N3CCC(CC3)O)NC(=O)C4=CC=CC=C4Cl',
-  canonicalSmiles: 'CC1=CC=C(C=C1C(=O)NC2=CC=C(C=C2)C(=O)N3CCC(CC3)O)NC(=O)C4=CC=CC=C4Cl',
-  cid: 216239,
+  smiles: 'CC1=CC=CC=C1C(=O)NC2=CC(=C(C=C2)C(=O)N3CCCC(C4=C3C=CC(=C4)Cl)O)C',
+  canonical_smiles: 'CC1=CC=CC=C1C(=O)NC2=CC(=C(C=C2)C(=O)N3CCCC(C4=C3C=CC(=C4)Cl)O)C',
+  canonicalSmiles: 'CC1=CC=CC=C1C(=O)NC2=CC(=C(C=C2)C(=O)N3CCCC(C4=C3C=CC(=C4)Cl)O)C',
+  cid: 216237,
   mw: 448.94,
   logP: 3.4,
   chemicalClass: 'Benzamide-benzazepine derivative (Non-peptide small molecule)',
@@ -275,8 +275,8 @@ export const TOLVAPTAN_STRUCTURE: ChemicalStructure = {
     'Non-peptide V2 antagonist ("vaptan"). The 7-chloro-2-methylbenzamide and hydroxy-benzazepine scaffold imparts >29-fold selectivity for renal V2 over vascular V1a receptors. Acts as an "aquaretic" promoting pure electrolyte-free water excretion without kaliuresis or natriuresis.',
   moa_summary:
     'Competitively blocks arginine vasopressin (AVP) from binding basolateral V2 receptors in collecting ducts, blocking adenylyl cyclase activation, preventing intracellular cAMP rise, and preventing aquaporin-2 channel exocytosis.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/216239/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/216239',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/216237/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/216237',
 };
 
 export const VASOPRESSIN_STRUCTURE: ChemicalStructure = {
@@ -284,10 +284,10 @@ export const VASOPRESSIN_STRUCTURE: ChemicalStructure = {
   document_label: 'Vasopressin (AVP / Antidiuretic Hormone)',
   name: 'Arginine Vasopressin (AVP)',
   tradeName: 'Pitressin / Vasostrict',
-  smiles: 'C[C@H](N)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@@H](Cc2ccccc2)C(=O)N[C@@H](CCC(=O)N)C(=O)N[C@@H](CC(=O)N)C(=O)N[C@H]3CSSC[C@H](NC(=O)[C@H](CC(=O)N)NC3=O)C(=O)N4CCC[C@H]4C(=O)N[C@@H](CCCNC(=N)N)C(=O)NCC(=O)N',
-  canonical_smiles: 'C[C@H](N)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@@H](Cc2ccccc2)C(=O)N[C@@H](CCC(=O)N)C(=O)N[C@@H](CC(=O)N)C(=O)N[C@H]3CSSC[C@H](NC(=O)[C@H](CC(=O)N)NC3=O)C(=O)N4CCC[C@H]4C(=O)N[C@@H](CCCNC(=N)N)C(=O)NCC(=O)N',
-  canonicalSmiles: 'C[C@H](N)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@@H](Cc2ccccc2)C(=O)N[C@@H](CCC(=O)N)C(=O)N[C@@H](CC(=O)N)C(=O)N[C@H]3CSSC[C@H](NC(=O)[C@H](CC(=O)N)NC3=O)C(=O)N4CCC[C@H]4C(=O)N[C@@H](CCCNC(=N)N)C(=O)NCC(=O)N',
-  cid: 50293,
+  smiles: 'C1CC(N(C1)C(=O)C2CSSCC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)N)C(=O)NC(CCCN=C(N)N)C(=O)NCC(=O)N',
+  canonical_smiles: 'C1CC(N(C1)C(=O)C2CSSCC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)N)C(=O)NC(CCCN=C(N)N)C(=O)NCC(=O)N',
+  canonicalSmiles: 'C1CC(N(C1)C(=O)C2CSSCC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)N)C(=O)NC(CCCN=C(N)N)C(=O)NCC(=O)N',
+  cid: 644077,
   mw: 1084.23,
   logP: -3.5,
   chemicalClass: 'Nonapeptide neurohypophyseal hormone',
@@ -314,8 +314,8 @@ export const VASOPRESSIN_STRUCTURE: ChemicalStructure = {
     'Sequence: Cys-Tyr-Phe-Gln-Asn-Cys-Pro-L-Arg-Gly-NH2 with Cys1-Cys6 disulfide cyclic loop. Non-selectively stimulates both vascular V1a receptors (causing potent vasoconstriction and blood pressure elevation) and renal V2 receptors (causing antidiuresis). Intact N-terminal Cys1 amine is rapidly digested by aminopeptidases, explaining its very short half-life.',
   moa_summary:
     'Endogenous hormone that causes water retention (NOT diuresis!). Binds basolateral V2 receptors in collecting duct principal cells, triggering cAMP-mediated insertion of aquaporin-2 water channels, concentrating urine.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/50293/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/50293',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/644077/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/644077',
 };
 
 export const DESMOPRESSIN_STRUCTURE: ChemicalStructure = {
@@ -323,10 +323,10 @@ export const DESMOPRESSIN_STRUCTURE: ChemicalStructure = {
   document_label: 'Desmopressin (DDAVP)',
   name: 'Desmopressin (DDAVP)',
   tradeName: 'DDAVP / Nocdurna',
-  smiles: 'O=C1N[C@@H](Cc2ccc(O)cc2)C(=O)N[C@@H](Cc3ccccc3)C(=O)N[C@@H](CCC(=O)N)C(=O)N[C@@H](CC(=O)N)C(=O)N[C@H]4CSSCC(=O)N[C@H](C(=O)N5CCC[C@H]5C(=O)N[C@H](C(=O)NCC(=O)N)CCCNC(=N)N)CSSC4',
-  canonical_smiles: 'O=C1N[C@@H](Cc2ccc(O)cc2)C(=O)N[C@@H](Cc3ccccc3)C(=O)N[C@@H](CCC(=O)N)C(=O)N[C@@H](CC(=O)N)C(=O)N[C@H]4CSSCC(=O)N[C@H](C(=O)N5CCC[C@H]5C(=O)N[C@H](C(=O)NCC(=O)N)CCCNC(=N)N)CSSC4',
-  canonicalSmiles: 'O=C1N[C@@H](Cc2ccc(O)cc2)C(=O)N[C@@H](Cc3ccccc3)C(=O)N[C@@H](CCC(=O)N)C(=O)N[C@@H](CC(=O)N)C(=O)N[C@H]4CSSCC(=O)N[C@H](C(=O)N5CCC[C@H]5C(=O)N[C@H](C(=O)NCC(=O)N)CCCNC(=N)N)CSSC4',
-  cid: 279,
+  smiles: 'C1CC(N(C1)C(=O)C2CSSCCC(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)C(=O)NC(CCCN=C(N)N)C(=O)NCC(=O)N',
+  canonical_smiles: 'C1CC(N(C1)C(=O)C2CSSCCC(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)C(=O)NC(CCCN=C(N)N)C(=O)NCC(=O)N',
+  canonicalSmiles: 'C1CC(N(C1)C(=O)C2CSSCCC(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)C(=O)NC(CCCN=C(N)N)C(=O)NCC(=O)N',
+  cid: 5311065,
   mw: 1069.22,
   logP: -3.8,
   chemicalClass: 'Synthetic modified nonapeptide (1-Deamino-8-D-arginine vasopressin)',
@@ -353,8 +353,47 @@ export const DESMOPRESSIN_STRUCTURE: ChemicalStructure = {
     'Two critical SAR modifications: (1) 1-Deamination at position 1 eliminates the N-terminal amino group, conferring high resistance against aminopeptidases and extending half-life from 15 min to 2 hours. (2) Substitution of L-Arg with D-Arg at position 8 dramatically eliminates V1a pressor/vasoconstrictor activity while preserving potent V2 antidiuretic affinity (>2000:1 V2:V1 selectivity ratio).',
   moa_summary:
     'Selectively activates renal V2 receptors to promote aquaporin-2 water channel insertion, treating central diabetes insipidus, nocturnal enuresis, and stimulating endothelial von Willebrand factor release in hemophilia A and von Willebrand disease.',
-  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/279/PNG',
-  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/279',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/5311065/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/5311065',
+};
+
+export const TERLIPRESSIN_STRUCTURE: ChemicalStructure = {
+  id: 'terlipressin',
+  document_label: 'Terlipressin (Triglycyl-Lysine Vasopressin)',
+  name: 'Terlipressin',
+  tradeName: 'Terlivaz',
+  smiles: 'C1CC(N(C1)C(=O)C2CSSCC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)NC(=O)CNC(=O)CNC(=O)CN)C(=O)NC(CCCCN)C(=O)NCC(=O)N',
+  canonical_smiles: 'C1CC(N(C1)C(=O)C2CSSCC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)NC(=O)CNC(=O)CNC(=O)CN)C(=O)NC(CCCCN)C(=O)NCC(=O)N',
+  canonicalSmiles: 'C1CC(N(C1)C(=O)C2CSSCC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)N2)CC(=O)N)CCC(=O)N)CC3=CC=CC=C3)CC4=CC=C(C=C4)O)NC(=O)CNC(=O)CNC(=O)CN)C(=O)NC(CCCCN)C(=O)NCC(=O)N',
+  cid: 23624298,
+  mw: 1227.4,
+  logP: -4.1,
+  chemicalClass: 'Synthetic prodrug dodecapeptide (N-α-triglycyl-8-lysine vasopressin)',
+  pharmacologicalClass: 'V1a-Selective Vasoconstrictor Prodrug',
+  target: 'Vasopressin V1a Receptor (Gq-coupled GPCR)',
+  target_receptor: 'Splanchnic vascular smooth muscle V1a receptors',
+  reversibility: 'Reversible GPCR Agonist',
+  drug_state: 'Prodrug (cleaved in vivo to active [Lys8]-vasopressin)',
+  route: 'IV bolus',
+  keyFunctionalGroups: [
+    'N-terminal triglycine tail (Gly-Gly-Gly-Cys1)',
+    'Position 8 Lysine substitution',
+    'Intramolecular disulfide bridge (Cys1-Cys6)',
+    'Phe3 aromatic pharmacophore',
+  ],
+  pkPdHighlights: {
+    onset: '30 min',
+    duration: '4-6 hours',
+    halfLife: '24-40 minutes (slow cleavage provides sustained 4-hour pharmacodynamic duration)',
+    elimination: 'Systemic enzymatic cleavage of triglycyl tail by endopeptidases yielding active lysine-vasopressin',
+    bioactivation: 'Sustained enzymatic cleavage of the three N-terminal glycyl residues in vivo',
+  },
+  sarNotes:
+    'N-terminal triglycyl prodrug extension of [Lys8]-vasopressin. In vivo, tissue endopeptidases slowly cleave the three glycyl residues, acting as a slow-release depot for active lysine-vasopressin. This sustained release stimulates splanchnic V1a receptors to induce splanchnic vasoconstriction, reduce portal venous pressure, and improve renal perfusion in hepatorenal syndrome (HRS) with significantly fewer systemic ischemic spikes than continuous AVP infusion.',
+  moa_summary:
+    'Prodrug that is cleaved in vivo to active [Lys8]-vasopressin, preferentially stimulating splanchnic vascular V1a receptors (Gq) to induce splanchnic vasoconstriction, reducing portal venous pressure and reversing renal failure in hepatorenal syndrome.',
+  pngUrl: 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/23624298/PNG',
+  pubchemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/23624298',
 };
 
 export const OXYTOCIN_STRUCTURE: ChemicalStructure = {
@@ -448,7 +487,7 @@ export function getRenalReviewPages(): ReviewPage[] {
                 {
                   id: 'target-chem-amiloride',
                   label: 'Pyrazinopyrimidine derivative',
-                  acceptedStructureIds: ['amiloride', 'I'],
+                  acceptedStructureIds: ['amiloride', 'triamterene', 'I'],
                   rationale:
                     'Structure I (Amiloride): Pyrazine ring with amino and chloro substituents coupled to an acylguanidine side chain.',
                 },
@@ -512,7 +551,7 @@ export function getRenalReviewPages(): ReviewPage[] {
                 {
                   id: 'target-acidbase-base',
                   label: 'Weak Base (pKa ~8.7 cationic guanidinium)',
-                  acceptedStructureIds: ['amiloride', 'I'],
+                  acceptedStructureIds: ['amiloride', 'triamterene', 'I'],
                   rationale:
                     'Structure I (Amiloride): Acylguanidine moiety has pKa 8.7, existing predominantly in protonated, positively charged form.',
                 },
@@ -599,7 +638,7 @@ export function getRenalReviewPages(): ReviewPage[] {
                 {
                   id: 'target-mech-enac',
                   label: 'Epithelial Sodium Channel (ENaC) Blocker / K+-Sparing',
-                  acceptedStructureIds: ['amiloride', 'I'],
+                  acceptedStructureIds: ['amiloride', 'triamterene', 'I'],
                   rationale:
                     'Structure I (Amiloride): Plugs the pore of luminal ENaC channels, preventing Na+ entry and sparing potassium.',
                 },
@@ -663,7 +702,7 @@ export function getRenalReviewPages(): ReviewPage[] {
                 {
                   id: 'target-site-collecting-duct',
                   label: 'Late Distal Tubule & Cortical Collecting Duct (Principal Cells)',
-                  acceptedStructureIds: ['amiloride', 'I'],
+                  acceptedStructureIds: ['amiloride', 'triamterene', 'I'],
                   rationale:
                     'Structure I (Amiloride): Luminal ENaC channels are exclusively located in principal cells of late distal tubules and collecting ducts.',
                 },
@@ -1130,6 +1169,7 @@ export function getRenalReviewPages(): ReviewPage[] {
             VASOPRESSIN_STRUCTURE,
             DESMOPRESSIN_STRUCTURE,
             OXYTOCIN_STRUCTURE,
+            TERLIPRESSIN_STRUCTURE,
           ],
           questions: [
             // Q15: Non-diuretic identification
@@ -1307,6 +1347,13 @@ export function getRenalReviewPages(): ReviewPage[] {
                   explanation:
                     'True: Desmopressin activates extra-renal endothelial V2 receptors, releasing stored von Willebrand factor and Factor VIII into circulation to promote hemostasis.',
                 },
+                {
+                  id: '18g',
+                  text: 'Terlipressin is an N-terminal triglycyl prodrug of [Lys8]-vasopressin that undergoes slow enzymatic cleavage in vivo to provide sustained V1a-selective splanchnic vasoconstriction for the management of hepatorenal syndrome (HRS).',
+                  isCorrect: true,
+                  explanation:
+                    'True: Terlipressin carries an N-alpha-triglycyl extension that tissue endopeptidases gradually cleave in vivo, slowly releasing active lysine-vasopressin. This sustained release selectively constricts dilated splanchnic mesenteric vessels via V1a receptors, reducing portal hypertension and restoring renal perfusion in hepatorenal syndrome with significantly fewer systemic ischemic spikes than continuous AVP infusion.',
+                },
               ],
             },
           ],
@@ -1381,7 +1428,7 @@ export function getRenalReviewPages(): ReviewPage[] {
                 {
                   id: 'target-region-d',
                   label: 'Region d: Late Distal Tubule & Cortical Collecting Duct',
-                  acceptedStructureIds: ['amiloride', 'diuretic_4', 'IV', 'I'],
+                  acceptedStructureIds: ['amiloride', 'triamterene', 'diuretic_4', 'IV', 'I'],
                   rationale:
                     'Region d is the late distal tubule and cortical collecting duct, where potassium-sparing diuretics (Amiloride / Diuretic 4) plug luminal ENaC channels (2-3% filtered Na+).',
                 },
@@ -1474,6 +1521,7 @@ export function getDefaultRenalReviewModule(): ReviewModule {
       VASOPRESSIN_STRUCTURE,
       DESMOPRESSIN_STRUCTURE,
       OXYTOCIN_STRUCTURE,
+      TERLIPRESSIN_STRUCTURE,
     ],
     pages: getRenalReviewPages(),
   };

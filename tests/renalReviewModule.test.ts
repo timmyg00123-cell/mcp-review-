@@ -12,6 +12,7 @@ import {
   VASOPRESSIN_STRUCTURE,
   DESMOPRESSIN_STRUCTURE,
   OXYTOCIN_STRUCTURE,
+  TERLIPRESSIN_STRUCTURE,
 } from '../src/data/renalReviewModuleData';
 
 console.log('Testing Renal Review Module (renalReviewModuleData.ts)...');
@@ -49,6 +50,7 @@ const landmarkStructures = [
   VASOPRESSIN_STRUCTURE,
   DESMOPRESSIN_STRUCTURE,
   OXYTOCIN_STRUCTURE,
+  TERLIPRESSIN_STRUCTURE,
 ];
 
 landmarkStructures.forEach((struct) => {
@@ -62,14 +64,29 @@ landmarkStructures.forEach((struct) => {
   assert.ok(struct.keyFunctionalGroups && struct.keyFunctionalGroups.length >= 2, `Structure ${struct.name} must have functional groups`);
 });
 
-// Specific chemical assertions
+// Specific chemical assertions (PubChem CIDs & SMILES audits)
 assert.equal(AMILORIDE_STRUCTURE.chemicalClass, 'Pyrazinopyrimidine derivative');
+assert.equal(AMILORIDE_STRUCTURE.cid, 16231, 'Amiloride PubChem CID must be 16231');
+assert.equal(AMILORIDE_STRUCTURE.canonicalSmiles, 'C1(=C(N=C(C(=N1)Cl)N)N)C(=O)N=C(N)N');
 assert.ok(AMILORIDE_STRUCTURE.keyFunctionalGroups.some((g) => g.toLowerCase().includes('guanidino') || g.toLowerCase().includes('guanidine')));
+
 assert.equal(FUROSEMIDE_STRUCTURE.chemicalClass, 'Sulfamoyl anthranilic acid');
 assert.ok(HYDROCHLOROTHIAZIDE_STRUCTURE.chemicalClass.includes('Benzothiadiazine'));
 assert.ok(ACETAZOLAMIDE_STRUCTURE.chemicalClass.includes('Thiadiazole'));
 assert.equal(MANNITOL_STRUCTURE.chemicalClass, 'Aliphatic polyalcohol (Sugar alcohol)');
+
+assert.equal(TOLVAPTAN_STRUCTURE.cid, 216237, 'Tolvaptan PubChem CID must be 216237');
+assert.equal(TOLVAPTAN_STRUCTURE.canonicalSmiles, 'CC1=CC=CC=C1C(=O)NC2=CC(=C(C=C2)C(=O)N3CCCC(C4=C3C=CC(=C4)Cl)O)C');
 assert.ok(TOLVAPTAN_STRUCTURE.pharmacologicalClass.includes('V2'));
+
+assert.equal(VASOPRESSIN_STRUCTURE.cid, 644077, 'Vasopressin PubChem CID must be 644077');
+assert.equal(DESMOPRESSIN_STRUCTURE.cid, 5311065, 'Desmopressin PubChem CID must be 5311065');
+assert.ok(
+  DESMOPRESSIN_STRUCTURE.smiles &&
+    !DESMOPRESSIN_STRUCTURE.smiles.startsWith('O=C1'),
+  'Desmopressin SMILES must not have unclosed ring tag O=C1'
+);
+assert.equal(TERLIPRESSIN_STRUCTURE.cid, 23624298, 'Terlipressin PubChem CID must be 23624298');
 
 // 4. Page 1 (Slide 1): Q1 - Q14
 const page1 = pages[0]!;
@@ -83,6 +100,7 @@ assert.equal(q1.type, 'matching', 'Q1 must be matching type');
 assert.ok(q1.matchingTargets && q1.matchingTargets.length >= 5, 'Q1 must have matching targets for 5 chemical classes');
 const q1Accepted = q1.matchingTargets!.flatMap((t) => t.acceptedStructureIds);
 assert.ok(q1Accepted.includes('amiloride') || q1Accepted.includes('I'), 'Q1 must accept amiloride/I');
+assert.ok(q1Accepted.includes('triamterene'), 'Q1 must accept triamterene alongside amiloride');
 assert.ok(q1Accepted.includes('furosemide') || q1Accepted.includes('II'), 'Q1 must accept furosemide/II');
 assert.ok(q1Accepted.includes('hydrochlorothiazide') || q1Accepted.includes('III'), 'Q1 must accept hydrochlorothiazide/III');
 assert.ok(q1Accepted.includes('acetazolamide') || q1Accepted.includes('IV'), 'Q1 must accept acetazolamide/IV');
@@ -91,14 +109,20 @@ assert.ok(q1Accepted.includes('mannitol') || q1Accepted.includes('V'), 'Q1 must 
 // Q2: Acid/base classification
 const q2 = p1Questions.find((q) => q.id === 2)!;
 assert.ok(q2.type === 'matching' || q2.type === 'sub-statements', 'Q2 must be matching or sub-statements');
+const q2Accepted = q2.matchingTargets?.flatMap((t) => t.acceptedStructureIds) || [];
+assert.ok(q2Accepted.includes('triamterene'), 'Q2 must accept triamterene for weak base');
 
 // Q3: Mechanistic class
 const q3 = p1Questions.find((q) => q.id === 3)!;
 assert.equal(q3.type, 'matching', 'Q3 must be matching');
+const q3Accepted = q3.matchingTargets!.flatMap((t) => t.acceptedStructureIds);
+assert.ok(q3Accepted.includes('triamterene'), 'Q3 must accept triamterene for ENaC inhibitor');
 
 // Q4: Site of action
 const q4 = p1Questions.find((q) => q.id === 4)!;
 assert.equal(q4.type, 'matching', 'Q4 must be matching');
+const q4Accepted = q4.matchingTargets!.flatMap((t) => t.acceptedStructureIds);
+assert.ok(q4Accepted.includes('triamterene'), 'Q4 must accept triamterene for collecting duct');
 
 // Q5 - Q11: High-yield sub-statements / rationales
 const q5 = p1Questions.find((q) => q.id === 5)!; // Fastest acting (Furosemide / pKa 3.9)
@@ -152,9 +176,17 @@ assert.ok(
     q17.questionStem?.toLowerCase().includes('carbonic anhydrase')
 );
 
-const q18 = p2Questions.find((q) => q.id === 18)!; // Compare 3 peptides
+const q18 = p2Questions.find((q) => q.id === 18)!; // Compare peptides
 assert.equal(q18.type, 'sub-statements', 'Q18 must be sub-statements for comparing peptides');
 assert.ok(q18.subStatements && q18.subStatements.length >= 4, 'Q18 must have at least 4 comparative sub-statements');
+assert.ok(
+  q18.subStatements.some(
+    (s) =>
+      s.text?.toLowerCase().includes('terlipressin') &&
+      s.text?.toLowerCase().includes('hepatorenal')
+  ),
+  'Q18 must include Terlipressin prodrug cleavage for hepatorenal syndrome'
+);
 
 // 6. Page 3 (Slide 3): Q19
 const page3 = pages[2]!;
@@ -164,6 +196,8 @@ assert.ok(p3Questions.length >= 1, 'Page 3 must contain Q19');
 
 const q19 = p3Questions.find((q) => q.id === 19)!;
 assert.ok(q19.matchingTargets && q19.matchingTargets.length >= 4, 'Q19 must have nephron region matching targets');
+const q19Accepted = q19.matchingTargets!.flatMap((t) => t.acceptedStructureIds);
+assert.ok(q19Accepted.includes('triamterene'), 'Q19 must accept triamterene alongside amiloride for Region d');
 assert.ok(q19.subStatements && q19.subStatements.length >= 2, 'Q19 must include efficacy ranking sub-statements');
 
 // 7. Rigorous Sub-statements Validation across entire module
