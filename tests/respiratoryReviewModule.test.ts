@@ -267,6 +267,17 @@ p2Questions.forEach((q, idx) => {
 const page3 = pages[2]!;
 assert.equal(page3.pageNumber, 3, 'Page 3 must be pageNumber 3');
 const p3Questions = page3.sections.flatMap((s) => s.questions);
+
+// Slide 3 Q304 spoiler check
+const s3q4 = p3Questions.find((q) => q.id === 304)!;
+assert.ok(s3q4, 'Slide 3 must have Q304');
+s3q4.options?.forEach((opt) => {
+  assert.doesNotMatch(
+    opt,
+    /Structure\s+[IVXLCDM]+\s*\([A-Za-z\s’']+\)/i,
+    `Slide 3 Q304 option must not spoil drug name in parentheses: "${opt}"`
+  );
+});
 assert.ok(p3Questions.length >= 8, 'Page 3 must contain at least 8 questions across Anticholinergics and Hydrocortisone');
 
 // Anticholinergics: Quaternary ammonium lung localization
@@ -364,6 +375,17 @@ assert.equal(stmtC21Lipophilic.isCorrect, true);
 const stmt1Dehydro = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('1-dehydro'));
 assert.ok(stmt1Dehydro, 'Slide 6 must test 1-dehydro modification increases anti-inflammatory activity and limits metabolism');
 assert.equal(stmt1Dehydro.isCorrect, true);
+
+// Slide 6 Matching target spoiler audit
+const s6Matching = p6Questions.find((q) => q.type === 'matching')!;
+assert.ok(s6Matching, 'Slide 6 must have matching question');
+s6Matching.matchingTargets!.forEach((t) => {
+  assert.doesNotMatch(
+    t.label,
+    /^Structure\s+[IVXLCDM]+\s*\([A-Za-z\s]+\):/i,
+    `Slide 6 target label must not spoil structure: "${t.label}"`
+  );
+});
 
 // 10. Slide 7 (Page 7): Glucocorticoid SAR Items, Biotransformations & Theophylline vs Roflumilast
 const page7 = pages[6]!;

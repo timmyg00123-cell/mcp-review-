@@ -2064,10 +2064,10 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionStem:
                 'Which of the anticholinergic structures (I–V) are clinically indicated for the inhalation management of asthma and COPD?',
               options: [
-                'Structures III (Tiotropium), IV (Umeclidinium), and V (Ipratropium) are indicated for respiratory diseases; Structure I (Darifenacin) is for overactive bladder; Structure II (Trihexyphenidyl) is for Parkinson’s disease',
+                'Structures III, IV, and V are indicated for respiratory diseases; Structure I is for overactive bladder; Structure II is for Parkinson’s disease',
                 'Structures I and II are inhaled bronchodilators; Structures III, IV, and V are for urinary incontinence',
                 'All five structures are formulated as metered-dose inhalers for COPD',
-                'Only Structure II (Trihexyphenidyl) is approved for chronic asthma',
+                'Only Structure II is approved for chronic asthma',
               ],
               correctIndex: 0,
               explanation:
@@ -2452,54 +2452,54 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               matchingTargets: [
                 {
                   id: 'target_triamcinolone',
-                  label: 'Structure I (Triamcinolone acetonide): Cyclic 16,17-acetonide ketal',
+                  label: 'Cyclic 16,17-acetonide ketal for topical anti-inflammatory potency with zero salt retention',
                   acceptedStructureIds: ['triamcinolone_acetonide', 'I'],
                   rationale:
-                    'Triamcinolone acetonide contains a 16alpha,17alpha-isopropylidenedioxy (acetonide) group that maximizes topical anti-inflammatory potency with zero salt retention.',
+                    'Structure I (Triamcinolone acetonide) contains a 16alpha,17alpha-isopropylidenedioxy (acetonide) group that maximizes topical anti-inflammatory potency with zero salt retention.',
                 },
                 {
                   id: 'target_beclo',
-                  label: 'Structure II (Beclomethasone dipropionate): Lipophilic diester prodrug',
+                  label: 'Lipophilic diester prodrug providing airway tissue deposition and low oral bioavailability',
                   acceptedStructureIds: ['beclomethasone_dipropionate', 'II'],
                   rationale:
-                    'Beclomethasone dipropionate carries propionate esters at C17alpha and C21, conferring high lipophilicity for inhaled dry powder delivery.',
+                    'Structure II (Beclomethasone dipropionate) carries propionate esters at C17alpha and C21, conferring high lipophilicity for inhaled dry powder delivery.',
                 },
                 {
                   id: 'target_fluticasone',
-                  label: 'Structure III (Fluticasone propionate): 17beta-Carbothioate fluoromethyl soft steroid',
+                  label: '17beta-Carbothioate fluoromethyl soft steroid designed for rapid metabolic inactivation',
                   acceptedStructureIds: ['fluticasone_propionate', 'III'],
                   rationale:
-                    'Fluticasone propionate features a 17beta-carbothioate fluoromethyl ester designed for rapid hepatic CYP3A4 inactivation.',
+                    'Structure III (Fluticasone propionate) features a 17beta-carbothioate fluoromethyl ester designed for rapid hepatic CYP3A4 inactivation.',
                 },
                 {
                   id: 'target_hydro_phos',
-                  label: 'Structure IV (Hydrocortisone sodium phosphate): Water-soluble parenteral ester salt',
+                  label: 'Water-soluble parenteral ester salt for emergency intravenous bolus administration',
                   acceptedStructureIds: ['hydrocortisone_sodium_phosphate', 'IV'],
                   rationale:
-                    'Hydrocortisone sodium phosphate has a charged phosphate ester at C21 that ionizes at pH 7.4, providing high water solubility for emergency IV injection.',
+                    'Structure IV (Hydrocortisone sodium phosphate) has a charged phosphate ester at C21 that ionizes at pH 7.4, providing high water solubility for emergency IV injection.',
                 },
                 {
                   id: 'target_ciclesonide',
-                  label: 'Structure V (Ciclesonide): Inhaled cyclic acetal prodrug activated by airway esterases',
+                  label: 'Inhaled cyclic acetal prodrug activated by airway esterases',
                   acceptedStructureIds: ['ciclesonide', 'V'],
                   rationale:
-                    'Ciclesonide is a 21-isobutyrate cyclic acetal prodrug cleaved by pulmonary carboxylesterase 1 into potent des-ciclesonide inside the lung.',
+                    'Structure V (Ciclesonide) is a 21-isobutyrate cyclic acetal prodrug cleaved by pulmonary carboxylesterase 1 into potent des-ciclesonide inside the lung.',
                 },
                 {
                   id: 'target_clobetasol',
-                  label: 'Structure VI (Clobetasol propionate): Super-potent 21-chloro topical corticosteroid',
+                  label: 'Super-potent 21-chloro topical corticosteroid for severe inflammatory dermatoses',
                   acceptedStructureIds: ['clobetasol_propionate', 'VI'],
                   rationale:
-                    'Clobetasol propionate replaces the 21-hydroxyl with chlorine, yielding super-high glucocorticoid potency reserved for severe refractory inflammatory dermatoses.',
+                    'Structure VI (Clobetasol propionate) replaces the 21-hydroxyl with chlorine, yielding super-high glucocorticoid potency reserved for severe refractory inflammatory dermatoses.',
                 },
               ],
               options: [
-                'Structure I: Cyclic 16,17-acetonide ketal',
-                'Structure II: Lipophilic diester prodrug',
-                'Structure III: 17beta-Carbothioate soft steroid',
-                'Structure IV: Water-soluble parenteral ester salt',
-                'Structure V: Inhaled cyclic acetal prodrug',
-                'Structure VI: Super-potent 21-chloro corticosteroid',
+                'Cyclic 16,17-acetonide ketal',
+                'Lipophilic diester prodrug',
+                '17beta-Carbothioate soft steroid',
+                'Water-soluble parenteral ester salt',
+                'Inhaled cyclic acetal prodrug',
+                'Super-potent 21-chloro corticosteroid',
               ],
               correctAnswer: 'I: Acetonide; II: Diester; III: Carbothioate; IV: Phosphate salt; V: Acetal prodrug; VI: 21-Chloro',
               explanation:
