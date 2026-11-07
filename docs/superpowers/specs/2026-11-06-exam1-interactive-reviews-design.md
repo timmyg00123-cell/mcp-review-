@@ -25,19 +25,20 @@ Rather than standard 4-choice questions, the user requested that these review de
 
 ### Goals
 1. **Interactive Review for Renal Drugs (`renal_review_mcp2`)**:
-   - Construct a multi-page interactive review matching Dr. Al-Horani's 3-slide review deck.
+   - Construct a multi-page interactive review matching Dr. Al-Horani's 3-slide review deck (`2)_Review_for_Renal_Drugs.pdf`).
    - Render chemical structures I–V (Hydrochlorothiazide, Furosemide, Amiloride/Triamterene, Acetazolamide, Mannitol/Urea/Isosorbide, Tolvaptan/Peptides) with accurate 2D coordinates, SMILES, and pharmacophore highlights.
    - Provide interactive structure-to-class and structure-to-nephron matching questions.
    - Provide sub-statement True/False questions for acid/base classification, onset/duration, glaucoma indications, and sulfa cross-reactivity.
 2. **Interactive Review for Respiratory Drugs (`respiratory_review_mcp2`)**:
-   - Construct a multi-page interactive review matching Dr. Al-Horani's 9-slide review deck.
+   - Construct a multi-page interactive review matching Dr. Al-Horani's 9-slide review deck (`1)_Review_for_Respiratory_Drugs.pdf`).
    - Cover dual/triple combination therapies (TRELEGY / ANORO / STIOLTO counterparts), adrenergic agonist SAR (Structures I–VII), anticholinergics (Structures I–V), hydrocortisone numbering/biosynthesis/metabolism, glucocorticoid potency ranking, prodrugs/soft steroids, methylxanthines vs PDE4 inhibitors, and leukotriene cascade modulators.
    - Provide sub-statement True/False questions with individualized, rigorous medchem rationales.
-3. **Dedicated Module Organization (Approach A)**:
-   - Register `renal_review_mcp2` and `respiratory_review_mcp2` as official built-in modules under `exam_1` in `EXAM_DEFINITIONS`.
-   - Distinctly group or tag lecture study modules vs. interactive review modules in navigation.
+3. **1:1 Module Scope Alignment (User Clarified)**:
+   - For Exam 1: Include **strictly and only the 2 interactive review modules** matching the 2 uploaded review files (`renal_review_mcp2` and `respiratory_review_mcp2`), retiring generated lecture question sets from the active exam curriculum.
+   - For Exam 2 (Roadmap): Mirror this exact 1:1 structure with the 5 review modules matching the 5 uploaded review slide files in `Anti-HTN review`.
 4. **Flashcard Deck Integration & Retry Button**:
-   - Ensure `StructureFlashcardDeck` loads chemical structures from both lecture modules and review modules for Exam 1.
+   - Ensure `StructureFlashcardDeck` loads chemical structures from the review modules for the active exam.
+   - Update module filtering to be dynamic and exam-aware.
    - Add a prominent **"Retry Deck"** button to the flashcard completion screen (`StructureFlashcardDeck.tsx`) allowing students to instantly restart or re-drill the deck without leaving the session.
 
 ### Non-Goals
@@ -146,23 +147,20 @@ It maintains complete architectural symmetry with Exam 3 (where `antiarrhythmics
     - Final comparative True/False evaluations: Drug A vs Drug B across glucocorticoids, anticholinergics, and beta-2 agonists.
 
 ### 5.3 Exam 1 Registration (`src/types/examTypes.ts`)
-Update `EXAM_DEFINITIONS` for `exam_1`:
+Update `EXAM_DEFINITIONS` for `exam_1` to contain strictly the 2 interactive review modules:
 ```typescript
 {
   id: 'exam_1',
   code: 'Exam 1',
   title: 'Exam 1: Renal & Respiratory Medicinal Chemistry',
-  shortTitle: 'Renal & Respiratory',
-  description: 'Diuretics, Vaptans, Bronchodilators, Glucocorticoids, Antileukotrienes & Slide Reviews.',
-  chapters: 'Modules 1–5',
+  shortTitle: 'Renal & Respiratory Reviews',
+  description: 'Interactive slide-by-slide reviews for Renal and Respiratory medicinal chemistry.',
+  chapters: 'Reviews 1 & 2',
   builtInModuleIds: [
-    'renal_drugs_mcp2',
-    'respiratory_bronchodilators_mcp2',
-    'respiratory_antiinflammatories_mcp2',
     'renal_review_mcp2',
     'respiratory_review_mcp2',
   ],
-  defaultModuleId: 'renal_drugs_mcp2',
+  defaultModuleId: 'renal_review_mcp2',
   isAvailable: true,
 }
 ```
