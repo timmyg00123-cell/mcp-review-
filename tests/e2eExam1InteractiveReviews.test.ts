@@ -49,7 +49,7 @@ assert.strictEqual(renalMod.pages.length, 3, 'Renal review module must have exac
 
 // Slide 1: Loop, Thiazide, Carbonic Anhydrase (Q1 - Q14)
 const renalP1 = renalMod.pages[0];
-assert.ok(renalP1.title.includes('Slide 1') || renalP1.subtitle?.includes('Structures I–V'));
+assert.ok(renalP1.title?.includes('Slide 1') || renalP1.subtitle?.includes('Structures I–V'));
 const renalP1Structs = renalP1.sections[0].structures || [];
 assert.strictEqual(renalP1Structs.length, 5, 'Slide 1 must feature Structures I–V');
 const renalP1Questions = renalP1.sections.flatMap((s) => s.questions);
