@@ -545,4 +545,16 @@ questionsWithSubStmts.forEach((q) => {
 
 assert.ok(totalSubStatements >= 35, `Module must contain at least 35 sub-statements across all slides (found ${totalSubStatements})`);
 
+// 14. Universal question numbering validation across all 9 pages
+pages.forEach((page, pIdx) => {
+  const pQuestions = page.sections.flatMap((s) => s.questions);
+  pQuestions.forEach((q, qIdx) => {
+    assert.equal(
+      q.questionNumberLabel,
+      `Question ${qIdx + 1}`,
+      `Page ${pIdx + 1} question ${q.id} must have questionNumberLabel "Question ${qIdx + 1}", got "${q.questionNumberLabel}"`
+    );
+  });
+});
+
 console.log(`All Respiratory Review Module tests passed successfully! (${totalSubStatements} sub-statements verified across 9 slides)`);

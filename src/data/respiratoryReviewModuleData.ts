@@ -1697,6 +1697,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
           questions: [
             {
               id: 101,
+              questionNumberLabel: 'Question 1',
               type: 'matching',
               title: 'Fixed-Dose Combination Regimens Matching',
               prompt:
@@ -1752,6 +1753,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 102,
+              questionNumberLabel: 'Question 2',
               type: 'sub-statements',
               title: 'Mechanistic Synergy in Combination Regimens',
               prompt:
@@ -1791,6 +1793,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 103,
+              questionNumberLabel: 'Question 3',
               type: 'multiple-choice',
               title: 'Clinical Differentiation of Inhaled Regimens',
               questionStem:
@@ -2011,6 +2014,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
           questions: [
             {
               id: 301,
+              questionNumberLabel: 'Question 1',
               type: 'multiple-choice',
               title: 'Anticholinergics: Chemical & Mechanistic Classification',
               questionStem:
@@ -2027,6 +2031,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 302,
+              questionNumberLabel: 'Question 2',
               type: 'multiple-choice',
               title: 'Anticholinergic Pharmacophore Features',
               questionStem:
@@ -2043,6 +2048,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 303,
+              questionNumberLabel: 'Question 3',
               type: 'multiple-choice',
               title: 'Quaternary Ammonium Lung Localization & Blood-Brain Barrier Exclusion',
               questionStem:
@@ -2059,6 +2065,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 304,
+              questionNumberLabel: 'Question 4',
               type: 'multiple-choice',
               title: 'Clinical Indications of Anticholinergics I–V',
               questionStem:
@@ -2075,6 +2082,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 305,
+              questionNumberLabel: 'Question 5',
               type: 'multiple-choice',
               title: 'Soft Anticholinergics & Plasma Esterase Inactivation',
               questionStem:
@@ -2091,6 +2099,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 306,
+              questionNumberLabel: 'Question 6',
               type: 'multiple-choice',
               title: 'Adrenocorticoid Classification & Endogenous Roles',
               questionStem:
@@ -2107,6 +2116,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 307,
+              questionNumberLabel: 'Question 7',
               type: 'multiple-choice',
               title: 'Corticosteroid Numbering & 11-beta-OH vs 11-Keto Activation',
               questionStem:
@@ -2123,6 +2133,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 308,
+              questionNumberLabel: 'Question 8',
               type: 'multiple-choice',
               title: 'Glucocorticoid Receptor (GR) Interaction Points',
               questionStem:
@@ -2139,6 +2150,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 309,
+              questionNumberLabel: 'Question 9',
               type: 'multiple-choice',
               title: 'Anti-inflammatory Utility in Asthma & COPD',
               questionStem:
@@ -2177,6 +2189,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
           questions: [
             {
               id: 401,
+              questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Adrenal Steroidogenesis & Cytochrome P450 Enzymes',
               questionStem:
@@ -2216,6 +2229,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 402,
+              questionNumberLabel: 'Question 2',
               type: 'sub-statements',
               title: 'Glucocorticoid Receptor (GR) Architecture & Activation Cycle',
               questionStem:
@@ -2285,6 +2299,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
           questions: [
             {
               id: 501,
+              questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Metabolic Inactivation Pathways of Hydrocortisone',
               questionStem:
@@ -2324,6 +2339,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 502,
+              questionNumberLabel: 'Question 2',
               type: 'ranking',
               title: 'Systemic Corticosteroid Anti-inflammatory Potency Ranking',
               rankingPrompt:
@@ -2406,6 +2422,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
           questions: [
             {
               id: 601,
+              questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Glucocorticoid Prodrugs, Soft Steroids & SAR Sub-statements',
               prompt:
@@ -2445,6 +2462,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             },
             {
               id: 602,
+              questionNumberLabel: 'Question 2',
               type: 'matching',
               title: 'Corticosteroid Formulation & Structural Class Matching',
               prompt:
@@ -2537,6 +2555,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q701 (3 True/False sub-statements)
             {
               id: 701,
+              questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Glucocorticoid SAR True/False Battery',
               prompt:
@@ -2570,6 +2589,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q702 (Biotransformations)
             {
               id: 702,
+              questionNumberLabel: 'Question 2',
               type: 'multiple-choice',
               title: 'Corticosteroid Metabolic Biotransformations & Bioactivations',
               questionStem:
@@ -2587,6 +2607,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q703 (Theophylline vs Roflumilast True/False battery)
             {
               id: 703,
+              questionNumberLabel: 'Question 3',
               type: 'sub-statements',
               title: 'Comparative Chemistry & Pharmacology: Theophylline (Drug A) vs Roflumilast (Drug B)',
               prompt:
@@ -2824,6 +2845,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Question 901: 10 Sub-statements comparing Beclomethasone dipropionate vs Hydrocortisone sodium succinate
             {
               id: 901,
+              questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Beclomethasone Dipropionate (Drug A) vs Hydrocortisone Sodium Succinate (Drug B)',
               questionStem:
@@ -2906,6 +2928,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Question 902: 5 Sub-statements comparing Tiotropium vs Pirbuterol
             {
               id: 902,
+              questionNumberLabel: 'Question 2',
               type: 'sub-statements',
               title: 'Tiotropium (Drug A) vs Pirbuterol (Drug B)',
               questionStem:
