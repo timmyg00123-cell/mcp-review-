@@ -2666,6 +2666,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q801 (7 matching targets A to G)
             {
               id: 801,
+              questionNumberLabel: 'Question 1',
               type: 'matching',
               title: '7-Drug Respiratory Molecular Mechanism Matching',
               prompt:
@@ -2673,62 +2674,62 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               matchingTargets: [
                 {
                   id: 'target_m3_antag',
-                  label: 'Muscarinic M3 receptor antagonist (Structure I: Aclidinium)',
+                  label: 'Muscarinic M3 receptor antagonist',
                   acceptedStructureIds: ['I', 'aclidinium'],
                   rationale:
                     'Structure I (Aclidinium bromide) is a long-acting muscarinic M3 receptor antagonist (LAMA) that blocks acetylcholine-mediated bronchoconstriction in airway smooth muscle.',
                 },
                 {
                   id: 'target_pla2_annexin',
-                  label: 'Phospholipase A2 (cPLA2) indirect inhibitor via Annexin A1 induction (Structure II: Methylprednisolone)',
+                  label: 'Phospholipase A2 (cPLA2) indirect inhibitor via Annexin A1 induction',
                   acceptedStructureIds: ['II', 'methylprednisolone'],
                   rationale:
                     'Structure II (Methylprednisolone) is a synthetic glucocorticoid that transactivates Annexin A1 (lipocortin-1), indirectly inhibiting cytosolic Phospholipase A2 (cPLA2) to halt the arachidonic acid cascade.',
                 },
                 {
                   id: 'target_dual_pde',
-                  label: 'Dual PDE3 and PDE4 inhibitor (Structure III: Ensifentrine)',
+                  label: 'Dual PDE3 and PDE4 inhibitor',
                   acceptedStructureIds: ['III', 'ensifentrine'],
                   rationale:
                     'Structure III (Ensifentrine / RPL554) is a novel first-in-class inhaled dual inhibitor of both PDE3 and PDE4, providing simultaneous bronchodilation (via PDE3) and mucosal anti-inflammatory action (via PDE4).',
                 },
                 {
                   id: 'target_cyslt1_antag',
-                  label: 'Cysteinyl leukotriene receptor 1 (CysLT1) antagonist (Structure IV: Montelukast)',
+                  label: 'Cysteinyl leukotriene receptor 1 (CysLT1) antagonist',
                   acceptedStructureIds: ['IV', 'montelukast'],
                   rationale:
                     'Structure IV (Montelukast) is a selective high-affinity competitive antagonist of the CysLT1 receptor, blocking LTD4- and LTE4-mediated bronchospasm and vascular permeability.',
                 },
                 {
                   id: 'target_5lox_inhib',
-                  label: '5-Lipoxygenase (5-LOX) inhibitor (Structure V: Zileuton)',
+                  label: '5-Lipoxygenase (5-LOX) inhibitor',
                   acceptedStructureIds: ['V', 'zileuton'],
                   rationale:
                     'Structure V (Zileuton) is an N-hydroxyurea derivative that directly inhibits 5-Lipoxygenase (5-LOX) via iron chelation, blocking the initial synthesis of all leukotrienes (LTA4, LTB4, LTC4, LTD4, LTE4).',
                 },
                 {
                   id: 'target_beta2_agon',
-                  label: 'Selective beta-2 adrenergic receptor agonist (Structure VI: Olodaterol)',
+                  label: 'Selective beta-2 adrenergic receptor agonist',
                   acceptedStructureIds: ['VI', 'olodaterol'],
                   rationale:
                     'Structure VI (Olodaterol) is an ultra-long-acting selective beta-2 adrenergic agonist (ultra-LABA) stimulating Gs-coupled adenylyl cyclase to relax bronchial smooth muscle for 24 hours.',
                 },
                 {
                   id: 'target_pde_nonselective',
-                  label: 'Nonselective Phosphodiesterase (PDE) inhibitor & adenosine antagonist (Structure VII: Theophylline)',
+                  label: 'Nonselective Phosphodiesterase (PDE) inhibitor & adenosine antagonist',
                   acceptedStructureIds: ['VII', 'theophylline'],
                   rationale:
                     'Structure VII (Theophylline) is a nonselective competitive phosphodiesterase (PDE) inhibitor and adenosine receptor antagonist that elevates intracellular cAMP/cGMP and activates HDAC2.',
                 },
               ],
               options: [
-                'Structure I: Muscarinic M3 antagonist (Aclidinium)',
-                'Structure II: Phospholipase A2 inhibitor via Annexin A1 (Methylprednisolone)',
-                'Structure III: Dual PDE3 and PDE4 inhibitor (Ensifentrine)',
-                'Structure IV: CysLT1 receptor antagonist (Montelukast)',
-                'Structure V: 5-Lipoxygenase (5-LOX) inhibitor (Zileuton)',
-                'Structure VI: Selective beta-2 adrenergic agonist (Olodaterol)',
-                'Structure VII: Nonselective PDE inhibitor & adenosine antagonist (Theophylline)',
+                'Structure I: Muscarinic M3 antagonist',
+                'Structure II: Phospholipase A2 inhibitor via Annexin A1',
+                'Structure III: Dual PDE3 and PDE4 inhibitor',
+                'Structure IV: CysLT1 receptor antagonist',
+                'Structure V: 5-Lipoxygenase (5-LOX) inhibitor',
+                'Structure VI: Selective beta-2 adrenergic agonist',
+                'Structure VII: Nonselective PDE inhibitor & adenosine antagonist',
               ],
               correctAnswer: 'I: M3; II: PLA2/Annexin; III: Dual PDE3/4; IV: CysLT1; V: 5-LOX; VI: Beta-2; VII: Nonselective PDE',
               explanation:
@@ -2737,6 +2738,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q802
             {
               id: 802,
+              questionNumberLabel: 'Question 2',
               type: 'multiple-choice',
               title: 'Formulation Chemistry: Beclomethasone Dipropionate vs Hydrocortisone Sodium Succinate',
               questionStem:
@@ -2754,6 +2756,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
             // Q803
             {
               id: 803,
+              questionNumberLabel: 'Question 3',
               type: 'sub-statements',
               title: 'Leukotriene Pathway Modulators: Montelukast vs Zileuton',
               prompt:

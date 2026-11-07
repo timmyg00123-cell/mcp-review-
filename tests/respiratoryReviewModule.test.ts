@@ -413,11 +413,29 @@ const page8 = pages[7]!;
 assert.equal(page8.pageNumber, 8, 'Page 8 must be pageNumber 8');
 const p8Questions = page8.sections.flatMap((s) => s.questions);
 
+// Slide 8 question numbering
+p8Questions.forEach((q, idx) => {
+  assert.equal(
+    q.questionNumberLabel,
+    `Question ${idx + 1}`,
+    `Slide 8 question ${q.id} must have questionNumberLabel "Question ${idx + 1}"`
+  );
+});
+
 // Mechanism Matching
 const qMechMatching = p8Questions.find((q) => q.type === 'matching' && q.matchingTargets?.some((t) => t.label.includes('5-Lipoxygenase') || t.label.includes('CysLT1')));
 assert.ok(qMechMatching, 'Slide 8 must include 7-drug mechanism matching');
+assert.equal(qMechMatching.questionNumberLabel, 'Question 1', 'Slide 8 matching must have questionNumberLabel "Question 1"');
 const targets = qMechMatching.matchingTargets!;
 assert.equal(targets.length, 7, 'Slide 8 mechanism matching must have exactly 7 targets (A to G)');
+
+targets.forEach((t) => {
+  assert.doesNotMatch(
+    t.label,
+    /\(Structure\s+[IVXLCDM]+:\s*[A-Za-z]+\)/i,
+    `Slide 8 matching target label must not contain spoiler: "${t.label}"`
+  );
+});
 
 // Verify target mapping:
 // I: Aclidinium -> M3 antagonist
