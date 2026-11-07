@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { FlashcardItem, SpacedRepetitionRating } from '../types/cumulativeStudy';
 import {
   applySpacedRepetitionGrade,
@@ -13,6 +13,7 @@ import {
   X,
   Filter,
   Layers,
+  RotateCcw,
 } from 'lucide-react';
 
 export interface StructureFlashcardDeckProps {
@@ -21,28 +22,112 @@ export interface StructureFlashcardDeckProps {
   onClose?: () => void;
 }
 
-interface ModuleFilterState {
-  antiplatelets: boolean;
-  anticoagulants: boolean;
-  heartFailure: boolean;
-  antiarrhythmics: boolean;
+export interface ModuleCategory {
+  key: string;
+  label: string;
+  matchPattern: RegExp;
+}
+
+export type ModuleFilterState = Record<string, boolean>;
+
+export const KNOWN_MODULE_CATEGORIES: ModuleCategory[] = [
+  { key: 'renal', label: 'Renal', matchPattern: /renal/i },
+  { key: 'respiratory', label: 'Respiratory', matchPattern: /respirat|broncho|antiinflam/i },
+  { key: 'antiplatelets', label: 'Antiplatelet', matchPattern: /platelet/i },
+  { key: 'anticoagulants', label: 'Anticoagulant', matchPattern: /coagul/i },
+  { key: 'heartFailure', label: 'Heart Failure', matchPattern: /heart|failure/i },
+  { key: 'antiarrhythmics', label: 'Antiarrhythmic', matchPattern: /arrhythm/i },
+  { key: 'antihypertensives', label: 'Antihypertensive', matchPattern: /hypertens|diuretic|vasodilat|raas|sympatho/i },
+  { key: 'antihyperlipidemics', label: 'Antihyperlipidemic', matchPattern: /lipid/i },
+];
+
+function formatModuleLabel(id: string): string {
+  const clean = id.replace(/_mcp2$|_review$|_drugs$/i, '').replace(/_/g, ' ');
+  return clean.charAt(0).toUpperCase() + clean.slice(1);
+}
+
+/**
+ * Derives available module filter categories dynamically from the current cards.
+ * If cards contain module IDs matching known categories (e.g. Renal, Respiratory,
+ * Antiplatelet, Anticoagulant, Heart Failure, Antiarrhythmic), those categories are returned.
+ * Any additional unique module IDs are formatted into friendly labels.
+ */
+export function getAvailableModuleFilters(cards: FlashcardItem[]): ModuleCategory[] {
+  if (!cards || cards.length === 0) {
+    return KNOWN_MODULE_CATEGORIES.slice(0, 4); // Default fallback
+  }
+
+  const allModuleIds = new Set<string>();
+  for (const card of cards) {
+    if (card.moduleIds) {
+      for (const mId of card.moduleIds) {
+        if (mId) allModuleIds.add(mId);
+      }
+    }
+  }
+
+  if (allModuleIds.size === 0) {
+    return KNOWN_MODULE_CATEGORIES.slice(0, 4);
+  }
+
+  const result: ModuleCategory[] = [];
+  const matchedModuleIds = new Set<string>();
+
+  for (const cat of KNOWN_MODULE_CATEGORIES) {
+    let hasMatch = false;
+    for (const mId of allModuleIds) {
+      if (cat.matchPattern.test(mId)) {
+        hasMatch = true;
+        matchedModuleIds.add(mId);
+      }
+    }
+    if (hasMatch) {
+      result.push(cat);
+    }
+  }
+
+  for (const mId of allModuleIds) {
+    if (!matchedModuleIds.has(mId)) {
+      result.push({
+        key: mId,
+        label: formatModuleLabel(mId),
+        matchPattern: new RegExp(mId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+      });
+    }
+  }
+
+  return result.length > 0 ? result : KNOWN_MODULE_CATEGORIES.slice(0, 4);
 }
 
 /**
  * Checks whether a flashcard belongs to any of the currently selected module filters.
+ * Any card from the active deck is included by default when all its matching filters are active.
  */
-function cardMatchesModuleFilter(card: FlashcardItem, filter: ModuleFilterState): boolean {
+export function cardMatchesModuleFilter(
+  card: FlashcardItem,
+  filter: ModuleFilterState,
+  availableFilters?: ModuleCategory[]
+): boolean {
   if (!card.moduleIds || card.moduleIds.length === 0) {
     return true;
   }
-  return card.moduleIds.some((modId) => {
-    const lower = modId.toLowerCase();
-    if (lower.includes('platelet') && filter.antiplatelets) return true;
-    if (lower.includes('coagul') && filter.anticoagulants) return true;
-    if ((lower.includes('heart') || lower.includes('failure')) && filter.heartFailure) return true;
-    if (lower.includes('arrhythm') && filter.antiarrhythmics) return true;
-    return false;
-  });
+
+  const categories =
+    availableFilters && availableFilters.length > 0
+      ? availableFilters
+      : KNOWN_MODULE_CATEGORIES;
+
+  const matchingCategories = categories.filter((cat) =>
+    card.moduleIds.some((modId) => cat.matchPattern.test(modId))
+  );
+
+  // If card's modules don't match any filter categories, include it by default
+  if (matchingCategories.length === 0) {
+    return true;
+  }
+
+  // Include card if at least one matching category is enabled (not unchecked)
+  return matchingCategories.some((cat) => filter[cat.key] !== false);
 }
 
 /**
@@ -54,7 +139,7 @@ function cardMatchesModuleFilter(card: FlashcardItem, filter: ModuleFilterState)
  *   pharmacophore tags, clinical pharmacology (metabolism, BBB, pregnancy risk), and SAR notes.
  * - 4-interval spaced repetition bar: Again (< 1 min), Hard (4 min), Good (10 min), Easy (1 day).
  * - Keyboard shortcuts: Space (flip), 1 (Again), 2 (Hard), 3 (Good), 4 (Easy) with input focus guard.
- * - Module filter toggles (Antiplatelets, Anticoagulants, Heart Failure, Antiarrhythmics).
+ * - Module filter toggles (Dynamic exam-aware categories including Renal, Respiratory, Antiplatelets, etc.).
  * - Active session counters (Remaining, In-session, Graduated).
  */
 export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
@@ -65,44 +150,72 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   // Master working deck initialized with persisted local storage progress
   const [deck, setDeck] = useState<FlashcardItem[]>(() => applyProgressToCards(cards));
 
+  // Dynamic available module categories derived from cards
+  const availableFilters = useMemo(() => getAvailableModuleFilters(cards), [cards]);
+
   // Module filter toggles
-  const [moduleFilter, setModuleFilter] = useState<ModuleFilterState>({
-    antiplatelets: true,
-    anticoagulants: true,
-    heartFailure: true,
-    antiarrhythmics: true,
+  const [moduleFilter, setModuleFilter] = useState<ModuleFilterState>(() => {
+    const initial: ModuleFilterState = {};
+    const filters = getAvailableModuleFilters(cards);
+    for (const f of filters) {
+      initial[f.key] = true;
+    }
+    return initial;
   });
 
   // Active in-session queue and position index
   const [activeQueue, setActiveQueue] = useState<FlashcardItem[]>(() => {
     const initialized = applyProgressToCards(cards);
-    return initialized.filter((c) => !c.isSuspended && cardMatchesModuleFilter(c, {
-      antiplatelets: true,
-      anticoagulants: true,
-      heartFailure: true,
-      antiarrhythmics: true,
-    }));
+    const filters = getAvailableModuleFilters(cards);
+    const initialFilterState: ModuleFilterState = {};
+    for (const f of filters) {
+      initialFilterState[f.key] = true;
+    }
+    return initialized.filter(
+      (c) => !c.isSuspended && cardMatchesModuleFilter(c, initialFilterState, filters)
+    );
   });
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
 
+  // Restart deck handler (resets active queue to full filtered deck, currentIndex to 0, isFlipped to false)
+  const handleRestartDeck = useCallback(() => {
+    const initialized = applyProgressToCards(cards);
+    const filtered = initialized.filter(
+      (c) => !c.isSuspended && cardMatchesModuleFilter(c, moduleFilter, availableFilters)
+    );
+    setActiveQueue(filtered);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  }, [cards, moduleFilter, availableFilters]);
+
   // Sync state if cards prop identity updates
   useEffect(() => {
     const withProgress = applyProgressToCards(cards);
     setDeck(withProgress);
+    const filters = getAvailableModuleFilters(cards);
+    const nextFilterState: ModuleFilterState = {};
+    for (const f of filters) {
+      nextFilterState[f.key] = true;
+    }
+    setModuleFilter(nextFilterState);
     setActiveQueue(
-      withProgress.filter((c) => !c.isSuspended && cardMatchesModuleFilter(c, moduleFilter))
+      withProgress.filter(
+        (c) => !c.isSuspended && cardMatchesModuleFilter(c, nextFilterState, filters)
+      )
     );
     setCurrentIndex(0);
     setIsFlipped(false);
   }, [cards]);
 
   // Handle module filter change
-  const handleToggleModule = (moduleKey: keyof ModuleFilterState, checked: boolean) => {
+  const handleToggleModule = (moduleKey: string, checked: boolean) => {
     const nextFilter = { ...moduleFilter, [moduleKey]: checked };
     setModuleFilter(nextFilter);
-    const nextFiltered = deck.filter((c) => !c.isSuspended && cardMatchesModuleFilter(c, nextFilter));
+    const nextFiltered = deck.filter(
+      (c) => !c.isSuspended && cardMatchesModuleFilter(c, nextFilter, availableFilters)
+    );
     setActiveQueue(nextFiltered);
     setCurrentIndex(0);
     setIsFlipped(false);
@@ -116,7 +229,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   const graduatedCount = deck.filter(
     (c) =>
       !c.isSuspended &&
-      cardMatchesModuleFilter(c, moduleFilter) &&
+      cardMatchesModuleFilter(c, moduleFilter, availableFilters) &&
       (c.state === 'review' || c.state === 'mastered')
   ).length;
 
@@ -253,7 +366,15 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap justify-center">
+          <button
+            type="button"
+            onClick={handleRestartDeck}
+            className="px-6 py-2.5 rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Retry Full Deck
+          </button>
           <button
             type="button"
             onClick={() => onSessionComplete(struggled, deck)}
@@ -323,42 +444,23 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             <span className="font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
               <Filter className="w-3.5 h-3.5" /> Modules:
             </span>
-            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors">
-              <input
-                type="checkbox"
-                checked={moduleFilter.antiplatelets}
-                onChange={(e) => handleToggleModule('antiplatelets', e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span>Antiplatelet</span>
-            </label>
-            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors">
-              <input
-                type="checkbox"
-                checked={moduleFilter.anticoagulants}
-                onChange={(e) => handleToggleModule('anticoagulants', e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span>Anticoagulant</span>
-            </label>
-            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors">
-              <input
-                type="checkbox"
-                checked={moduleFilter.heartFailure}
-                onChange={(e) => handleToggleModule('heartFailure', e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span>Heart Failure</span>
-            </label>
-            <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors">
-              <input
-                type="checkbox"
-                checked={moduleFilter.antiarrhythmics}
-                onChange={(e) => handleToggleModule('antiarrhythmics', e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span>Antiarrhythmic</span>
-            </label>
+            {availableFilters.map((category) => {
+              const isChecked = moduleFilter[category.key] !== false;
+              return (
+                <label
+                  key={category.key}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => handleToggleModule(category.key, e.target.checked)}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>{category.label}</span>
+                </label>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-2 font-mono text-[11px]">
