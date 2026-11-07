@@ -40,6 +40,10 @@ import {
   getReversibility,
   getRouteOfAdmin,
 } from '../utils/structureDataUtils';
+import {
+  formatTargetBullet,
+  extractRomanOrShortLabel,
+} from '../utils/documentLabel';
 
 interface DocumentQuestionItemProps {
   question: AntiplateletQuestion;
@@ -1257,9 +1261,13 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                           const str = question.structuresDisplayed?.find(
                             (s) => s.id === id
                           );
-                          return str
-                            ? `Structure ${id} (${str.name})`
-                            : `Structure ${id}`;
+                          const roman = extractRomanOrShortLabel(
+                            str || { id },
+                            question.structuresDisplayed?.findIndex((s) => s.id === id) ?? -1
+                          );
+                          return str && str.name
+                            ? `Structure ${roman} (${str.name})`
+                            : `Structure ${roman}`;
                         })
                         .join(', ');
                       return (
@@ -1268,7 +1276,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                           className="hover:bg-slate-50 dark:hover:bg-slate-800/40"
                         >
                           <td className="py-2.5 px-3 font-mono font-bold text-slate-800 dark:text-slate-200">
-                            {target.id})
+                            {formatTargetBullet(target.id, index)})
                           </td>
                           <td className="py-2.5 px-3 text-slate-800 dark:text-slate-200 font-semibold">
                             {target.label}
@@ -1287,7 +1295,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                           </td>
                           <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400 leading-relaxed">
                             {target.rationale ||
-                              'Direct correlation from Review for Antiplatelets PDF.'}
+                              'Key SAR and pharmacophore correlation from course lecture review.'}
                           </td>
                         </tr>
                       );
