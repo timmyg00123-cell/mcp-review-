@@ -293,22 +293,26 @@ export const diureticsPages: ReviewPage[] = [
   // ---------------------------------------------------------------------------
   // PAGE 2: Thiazide-like & Loop Diuretics SAR (Questions 10 - 22)
   // ---------------------------------------------------------------------------
+  // PAGE 2: Thiazide-like Diuretics & High-Ceiling Loop Intro (Questions 1 - 4)
+  // Source: Dr. Rami A. Al-Horani Review for Antihypertensive Drugs I, Page 2 (Q10 - Q13)
+  // ---------------------------------------------------------------------------
   {
     pageNumber: 2,
-    title: 'Thiazide-like Diuretics & High-Ceiling Loop Diuretics SAR',
-    subtitle: 'Metolazone, Chlorthalidone, Furosemide, Bumetanide, Torsemide, and Ethacrynic acid',
+    title: 'Thiazide-like Diuretics & Loop Diuretics Introduction',
+    subtitle: 'Metolazone, Chlorthalidone, Diazoxide, and Aminobenzoic Acid Loop Diuretic Pharmacophores',
     sections: [
       {
-        sectionTitle: 'Thiazide-Like Agents: Metolazone vs Chlorthalidone',
-        block_instructions: 'Consider structures I (Metolazone, quinazolinone) and II (Chlorthalidone, phthalimidine) to evaluate their chemical and clinical properties.',
+        sectionTitle: 'Thiazide-Like Agents: Metolazone vs Chlorthalidone & Diazoxide',
+        block_instructions: 'Consider chemical structures I (Metolazone), II (Chlorthalidone), and Diazoxide to answer questions 1-2. Note differences in ring system, sulfonamide placement, and diuretic efficacy.',
         structures: [
           DIURETICS_STRUCTURES.metolazone,
-          DIURETICS_STRUCTURES.chlorthalidone
+          DIURETICS_STRUCTURES.chlorthalidone,
+          DIURETICS_STRUCTURES.diazoxide
         ],
         questions: [
           {
             id: 310,
-            questionNumberLabel: 'Question 10',
+            questionNumberLabel: 'Question 1',
             title: 'Metolazone vs Chlorthalidone True/False Statements',
             category: 'Medicinal Chemistry SAR',
             type: 'sub-statements',
@@ -352,13 +356,13 @@ export const diureticsPages: ReviewPage[] = [
           },
           {
             id: 311,
-            questionNumberLabel: 'Question 11',
+            questionNumberLabel: 'Question 2',
             title: 'Molecules Lacking Substantial Diuretic Activity',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following molecules lacks substantial diuretic activity (comparing Diazoxide vs Chlorothiazide, HCTZ, Metolazone)?',
+            questionStem: 'Which of the following molecules lacks substantial diuretic activity?',
             options: [
-              'Diazoxide (lacks 7-sulfonamide group: contains 7-chloro but no sulfonamide)',
+              'Diazoxide',
               'Chlorothiazide',
               'Hydrochlorothiazide',
               'Metolazone'
@@ -367,7 +371,7 @@ export const diureticsPages: ReviewPage[] = [
             optionExplanations: [
               'Correct: Diazoxide retains the benzothiadiazine ring but lacks the essential unsubstituted 7-sulfonamide group (-SO2NH2). It has NO diuretic activity and is instead an ATP-sensitive K+ channel (K_ATP) opener that causes vasodilation and hyperglycemic insulin inhibition.',
               'Incorrect: Chlorothiazide is a potent diuretic.',
-              'Incorrect: HCTZ is a potent diuretic.',
+              'Incorrect: Hydrochlorothiazide is a potent diuretic.',
               'Incorrect: Metolazone is a potent diuretic.'
             ],
             overallExplanation: 'An unsubstituted sulfonamide group at position 7 (or meta to ring nitrogen) is MANDATORY for diuretic activity. Without it, Diazoxide opens K_ATP channels, relaxing vascular smooth muscle without promoting diuresis.',
@@ -378,22 +382,20 @@ export const diureticsPages: ReviewPage[] = [
         ]
       },
       {
-        sectionTitle: 'Loop Diuretics SAR: Furosemide, Bumetanide, Torsemide & Ethacrynic Acid',
-        block_instructions: 'Consider structures I (Furosemide), II (Bumetanide), III (Torsemide), and IV (Ethacrynic acid) to answer questions 12-22.',
+        sectionTitle: 'High-Ceiling Loop Diuretics: Prototype Chemical & Mechanistic Classification',
+        block_instructions: 'Consider chemical structures I (Furosemide) and II (Bumetanide) to answer questions 3-4.',
         structures: [
           DIURETICS_STRUCTURES.furosemide,
-          DIURETICS_STRUCTURES.bumetanide,
-          DIURETICS_STRUCTURES.torsemide,
-          DIURETICS_STRUCTURES.ethacrynic_acid
+          DIURETICS_STRUCTURES.bumetanide
         ],
         questions: [
           {
             id: 312,
-            questionNumberLabel: 'Question 12',
-            title: 'Chemical Class of Molecules I (Furosemide) and II (Bumetanide)',
+            questionNumberLabel: 'Question 3',
+            title: 'Chemical Class of Molecules I and II',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following best describes the chemical class of Molecules I (Furosemide) and II (Bumetanide)?',
+            questionStem: 'Which of the following best describes the chemical class of Molecules I and II?',
             options: [
               'Sulfamoyl anthranilic acid / sulfamoyl benzoic acid derivatives',
               'Benzothiadiazine-1,1-dioxide',
@@ -418,18 +420,18 @@ export const diureticsPages: ReviewPage[] = [
           },
           {
             id: 313,
-            questionNumberLabel: 'Question 13',
+            questionNumberLabel: 'Question 4',
             title: 'Mechanistic Class of High-Ceiling Diuretics',
             category: 'Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'What is the mechanistic class of the above drugs (Furosemide, Bumetanide, Torsemide, Ethacrynic acid)?',
+            questionStem: 'What is the mechanistic class of the above drugs?',
             options: [
-              'Loop diuretics (High-ceiling NKCC2 cotransporter inhibitors)',
+              'Loop diuretics (Inhibition of Na+/K+/2Cl- symporter NKCC2 in thick ascending limb of Henle)',
               'Potassium-sparing agents',
               'Thiazide diuretics',
               'Calcium channel blockers',
               'Beta-blockers',
-              'ACE inhibitors'
+              'Angiotensin-converting enzyme inhibitors'
             ],
             correctIndex: 0,
             optionExplanations: [
@@ -444,7 +446,31 @@ export const diureticsPages: ReviewPage[] = [
             highYieldPearl: 'Loop diuretics = high ceiling (~20-25% fractional Na excretion) due to NKCC2 blockade in the thick ascending limb of the loop of Henle.',
             sourceReference: 'Review for Antihypertensive Drugs I (Diuretics), Page 2, Question 13',
             sourcePageNumber: 2
-          },
+          }
+        ]
+      }
+    ]
+  },
+
+  // ---------------------------------------------------------------------------
+  // PAGE 3: High-Ceiling Loop Diuretics SAR & Landmark Properties (Questions 1 - 9)
+  // Source: Dr. Rami A. Al-Horani Review for Antihypertensive Drugs I, Page 3 (Q14 - Q22)
+  // ---------------------------------------------------------------------------
+  {
+    pageNumber: 3,
+    title: 'High-Ceiling Loop Diuretics SAR & Landmark Properties',
+    subtitle: 'Furosemide, Bumetanide, Torsemide, and Ethacrynic Acid: Potency, Duration, Ototoxicity & Sulfa Allergy',
+    sections: [
+      {
+        sectionTitle: 'Loop Diuretics SAR: Furosemide, Bumetanide, Torsemide & Ethacrynic Acid',
+        block_instructions: 'Consider chemical structures I (Furosemide), II (Bumetanide), III (Torsemide), and IV (Ethacrynic acid) to answer questions 1-9.',
+        structures: [
+          DIURETICS_STRUCTURES.furosemide,
+          DIURETICS_STRUCTURES.bumetanide,
+          DIURETICS_STRUCTURES.torsemide,
+          DIURETICS_STRUCTURES.ethacrynic_acid
+        ],
+        questions: [
           {
             id: 314,
             questionNumberLabel: 'Question 14',

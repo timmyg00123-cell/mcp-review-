@@ -3531,6 +3531,53 @@ export const EXAM_2_STRUCTURES: Record<string, ChemicalStructure> = {
       pubChemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/10129946',
     },
   },
+  "aldosterone": {
+    id: "aldosterone",
+    name: "Aldosterone",
+    document_label: "Molecule I (Aldosterone) - Endogenous Mineralocorticoid",
+    tradeName: "Aldosterone",
+    smiles: "CC12CCC(=O)C=C1CCC3C2C(CC4(C3CC(C4(C(=O)CO)O)=O)C=O)O",
+    canonical_smiles: "CC12CCC(=O)C=C1CCC3C2C(CC4(C3CC(C4(C(=O)CO)O)=O)C=O)O",
+    canonicalSmiles: "CC12CCC(=O)C=C1CCC3C2C(CC4(C3CC(C4(C(=O)CO)O)=O)C=O)O",
+    cid: 5839,
+    mw: 360.44,
+    logP: 1.1,
+    chemicalClass: "Natural Mineralocorticoid (C18-Aldehyde)",
+    pharmacologicalClass: "Mineralocorticoid Receptor Agonist (Endogenous)",
+    target: "Mineralocorticoid Receptor (MR / NR3C2)",
+    target_receptor: "Renal distal tubule and collecting duct MR",
+    reversibility: "Reversible Agonist",
+    drug_state: "Active hormone",
+    route: "Endogenous / Experimental",
+    keyFunctionalGroups: [
+      "18-Aldehyde (hemiacetal with 11-beta-OH)",
+      "Delta-4-3-ketone",
+      "21-hydroxy-20-keto chain",
+      "Lack of 17-alpha-OH"
+    ],
+    pkPdHighlights: {
+      onset: "1-2 hours",
+      duration: "6-8 hours",
+      halfLife: "15-20 minutes",
+      elimination: "Hepatic reduction to tetrahydroaldosterone glucuronide",
+      bioactivation: "Active as administered"
+    },
+    sarNotes: "Possesses an 18-aldehyde that forms a cyclic hemiacetal with the 11-beta-OH. Lacks a 17-alpha-OH group. Exhibits 3000-fold higher mineralocorticoid potency than cortisol with virtually zero anti-inflammatory activity.",
+    moa_summary: "Regulates electrolyte and fluid homeostasis by stimulating renal ENaC and Na+/K+-ATPase expression in collecting duct principal cells.",
+    pngUrl: "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/CID/5839/PNG",
+    pubchemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/5839",
+    pubchemAudit: {
+      cid: 5839,
+      status: "verified",
+      source: "nih_pug_rest",
+      canonicalSmiles: "CC12CCC(=O)C=C1CCC3C2C(CC4(C3CC(C4(C(=O)CO)O)=O)C=O)O",
+      iupacName: "11beta,21-dihydroxy-3,20-dioxopregn-4-en-18-al",
+      molecularFormula: "C21H28O5",
+      molecularWeight: 360.44,
+      xlogp: 1.1,
+      pubChemUrl: "https://pubchem.ncbi.nlm.nih.gov/compound/5839"
+    }
+  },
 };
 
 export const DIURETICS_STRUCTURES: Record<string, ChemicalStructure> = Object.fromEntries(
@@ -3538,7 +3585,7 @@ export const DIURETICS_STRUCTURES: Record<string, ChemicalStructure> = Object.fr
     'chlorothiazide', 'hydrochlorothiazide', 'trichlormethiazide', 'polythiazide',
     'metolazone', 'indapamide', 'chlorthalidone', 'furosemide', 'bumetanide',
     'torsemide', 'ethacrynic_acid', 'triamterene', 'amiloride', 'spironolactone',
-    'eplerenone', 'canrenone', 'acetazolamide', 'mannitol'
+    'eplerenone', 'canrenone', 'acetazolamide', 'mannitol', 'diazoxide', 'aldosterone'
   ].includes(k))
 );
 
