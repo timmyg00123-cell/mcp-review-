@@ -202,6 +202,14 @@ export function loadAllReviewModules(): ReviewModule[] {
           delete overrides['antihypertensives_4_mcp2'];
           localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
         }
+        if (
+          overrides['antihyperlipidemics_mcp2'] &&
+          (overrides['antihyperlipidemics_mcp2'].version !== '2.0.0' ||
+            (overrides['antihyperlipidemics_mcp2'].pages || []).length < 5)
+        ) {
+          delete overrides['antihyperlipidemics_mcp2'];
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        }
       }
     } catch (e) {
       console.warn('Could not parse built-in overrides:', e);
@@ -492,6 +500,34 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
         (overrides['antihypertensives_4_mcp2'].pages || []).length < 4)
     ) {
       delete overrides['antihypertensives_4_mcp2'];
+      try {
+        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+      } catch {}
+    }
+
+    const dexieLipids = dexieModules.find((m) => m.id === 'antihyperlipidemics_mcp2')?.module;
+    if (dexieLipids) {
+      if (dexieLipids.version === '2.0.0' && (dexieLipids.pages || []).length >= 5) {
+        overrides['antihyperlipidemics_mcp2'] = dexieLipids;
+      } else {
+        delete overrides['antihyperlipidemics_mcp2'];
+        await medChemGraphDb.modules.put({
+          id: 'antihyperlipidemics_mcp2',
+          module: defaultAntihyperlipidemics,
+          updatedAt: new Date().toISOString(),
+        }).catch((e) => console.warn('Dexie put during Antihyperlipidemics migration warning:', e));
+        try {
+          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        } catch {}
+      }
+    }
+
+    if (
+      overrides['antihyperlipidemics_mcp2'] &&
+      (overrides['antihyperlipidemics_mcp2'].version !== '2.0.0' ||
+        (overrides['antihyperlipidemics_mcp2'].pages || []).length < 5)
+    ) {
+      delete overrides['antihyperlipidemics_mcp2'];
       try {
         localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
       } catch {}
