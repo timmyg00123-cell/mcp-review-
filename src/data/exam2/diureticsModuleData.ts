@@ -65,7 +65,7 @@ export const diureticsPages: ReviewPage[] = [
       },
       {
         sectionTitle: 'Thiazide Diuretics SAR: Chlorothiazide, Hydrochlorothiazide, Trichlormethiazide & Polythiazide',
-        block_instructions: 'Consider structures I (Chlorothiazide), II (Hydrochlorothiazide), III (Trichlormethiazide), and IV (Polythiazide) to answer questions 3-9. Focus on modifications at the 3,4-double bond, position-3 substituent, and position-2 nitrogen.',
+        block_instructions: 'Consider chemical Structures I - IV to answer questions 3-9. Focus on modifications at the 3,4-double bond, position-3 substituent, and position-2 nitrogen.',
         structures: [
           DIURETICS_STRUCTURES.chlorothiazide,
           DIURETICS_STRUCTURES.hydrochlorothiazide,
@@ -79,7 +79,7 @@ export const diureticsPages: ReviewPage[] = [
             title: 'Chemical Class of Thiazide Diuretics',
             category: 'Medicinal Chemistry SAR',
             type: 'multiple-choice',
-            questionStem: 'Which of the following best describes the chemical class of the above molecules (I: Chlorothiazide, II: HCTZ, III: Trichlormethiazide, IV: Polythiazide)?',
+            questionStem: 'Which of the following best describes the chemical class of Structures I - IV?',
             options: [
               'Benzothiadiazine-1,1-dioxide',
               '1,4-Dihydropyridine',
@@ -110,7 +110,7 @@ export const diureticsPages: ReviewPage[] = [
             title: 'Mechanistic Class of Benzothiadiazine Diuretics',
             category: 'Pharmacology',
             type: 'multiple-choice',
-            questionStem: 'What is the mechanistic class of the above drugs (Chlorothiazide, HCTZ, Trichlormethiazide, Polythiazide)?',
+            questionStem: 'What is the mechanistic class of Structures I - IV?',
             options: [
               'Thiazide diuretics (NCC inhibitors in the distal convoluted tubule)',
               'Potassium-sparing agents (ENaC blockers)',
@@ -143,10 +143,10 @@ export const diureticsPages: ReviewPage[] = [
             type: 'multiple-choice',
             questionStem: 'Which of the above drugs is the MOST potent? Which is the LEAST potent?',
             options: [
-              'Most potent: Polythiazide (IV); Least potent: Chlorothiazide (I)',
-              'Most potent: Chlorothiazide (I); Least potent: Polythiazide (IV)',
-              'Most potent: Hydrochlorothiazide (II); Least potent: Trichlormethiazide (III)',
-              'Most potent: Trichlormethiazide (III); Least potent: Chlorothiazide (I)'
+              'Most potent: Structure IV; Least potent: Structure I',
+              'Most potent: Structure I; Least potent: Structure IV',
+              'Most potent: Structure II; Least potent: Structure III',
+              'Most potent: Structure III; Least potent: Structure I'
             ],
             correctIndex: 0,
             optionExplanations: [
@@ -168,10 +168,10 @@ export const diureticsPages: ReviewPage[] = [
             type: 'multiple-choice',
             questionStem: 'Which of the above drugs has the LONGEST duration of action? Which has the SHORTEST duration of action?',
             options: [
-              'Longest: Polythiazide (IV); Shortest: Chlorothiazide (I) & Hydrochlorothiazide (II)',
-              'Longest: Chlorothiazide (I); Shortest: Polythiazide (IV)',
-              'Longest: Hydrochlorothiazide (II); Shortest: Trichlormethiazide (III)',
-              'Longest: Trichlormethiazide (III); Shortest: Hydrochlorothiazide (II)'
+              'Longest: Structure IV; Shortest: Structure I & Structure II',
+              'Longest: Structure I; Shortest: Structure IV',
+              'Longest: Structure II; Shortest: Structure III',
+              'Longest: Structure III; Shortest: Structure II'
             ],
             correctIndex: 0,
             optionExplanations: [
@@ -193,10 +193,10 @@ export const diureticsPages: ReviewPage[] = [
             type: 'multiple-choice',
             questionStem: 'Rank the above drugs according to their diuretic potency from MOST POTENT to WEAKEST:',
             options: [
-              'IV (Polythiazide) > III (Trichlormethiazide) > II (Hydrochlorothiazide) > I (Chlorothiazide)',
-              'I (Chlorothiazide) > II (Hydrochlorothiazide) > III (Trichlormethiazide) > IV (Polythiazide)',
-              'II (Hydrochlorothiazide) > IV (Polythiazide) > III (Trichlormethiazide) > I (Chlorothiazide)',
-              'III (Trichlormethiazide) > IV (Polythiazide) > II (Hydrochlorothiazide) > I (Chlorothiazide)'
+              'Structure IV > Structure III > Structure II > Structure I',
+              'Structure I > Structure II > Structure III > Structure IV',
+              'Structure II > Structure IV > Structure III > Structure I',
+              'Structure III > Structure IV > Structure II > Structure I'
             ],
             correctIndex: 0,
             optionExplanations: [
@@ -218,10 +218,10 @@ export const diureticsPages: ReviewPage[] = [
             type: 'multiple-choice',
             questionStem: 'Rank the above drugs according to their duration of action from SHORTEST to LONGEST:',
             options: [
-              'I (Chlorothiazide) <= II (Hydrochlorothiazide) < III (Trichlormethiazide) < IV (Polythiazide)',
-              'IV (Polythiazide) < III (Trichlormethiazide) < II (Hydrochlorothiazide) < I (Chlorothiazide)',
-              'II (Hydrochlorothiazide) < I (Chlorothiazide) < IV (Polythiazide) < III (Trichlormethiazide)',
-              'I (Chlorothiazide) < IV (Polythiazide) < II (Hydrochlorothiazide) < III (Trichlormethiazide)'
+              'Structure I <= Structure II < Structure III < Structure IV',
+              'Structure IV < Structure III < Structure II < Structure I',
+              'Structure II < Structure I < Structure IV < Structure III',
+              'Structure I < Structure IV < Structure II < Structure III'
             ],
             correctIndex: 0,
             optionExplanations: [
@@ -241,7 +241,7 @@ export const diureticsPages: ReviewPage[] = [
             title: 'Thiazide Diuretics True/False Statements',
             category: 'Medicinal Chemistry SAR',
             type: 'sub-statements',
-            questionStem: 'Consider the chemical structures of Chlorothiazide, Hydrochlorothiazide, Trichlormethiazide, and Polythiazide to determine whether each statement is true or false:',
+            questionStem: 'Consider chemical Structures I - IV to determine whether each statement is true or false:',,
             subStatements: [
               {
                 id: 'a',
