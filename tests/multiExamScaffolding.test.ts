@@ -40,10 +40,10 @@ assert.equal(activeDef.code, 'Exam 3');
 
 // 3. Verify Module Exam ID mapping
 const builtIns = loadAllReviewModules();
-assert.equal(builtIns.length, 12, 'Must load all 12 built-in modules (3 for Exam 1, 5 for Exam 2, 4 for Exam 3)');
+assert.equal(builtIns.length, 11, 'Must load all 11 built-in modules (2 for Exam 1, 5 for Exam 2, 4 for Exam 3)');
 
 const exam1Modules = getModulesForExam('exam_1', builtIns);
-assert.equal(exam1Modules.length, 3, 'Exam 1 must filter to the 3 built-in Exam 1 modules');
+assert.equal(exam1Modules.length, 2, 'Exam 1 must filter to the 2 built-in Exam 1 review modules');
 for (const mod of exam1Modules) {
   const modExamId = getModuleExamId(mod);
   assert.equal(modExamId, 'exam_1', `Built-in Exam 1 module ${mod.id} must map to exam_1`);
@@ -66,14 +66,13 @@ for (const mod of exam2Modules) {
 
 // 5. Verify Scoped Cumulative Flashcards Harvester
 const exam1Cards = harvestCumulativeFlashcards('exam_1');
-assert.equal(exam1Cards.length, 50, 'Exam 1 must harvest 50 unique landmark flashcards');
+assert.equal(exam1Cards.length, 52, 'Exam 1 must harvest 52 unique landmark flashcards');
 assert.ok(
   exam1Cards.every((c) =>
     c.moduleIds.every((mId) =>
       [
-        'renal_drugs_mcp2',
-        'respiratory_bronchodilators_mcp2',
-        'respiratory_antiinflammatories_mcp2',
+        'renal_review_mcp2',
+        'respiratory_review_mcp2',
       ].includes(mId)
     )
   ),

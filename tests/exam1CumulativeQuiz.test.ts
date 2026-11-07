@@ -34,6 +34,8 @@ const validModuleIds = new Set([
   'renal_drugs_mcp2',
   'respiratory_bronchodilators_mcp2',
   'respiratory_antiinflammatories_mcp2',
+  'renal_review_mcp2',
+  'respiratory_review_mcp2',
 ]);
 
 const forbiddenStemTerms = [

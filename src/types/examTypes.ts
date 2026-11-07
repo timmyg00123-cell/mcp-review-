@@ -18,14 +18,13 @@ export const EXAM_DEFINITIONS: ExamDefinition[] = [
     code: 'Exam 1',
     title: 'Exam 1: Renal & Respiratory Medicinal Chemistry',
     shortTitle: 'Renal & Respiratory',
-    description: 'Diuretics, Vaptans, Potassium Binders, Bronchodilators, Glucocorticoids & Antileukotrienes.',
-    chapters: 'Modules 1–3',
+    description: 'Interactive slide-by-slide reviews for Renal and Respiratory medicinal chemistry.',
+    chapters: 'Modules 1–2',
     builtInModuleIds: [
-      'renal_drugs_mcp2',
-      'respiratory_bronchodilators_mcp2',
-      'respiratory_antiinflammatories_mcp2',
+      'renal_review_mcp2',
+      'respiratory_review_mcp2',
     ],
-    defaultModuleId: 'renal_drugs_mcp2',
+    defaultModuleId: 'renal_review_mcp2',
     isAvailable: true,
   },
   {
@@ -126,6 +125,8 @@ export function getModuleExamId(module: ReviewModule | null | undefined): string
   // Exam 1 built-ins or custom matching pattern
   if (
     [
+      'renal_review_mcp2',
+      'respiratory_review_mcp2',
       'renal_drugs_mcp2',
       'respiratory_bronchodilators_mcp2',
       'respiratory_antiinflammatories_mcp2',
