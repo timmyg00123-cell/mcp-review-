@@ -164,7 +164,7 @@ export function loadAllReviewModules(): ReviewModule[] {
         }
         if (
           overrides['respiratory_review_mcp2'] &&
-          (overrides['respiratory_review_mcp2'].version !== '2.1.0' ||
+          (overrides['respiratory_review_mcp2'].version !== '2.2.0' ||
             (overrides['respiratory_review_mcp2'].pages || []).length < 9)
         ) {
           delete overrides['respiratory_review_mcp2'];
@@ -375,7 +375,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     const dexieRespReview = dexieModules.find((m) => m.id === 'respiratory_review_mcp2')?.module;
     if (dexieRespReview) {
-      if (dexieRespReview.version === '2.1.0' && (dexieRespReview.pages || []).length >= 9) {
+      if (dexieRespReview.version === '2.2.0' && (dexieRespReview.pages || []).length >= 9) {
         overrides['respiratory_review_mcp2'] = dexieRespReview;
       } else {
         delete overrides['respiratory_review_mcp2'];
@@ -392,7 +392,7 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
 
     if (
       overrides['respiratory_review_mcp2'] &&
-      (overrides['respiratory_review_mcp2'].version !== '2.1.0' ||
+      (overrides['respiratory_review_mcp2'].version !== '2.2.0' ||
         (overrides['respiratory_review_mcp2'].pages || []).length < 9)
     ) {
       delete overrides['respiratory_review_mcp2'];
