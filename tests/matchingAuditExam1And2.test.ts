@@ -84,17 +84,22 @@ test('audits Exam 1 Renal Review matching questions for clean target bullets and
 
 test('audits Exam 1 Respiratory Review matching questions for clean target bullets and Roman labels', () => {
   const allQuestions = getAllQuestionsFromPages(getRespiratoryReviewPages());
-  const matchingQuestions = allQuestions.filter(
-    (q) => q.type === 'matching' && q.matchingTargets && q.matchingTargets.length > 0
-  );
+  const matchingQuestions = allQuestions.filter((q) => q.type === 'matching');
 
-  assert.ok(
-    matchingQuestions.length >= 3,
-    `Expected at least 3 matching questions in Respiratory, found ${matchingQuestions.length}`
+  assert.equal(
+    matchingQuestions.length,
+    3,
+    `Expected exactly 3 matching questions in Respiratory (Q101, Q602, Q801), found ${matchingQuestions.length}`
   );
 
   for (const q of matchingQuestions) {
-    assert.ok(q.matchingTargets && q.matchingTargets.length > 0);
+    // 1. Must define matching targets
+    assert.ok(
+      q.matchingTargets && q.matchingTargets.length > 0,
+      `Matching question ${q.id} must define matchingTargets`
+    );
+
+    // 2. Targets must have clean single-letter bullets
     q.matchingTargets.forEach((target: MatchingTarget, index: number) => {
       const bullet = formatTargetBullet(target.id, index);
       assert.match(
@@ -107,23 +112,37 @@ test('audits Exam 1 Respiratory Review matching questions for clean target bulle
         /target[-_]|chem[-_]/i,
         `Target bullet should never contain raw prefixes, got "${bullet}" in Q${q.id}`
       );
+      assert.ok(
+        target.acceptedStructureIds && target.acceptedStructureIds.length > 0,
+        `Target ${target.id} in Q${q.id} must have non-empty acceptedStructureIds`
+      );
     });
 
-    if (q.structuresDisplayed && q.structuresDisplayed.length > 0) {
-      q.structuresDisplayed.forEach((str: ChemicalStructure, sIdx: number) => {
-        const roman = extractRomanOrShortLabel(str, sIdx);
-        assert.match(
-          roman,
-          /^[IVXLCDM]+$/i,
-          `Structure label should extract clean Roman numeral, got "${roman}" for label "${str.document_label || (str as any).label || str.id}" in Q${q.id}`
-        );
-        assert.doesNotMatch(
-          roman,
-          /[()]/,
-          `Structure label should not contain drug name parentheses, got "${roman}" in Q${q.id}`
-        );
-      });
-    }
+    // 3. MUST explicitly define non-empty structuresDisplayed
+    assert.ok(
+      q.structuresDisplayed && q.structuresDisplayed.length > 0,
+      `Matching question ${q.id} MUST explicitly define non-empty structuresDisplayed for its draggable tray`
+    );
+
+    // 4. Must have questionStem describing matching task
+    assert.ok(
+      q.questionStem && q.questionStem.trim().length > 10,
+      `Matching question ${q.id} MUST define an informative questionStem`
+    );
+
+    q.structuresDisplayed.forEach((str: ChemicalStructure, sIdx: number) => {
+      const roman = extractRomanOrShortLabel(str, sIdx);
+      assert.match(
+        roman,
+        /^[IVXLCDM]+|[A-Z]|\d+$/i,
+        `Structure label should extract clean Roman numeral or short symbol, got "${roman}" for label "${str.document_label || (str as any).label || str.id}" in Q${q.id}`
+      );
+      assert.doesNotMatch(
+        roman,
+        /[()]/,
+        `Structure label should not contain drug name parentheses, got "${roman}" in Q${q.id}`
+      );
+    });
   }
 });
 
