@@ -63,11 +63,11 @@ assert.equal(mod.code, 'Exam 1', 'Code must be Exam 1');
 assert.equal(mod.examId, 'exam_1', 'Exam ID must be exam_1');
 assert.equal(mod.examTitle, 'Exam 1: Renal & Respiratory Medicinal Chemistry');
 assert.equal(mod.isBuiltIn, true, 'isBuiltIn must be true');
-assert.equal(mod.version, '2.1.0', 'Module version must be 2.1.0');
+assert.equal(mod.version, '2.2.0', 'Module version must be 2.2.0');
 
 // 2. Pages structure
 const pages = getRespiratoryReviewPages();
-assert.equal(pages.length, 9, 'Module must have exactly 9 pages matching Slides 1-9 of the review PDF');
+assert.equal(pages.length, 9, 'Module must have exactly 9 pages matching Review Pages 1-9 of the review PDF');
 assert.equal(mod.pages.length, 9, 'getDefaultRespiratoryReviewModule() pages must match getRespiratoryReviewPages()');
 
 // 3. Chemical Structure Audits (All 41 Landmark Structures)
@@ -181,7 +181,7 @@ assert.equal(ZAFIRLUKAST_STRUCTURE.cid, 5717);
 // Structure registry map validation
 assert.equal(Object.keys(RESPIRATORY_REVIEW_STRUCTURES).length, 41, 'Structure registry map must hold all 41 structures');
 
-// 4. Slide 1 (Page 1): Combination Bronchodilators & Anti-inflammatory Regimens
+// 4. Review Page 1: Combination Bronchodilators & Anti-inflammatory Regimens
 const page1 = pages[0]!;
 assert.equal(page1.pageNumber, 1, 'Page 1 must be pageNumber 1');
 const p1Questions = page1.sections.flatMap((s) => s.questions);
@@ -202,7 +202,7 @@ assert.ok(
   'Must cover corticosteroid upregulation of beta2 receptors'
 );
 
-// 5. Slide 2 (Page 2): Adrenergic Agonists SAR (Structures I–VII)
+// 5. Review Page 2: Adrenergic Agonists SAR (Structures I–VII)
 const page2 = pages[1]!;
 assert.equal(page2.pageNumber, 2, 'Page 2 must be pageNumber 2');
 const p2Questions = page2.sections.flatMap((s) => s.questions);
@@ -210,12 +210,12 @@ assert.equal(p2Questions.length, 8, 'Page 2 must contain exactly 8 questions (Q1
 
 // Q1: Pharmacophore
 const s2q1 = p2Questions.find((q) => q.id === 201 || q.questionStem?.toLowerCase().includes('pharmacophore'))!;
-assert.ok(s2q1, 'Slide 2 must have Q1 for pharmacophore');
+assert.ok(s2q1, 'Review Page 2 must have Q1 for pharmacophore');
 assert.ok(s2q1.explanation?.toLowerCase().includes('phenylethanolamine') || s2q1.overallExplanation?.toLowerCase().includes('phenylethanolamine'));
 
 // Q2: Nonselective alpha/beta (VII Norepinephrine)
 const s2q2 = p2Questions.find((q) => q.questionStem?.toLowerCase().includes('nonselective alpha and beta') || q.title?.toLowerCase().includes('nonselective alpha'));
-assert.ok(s2q2, 'Slide 2 must have Q2 for nonselective alpha/beta');
+assert.ok(s2q2, 'Review Page 2 must have Q2 for nonselective alpha/beta');
 assert.ok(
   s2q2.matchingTargets?.some((t) => t.acceptedStructureIds.includes('VII') || t.acceptedStructureIds.includes('norepinephrine')) ||
     s2q2.options?.some((o) => o.includes('VII') || o.includes('Norepinephrine')) ||
@@ -224,59 +224,59 @@ assert.ok(
 
 // Q3: Nonselective beta1/beta2 (I Isoproterenol)
 const s2q3 = p2Questions.find((q) => q.questionStem?.toLowerCase().includes('nonselective beta-1 and beta-2') || q.title?.toLowerCase().includes('nonselective beta1'));
-assert.ok(s2q3, 'Slide 2 must have Q3 for nonselective beta1/beta2');
+assert.ok(s2q3, 'Review Page 2 must have Q3 for nonselective beta1/beta2');
 
 // Q4: Selective beta1 (II Dobutamine)
 const s2q4 = p2Questions.find((q) => q.questionStem?.toLowerCase().includes('selective beta-1') || q.title?.toLowerCase().includes('selective beta1'));
-assert.ok(s2q4, 'Slide 2 must have Q4 for selective beta1');
+assert.ok(s2q4, 'Review Page 2 must have Q4 for selective beta1');
 
 // Q5: Selective beta2 (III, IV, V, VI)
 const s2q5 = p2Questions.find((q) => q.questionStem?.toLowerCase().includes('selective beta-2') || q.title?.toLowerCase().includes('selective beta2'));
-assert.ok(s2q5, 'Slide 2 must have Q5 for selective beta2');
+assert.ok(s2q5, 'Review Page 2 must have Q5 for selective beta2');
 
 // Q6: SABA vs LABA vs ultra-LABA
 const s2q6 = p2Questions.find((q) => q.questionStem?.toLowerCase().includes('saba') || q.title?.toLowerCase().includes('saba'));
-assert.ok(s2q6, 'Slide 2 must have Q6 for SABA/LABA/ultra-LABA');
+assert.ok(s2q6, 'Review Page 2 must have Q6 for SABA/LABA/ultra-LABA');
 
 // Q7: Asthma/COPD vs shock/heart failure indications
 const s2q7 = p2Questions.find((q) => q.questionStem?.toLowerCase().includes('indicated') || q.title?.toLowerCase().includes('indicated'));
-assert.ok(s2q7, 'Slide 2 must have Q7 for indications');
+assert.ok(s2q7, 'Review Page 2 must have Q7 for indications');
 
 // Q8: COMT & MAO metabolism
 const s2q8 = p2Questions.find((q) => q.questionStem?.toLowerCase().includes('comt') || q.title?.toLowerCase().includes('comt'));
-assert.ok(s2q8, 'Slide 2 must have Q8 for COMT & MAO metabolism');
+assert.ok(s2q8, 'Review Page 2 must have Q8 for COMT & MAO metabolism');
 
-// Slide 2 sequential numbering & spoiler audits
+// Review Page 2 sequential numbering & spoiler audits
 p2Questions.forEach((q, idx) => {
   assert.equal(
     q.questionNumberLabel,
     `Question ${idx + 1}`,
-    `Slide 2 question ${q.id} must have questionNumberLabel "Question ${idx + 1}"`
+    `Review Page 2 question ${q.id} must have questionNumberLabel "Question ${idx + 1}"`
   );
   if (q.options) {
     q.options.forEach((opt) => {
       assert.doesNotMatch(
         opt,
         /Structure\s+[IVXLCDM]+\s*\([A-Za-z]+\)/,
-        `Slide 2 option must not contain drug name spoilers in parentheses: "${opt}"`
+        `Review Page 2 option must not contain drug name spoilers in parentheses: "${opt}"`
       );
     });
   }
 });
 
-// 6. Slide 3 (Page 3): Anticholinergics & Hydrocortisone Prototype
+// 6. Review Page 3: Anticholinergics & Hydrocortisone Prototype
 const page3 = pages[2]!;
 assert.equal(page3.pageNumber, 3, 'Page 3 must be pageNumber 3');
 const p3Questions = page3.sections.flatMap((s) => s.questions);
 
-// Slide 3 Q304 spoiler check
+// Review Page 3 Q304 spoiler check
 const s3q4 = p3Questions.find((q) => q.id === 304)!;
-assert.ok(s3q4, 'Slide 3 must have Q304');
+assert.ok(s3q4, 'Review Page 3 must have Q304');
 s3q4.options?.forEach((opt) => {
   assert.doesNotMatch(
     opt,
     /Structure\s+[IVXLCDM]+\s*\([A-Za-z\s’']+\)/i,
-    `Slide 3 Q304 option must not spoil drug name in parentheses: "${opt}"`
+    `Review Page 3 Q304 option must not spoil drug name in parentheses: "${opt}"`
   );
 });
 assert.ok(p3Questions.length >= 8, 'Page 3 must contain at least 8 questions across Anticholinergics and Hydrocortisone');
@@ -287,7 +287,7 @@ assert.ok(
     (q.questionStem + (q.explanation || '')).toLowerCase().includes('quaternary ammonium') &&
     (q.questionStem + (q.explanation || '')).toLowerCase().includes('blood-brain barrier')
   ),
-  'Slide 3 must cover quaternary ammonium preventing BBB penetration and systemic absorption'
+  'Review Page 3 must cover quaternary ammonium preventing BBB penetration and systemic absorption'
 );
 
 // Hydrocortisone prototype: C1-C21 carbon numbering & 11-keto vs 11beta-OH
@@ -296,10 +296,10 @@ assert.ok(
     (q.questionStem + (q.explanation || '')).toLowerCase().includes('11-beta') &&
     (q.questionStem + (q.explanation || '')).toLowerCase().includes('11-keto')
   ),
-  'Slide 3 must cover 11beta-OH activity vs 11-keto prodrug'
+  'Review Page 3 must cover 11beta-OH activity vs 11-keto prodrug'
 );
 
-// 7. Slide 4 (Page 4): Hydrocortisone Biosynthesis & Glucocorticoid Receptor (GR)
+// 7. Review Page 4: Hydrocortisone Biosynthesis & Glucocorticoid Receptor (GR)
 const page4 = pages[3]!;
 assert.equal(page4.pageNumber, 4, 'Page 4 must be pageNumber 4');
 const p4Questions = page4.sections.flatMap((s) => s.questions);
@@ -312,7 +312,7 @@ assert.ok(
     (q.questionStem + (q.overallExplanation || '')).includes('CYP11B1') &&
     (q.questionStem + (q.overallExplanation || '')).includes('CYP21A2')
   ),
-  'Slide 4 must cover key cytochrome P450 enzymes in cortisol biosynthesis'
+  'Review Page 4 must cover key cytochrome P450 enzymes in cortisol biosynthesis'
 );
 
 // GR: LBD (XX), DBD (YY), HSP90 (AA), GRE (CC), Processes 1-6
@@ -322,10 +322,10 @@ assert.ok(
     (q.questionStem + (q.overallExplanation || '')).includes('GRE') &&
     (q.questionStem + (q.overallExplanation || '')).toLowerCase().includes('transrepression')
   ),
-  'Slide 4 must cover GR receptor architecture and activation processes'
+  'Review Page 4 must cover GR receptor architecture and activation processes'
 );
 
-// 8. Slide 5 (Page 5): Hydrocortisone Metabolism & Potency Ranking
+// 8. Review Page 5: Hydrocortisone Metabolism & Potency Ranking
 const page5 = pages[4]!;
 assert.equal(page5.pageNumber, 5, 'Page 5 must be pageNumber 5');
 const p5Questions = page5.sections.flatMap((s) => s.questions);
@@ -336,7 +336,7 @@ assert.ok(
     (q.questionStem + (q.overallExplanation || '')).toLowerCase().includes('11-beta-hsd2') ||
     (q.questionStem + (q.overallExplanation || '')).toLowerCase().includes('tetrahydrocortisol')
   ),
-  'Slide 5 must cover 11beta-HSD2 and ring-A reduction pathways'
+  'Review Page 5 must cover 11beta-HSD2 and ring-A reduction pathways'
 );
 
 // Potency ranking question
@@ -345,7 +345,7 @@ const qPotency = p5Questions.find((q) =>
   q.questionStem?.toLowerCase().includes('potency') ||
   q.title?.toLowerCase().includes('potency')
 );
-assert.ok(qPotency, 'Slide 5 must include glucocorticoid potency ranking');
+assert.ok(qPotency, 'Review Page 5 must include glucocorticoid potency ranking');
 if (qPotency.rankingItems) {
   const dexa = qPotency.rankingItems.find((r) => r.label.toLowerCase().includes('dexamethasone'));
   const cortisone = qPotency.rankingItems.find((r) => r.label.toLowerCase().includes('cortisone'));
@@ -353,42 +353,42 @@ if (qPotency.rankingItems) {
   assert.ok(dexa.correctRank < cortisone.correctRank, 'Dexamethasone must rank higher in anti-inflammatory potency than Cortisone');
 }
 
-// 9. Slide 6 (Page 6): Glucocorticoid Prodrugs, Soft Steroids & SAR
+// 9. Review Page 6: Glucocorticoid Prodrugs, Soft Steroids & SAR
 const page6 = pages[5]!;
 assert.equal(page6.pageNumber, 6, 'Page 6 must be pageNumber 6');
 const p6Questions = page6.sections.flatMap((s) => s.questions);
 const p6SubStmts = p6Questions.flatMap((q) => q.subStatements || []);
-assert.ok(p6SubStmts.length >= 4, 'Slide 6 must have at least 4 True/False sub-statements');
+assert.ok(p6SubStmts.length >= 4, 'Review Page 6 must have at least 4 True/False sub-statements');
 
-// 4 explicit sub-statements from Slide 6:
+// 4 explicit sub-statements from Review Page 6:
 const stmtDual = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('hydrocortisone') && (s.text || '').toLowerCase().includes('mineralocorticoid'));
-assert.ok(stmtDual, 'Slide 6 must test hydrocortisone, cortisone, prednisone, prednisolone have both glucocorticoid and mineralocorticoid activities');
+assert.ok(stmtDual, 'Review Page 6 must test hydrocortisone, cortisone, prednisone, prednisolone have both glucocorticoid and mineralocorticoid activities');
 assert.equal(stmtDual.isCorrect, true);
 
 const stmtSkeleton = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('all-trans') || (s.text || '').toLowerCase().includes('ene-one'));
-assert.ok(stmtSkeleton, 'Slide 6 must test steroid skeleton, all-trans backbone, ring A ene-one, C-17 required for anti-inflammatory');
+assert.ok(stmtSkeleton, 'Review Page 6 must test steroid skeleton, all-trans backbone, ring A ene-one, C-17 required for anti-inflammatory');
 assert.equal(stmtSkeleton.isCorrect, true);
 
 const stmtC21Lipophilic = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('c21-lipophilic'));
-assert.ok(stmtC21Lipophilic, 'Slide 6 must test C21-lipophilic esters prodrug properties');
+assert.ok(stmtC21Lipophilic, 'Review Page 6 must test C21-lipophilic esters prodrug properties');
 assert.equal(stmtC21Lipophilic.isCorrect, true);
 
 const stmt1Dehydro = p6SubStmts.find((s) => (s.text || '').toLowerCase().includes('1-dehydro'));
-assert.ok(stmt1Dehydro, 'Slide 6 must test 1-dehydro modification increases anti-inflammatory activity and limits metabolism');
+assert.ok(stmt1Dehydro, 'Review Page 6 must test 1-dehydro modification increases anti-inflammatory activity and limits metabolism');
 assert.equal(stmt1Dehydro.isCorrect, true);
 
-// Slide 6 Matching target spoiler audit
+// Review Page 6 Matching target spoiler audit
 const s6Matching = p6Questions.find((q) => q.type === 'matching')!;
-assert.ok(s6Matching, 'Slide 6 must have matching question');
+assert.ok(s6Matching, 'Review Page 6 must have matching question');
 s6Matching.matchingTargets!.forEach((t) => {
   assert.doesNotMatch(
     t.label,
     /^Structure\s+[IVXLCDM]+\s*\([A-Za-z\s]+\):/i,
-    `Slide 6 target label must not spoil structure: "${t.label}"`
+    `Review Page 6 target label must not spoil structure: "${t.label}"`
   );
 });
 
-// 10. Slide 7 (Page 7): Glucocorticoid SAR Items, Biotransformations & Theophylline vs Roflumilast
+// 10. Review Page 7: Glucocorticoid SAR Items, Biotransformations & Theophylline vs Roflumilast
 const page7 = pages[6]!;
 assert.equal(page7.pageNumber, 7, 'Page 7 must be pageNumber 7');
 const p7Questions = page7.sections.flatMap((s) => s.questions);
@@ -396,15 +396,15 @@ const p7SubStmts = p7Questions.flatMap((q) => q.subStatements || []);
 
 // 3 explicit T/F items:
 const p7Stmt1 = p7SubStmts.find((s) => (s.text || '').toLowerCase().includes('16,17-acetal') && (s.text || '').toLowerCase().includes('salt'));
-assert.ok(p7Stmt1, 'Slide 7 must include 16,17-acetal decreases salt retention');
+assert.ok(p7Stmt1, 'Review Page 7 must include 16,17-acetal decreases salt retention');
 assert.equal(p7Stmt1.isCorrect, true);
 
 const p7Stmt2 = p7SubStmts.find((s) => (s.text || '').toLowerCase().includes('9a-f') || (s.text || '').toLowerCase().includes('9-alpha-fluoro decreases'));
-assert.ok(p7Stmt2, 'Slide 7 must include 9a-F decreases mineralocorticoid activity (False)');
+assert.ok(p7Stmt2, 'Review Page 7 must include 9a-F decreases mineralocorticoid activity (False)');
 assert.equal(p7Stmt2.isCorrect, false);
 
 const p7Stmt3 = p7SubStmts.find((s) => (s.text || '').toLowerCase().includes('triamcinolone') && (s.text || '').toLowerCase().includes('methylprednisolone'));
-assert.ok(p7Stmt3, 'Slide 7 must include triamcinolone and methylprednisolone have little mineralocorticoid activity');
+assert.ok(p7Stmt3, 'Review Page 7 must include triamcinolone and methylprednisolone have little mineralocorticoid activity');
 assert.equal(p7Stmt3.isCorrect, true);
 
 // Biotransformations:
@@ -413,12 +413,12 @@ assert.ok(
     (q.questionStem + (q.overallExplanation || '')).includes('Beclomethasone 17-monopropionate') ||
     (q.questionStem + (q.overallExplanation || '')).includes('17-BMP')
   ),
-  'Slide 7 must cover Beclomethasone dipropionate -> Beclomethasone 17-monopropionate bioactivation'
+  'Review Page 7 must cover Beclomethasone dipropionate -> Beclomethasone 17-monopropionate bioactivation'
 );
 
 // Theophylline vs Roflumilast comparison
 const qTheoRof = p7Questions.find((q) => q.id === 703 || (q.title?.toLowerCase().includes('theophylline') && q.title?.toLowerCase().includes('roflumilast')));
-assert.ok(qTheoRof, 'Slide 7 must include Drug A (Theophylline) vs Drug B (Roflumilast) comparison');
+assert.ok(qTheoRof, 'Review Page 7 must include Drug A (Theophylline) vs Drug B (Roflumilast) comparison');
 assert.ok(qTheoRof.subStatements && qTheoRof.subStatements.length === 5, 'Q703 must have 5 True/False sub-statements');
 const theoStmt1 = qTheoRof.subStatements.find((s) => (s.text ?? '').toLowerCase().includes('methylxanthine') && (s.text ?? '').toLowerCase().includes('dichloropyridine'));
 assert.ok(theoStmt1 && theoStmt1.isCorrect === true);
@@ -431,32 +431,32 @@ assert.ok(theoStmt4 && theoStmt4.isCorrect === false);
 const theoStmt5 = qTheoRof.subStatements.find((s) => (s.text ?? '').toLowerCase().includes('cyp1a2'));
 assert.ok(theoStmt5 && theoStmt5.isCorrect === false);
 
-// 11. Slide 8 (Page 8): Theophylline vs Roflumilast (cont.), Mechanism Matching & Beclomethasone vs Hydrocortisone Succinate
+// 11. Review Page 8: Theophylline vs Roflumilast (cont.), Mechanism Matching & Beclomethasone vs Hydrocortisone Succinate
 const page8 = pages[7]!;
 assert.equal(page8.pageNumber, 8, 'Page 8 must be pageNumber 8');
 const p8Questions = page8.sections.flatMap((s) => s.questions);
 
-// Slide 8 question numbering
+// Review Page 8 question numbering
 p8Questions.forEach((q, idx) => {
   assert.equal(
     q.questionNumberLabel,
     `Question ${idx + 1}`,
-    `Slide 8 question ${q.id} must have questionNumberLabel "Question ${idx + 1}"`
+    `Review Page 8 question ${q.id} must have questionNumberLabel "Question ${idx + 1}"`
   );
 });
 
 // Mechanism Matching
 const qMechMatching = p8Questions.find((q) => q.type === 'matching' && q.matchingTargets?.some((t) => t.label.includes('5-Lipoxygenase') || t.label.includes('CysLT1')));
-assert.ok(qMechMatching, 'Slide 8 must include 7-drug mechanism matching');
-assert.equal(qMechMatching.questionNumberLabel, 'Question 1', 'Slide 8 matching must have questionNumberLabel "Question 1"');
+assert.ok(qMechMatching, 'Review Page 8 must include 7-drug mechanism matching');
+assert.equal(qMechMatching.questionNumberLabel, 'Question 1', 'Review Page 8 matching must have questionNumberLabel "Question 1"');
 const targets = qMechMatching.matchingTargets!;
-assert.equal(targets.length, 7, 'Slide 8 mechanism matching must have exactly 7 targets (A to G)');
+assert.equal(targets.length, 7, 'Review Page 8 mechanism matching must have exactly 7 targets (A to G)');
 
 targets.forEach((t) => {
   assert.doesNotMatch(
     t.label,
     /\(Structure\s+[IVXLCDM]+:\s*[A-Za-z]+\)/i,
-    `Slide 8 matching target label must not contain spoiler: "${t.label}"`
+    `Review Page 8 matching target label must not contain spoiler: "${t.label}"`
   );
 });
 
@@ -489,7 +489,7 @@ assert.ok(beta2Target.acceptedStructureIds.includes('VI') || beta2Target.accepte
 const pdeTarget = targets.find((t) => (t.label.includes('PDE') || t.label.includes('Phosphodiesterase')) && !t.label.toLowerCase().includes('dual'))!;
 assert.ok(pdeTarget.acceptedStructureIds.includes('VII') || pdeTarget.acceptedStructureIds.includes('theophylline'));
 
-// 12. Slide 9 (Page 9): Beclomethasone dipropionate vs Hydrocortisone succinate (10 T/F items) & Tiotropium vs Pirbuterol (5 T/F items)
+// 12. Review Page 9: Beclomethasone dipropionate vs Hydrocortisone succinate (10 T/F items) & Tiotropium vs Pirbuterol (5 T/F items)
 const page9 = pages[8]!;
 assert.equal(page9.pageNumber, 9, 'Page 9 must be pageNumber 9');
 const p9Questions = page9.sections.flatMap((s) => s.questions);
@@ -500,7 +500,7 @@ const qBecloHydro = p9Questions.find((q) =>
   q.subStatements.length === 10 &&
   (q.title?.toLowerCase().includes('beclomethasone') || q.questionStem?.toLowerCase().includes('beclomethasone'))
 );
-assert.ok(qBecloHydro, 'Slide 9 must contain the 10-statement True/False battery comparing Beclomethasone dipropionate vs Hydrocortisone sodium succinate');
+assert.ok(qBecloHydro, 'Review Page 9 must contain the 10-statement True/False battery comparing Beclomethasone dipropionate vs Hydrocortisone sodium succinate');
 assert.equal(qBecloHydro.subStatements!.length, 10, 'Must have exactly 10 sub-statements');
 const bdpSubStmts = qBecloHydro.subStatements!;
 const bdpStmt1 = bdpSubStmts.find((s) => (s.text ?? '').includes('Drug A is a glucocorticoid whereas Drug B is a mineralocorticoid.'));
@@ -516,7 +516,7 @@ const qTioPir = p9Questions.find((q) =>
   q.subStatements.length === 5 &&
   (q.title?.toLowerCase().includes('tiotropium') || q.questionStem?.toLowerCase().includes('tiotropium') || q.title?.toLowerCase().includes('pirbuterol'))
 );
-assert.ok(qTioPir, 'Slide 9 must contain the 5-statement True/False battery comparing Tiotropium (Drug A) vs Pirbuterol (Drug B)');
+assert.ok(qTioPir, 'Review Page 9 must contain the 5-statement True/False battery comparing Tiotropium (Drug A) vs Pirbuterol (Drug B)');
 assert.equal(qTioPir.subStatements!.length, 5, 'Must have exactly 5 sub-statements');
 const tioSubStmts = qTioPir.subStatements!;
 const tioStmt1 = tioSubStmts.find((s) => (s.text ?? '').includes('Drug A is amino-ester whereas Drug B is a phenyl-ethanol amine.'));
@@ -544,7 +544,7 @@ questionsWithSubStmts.forEach((q) => {
   });
 });
 
-assert.ok(totalSubStatements >= 35, `Module must contain at least 35 sub-statements across all slides (found ${totalSubStatements})`);
+assert.ok(totalSubStatements >= 35, `Module must contain at least 35 sub-statements across all Review Pages (found ${totalSubStatements})`);
 
 // 14. Universal question numbering validation across all 9 pages
 pages.forEach((page, pIdx) => {
@@ -558,4 +558,119 @@ pages.forEach((page, pIdx) => {
   });
 });
 
-console.log(`All Respiratory Review Module tests passed successfully! (${totalSubStatements} sub-statements verified across 9 slides)`);
+// 15. Review Page and Section Titling Contract Audit
+pages.forEach((page, idx) => {
+  assert.equal(page.pageNumber, idx + 1, `Page index ${idx} must have pageNumber ${idx + 1}`);
+  assert.ok(
+    page.pageTitle?.startsWith('Review Page '),
+    `Page ${idx + 1} pageTitle must start with "Review Page ", got "${page.pageTitle}"`
+  );
+  assert.ok(
+    page.pageTitle?.startsWith(`Review Page ${idx + 1}`),
+    `Page ${idx + 1} pageTitle must start with "Review Page ${idx + 1}", got "${page.pageTitle}"`
+  );
+  assert.ok(page.sections.length > 0, `Page ${idx + 1} must have at least one section`);
+  page.sections.forEach((sec, sIdx) => {
+    assert.ok(
+      sec.sectionTitle?.startsWith('Review Page '),
+      `Page ${idx + 1} section ${sIdx} sectionTitle must start with "Review Page ", got "${sec.sectionTitle}"`
+    );
+    assert.ok(
+      sec.sectionTitle?.startsWith(`Review Page ${idx + 1}`),
+      `Page ${idx + 1} section ${sIdx} sectionTitle must start with "Review Page ${idx + 1}", got "${sec.sectionTitle}"`
+    );
+  });
+});
+
+// 16. Question Source Reference & Source Page Number Contract Audit (All 34 Questions)
+assert.equal(allQuestions.length, 34, 'Must have exactly 34 questions across the 9 Review Pages');
+pages.forEach((page) => {
+  const pQuestions = page.sections.flatMap((s) => s.questions);
+  pQuestions.forEach((q) => {
+    assert.ok(
+      q.sourceReference,
+      `Question ${q.id} on Page ${page.pageNumber} must have sourceReference defined`
+    );
+    assert.match(
+      q.sourceReference,
+      /^Respiratory Med Chem \(Asthma\/COPD\) Review, Page \d+, Question \d+$/,
+      `Question ${q.id} sourceReference must match expected format, got "${q.sourceReference}"`
+    );
+    assert.equal(
+      typeof q.sourcePageNumber,
+      'number',
+      `Question ${q.id} sourcePageNumber must be a number, got ${typeof q.sourcePageNumber}`
+    );
+    assert.equal(
+      q.sourcePageNumber,
+      page.pageNumber,
+      `Question ${q.id} sourcePageNumber (${q.sourcePageNumber}) must equal page.pageNumber (${page.pageNumber})`
+    );
+    assert.ok(
+      q.sourcePageNumber >= 1 && q.sourcePageNumber <= 9,
+      `Question ${q.id} sourcePageNumber must be between 1 and 9, got ${q.sourcePageNumber}`
+    );
+  });
+});
+
+// 17. Matching Questions structuresDisplayed & Matching Targets Contract Audit
+const q101 = allQuestions.find((q) => q.id === 101);
+assert.ok(q101, 'Question 101 must exist');
+assert.equal(q101.structuresDisplayed?.length, 5, 'Q101 must have 5 structuresDisplayed');
+assert.equal(q101.matchingTargets?.length, 5, 'Q101 must have 5 matching targets');
+
+const q602 = allQuestions.find((q) => q.id === 602);
+assert.ok(q602, 'Question 602 must exist');
+assert.equal(q602.structuresDisplayed?.length, 6, 'Q602 must have 6 structuresDisplayed');
+assert.equal(q602.matchingTargets?.length, 6, 'Q602 must have 6 matching targets');
+
+const q801 = allQuestions.find((q) => q.id === 801);
+assert.ok(q801, 'Question 801 must exist');
+assert.equal(q801.structuresDisplayed?.length, 7, 'Q801 must have 7 structuresDisplayed');
+assert.equal(q801.matchingTargets?.length, 7, 'Q801 must have 7 matching targets');
+
+// 18. Purge Verification: Zero "Slide N" References Across Module Content
+const fullPagesJson = JSON.stringify(pages);
+const slideMatch = fullPagesJson.match(/\bSlide\s*\d+/i);
+assert.equal(slideMatch, null, `Module pages must have zero occurrences of "Slide N", found: ${slideMatch?.[0]}`);
+
+pages.forEach((page) => {
+  assert.doesNotMatch(page.pageTitle || '', /\bSlide\s*\d+/i, `Page ${page.pageNumber} pageTitle must not contain "Slide N"`);
+  assert.doesNotMatch(page.title || '', /\bSlide\s*\d+/i, `Page ${page.pageNumber} title must not contain "Slide N"`);
+  assert.doesNotMatch(page.subtitle || '', /\bSlide\s*\d+/i, `Page ${page.pageNumber} subtitle must not contain "Slide N"`);
+
+  page.sections.forEach((sec, sIdx) => {
+    assert.doesNotMatch(sec.sectionTitle || '', /\bSlide\s*\d+/i, `Page ${page.pageNumber} sec ${sIdx} sectionTitle must not contain "Slide N"`);
+    assert.doesNotMatch(sec.title || '', /\bSlide\s*\d+/i, `Page ${page.pageNumber} sec ${sIdx} title must not contain "Slide N"`);
+    assert.doesNotMatch(sec.headerNote || '', /\bSlide\s*\d+/i, `Page ${page.pageNumber} sec ${sIdx} headerNote must not contain "Slide N"`);
+    assert.doesNotMatch(sec.block_instructions || '', /\bSlide\s*\d+/i, `Page ${page.pageNumber} sec ${sIdx} block_instructions must not contain "Slide N"`);
+
+    sec.questions.forEach((q) => {
+      assert.doesNotMatch(q.title || '', /\bSlide\s*\d+/i, `Question ${q.id} title must not contain "Slide N"`);
+      assert.doesNotMatch(q.prompt || '', /\bSlide\s*\d+/i, `Question ${q.id} prompt must not contain "Slide N"`);
+      assert.doesNotMatch(q.questionStem || '', /\bSlide\s*\d+/i, `Question ${q.id} questionStem must not contain "Slide N"`);
+      assert.doesNotMatch(q.explanation || '', /\bSlide\s*\d+/i, `Question ${q.id} explanation must not contain "Slide N"`);
+      assert.doesNotMatch(q.overallExplanation || '', /\bSlide\s*\d+/i, `Question ${q.id} overallExplanation must not contain "Slide N"`);
+      assert.doesNotMatch(q.rankingPrompt || '', /\bSlide\s*\d+/i, `Question ${q.id} rankingPrompt must not contain "Slide N"`);
+
+      if (q.options) {
+        q.options.forEach((opt, oIdx) => {
+          assert.doesNotMatch(opt, /\bSlide\s*\d+/i, `Question ${q.id} option ${oIdx} must not contain "Slide N"`);
+        });
+      }
+      if (q.optionExplanations) {
+        q.optionExplanations.forEach((oe, oeIdx) => {
+          assert.doesNotMatch(oe, /\bSlide\s*\d+/i, `Question ${q.id} optionExplanation ${oeIdx} must not contain "Slide N"`);
+        });
+      }
+      if (q.subStatements) {
+        q.subStatements.forEach((st, stIdx) => {
+          assert.doesNotMatch(st.text || '', /\bSlide\s*\d+/i, `Question ${q.id} subStatement ${stIdx} text must not contain "Slide N"`);
+          assert.doesNotMatch(st.explanation || '', /\bSlide\s*\d+/i, `Question ${q.id} subStatement ${stIdx} explanation must not contain "Slide N"`);
+        });
+      }
+    });
+  });
+});
+
+console.log(`All Respiratory Review Module tests passed successfully! (${totalSubStatements} sub-statements verified across 9 Review Pages)`);
