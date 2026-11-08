@@ -1663,25 +1663,25 @@ export const RESPIRATORY_REVIEW_STRUCTURES: Record<string, ChemicalStructure> = 
 };
 
 // =============================================================================
-// 9 COMPREHENSIVE REVIEW PAGES MATCHING SLIDES 1 - 9
+// 9 COMPREHENSIVE REVIEW PAGES MATCHING REVIEW PAGES 1 - 9
 // Grounded strictly in Dr. Rami A. Al-Horani's Fall 2026 Medicinal Chemistry lecture
 // =============================================================================
 
 export function getRespiratoryReviewPages(): ReviewPage[] {
   return [
     // =========================================================================
-    // SLIDE 1 (PAGE 1): Combination Bronchodilators & Anti-inflammatory Regimens
+    // REVIEW PAGE 1: Combination Bronchodilators & Anti-inflammatory Regimens
     // =========================================================================
     {
       pageNumber: 1,
-      pageTitle: 'Slide 1: Combination Bronchodilators & Anti-inflammatory Regimens',
+      pageTitle: 'Review Page 1: Combination Bronchodilators & Anti-inflammatory Regimens',
       title: 'Combination Bronchodilators & Anti-inflammatory Regimens',
       subtitle:
         'LAMA + LABA, ICS + LABA, and Triple Therapy (LAMA + LABA + ICS) in Asthma and COPD Management',
       sections: [
         {
           id: 'resp_p1_s1',
-          sectionTitle: 'Slide 1: Fixed-Dose Inhaled Combinations & Mechanistic Synergy',
+          sectionTitle: 'Review Page 1: Fixed-Dose Inhaled Combinations & Mechanistic Synergy',
           headerNote:
             'Evaluate the clinical rationales, individual molecular components, and pharmacological synergies of fixed-dose combination inhalers (Anoro Ellipta, Breo Ellipta, Stiolto Respimat, Trelegy Ellipta, Enerzair Breezhaler):',
           structures: [
@@ -1700,41 +1700,52 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'matching',
               title: 'Fixed-Dose Combination Regimens Matching',
+              questionStem:
+                'Drag each signature chemical structure (Structure I - Structure V) into its corresponding fixed-dose combination inhaler regimen (Anoro Ellipta, Breo Ellipta, Stiolto Respimat, Trelegy Ellipta, Enerzair Breezhaler):',
               prompt:
-                'Match each landmark fixed-dose combination brand name to its constituent drug classes and active molecular ingredients:',
+                'Drag each signature chemical structure (Structure I - Structure V) into its corresponding fixed-dose combination inhaler regimen (Anoro Ellipta, Breo Ellipta, Stiolto Respimat, Trelegy Ellipta, Enerzair Breezhaler):',
+              sourceReference: 'Respiratory Med Chem (Asthma/COPD) Review, Page 1, Question 1',
+              sourcePageNumber: 1,
+              structuresDisplayed: [
+                UMECLIDINIUM_STRUCTURE,
+                FLUTICASONE_FUROATE_STRUCTURE,
+                OLODATEROL_STRUCTURE,
+                VILANTEROL_STRUCTURE,
+                INDACATEROL_STRUCTURE,
+              ],
               matchingTargets: [
                 {
                   id: 'target_anoro',
                   label: 'Anoro Ellipta (Umeclidinium + Vilanterol)',
-                  acceptedStructureIds: ['umeclidinium', 'vilanterol', 'anoro', 'I'],
+                  acceptedStructureIds: ['umeclidinium', 'I'],
                   rationale:
                     'Anoro Ellipta combines Umeclidinium (LAMA) with Vilanterol trifenatate (LABA) for once-daily maintenance bronchodilation in COPD.',
                 },
                 {
                   id: 'target_breo',
                   label: 'Breo Ellipta (Fluticasone furoate + Vilanterol)',
-                  acceptedStructureIds: ['fluticasone_furoate', 'vilanterol', 'breo', 'II'],
+                  acceptedStructureIds: ['fluticasone_furoate', 'II'],
                   rationale:
                     'Breo Ellipta combines Fluticasone furoate (high-potency ICS) with Vilanterol (LABA) for once-daily controller therapy in asthma and COPD.',
                 },
                 {
                   id: 'target_stiolto',
                   label: 'Stiolto Respimat (Tiotropium + Olodaterol)',
-                  acceptedStructureIds: ['tiotropium', 'olodaterol', 'stiolto', 'III'],
+                  acceptedStructureIds: ['olodaterol', 'III'],
                   rationale:
                     'Stiolto Respimat delivers Tiotropium bromide (LAMA) and Olodaterol (ultra-LABA) via soft mist inhaler for once-daily COPD bronchodilation.',
                 },
                 {
                   id: 'target_trelegy',
                   label: 'Trelegy Ellipta (Umeclidinium + Fluticasone furoate + Vilanterol)',
-                  acceptedStructureIds: ['umeclidinium', 'fluticasone_furoate', 'vilanterol', 'trelegy', 'IV'],
+                  acceptedStructureIds: ['vilanterol', 'IV'],
                   rationale:
                     'Trelegy Ellipta is a single-inhaler triple therapy (SITT) combining Umeclidinium (LAMA), Fluticasone furoate (ICS), and Vilanterol (LABA) for once-daily dosing.',
                 },
                 {
                   id: 'target_enerzair',
                   label: 'Enerzair Breezhaler (Indacaterol + Glycopyrrolate + Mometasone furoate)',
-                  acceptedStructureIds: ['indacaterol', 'glycopyrrolate', 'mometasone_furoate', 'enerzair', 'V'],
+                  acceptedStructureIds: ['indacaterol', 'V'],
                   rationale:
                     'Enerzair Breezhaler is a once-daily triple combination containing Indacaterol acetate (ultra-LABA), Glycopyrronium bromide (LAMA), and Mometasone furoate (ICS).',
                 },
@@ -1756,6 +1767,8 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'sub-statements',
               title: 'Mechanistic Synergy in Combination Regimens',
+              sourceReference: 'Respiratory Med Chem (Asthma/COPD) Review, Page 1, Question 2',
+              sourcePageNumber: 1,
               prompt:
                 'Evaluate the following statements regarding the molecular pharmacology and synergy of LAMA, LABA, and ICS combinations:',
               subStatements: [
@@ -1796,6 +1809,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 3',
               type: 'multiple-choice',
               title: 'Clinical Differentiation of Inhaled Regimens',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 1, Question 3',
+              sourcePageNumber: 1,
               questionStem:
                 'Which clinical scenario best reflects the rationale for initiating single-inhaler triple therapy (LAMA + LABA + ICS, such as Trelegy or Enerzair) over a LABA + LAMA dual bronchodilator alone?',
               options: [
@@ -1814,18 +1830,18 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
     },
 
     // =========================================================================
-    // SLIDE 2 (PAGE 2): Adrenergic Agonists SAR (Structures I - VII)
+    // REVIEW PAGE 2: Adrenergic Agonists SAR (Structures I - VII)
     // =========================================================================
     {
       pageNumber: 2,
-      pageTitle: 'Slide 2: Adrenergic Agonists SAR',
+      pageTitle: 'Review Page 2: Adrenergic Agonists SAR',
       title: 'Adrenergic Agonists SAR & Pharmacophore Matrix',
       subtitle:
         'Structures I–VII (Isoproterenol, Dobutamine, Olodaterol, Salmeterol, Indacaterol, Pirbuterol, Norepinephrine): Pharmacophore, Selectivity, Duration & Metabolism',
       sections: [
         {
           id: 'resp_p2_s1',
-          sectionTitle: 'Slide 2: Adrenergic Agonists SAR (Structures I–VII)',
+          sectionTitle: 'Review Page 2: Adrenergic Agonists SAR (Structures I–VII)',
           headerNote:
             'Consider Structures I–VII (Isoproterenol, Dobutamine, Olodaterol, Salmeterol, Indacaterol, Pirbuterol, Norepinephrine) to answer Questions 201–208:',
           structures: [
@@ -1844,6 +1860,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'multiple-choice',
               title: 'Core Adrenergic Pharmacophore',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 2, Question 1',
+              sourcePageNumber: 2,
               questionStem:
                 'What is the core active pharmacophore common to adrenergic agonists (Structures I–VII)?',
               options: [
@@ -1862,6 +1881,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'multiple-choice',
               title: 'Nonselective Alpha and Beta Agonist Identification',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 2, Question 2',
+              sourcePageNumber: 2,
               questionStem:
                 'Which structure is a nonselective alpha and beta adrenergic agonist?',
               options: [
@@ -1880,6 +1902,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 3',
               type: 'multiple-choice',
               title: 'Nonselective Beta-1 and Beta-2 Agonist Identification',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 2, Question 3',
+              sourcePageNumber: 2,
               questionStem:
                 'Which structure is a nonselective beta-1 and beta-2 adrenergic agonist?',
               options: [
@@ -1898,6 +1923,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 4',
               type: 'multiple-choice',
               title: 'Selective Beta-1 Agonist Identification',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 2, Question 4',
+              sourcePageNumber: 2,
               questionStem:
                 'Which structure is a selective beta-1 adrenergic agonist indicated for acute heart failure and cardiogenic shock?',
               options: [
@@ -1916,6 +1944,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 5',
               type: 'multiple-choice',
               title: 'Selective Beta-2 Agonists Identification',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 2, Question 5',
+              sourcePageNumber: 2,
               questionStem:
                 'Which structures are selective beta-2 adrenergic agonists suitable for therapeutic bronchodilation?',
               options: [
@@ -1934,6 +1965,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 6',
               type: 'multiple-choice',
               title: 'SABA vs LABA vs Ultra-LABA Bronchodilator Categorization',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 2, Question 6',
+              sourcePageNumber: 2,
               questionStem:
                 'Categorize the selective beta-2 agonists into Short-Acting (SABA), Long-Acting (LABA), and Ultra-Long-Acting (ultra-LABA) bronchodilators:',
               options: [
@@ -1952,6 +1986,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 7',
               type: 'multiple-choice',
               title: 'Clinical Indications: Asthma/COPD vs Shock and Heart Failure',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 2, Question 7',
+              sourcePageNumber: 2,
               questionStem:
                 'Which of the adrenergic structures (I–VII) are clinically indicated for the management of asthma and COPD versus acute shock or heart failure?',
               options: [
@@ -1970,6 +2007,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 8',
               type: 'multiple-choice',
               title: 'Metabolic Susceptibility to COMT and MAO',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 2, Question 8',
+              sourcePageNumber: 2,
               questionStem:
                 'Analyze the metabolic susceptibility of Structures I–VII to Catechol-O-Methyltransferase (COMT) and Monoamine Oxidase (MAO):',
               options: [
@@ -1988,18 +2028,18 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
     },
 
     // =========================================================================
-    // SLIDE 3 (PAGE 3): Anticholinergics & Hydrocortisone Prototype
+    // REVIEW PAGE 3: Anticholinergics & Hydrocortisone Prototype
     // =========================================================================
     {
       pageNumber: 3,
-      pageTitle: 'Slide 3: Anticholinergics & Hydrocortisone Prototype',
+      pageTitle: 'Review Page 3: Anticholinergics & Hydrocortisone Prototype',
       title: 'Anticholinergic Bronchodilators & Hydrocortisone Prototype',
       subtitle:
         'Structures I–V (Darifenacin, Trihexyphenidyl, Tiotropium, Umeclidinium, Ipratropium) and Corticosteroid Core SAR',
       sections: [
         {
           id: 'resp_p3_s1',
-          sectionTitle: 'Slide 3: Anticholinergic Muscarinic Antagonists (Structures I–V)',
+          sectionTitle: 'Review Page 3: Anticholinergic Muscarinic Antagonists (Structures I–V)',
           headerNote:
             'Evaluate Structures I–V (Darifenacin, Trihexyphenidyl, Tiotropium, Umeclidinium, Ipratropium) and the Hydrocortisone steroid prototype to answer Questions 301–309:',
           structures: [
@@ -2017,6 +2057,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'multiple-choice',
               title: 'Anticholinergics: Chemical & Mechanistic Classification',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 1',
+              sourcePageNumber: 3,
               questionStem:
                 'What is the pharmacological and mechanistic classification of Anticholinergics I–V?',
               options: [
@@ -2034,6 +2077,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'multiple-choice',
               title: 'Anticholinergic Pharmacophore Features',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 2',
+              sourcePageNumber: 3,
               questionStem:
                 'What structural elements compose the classical muscarinic antagonist pharmacophore exhibited by Structures I–V?',
               options: [
@@ -2051,6 +2097,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 3',
               type: 'multiple-choice',
               title: 'Quaternary Ammonium Lung Localization & Blood-Brain Barrier Exclusion',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 3',
+              sourcePageNumber: 3,
               questionStem:
                 'Which structural feature of Anticholinergics III, IV, and V prevents blood-brain barrier penetration and limits systemic absorption after inhalation?',
               options: [
@@ -2068,6 +2117,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 4',
               type: 'multiple-choice',
               title: 'Clinical Indications of Anticholinergics I–V',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 4',
+              sourcePageNumber: 3,
               questionStem:
                 'Which of the anticholinergic structures (I–V) are clinically indicated for the inhalation management of asthma and COPD?',
               options: [
@@ -2085,6 +2137,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 5',
               type: 'multiple-choice',
               title: 'Soft Anticholinergics & Plasma Esterase Inactivation',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 5',
+              sourcePageNumber: 3,
               questionStem:
                 'What is the pharmacokinetic rationale for designing "soft anticholinergic" bronchodilators such as Aclidinium bromide?',
               options: [
@@ -2102,6 +2157,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 6',
               type: 'multiple-choice',
               title: 'Adrenocorticoid Classification & Endogenous Roles',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 6',
+              sourcePageNumber: 3,
               questionStem:
                 'How is Hydrocortisone classified among endogenous adrenocorticoids, and what are its primary physiological functions?',
               options: [
@@ -2119,6 +2177,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 7',
               type: 'multiple-choice',
               title: 'Corticosteroid Numbering & 11-beta-OH vs 11-Keto Activation',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 7',
+              sourcePageNumber: 3,
               questionStem:
                 'Evaluate the structural requirement of the C11 oxygen substituent: why is hydrocortisone active while cortisone requires bioactivation?',
               options: [
@@ -2136,6 +2197,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 8',
               type: 'multiple-choice',
               title: 'Glucocorticoid Receptor (GR) Interaction Points',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 8',
+              sourcePageNumber: 3,
               questionStem:
                 'Which functional groups of the Hydrocortisone molecule are essential contact points within the ligand-binding domain (LBD) of the glucocorticoid receptor?',
               options: [
@@ -2153,6 +2217,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 9',
               type: 'multiple-choice',
               title: 'Anti-inflammatory Utility in Asthma & COPD',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 3, Question 9',
+              sourcePageNumber: 3,
               questionStem:
                 'What is the fundamental cellular mechanism by which corticosteroids suppress airway inflammation in asthma and COPD?',
               options: [
@@ -2171,18 +2238,20 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
     },
 
     // =========================================================================
-    // SLIDE 4 (PAGE 4): Hydrocortisone Biosynthesis & Glucocorticoid Receptor (GR)
+    // REVIEW PAGE 4: Hydrocortisone Biosynthesis & Glucocorticoid Receptor (GR)
     // =========================================================================
     {
       pageNumber: 4,
-      pageTitle: 'Slide 4: Hydrocortisone Biosynthesis & Glucocorticoid Receptor (GR)',
+      pageTitle:
+        'Review Page 4: Hydrocortisone Biosynthesis & Glucocorticoid Receptor (GR)',
       title: 'Cortisol Biosynthesis & Glucocorticoid Receptor (GR) Mechanism',
       subtitle:
         'Adrenal Cortical Steroidogenesis, P450 Enzymes, Domain Architecture, Chaperones & Genomic Signaling',
       sections: [
         {
           id: 'resp_p4_s1',
-          sectionTitle: 'Slide 4: Biosynthesis Cascade & GR Receptor Activation',
+          sectionTitle:
+            'Review Page 4: Biosynthesis Cascade & GR Receptor Activation',
           headerNote:
             'Trace the cytochrome P450 enzymatic pathway in cortisol biosynthesis and the multi-step activation of the Glucocorticoid Receptor (GR):',
           structures: [HYDROCORTISONE_STRUCTURE, CORTISONE_STRUCTURE, ALDOSTERONE_STRUCTURE],
@@ -2192,6 +2261,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Adrenal Steroidogenesis & Cytochrome P450 Enzymes',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 4, Question 1',
+              sourcePageNumber: 4,
               questionStem:
                 'Trace the key cytochrome P450 enzymes (CYP11A1, CYP17A1, 3beta-HSD, CYP21A2, CYP11B1) involved in cortisol biosynthesis in the adrenal cortex:',
               subStatements: [
@@ -2232,6 +2304,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'sub-statements',
               title: 'Glucocorticoid Receptor (GR) Architecture & Activation Cycle',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 4, Question 2',
+              sourcePageNumber: 4,
               questionStem:
                 'Detail the structural domains of the glucocorticoid receptor (GR) and the sequence of events during receptor activation (HSP90 dissociation, nuclear translocation, GRE binding, transactivation and transrepression):',
               subStatements: [
@@ -2273,18 +2348,19 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
     },
 
     // =========================================================================
-    // SLIDE 5 (PAGE 5): Hydrocortisone Metabolism & Potency Ranking
+    // REVIEW PAGE 5: Hydrocortisone Metabolism & Potency Ranking
     // =========================================================================
     {
       pageNumber: 5,
-      pageTitle: 'Slide 5: Hydrocortisone Metabolism & Potency Ranking',
+      pageTitle: 'Review Page 5: Hydrocortisone Metabolism & Potency Ranking',
       title: 'Hydrocortisone Metabolism & Relative Potencies',
       subtitle:
         '11beta-HSD Isozymes, Ring A Reductions, and Structural Ranking of Systemic Corticosteroids',
       sections: [
         {
           id: 'resp_p5_s1',
-          sectionTitle: 'Slide 5: Metabolism Pathways & Relative Anti-inflammatory Potency',
+          sectionTitle:
+            'Review Page 5: Metabolism Pathways & Relative Anti-inflammatory Potency',
           headerNote:
             'Analyze the physiological inactivation pathways of hydrocortisone and rank synthetic corticosteroids by anti-inflammatory potency:',
           structures: [
@@ -2302,6 +2378,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Metabolic Inactivation Pathways of Hydrocortisone',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 5, Question 1',
+              sourcePageNumber: 5,
               questionStem:
                 'Analyze the primary metabolic degradation pathways of hydrocortisone, including 11beta-HSD2 oxidation, Ring-A reductions to tetrahydrocortisol, and side-chain cleavage:',
               subStatements: [
@@ -2342,6 +2421,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'ranking',
               title: 'Systemic Corticosteroid Anti-inflammatory Potency Ranking',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 5, Question 2',
+              sourcePageNumber: 5,
               rankingPrompt:
                 'Rank the following systemic corticosteroids in order of decreasing anti-inflammatory glucocorticoid potency (Rank 1 = Most potent anti-inflammatory, Rank 6 = Least potent / inactive anti-inflammatory):',
               rankingItems: [
@@ -2397,18 +2479,19 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
     },
 
     // =========================================================================
-    // SLIDE 6 (PAGE 6): Glucocorticoid Prodrugs, Soft Steroids & SAR
+    // REVIEW PAGE 6: Glucocorticoid Prodrugs, Soft Steroids & SAR
     // =========================================================================
     {
       pageNumber: 6,
-      pageTitle: 'Slide 6: Glucocorticoid Prodrugs, Soft Steroids & SAR',
+      pageTitle: 'Review Page 6: Glucocorticoid Prodrugs, Soft Steroids & SAR',
       title: 'Glucocorticoid Prodrugs, Soft Steroids & Formulation Chemistry',
       subtitle:
         'Structures I–VI (Triamcinolone acetonide, Beclomethasone dipropionate, Fluticasone propionate, Hydrocortisone sodium phosphate, Ciclesonide, Clobetasol propionate)',
       sections: [
         {
           id: 'resp_p6_s1',
-          sectionTitle: 'Slide 6: Formulation Chemistry & Structural Modifications (Structures I–VI)',
+          sectionTitle:
+            'Review Page 6: Formulation Chemistry & Structural Modifications (Structures I–VI)',
           headerNote:
             'Consider Structures I–VI (Triamcinolone acetonide, Beclomethasone dipropionate, Fluticasone propionate, Hydrocortisone sodium phosphate, Ciclesonide, Clobetasol propionate) to evaluate prodrug strategies, water solubility, and soft steroids:',
           structures: [
@@ -2425,8 +2508,11 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Glucocorticoid Prodrugs, Soft Steroids & SAR Sub-statements',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 6, Question 1',
+              sourcePageNumber: 6,
               prompt:
-                'Evaluate the following True/False statements regarding the medicinal chemistry and SAR of corticosteroids from Slide 6:',
+                'Evaluate the following True/False statements regarding the medicinal chemistry and SAR of corticosteroids from Review Page 6:',
               subStatements: [
                 {
                   id: 'p6_s1_1',
@@ -2465,8 +2551,21 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'matching',
               title: 'Corticosteroid Formulation & Structural Class Matching',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 6, Question 2',
+              sourcePageNumber: 6,
+              questionStem:
+                'Drag each chemical structure (Structure I - Structure VI) to its correct formulation class, prodrug status, and clinical role:',
               prompt:
-                'Match each corticosteroid structure (I–VI) to its defining medicinal chemistry and formulation feature:',
+                'Drag each chemical structure (Structure I - Structure VI) to its correct formulation class, prodrug status, and clinical role:',
+              structuresDisplayed: [
+                TRIAMCINOLONE_ACETONIDE_STRUCTURE,
+                BECLOMETHASONE_DIPROPIONATE_STRUCTURE,
+                FLUTICASONE_PROPIONATE_STRUCTURE,
+                HYDROCORTISONE_SODIUM_PHOSPHATE_STRUCTURE,
+                CICLESONIDE_STRUCTURE,
+                CLOBETASOL_PROPIONATE_STRUCTURE,
+              ],
               matchingTargets: [
                 {
                   id: 'target_triamcinolone',
@@ -2529,18 +2628,20 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
     },
 
     // =========================================================================
-    // SLIDE 7 (PAGE 7): Glucocorticoid SAR Items, Biotransformations & Theophylline vs Roflumilast
+    // REVIEW PAGE 7: Glucocorticoid SAR Items, Biotransformations & Theophylline vs Roflumilast
     // =========================================================================
     {
       pageNumber: 7,
-      pageTitle: 'Slide 7: Glucocorticoid SAR Items, Biotransformations & PDE Inhibitors',
+      pageTitle:
+        'Review Page 7: Glucocorticoid SAR Items, Biotransformations & PDE Inhibitors',
       title: 'Corticosteroid Biotransformations & PDE Inhibitor Pharmacology',
       subtitle:
         'SAR Principles, Prodrug Activations, and Comparative Chemistry of Theophylline vs Roflumilast',
       sections: [
         {
           id: 'resp_p7_s1',
-          sectionTitle: 'Slide 7: SAR Principles, Bioactivations & Methylxanthines vs PDE4 Inhibitors',
+          sectionTitle:
+            'Review Page 7: SAR Principles, Bioactivations & Methylxanthines vs PDE4 Inhibitors',
           headerNote:
             'Evaluate the True/False SAR statements, bioactivation pathways (BDP -> 17-BMP, Prednisone -> Prednisolone), and comparative pharmacology of Theophylline (Drug A) vs Roflumilast (Drug B):',
           structures: [
@@ -2558,6 +2659,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Glucocorticoid SAR True/False Battery',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 7, Question 1',
+              sourcePageNumber: 7,
               prompt:
                 'Evaluate the following three True/False statements regarding corticosteroid Structure-Activity Relationships (SAR):',
               subStatements: [
@@ -2592,6 +2696,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'multiple-choice',
               title: 'Corticosteroid Metabolic Biotransformations & Bioactivations',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 7, Question 2',
+              sourcePageNumber: 7,
               questionStem:
                 'Evaluate the critical enzymatic biotransformations of respiratory corticosteroids: Beclomethasone dipropionate to Beclomethasone 17-monopropionate (17-BMP), Prednisone to Prednisolone, and Fluticasone propionate clearance:',
               options: [
@@ -2610,8 +2717,11 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 3',
               type: 'sub-statements',
               title: 'Comparative Chemistry & Pharmacology: Theophylline (Drug A) vs Roflumilast (Drug B)',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 7, Question 3',
+              sourcePageNumber: 7,
               prompt:
-                'Evaluate the following 5 True/False statements comparing Theophylline (Drug A) and Roflumilast (Drug B) from Slide 7/8:',
+                'Evaluate the following 5 True/False statements comparing Theophylline (Drug A) and Roflumilast (Drug B) from Review Page 7:',
               subStatements: [
                 {
                   id: 'p7_s3_1',
@@ -2658,18 +2768,20 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
     },
 
     // =========================================================================
-    // SLIDE 8 (PAGE 8): Mechanism Matching & Beclomethasone vs Hydrocortisone Succinate
+    // REVIEW PAGE 8: Mechanism Matching & Beclomethasone vs Hydrocortisone Succinate
     // =========================================================================
     {
       pageNumber: 8,
-      pageTitle: 'Slide 8: Mechanism Matching & Parenteral vs Inhaled Steroids',
+      pageTitle:
+        'Review Page 8: Mechanism Matching & Parenteral vs Inhaled Steroids',
       title: 'Respiratory Mechanism Matching & Steroid Formulations',
       subtitle:
         '7-Drug Target Matching (M3, PLA2/Annexin A1, Dual PDE3/4, CysLT1, 5-LOX, Beta2, PDE) & Ester Prodrug Rationale',
       sections: [
         {
           id: 'resp_p8_s1',
-          sectionTitle: 'Slide 8: 7-Drug Molecular Target Matrix & Formulations',
+          sectionTitle:
+            'Review Page 8: 7-Drug Molecular Target Matrix & Formulations',
           headerNote:
             'Match respiratory therapeutic agents (I–VII) to their exact molecular targets and evaluate the contrasting formulation chemistry of Beclomethasone dipropionate versus Hydrocortisone sodium succinate:',
           structures: [
@@ -2690,8 +2802,22 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'matching',
               title: '7-Drug Respiratory Molecular Mechanism Matching',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 8, Question 1',
+              sourcePageNumber: 8,
+              questionStem:
+                'Drag each chemical structure (Structure I - Structure VII) to its precise pharmacological target and biochemical mechanism of action:',
               prompt:
-                'Match each respiratory drug structure (I–VII) to its precise pharmacological target and biochemical mechanism of action:',
+                'Drag each chemical structure (Structure I - Structure VII) to its precise pharmacological target and biochemical mechanism of action:',
+              structuresDisplayed: [
+                ACLIDINIUM_STRUCTURE,
+                METHYLPREDNISOLONE_STRUCTURE,
+                ENSIFENTRINE_STRUCTURE,
+                MONTELUKAST_STRUCTURE,
+                ZILEUTON_STRUCTURE,
+                OLODATEROL_STRUCTURE,
+                THEOPHYLLINE_STRUCTURE,
+              ],
               matchingTargets: [
                 {
                   id: 'target_m3_antag',
@@ -2762,6 +2888,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'multiple-choice',
               title: 'Formulation Chemistry: Beclomethasone Dipropionate vs Hydrocortisone Sodium Succinate',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 8, Question 2',
+              sourcePageNumber: 8,
               questionStem:
                 'Why is Hydrocortisone sodium succinate formulated as an intravenous injection, whereas Beclomethasone dipropionate is formulated as an inhaled aerosol?',
               options: [
@@ -2780,6 +2909,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 3',
               type: 'sub-statements',
               title: 'Leukotriene Pathway Modulators: Montelukast vs Zileuton',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 8, Question 3',
+              sourcePageNumber: 8,
               prompt:
                 'Evaluate the following statements regarding the leukotriene pathway modulators Montelukast and Zileuton:',
               subStatements: [
@@ -2821,20 +2953,21 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
     },
 
     // =========================================================================
-    // SLIDE 9 (PAGE 9): Comprehensive True/False Comparative Batterys
+    // REVIEW PAGE 9: Comprehensive True/False Comparative Batteries
     // =========================================================================
     {
       pageNumber: 9,
-      pageTitle: 'Slide 9: Comprehensive True/False Comparative Batterys',
-      title: 'Head-to-Head Comparative Medicinal Chemistry Batterys',
+      pageTitle: 'Review Page 9: Comprehensive True/False Comparative Batteries',
+      title: 'Head-to-Head Comparative Medicinal Chemistry Batteries',
       subtitle:
         'Beclomethasone Dipropionate vs Hydrocortisone Succinate (10 Items) and Tiotropium vs Pirbuterol (5 Items)',
       sections: [
         {
           id: 'resp_p9_s1',
-          sectionTitle: 'Slide 9: Comprehensive 10-Item & 5-Item True/False Batterys',
+          sectionTitle:
+            'Review Page 9: Comprehensive 10-Item & 5-Item True/False Batteries',
           headerNote:
-            'Carefully evaluate the following head-to-head True/False comparative batteries strictly matching Dr. Al-Horani’s Slide 9 review items:',
+            'Carefully evaluate the following head-to-head True/False comparative batteries strictly matching Dr. Al-Horani’s Review Page 9 review items:',
           structures: [
             BECLOMETHASONE_DIPROPIONATE_STRUCTURE,
             HYDROCORTISONE_SODIUM_SUCCINATE_STRUCTURE,
@@ -2848,6 +2981,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 1',
               type: 'sub-statements',
               title: 'Beclomethasone Dipropionate (Drug A) vs Hydrocortisone Sodium Succinate (Drug B)',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 9, Question 1',
+              sourcePageNumber: 9,
               questionStem:
                 'Evaluate the following 10 comparative statements regarding Beclomethasone dipropionate (Drug A) and Hydrocortisone sodium succinate (Drug B):',
               subStatements: [
@@ -2923,7 +3059,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
                 },
               ],
               overallExplanation:
-                'Slide 9 Head-to-Head Comparison: BDP (Drug A) is an inhaled lipophilic diester prodrug with high GR potency, long duration, and no mineralocorticoid effect. Hydrocortisone sodium succinate (Drug B) is a water-soluble C21 ester salt prodrug for emergency IV administration in acute status asthmaticus.',
+                'Review Page 9 Head-to-Head Comparison: BDP (Drug A) is an inhaled lipophilic diester prodrug with high GR potency, long duration, and no mineralocorticoid effect. Hydrocortisone sodium succinate (Drug B) is a water-soluble C21 ester salt prodrug for emergency IV administration in acute status asthmaticus.',
             },
             // Question 902: 5 Sub-statements comparing Tiotropium vs Pirbuterol
             {
@@ -2931,6 +3067,9 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
               questionNumberLabel: 'Question 2',
               type: 'sub-statements',
               title: 'Tiotropium (Drug A) vs Pirbuterol (Drug B)',
+              sourceReference:
+                'Respiratory Med Chem (Asthma/COPD) Review, Page 9, Question 2',
+              sourcePageNumber: 9,
               questionStem:
                 'Evaluate the following 5 comparative statements regarding Tiotropium (Drug A) and Pirbuterol (Drug B):',
               subStatements: [
@@ -2971,7 +3110,7 @@ export function getRespiratoryReviewPages(): ReviewPage[] {
                 },
               ],
               overallExplanation:
-                'Slide 9 Head-to-Head Comparison: Tiotropium (Drug A) is a quaternary amino-ester LAMA blocking M3 receptors for >24 hours. Pirbuterol (Drug B) is a pyridine-ethanolamine SABA activating beta-2 adrenoceptors for 4-6 hours. Both are bronchodilators used in asthma/COPD.',
+                'Review Page 9 Head-to-Head Comparison: Tiotropium (Drug A) is a quaternary amino-ester LAMA blocking M3 receptors for >24 hours. Pirbuterol (Drug B) is a pyridine-ethanolamine SABA activating beta-2 adrenoceptors for 4-6 hours. Both are bronchodilators used in asthma/COPD.',
             },
           ],
         },
@@ -2997,7 +3136,7 @@ export function getDefaultRespiratoryReviewModule(): ReviewModule {
     examTitle: 'Exam 1: Renal & Respiratory Medicinal Chemistry',
     isBuiltIn: true,
     createdAt: new Date().toISOString(),
-    version: '2.1.0',
+    version: '2.2.0',
     chemicalStructures: Object.values(RESPIRATORY_REVIEW_STRUCTURES),
     pages: getRespiratoryReviewPages(),
   };
