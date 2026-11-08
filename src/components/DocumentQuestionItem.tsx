@@ -338,6 +338,16 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
       }
     }
 
+    // 3. For matching questions, if no specific structures matched via regex and no structuresDisplayed/referenced_structures were provided, fall back to allSectionStructures or allModuleStructures
+    if (question.type === 'matching' && matched.length === 0) {
+      if (allSectionStructures && allSectionStructures.length > 0) {
+        return allSectionStructures;
+      }
+      if (allModuleStructures && allModuleStructures.length > 0) {
+        return allModuleStructures;
+      }
+    }
+
     return matched;
   }, [question, allSectionStructures, allModuleStructures]);
 
@@ -866,7 +876,13 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
               question={{
                 ...question,
                 structuresDisplayed:
-                  uniqueStructureOptions.length > 0 ? uniqueStructureOptions : question.structuresDisplayed,
+                  uniqueStructureOptions.length > 0
+                    ? uniqueStructureOptions
+                    : (question.structuresDisplayed && question.structuresDisplayed.length > 0)
+                    ? question.structuresDisplayed
+                    : (allSectionStructures && allSectionStructures.length > 0)
+                    ? allSectionStructures
+                    : (allModuleStructures || []),
               }}
               placements={matchingPlacements}
               onPlacementsChange={onMatchingChange}

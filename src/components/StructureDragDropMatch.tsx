@@ -102,23 +102,25 @@ export const StructureDragDropMatch: React.FC<StructureDragDropMatchProps> = ({
     (s) => !placedStructureIds.includes(s.id)
   );
 
-  // Check how many correct placements exist
-  const totalRequiredPlacements = targets.reduce(
-    (acc, t) => acc + t.acceptedStructureIds.length,
-    0
-  );
-
-  const correctPlacementsCount = targets.reduce((acc, t) => {
-    const placed = placements[t.id] || [];
-    const correctHere = placed.filter((id) => t.acceptedStructureIds.includes(id)).length;
-    return acc + correctHere;
-  }, 0);
+  // A target is satisfied if at least one of its acceptedStructureIds has been placed in it,
+  // and no invalid structures are placed in it.
+  const allTargetsSatisfied =
+    targets.length > 0 &&
+    targets.every((t) => {
+      const placed = placements[t.id] || [];
+      return placed.length > 0 && placed.every((id) => t.acceptedStructureIds.includes(id));
+    });
 
   const isCompleted =
     !examModeActive &&
-    totalRequiredPlacements > 0 &&
-    correctPlacementsCount === totalRequiredPlacements &&
+    allTargetsSatisfied &&
     unassignedStructures.length === 0;
+
+  const totalRequiredPlacements = targets.length;
+  const correctPlacementsCount = targets.filter((t) => {
+    const placed = placements[t.id] || [];
+    return placed.length > 0 && placed.every((id) => t.acceptedStructureIds.includes(id));
+  }).length;
 
   const isLocked = Boolean(isSolved || isCompleted);
 
