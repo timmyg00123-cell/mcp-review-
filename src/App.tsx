@@ -165,6 +165,8 @@ interface HorizontalStructureVignetteProps {
   selectedDrugBKey?: string | null;
   onSelectDrugA?: (key: string) => void;
   onSelectDrugB?: (key: string) => void;
+  hideDrugNames?: boolean;
+  examModeActive?: boolean;
 }
 
 export const HorizontalStructureVignette: React.FC<HorizontalStructureVignetteProps> = ({
@@ -175,7 +177,11 @@ export const HorizontalStructureVignette: React.FC<HorizontalStructureVignettePr
   selectedDrugBKey,
   onSelectDrugA,
   onSelectDrugB,
+  hideDrugNames,
+  examModeActive,
 }) => {
+  const shouldMask = Boolean(hideDrugNames || examModeActive);
+
   const relevantDrugs = useMemo(() => {
     const referencedNames = new Set<string>();
     const referencedIds = new Set<string>();
@@ -273,7 +279,11 @@ export const HorizontalStructureVignette: React.FC<HorizontalStructureVignettePr
         <span className="text-[11px]">Select [A] or [B] to compare structures</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
-        {relevantDrugs.map((drug) => {
+        {relevantDrugs.map((drug, idx) => {
+          const displayName = shouldMask
+            ? drug.structure?.document_label || ('Structure ' + (idx + 1))
+            : drug.name;
+
           const isA =
             Boolean(selectedDrugAKey) &&
             (selectedDrugAKey === drug.name ||
@@ -298,9 +308,9 @@ export const HorizontalStructureVignette: React.FC<HorizontalStructureVignettePr
             >
               <span
                 className="font-bold text-xs sm:text-sm text-center text-slate-900 dark:text-slate-100 mb-2 truncate max-w-[160px]"
-                title={drug.name}
+                title={displayName}
               >
-                {drug.name}
+                {displayName}
               </span>
               <div className="w-[160px] h-[160px] bg-[var(--structure-canvas-bg)] rounded-md flex items-center justify-center overflow-hidden border border-slate-200/60 dark:border-slate-700/50">
                 <SmilesCanvas
@@ -314,7 +324,7 @@ export const HorizontalStructureVignette: React.FC<HorizontalStructureVignettePr
                   fallbackImageUrl={drug.structure?.pngUrl}
                   width={160}
                   height={160}
-                  altText={drug.name}
+                  altText={displayName}
                 />
               </div>
 
@@ -326,7 +336,7 @@ export const HorizontalStructureVignette: React.FC<HorizontalStructureVignettePr
                     e.stopPropagation();
                     if (onSelectDrugA) onSelectDrugA(drug.name || drug.id);
                   }}
-                  title={`Select ${drug.name} as Compound A`}
+                  title={`Select ${displayName} as Compound A`}
                   className={`w-7 h-7 rounded flex items-center justify-center text-xs font-black transition-all cursor-pointer ${
                     isA
                       ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400'
@@ -341,7 +351,7 @@ export const HorizontalStructureVignette: React.FC<HorizontalStructureVignettePr
                     e.stopPropagation();
                     if (onSelectDrugB) onSelectDrugB(drug.name || drug.id);
                   }}
-                  title={`Select ${drug.name} as Compound B`}
+                  title={`Select ${displayName} as Compound B`}
                   className={`w-7 h-7 rounded flex items-center justify-center text-xs font-black transition-all cursor-pointer ${
                     isB
                       ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-400'
@@ -1537,6 +1547,8 @@ function AppContent() {
                         questions={visibleQuestions}
                         blockStructures={blockStructures}
                         hydratedDrugs={hydratedDrugs}
+                        hideDrugNames={hideDrugNames}
+                        examModeActive={examStatus === 'active'}
                         selectedDrugAKey={currentComp.drugAKey}
                         selectedDrugBKey={currentComp.drugBKey}
                         onSelectDrugA={(key) =>
