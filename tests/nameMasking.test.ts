@@ -46,4 +46,15 @@ const sanitizedNoTrade = sanitizeNarrativeText(noTradeSentence, [
 ]);
 assert.strictEqual(sanitizedNoTrade, 'Structure I is potent.');
 
+// Special replacement pattern handling in replacement label ($1, $&, $$, etc.)
+const dollarSentence = 'Compare Furosemide to benchmark.';
+const sanitizedDollar = sanitizeNarrativeText(dollarSentence, [
+  { realName: 'Furosemide', maskedLabel: 'Structure $1 ($&, $$)' },
+]);
+assert.strictEqual(
+  sanitizedDollar,
+  'Compare Structure $1 ($&, $$) to benchmark.',
+  'Special replacement patterns in maskedLabel must not be parsed by replace'
+);
+
 console.log('✓ All name masking and narrative sanitization tests passed');

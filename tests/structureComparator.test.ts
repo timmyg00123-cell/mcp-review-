@@ -177,4 +177,10 @@ assert(
   'Contrast card B title must render displayNameB'
 );
 
+// Verify card header MOA/rationale sanitization
+assert(
+  /sanitizeText\(\s*\(\s*structure as any\)\?\.moa_summary/.test(comparatorSource),
+  'Card header MOA/rationale quote must have sanitizeText applied'
+);
+
 console.log('✓ StructureComparator component source verification passed');

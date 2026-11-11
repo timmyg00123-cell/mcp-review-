@@ -223,11 +223,11 @@ export function sanitizeNarrativeText(
   for (const { realName, tradeName, maskedLabel } of replacements) {
     if (realName && realName.trim()) {
       const escapedReal = realName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      result = result.replace(new RegExp(`\\b${escapedReal}\\b`, 'gi'), maskedLabel);
+      result = result.replace(new RegExp(`\\b${escapedReal}\\b`, 'gi'), () => maskedLabel);
     }
     if (tradeName && tradeName.trim() && tradeName.trim().toLowerCase() !== (realName || '').trim().toLowerCase()) {
       const escapedTrade = tradeName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      result = result.replace(new RegExp(`\\b${escapedTrade}\\b`, 'gi'), '[Brand]');
+      result = result.replace(new RegExp(`\\b${escapedTrade}\\b`, 'gi'), () => '[Brand]');
     }
   }
   return result;

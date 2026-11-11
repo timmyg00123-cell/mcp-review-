@@ -135,6 +135,13 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'vinyl': 'C=C',
   'oxazolidinone': 'O1CCNC1=O',
   'morpholinone': 'O1CCNCC1=O',
+
+  // Alkyls & Medicinal Chemistry Scaffolds
+  'methyl': 'C',
+  'ethyl': 'CC',
+  'propyl': 'CCC',
+  'butyl': 'CCCC',
+  'saligenin': 'c1ccc(O)c(CO)c1',
 };
 
 const NOISE_WORDS = new Set([
@@ -190,7 +197,7 @@ export function getCorrectedSmarts(name: string = '', aiSmarts: string = ''): st
     let tokenBestMatch: { len: number; smarts: string } | null = null;
     for (const [key, smarts] of Object.entries(SMARTS_OVERRIDE_DICT)) {
       const cleanKey = key.replace(/[\s\-_]/g, '');
-      if (token.includes(cleanKey) || cleanKey.includes(token)) {
+      if (token.includes(cleanKey)) {
         if (!tokenBestMatch || cleanKey.length > tokenBestMatch.len) {
           tokenBestMatch = { len: cleanKey.length, smarts };
         }

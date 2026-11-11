@@ -2032,10 +2032,12 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
               getMoaOrSar(structure)) !== 'N/A' ? (
               <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed italic">
                 "{
-                  (structure as any)?.moa_summary ||
-                  (structure as any)?.moa ||
-                  (structure as any)?.sar_rationale ||
-                  getMoaOrSar(structure)
+                  sanitizeText(
+                    (structure as any)?.moa_summary ||
+                    (structure as any)?.moa ||
+                    (structure as any)?.sar_rationale ||
+                    getMoaOrSar(structure)
+                  )
                 }"
               </p>
             ) : null}
