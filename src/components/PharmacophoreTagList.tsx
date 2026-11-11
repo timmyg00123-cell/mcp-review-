@@ -129,18 +129,16 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
                     setActiveTooltip(group.id);
                   }
                 }}
-                className={`relative px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors duration-100 cursor-pointer select-none border ${
+                className={`relative px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 transition-colors duration-100 cursor-pointer select-none border ${
                   isPinned
-                    ? 'shadow-2xs'
-                    : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-bold'
+                    : 'bg-slate-100 dark:bg-slate-800/90 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white font-medium'
                 }`}
                 style={
                   isPinned
                     ? {
-                        backgroundColor: `${activeColor.hex}18`,
                         borderColor: activeColor.hex,
-                        color: activeColor.hex,
-                        boxShadow: `0 0 0 1px ${activeColor.hex}`,
+                        boxShadow: `0 0 0 1px ${activeColor.hex}, 0 0 8px ${activeColor.hex}40`,
                       }
                     : undefined
                 }
@@ -150,6 +148,7 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{
                     backgroundColor: isPinned ? activeColor.hex : '#94A3B8',
+                    boxShadow: isPinned ? `0 0 6px ${activeColor.hex}80` : undefined,
                   }}
                 />
                 <span className="truncate">{iupac}</span>
@@ -158,7 +157,7 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
                     className={`text-[10px] px-1.5 py-0.2 rounded font-normal shrink-0 ${
                       isPinned
                         ? 'bg-black/10 dark:bg-white/15'
-                        : 'bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400'
+                        : 'bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300'
                     }`}
                   >
                     {casual}

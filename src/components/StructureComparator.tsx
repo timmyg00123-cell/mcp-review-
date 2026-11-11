@@ -1758,7 +1758,6 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                     (t) => t.id === tag.id || t.name.toLowerCase() === tag.name.toLowerCase()
                   );
                   const isSelected = Boolean(activeItem);
-                  const isHovered = hoveredTag?.id === tag.id;
                   const itemColor = activeItem?.color || ACTIVE_TAG_PALETTE[0];
                   const { iupac, casual } = parsePharmacophoreName(tag.name);
 
@@ -1781,31 +1780,23 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                       style={
                         isSelected
                           ? {
-                              backgroundColor: `${itemColor}18`,
                               borderColor: itemColor,
-                              boxShadow: `0 0 0 1px ${itemColor}40`,
-                            }
-                          : isHovered
-                          ? {
-                              borderColor: `${itemColor}80`,
-                              backgroundColor: `${itemColor}0d`,
+                              boxShadow: `0 0 0 1px ${itemColor}, 0 0 8px ${itemColor}40`,
                             }
                           : undefined
                       }
-                      className={`px-2 py-0.5 rounded-md text-[11px] font-medium border transition-all cursor-pointer flex items-center gap-1.5 ${
+                      className={`px-2 py-0.5 rounded-md text-[11px] border transition-colors cursor-pointer flex items-center gap-1.5 ${
                         isSelected
-                          ? 'text-slate-900 dark:text-slate-100 font-semibold shadow-2xs'
-                          : isHovered
-                          ? 'text-slate-800 dark:text-slate-200'
-                          : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                          ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-bold'
+                          : 'bg-slate-100 dark:bg-slate-800/90 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white font-medium'
                       }`}
                       title={tag.description || tag.purpose || tag.name}
                     >
                       <span
-                        className="w-2 h-2 rounded-full shrink-0 transition-transform"
+                        className="w-2 h-2 rounded-full shrink-0"
                         style={{
                           backgroundColor: isSelected ? itemColor : '#94a3b8',
-                          transform: isSelected || isHovered ? 'scale(1.25)' : 'scale(1)',
+                          boxShadow: isSelected ? `0 0 6px ${itemColor}80` : undefined,
                         }}
                       />
                       <span className="truncate max-w-[140px]">{iupac}</span>
@@ -1814,17 +1805,14 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                           className={`text-[9px] px-1 py-0.2 rounded font-normal shrink-0 ${
                             isSelected
                               ? 'bg-black/10 dark:bg-white/15'
-                              : 'bg-slate-200/60 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400'
+                              : 'bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300'
                           }`}
                         >
                           {casual}
                         </span>
                       )}
                       {isSelected && (
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ backgroundColor: itemColor }}
-                        />
+                        <Check className="w-2.5 h-2.5 stroke-[3]" style={{ color: itemColor }} />
                       )}
                     </button>
                   );
