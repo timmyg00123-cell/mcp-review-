@@ -34,7 +34,15 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
+import {
+  getMaskedDrugName,
+  sanitizeNarrativeText,
+  sortStructuresByDocumentLabel,
+  ROMAN_NUMERALS_LIST,
+} from '../utils/documentLabel';
 import { fetchPubChemXLogP } from '../services/pubchemService';
 import { medChemGraphDb } from '../db/medChemGraphDb';
 import { ComparatorViewMode, resolveComparatorViewMode } from '../utils/comparatorViewMode';
@@ -610,7 +618,8 @@ export function resolveTargetAndReversibilitySafe(
  */
 export function resolveContrast(
   drugA?: Partial<ChemicalStructure> | null,
-  drugB?: Partial<ChemicalStructure> | null
+  drugB?: Partial<ChemicalStructure> | null,
+  replacements?: Array<{ realName: string; tradeName?: string; maskedLabel: string }>
 ): string {
   if (!drugA) return 'N/A';
   const rawDiff =
@@ -626,11 +635,17 @@ export function resolveContrast(
   const opposingName = drugB?.name ? stripBracketedText(drugB.name) || drugB.name : 'comparator';
   const currentName = drugA.name ? stripBracketedText(drugA.name) || drugA.name : 'This compound';
 
-  if (trimmed.toLowerCase().startsWith('unlike')) {
-    return trimmed;
+  let result = trimmed;
+  if (!trimmed.toLowerCase().startsWith('unlike')) {
+    const cleanSentence = trimmed.endsWith('.') ? trimmed.slice(0, -1) : trimmed;
+    result = `Unlike ${opposingName}, ${currentName} ${cleanSentence}.`;
   }
-  const cleanSentence = trimmed.endsWith('.') ? trimmed.slice(0, -1) : trimmed;
-  return `Unlike ${opposingName}, ${currentName} ${cleanSentence}.`;
+
+  if (replacements && replacements.length > 0) {
+    result = sanitizeNarrativeText(result, replacements);
+  }
+
+  return result;
 }
 
 /**
@@ -855,6 +870,9 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
   onViewModeChange,
 }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  // Per-card peeking state for blinded mode: Compound A and Compound B independently
+  const [peekedCards, setPeekedCards] = useState<Record<'A' | 'B', boolean>>({ A: false, B: false });
 
   // Pharmacophore tag tracking state: arrays of active tags with assigned colors for Compound A and Compound B independently
   const [activeTagsA, setActiveTagsA] = useState<ActivePharmacophoreTag[]>([]);
@@ -1286,6 +1304,61 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
   const compoundB = currentStructureB;
   console.log('--- DEXIE DRUG SCHEMA ---', compoundA);
 
+  // Reset peeked cards when active compound selections change
+  useEffect(() => {
+    setPeekedCards({ A: false, B: false });
+  }, [compoundA?.id, compoundA?.name, compoundB?.id, compoundB?.name]);
+
+  const shouldMask = hideDrugName || examModeActive;
+  const isPeekedA = !examModeActive && Boolean(peekedCards.A);
+  const isPeekedB = !examModeActive && Boolean(peekedCards.B);
+  const labelA = compoundA?.document_label || (isSingleDrug ? 'Single Compound Focus' : 'Compound A');
+  const labelB = compoundB?.document_label || 'Compound B';
+  const displayNameA = compoundA ? getMaskedDrugName(compoundA.name, labelA, shouldMask, isPeekedA) : '';
+  const displayNameB = compoundB ? getMaskedDrugName(compoundB.name, labelB, shouldMask, isPeekedB) : '';
+
+  const narrativeReplacements = useMemo(() => {
+    if (!shouldMask) return [];
+    const list: Array<{ realName: string; tradeName?: string; maskedLabel: string }> = [];
+    if (compoundA) {
+      const cleanA = stripBracketedText(compoundA.name) || compoundA.name;
+      list.push({
+        realName: cleanA,
+        tradeName: (compoundA as any).tradeName,
+        maskedLabel: displayNameA,
+      });
+      if (compoundA.name && compoundA.name !== cleanA) {
+        list.push({
+          realName: compoundA.name,
+          tradeName: (compoundA as any).tradeName,
+          maskedLabel: displayNameA,
+        });
+      }
+    }
+    if (compoundB) {
+      const cleanB = stripBracketedText(compoundB.name) || compoundB.name;
+      list.push({
+        realName: cleanB,
+        tradeName: (compoundB as any).tradeName,
+        maskedLabel: displayNameB,
+      });
+      if (compoundB.name && compoundB.name !== cleanB) {
+        list.push({
+          realName: compoundB.name,
+          tradeName: (compoundB as any).tradeName,
+          maskedLabel: displayNameB,
+        });
+      }
+    }
+    return list;
+  }, [shouldMask, compoundA, compoundB, displayNameA, displayNameB]);
+
+  const sanitizeText = (text: string | null | undefined): string => {
+    if (!text) return '';
+    if (!shouldMask) return text;
+    return sanitizeNarrativeText(text, narrativeReplacements);
+  };
+
   // Programmatic LogP Hydration: Asynchronously fetch LogP via PubChem API if missing from Dexie/structures
   useEffect(() => {
     const fetchMissingLogP = async (targetStructure?: ChemicalStructure) => {
@@ -1447,6 +1520,8 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
     const prevHoveredA = hoveredTagA;
     setHoveredTagA(hoveredTagB);
     setHoveredTagB(prevHoveredA);
+
+    setPeekedCards({ A: false, B: false });
   };
 
   const handleCopySmiles = (smiles: string, key: string) => {
@@ -1475,6 +1550,11 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
     onHoverTag: (tag: PharmacophoreGroup | null) => void,
     copyKeySuffix: string = 'a'
   ) => {
+    const cardKey: 'A' | 'B' = copyKeySuffix.toLowerCase() === 'b' ? 'B' : 'A';
+    const isPeeked = !examModeActive && Boolean(peekedCards[cardKey]);
+    const maskedFallback = structure.document_label || label;
+    const displayName = getMaskedDrugName(structure.name, maskedFallback, shouldMask, isPeeked);
+
     const pharmacophores = getPharmacophoresForStructure(structure);
     const targetAndReversibility = resolveTargetAndReversibilitySafe(structure, graphTargetMap);
     const canonicalSmiles =
@@ -1513,8 +1593,21 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                 {label}
               </span>
               <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate text-balance">
-                {structure.name}
+                {displayName}
               </h3>
+              {shouldMask && !examModeActive && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPeekedCards((prev) => ({ ...prev, [cardKey]: !prev[cardKey] }));
+                  }}
+                  className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                  title={isPeeked ? "Hide name" : "Peek name"}
+                >
+                  {isPeeked ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              )}
             </div>
 
             {onSelectKey ? (
@@ -1530,8 +1623,10 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                   if (selected) {
                     if (copyKeySuffix === 'a') {
                       setSelectedDrugA(selected);
+                      setPeekedCards((prev) => ({ ...prev, A: false }));
                     } else {
                       setSelectedDrugB(selected);
+                      setPeekedCards((prev) => ({ ...prev, B: false }));
                     }
                   }
                   onSelectKey(targetName);
@@ -1539,6 +1634,32 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                 className="text-xs font-semibold px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 shrink-0 max-w-[190px] truncate cursor-pointer"
               >
                 {(() => {
+                  if (shouldMask) {
+                    const seenBaseNames = new Set<string>();
+                    const flatItems: ChemicalStructure[] = [];
+                    for (const items of Object.values(groupedStructures)) {
+                      for (const s of items) {
+                        const cleanBaseName = stripBracketedText(s.name) || s.name.trim();
+                        const normKey = cleanBaseName.toLowerCase();
+                        if (!normKey || seenBaseNames.has(normKey)) continue;
+                        seenBaseNames.add(normKey);
+                        flatItems.push(s);
+                      }
+                    }
+
+                    const sortedFlat = sortStructuresByDocumentLabel(flatItems);
+
+                    return sortedFlat.map((s, idx) => {
+                      const roman = ROMAN_NUMERALS_LIST[idx] || (idx + 1);
+                      const maskedOptionLabel = s.document_label || `Structure ${roman}`;
+                      return (
+                        <option key={s.name} value={s.name}>
+                          {maskedOptionLabel}
+                        </option>
+                      );
+                    });
+                  }
+
                   // Strict filtering utility before <select> renders
                   // Strip all bracketed text using regex .replace(/\[.*?\]\s*/g, '').trim()
                   // and use a Set to ensure ONLY unique base names are added to the <option> list
@@ -1587,7 +1708,7 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
               fallbackImageUrl={structure.pngUrl}
               width={280}
               height={210}
-              altText={`${structure.name} 2D chemical structure`}
+              altText={`${displayName} 2D chemical structure`}
               activePharmacophores={activeHighlights}
               className="w-full h-full flex items-center justify-center"
             />
@@ -2041,6 +2162,7 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
               setSelectedDrugA(drug);
               setActiveTagsA([]);
               setHoveredTagA(null);
+              setPeekedCards((prev) => ({ ...prev, A: false }));
               if (onSelectDrugA) onSelectDrugA(drug.name || drug.id);
             } catch (err) {
               console.error('Failed to parse dropped drug on Compound A:', err);
@@ -2096,6 +2218,7 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                 setSelectedDrugB(drug);
                 setActiveTagsB([]);
                 setHoveredTagB(null);
+                setPeekedCards((prev) => ({ ...prev, B: false }));
                 if (onSelectDrugB) onSelectDrugB(drug.name || drug.id);
               } catch (err) {
                 console.error('Failed to parse dropped drug on Compound B:', err);
@@ -2158,10 +2281,10 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                     Attribute
                   </th>
                   <th className="py-2 px-3 font-bold text-blue-600 dark:text-blue-400">
-                    {compoundA.name}
+                    {displayNameA}
                   </th>
                   <th className="py-2 px-3 font-bold text-indigo-600 dark:text-indigo-400">
-                    {compoundB.name}
+                    {displayNameB}
                   </th>
                 </tr>
               </thead>
@@ -2212,28 +2335,28 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                 {(resolveStructuralDifferences(compoundA, compoundB) !== 'N/A' || resolveStructuralDifferences(compoundB, compoundA) !== 'N/A') && (
                   <tr>
                     <td className="py-2 px-3 font-medium text-slate-500">Structural Differences</td>
-                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{resolveStructuralDifferences(compoundA, compoundB)}</td>
-                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{resolveStructuralDifferences(compoundB, compoundA)}</td>
+                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{sanitizeText(resolveStructuralDifferences(compoundA, compoundB))}</td>
+                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{sanitizeText(resolveStructuralDifferences(compoundB, compoundA))}</td>
                   </tr>
                 )}
                 {(resolvePkPdProfile(compoundA, compoundB) !== 'N/A' || resolvePkPdProfile(compoundB, compoundA) !== 'N/A') && (
                   <tr>
                     <td className="py-2 px-3 font-medium text-slate-500">PK/PD Profile</td>
-                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{resolvePkPdProfile(compoundA, compoundB)}</td>
-                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{resolvePkPdProfile(compoundB, compoundA)}</td>
+                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{sanitizeText(resolvePkPdProfile(compoundA, compoundB))}</td>
+                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{sanitizeText(resolvePkPdProfile(compoundB, compoundA))}</td>
                   </tr>
                 )}
                 {(resolveClinicalUseCases(compoundA, compoundB) !== 'N/A' || resolveClinicalUseCases(compoundB, compoundA) !== 'N/A') && (
                   <tr>
                     <td className="py-2 px-3 font-medium text-slate-500">Clinical Use Cases</td>
-                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{resolveClinicalUseCases(compoundA, compoundB)}</td>
-                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{resolveClinicalUseCases(compoundB, compoundA)}</td>
+                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{sanitizeText(resolveClinicalUseCases(compoundA, compoundB))}</td>
+                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{sanitizeText(resolveClinicalUseCases(compoundB, compoundA))}</td>
                   </tr>
                 )}
                 <tr>
                   <td className="py-2 px-3 font-medium text-slate-500">Unique Differentiator</td>
-                  <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{resolveContrast(compoundA, compoundB)}</td>
-                  <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{resolveContrast(compoundB, compoundA)}</td>
+                  <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{sanitizeText(resolveContrast(compoundA, compoundB, narrativeReplacements))}</td>
+                  <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{sanitizeText(resolveContrast(compoundB, compoundA, narrativeReplacements))}</td>
                 </tr>
               </tbody>
             </table>
@@ -2250,65 +2373,69 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
           <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
             <span className="font-bold text-slate-900 dark:text-slate-100 block mb-0.5">
-              {compoundA.name}:
+              {displayNameA}:
             </span>
             <p className="leading-relaxed text-slate-600 dark:text-slate-300">
-              {resolveContrast(compoundA, compoundB) !== 'N/A'
-                ? resolveContrast(compoundA, compoundB)
-                : (compoundA as any)?.moa_summary ||
-                  (compoundA as any)?.moa ||
-                  (compoundA as any)?.sar_rationale ||
-                  (compoundA as any)?.sarNotes ||
-                  getMoaOrSar(compoundA)}
+              {sanitizeText(
+                resolveContrast(compoundA, compoundB, narrativeReplacements) !== 'N/A'
+                  ? resolveContrast(compoundA, compoundB, narrativeReplacements)
+                  : (compoundA as any)?.moa_summary ||
+                    (compoundA as any)?.moa ||
+                    (compoundA as any)?.sar_rationale ||
+                    (compoundA as any)?.sarNotes ||
+                    getMoaOrSar(compoundA)
+              )}
             </p>
             {resolveStructuralDifferences(compoundA, compoundB) !== 'N/A' && (
               <div className="p-1.5 rounded bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/40 text-[11px] text-amber-900 dark:text-amber-200">
                 <span className="font-semibold text-amber-800 dark:text-amber-300">Structure: </span>
-                {resolveStructuralDifferences(compoundA, compoundB)}
+                {sanitizeText(resolveStructuralDifferences(compoundA, compoundB))}
               </div>
             )}
             {resolvePkPdProfile(compoundA, compoundB) !== 'N/A' && (
               <div className="p-1.5 rounded bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-800/40 text-[11px] text-blue-900 dark:text-blue-200">
                 <span className="font-semibold text-blue-800 dark:text-blue-300">PK/PD: </span>
-                {resolvePkPdProfile(compoundA, compoundB)}
+                {sanitizeText(resolvePkPdProfile(compoundA, compoundB))}
               </div>
             )}
             {resolveClinicalUseCases(compoundA, compoundB) !== 'N/A' && (
               <div className="p-1.5 rounded bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-800/40 text-[11px] text-emerald-900 dark:text-emerald-200">
                 <span className="font-semibold text-emerald-800 dark:text-emerald-300">Clinical: </span>
-                {resolveClinicalUseCases(compoundA, compoundB)}
+                {sanitizeText(resolveClinicalUseCases(compoundA, compoundB))}
               </div>
             )}
           </div>
           <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
             <span className="font-bold text-slate-900 dark:text-slate-100 block mb-0.5">
-              {compoundB.name}:
+              {displayNameB}:
             </span>
             <p className="leading-relaxed text-slate-600 dark:text-slate-300">
-              {resolveContrast(compoundB, compoundA) !== 'N/A'
-                ? resolveContrast(compoundB, compoundA)
-                : (compoundB as any)?.moa_summary ||
-                  (compoundB as any)?.moa ||
-                  (compoundB as any)?.sar_rationale ||
-                  (compoundB as any)?.sarNotes ||
-                  getMoaOrSar(compoundB)}
+              {sanitizeText(
+                resolveContrast(compoundB, compoundA, narrativeReplacements) !== 'N/A'
+                  ? resolveContrast(compoundB, compoundA, narrativeReplacements)
+                  : (compoundB as any)?.moa_summary ||
+                    (compoundB as any)?.moa ||
+                    (compoundB as any)?.sar_rationale ||
+                    (compoundB as any)?.sarNotes ||
+                    getMoaOrSar(compoundB)
+              )}
             </p>
             {resolveStructuralDifferences(compoundB, compoundA) !== 'N/A' && (
               <div className="p-1.5 rounded bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/40 text-[11px] text-amber-900 dark:text-amber-200">
                 <span className="font-semibold text-amber-800 dark:text-amber-300">Structure: </span>
-                {resolveStructuralDifferences(compoundB, compoundA)}
+                {sanitizeText(resolveStructuralDifferences(compoundB, compoundA))}
               </div>
             )}
             {resolvePkPdProfile(compoundB, compoundA) !== 'N/A' && (
               <div className="p-1.5 rounded bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-800/40 text-[11px] text-blue-900 dark:text-blue-200">
                 <span className="font-semibold text-blue-800 dark:text-blue-300">PK/PD: </span>
-                {resolvePkPdProfile(compoundB, compoundA)}
+                {sanitizeText(resolvePkPdProfile(compoundB, compoundA))}
               </div>
             )}
             {resolveClinicalUseCases(compoundB, compoundA) !== 'N/A' && (
               <div className="p-1.5 rounded bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-800/40 text-[11px] text-emerald-900 dark:text-emerald-200">
                 <span className="font-semibold text-emerald-800 dark:text-emerald-300">Clinical: </span>
-                {resolveClinicalUseCases(compoundB, compoundA)}
+                {sanitizeText(resolveClinicalUseCases(compoundB, compoundA))}
               </div>
             )}
           </div>
