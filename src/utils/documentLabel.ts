@@ -195,3 +195,41 @@ export function filterValidPharmacophores(pharmacophores?: PharmacophoreGroup[] 
     };
   });
 }
+
+/**
+ * Returns either the masked document label or the real drug name depending on blinding state.
+ * Allows on-demand revealing when isPeeked is true.
+ */
+export function getMaskedDrugName(
+  realName: string,
+  genericLabel: string,
+  isMasked: boolean,
+  isPeeked: boolean = false
+): string {
+  if (!isMasked || isPeeked) return realName;
+  return genericLabel;
+}
+
+/**
+ * Redacts mentions of real drug names and trade/brand names from narrative comparison text.
+ * Replaces generic names with their masked labels (e.g. "Structure I") and trade names with "[Brand]".
+ */
+export function sanitizeNarrativeText(
+  text: string,
+  replacements: Array<{ realName: string; tradeName?: string; maskedLabel: string }>
+): string {
+  if (!text) return text;
+  let result = text;
+  for (const { realName, tradeName, maskedLabel } of replacements) {
+    if (realName && realName.trim()) {
+      const escapedReal = realName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      result = result.replace(new RegExp(`\\b${escapedReal}\\b`, 'gi'), maskedLabel);
+    }
+    if (tradeName && tradeName.trim() && tradeName.trim().toLowerCase() !== (realName || '').trim().toLowerCase()) {
+      const escapedTrade = tradeName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      result = result.replace(new RegExp(`\\b${escapedTrade}\\b`, 'gi'), '[Brand]');
+    }
+  }
+  return result;
+}
+
