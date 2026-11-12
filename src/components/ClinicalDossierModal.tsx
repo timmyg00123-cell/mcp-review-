@@ -56,6 +56,7 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    setActiveTab('fda');
 
     if (preloadedDossier && preloadedDossier.genericName.toLowerCase() === drugName.toLowerCase()) {
       setDossier(preloadedDossier);

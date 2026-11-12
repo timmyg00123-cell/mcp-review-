@@ -9,6 +9,14 @@ const StructureLightboxModal = React.lazy(() =>
 const PubChemAuditEditModal = React.lazy(() =>
   import('./PubChemAuditEditModal').then((m) => ({ default: m.PubChemAuditEditModal }))
 );
+const ClinicalDossierModal = React.lazy(() =>
+  import('./ClinicalDossierModal').then((m) => ({ default: m.ClinicalDossierModal }))
+);
+import {
+  getLexicompSearchUrl,
+  getAccessPharmacySearchUrl,
+  getOpenAthensAuthUrl,
+} from '../utils/launchpadUrls';
 import {
   PHARMACOPHORE_COLOR_PALETTE,
   ColorPaletteItem,
@@ -32,6 +40,8 @@ import {
   Lock,
   Sparkles,
   Dna,
+  FileText,
+  BookOpen,
 } from 'lucide-react';
 
 interface ChemicalStructureCardProps {
@@ -69,6 +79,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
   const [openInCompareMode, setOpenInCompareMode] = useState(false);
   const [initialLightboxTab, setInitialLightboxTab] = useState<'2d' | '3d'>('2d');
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [isClinicalDossierOpen, setIsClinicalDossierOpen] = useState(false);
   const [isNamePeeked, setIsNamePeeked] = useState(false);
   const [copiedSmiles, setCopiedSmiles] = useState(false);
   const [isReauditing, setIsReauditing] = useState(false);
@@ -282,6 +293,16 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
                 {isNamePeeked ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
             )}
+
+            {/* Clinical Info Box Trigger */}
+            <button
+              type="button"
+              onClick={() => setIsClinicalDossierOpen(true)}
+              className="p-1 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors rounded hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+              title="Clinical Info Box"
+            >
+              <FileText className="w-3.5 h-3.5" />
+            </button>
 
             {/* 3D Macromolecular Target Pocket Button */}
             <button
@@ -639,6 +660,54 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
                 </div>
               </div>
             )}
+
+            {/* INSTITUTIONAL LAUNCHPAD & CLINICAL INFO BOX */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-lg p-2.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200 text-xs">
+                  <BookOpen className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>Clinical Pharmacology & References:</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsClinicalDossierOpen(true)}
+                  className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium text-[11px] flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                  title="Clinical Info Box"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Clinical Info Box</span>
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-slate-200 dark:border-slate-800 text-[10px]">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Institutional Launchpad:</span>
+                <a
+                  href={getLexicompSearchUrl(structure.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors font-medium flex items-center gap-1"
+                >
+                  Lexicomp ↗
+                </a>
+                <a
+                  href={getAccessPharmacySearchUrl(structure.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors font-medium flex items-center gap-1"
+                >
+                  AccessPharmacy ↗
+                </a>
+                <a
+                  href={getOpenAthensAuthUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Authenticate XULA OpenAthens Session"
+                  className="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900 transition-colors font-medium flex items-center gap-1"
+                >
+                  XULA Auth 🔑
+                </a>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -671,6 +740,17 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
               setStructure(updated);
               if (onUpdateStructure) onUpdateStructure(updated);
             }}
+          />
+        </React.Suspense>
+      )}
+
+      {/* Clinical Dossier Modal */}
+      {isClinicalDossierOpen && (
+        <React.Suspense fallback={null}>
+          <ClinicalDossierModal
+            isOpen={isClinicalDossierOpen}
+            onClose={() => setIsClinicalDossierOpen(false)}
+            drugName={structure.name}
           />
         </React.Suspense>
       )}
