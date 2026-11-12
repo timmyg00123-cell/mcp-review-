@@ -4,7 +4,8 @@ import { getKnownDrugSmiles } from '../utils/knownDrugSmiles';
 import { getCorrectedSmarts } from '../utils/smartsDictionary';
 import { antiplateletMolBlocks } from '../data/antiplateletMolBlocks';
 import type { OpenFdaClinicalData, ClinicalData, EliminationHalfLifeObj } from '../services/openFdaService';
-export type { OpenFdaClinicalData, ClinicalData, EliminationHalfLifeObj };
+import type { ClinicalDossierRecord } from '../services/clinicalDossierService';
+export type { OpenFdaClinicalData, ClinicalData, EliminationHalfLifeObj, ClinicalDossierRecord };
 
 export type EntityType =
   | 'DRUG'
@@ -116,6 +117,7 @@ export class MedChemGraphDatabase extends Dexie {
   relationships!: Table<GraphRelationship, [string, string, string]>;
   modules!: Table<StoredReviewModule, string>;
   sessionProgress!: Table<StoredModuleProgress, string>;
+  clinicalDossiers!: Table<ClinicalDossierRecord, number>;
 
   /**
    * Alias table for drugs, providing direct typed access for Fat Client components and useQuery hooks.
@@ -136,6 +138,13 @@ export class MedChemGraphDatabase extends Dexie {
       relationships: '[source+relation+target], source, target, relation, *theme_keywords',
       modules: 'id, updatedAt',
       sessionProgress: 'moduleId, updatedAt',
+    });
+    this.version(3).stores({
+      entities: 'id, type, cid',
+      relationships: '[source+relation+target], source, target, relation, *theme_keywords',
+      modules: 'id, updatedAt',
+      sessionProgress: 'moduleId, updatedAt',
+      clinicalDossiers: '++id, &genericName, lastUpdated',
     });
 
     // Proactively request persistent storage to protect database from browser eviction

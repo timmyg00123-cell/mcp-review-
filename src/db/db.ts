@@ -15,6 +15,7 @@ import {
   HydratedPharmacophore,
   OpenFdaClinicalData,
   ClinicalData,
+  ClinicalDossierRecord,
 } from './medChemGraphDb';
 
 /**
@@ -44,6 +45,7 @@ export type {
   HydratedPharmacophore,
   OpenFdaClinicalData,
   ClinicalData,
+  ClinicalDossierRecord,
 };
 
 export default db;
