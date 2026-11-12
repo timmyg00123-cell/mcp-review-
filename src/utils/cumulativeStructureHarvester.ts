@@ -4,6 +4,7 @@ import { loadAllReviewModules } from './moduleStorage';
 import { getModuleExamId } from '../types/examTypes';
 import { getExam1Modules } from '../data/exam1';
 import { getExam2Modules } from '../data/exam2';
+import { enrichStructureWithTaxonomy } from './topDrugsTaxonomy.js';
 
 /**
  * Normalizes SMILES strings for reliable deduplication comparison.
@@ -53,7 +54,7 @@ function extractNameTokens(name?: string): string[] {
 /**
  * Generates a clean, deterministic, URL-friendly structure identifier.
  */
-function generateBaseStructureId(st: ChemicalStructure): string {
+export function generateBaseStructureId(st: ChemicalStructure): string {
   if (st.id && typeof st.id === 'string' && !/^[IVXLCDM0-9]+$/i.test(st.id.trim())) {
     return st.id.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '_');
   }
@@ -250,7 +251,7 @@ export function harvestCurriculumStructures(modules: ReviewModule[]): FlashcardI
     structureId: acc.structureId,
     drugName: acc.drugName,
     moduleIds: Array.from(acc.moduleIds),
-    structure: acc.structure,
+    structure: enrichStructureWithTaxonomy(acc.structure),
     intervalMinutes: 0,
     dueTimestamp: creationTimestamp,
     repetitionCount: 0,
