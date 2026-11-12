@@ -25,6 +25,7 @@ import {
   Layers,
   Sun,
   GraduationCap,
+  Box,
 } from 'lucide-react';
 import { exportReviewModuleAsJson } from '../utils/jsonPortability';
 import { isStudentMode } from '../utils/envMode';
@@ -45,8 +46,8 @@ export interface NavbarProps {
   onOpenImportJson?: () => void;
   onOpenEditor: () => void;
   onOpenQuizSetup: () => void;
-  activeTab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard';
-  onSelectTab: (tab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard') => void;
+  activeTab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab';
+  onSelectTab: (tab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab') => void;
   pagesCount: number;
   showKnowledgeGraph?: boolean;
   hideDrugNames: boolean;
@@ -502,6 +503,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Knowledge Graph</span>
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={() => onSelectTab('3d-lab')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 ${
+              activeTab === '3d-lab'
+                ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+            title="3D Molecular Lab & ChEMBL SAR Studio"
+          >
+            <Box className="w-3.5 h-3.5 text-cyan-500" />
+            <span>3D Lab</span>
+          </button>
 
           {!isStudentMode() && (
             <button

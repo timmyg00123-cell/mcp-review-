@@ -42,13 +42,15 @@ import {
   Dna,
   FileText,
   BookOpen,
+  Box,
 } from 'lucide-react';
 
-interface ChemicalStructureCardProps {
+export interface ChemicalStructureCardProps {
   structure: ChemicalStructure;
   indexLabel?: string; // e.g., 'I', 'II', 'III'
   onInspect?: (structure: ChemicalStructure) => void;
   onUpdateStructure?: (updated: ChemicalStructure) => void;
+  onSelectStructureFor3D?: (structure: ChemicalStructure) => void;
   showDetailsByDefault?: boolean;
   highlight?: boolean;
   hideDrugName?: boolean;
@@ -64,6 +66,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
   indexLabel,
   onInspect,
   onUpdateStructure,
+  onSelectStructureFor3D,
   showDetailsByDefault = false,
   highlight = false,
   hideDrugName = false,
@@ -663,20 +666,33 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
 
             {/* INSTITUTIONAL LAUNCHPAD & CLINICAL INFO BOX */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-lg p-2.5 space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200 text-xs">
                   <BookOpen className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   <span>Clinical Pharmacology & References:</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsClinicalDossierOpen(true)}
-                  className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium text-[11px] flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                  title="Clinical Info Box"
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>Clinical Info Box</span>
-                </button>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {onSelectStructureFor3D && (
+                    <button
+                      type="button"
+                      onClick={() => onSelectStructureFor3D(structure)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 transition-colors cursor-pointer"
+                      title="Open this molecule and target complex in the 3D Lab"
+                    >
+                      <Box className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+                      <span>Open in 3D Lab →</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsClinicalDossierOpen(true)}
+                    className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium text-[11px] flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                    title="Clinical Info Box"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Clinical Info Box</span>
+                  </button>
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-slate-200 dark:border-slate-800 text-[10px]">

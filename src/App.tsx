@@ -43,6 +43,8 @@ import { DocumentQuestionItem } from './components/DocumentQuestionItem';
 import { SmilesCanvas } from './components/SmilesCanvas';
 import { getHydratedDrugs, HydratedDrug } from './db/medChemGraphDb';
 import { Navbar } from './components/Navbar';
+import { ThreeDLabLibrary } from './components/ThreeDLabLibrary';
+import { findCanonicalTargetForDrug } from './utils/canonicalTargets';
 import { yieldToMainThread, runWhenIdle } from './utils/scheduler';
 import { processFileAndGenerateQuestions } from './services/lectureIngestion';
 import { evaluateWorkbenchAnswer } from './utils/workbenchEvaluator';
@@ -138,7 +140,7 @@ import {
   Network,
 } from 'lucide-react';
 
-type AppTab = 'document-review' | 'matrix' | 'pubchem-inspector' | 'knowledge-graph' | 'dashboard';
+type AppTab = 'document-review' | 'matrix' | 'pubchem-inspector' | 'knowledge-graph' | 'dashboard' | '3d-lab';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -378,6 +380,15 @@ function AppContent() {
   const [bondLightColor, setBondLightColor] = useState<string>(getInitialBondLightColor);
   const [bondDarkColor, setBondDarkColor] = useState<string>(getInitialBondDarkColor);
   const [activeTab, setActiveTab] = useState<AppTab>('document-review');
+  const [selected3DDrug, setSelected3DDrug] = useState<string | undefined>(undefined);
+  const [selected3DPdbId, setSelected3DPdbId] = useState<string | undefined>(undefined);
+
+  const handleOpenIn3DLab = (structure: ChemicalStructure) => {
+    setSelected3DDrug(structure.name);
+    const canonical = findCanonicalTargetForDrug(structure.name);
+    setSelected3DPdbId(canonical?.pdbId);
+    switchTab('3d-lab');
+  };
 
   /**
    * Native View Transitions API for smooth multi-tab transitions
@@ -1150,6 +1161,18 @@ function AppContent() {
     return qList;
   }, [currentPage]);
 
+  // All structures on current page (fallback to all module structures)
+  const currentPageStructures = useMemo(() => {
+    if (!currentPage) return allModuleStructures;
+    const list: ChemicalStructure[] = [];
+    currentPage.sections.forEach((sec) => {
+      (sec.local_structures || sec.structures || []).forEach((s) => {
+        if (s) list.push(s);
+      });
+    });
+    return list.length > 0 ? list : allModuleStructures;
+  }, [currentPage, allModuleStructures]);
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-150">
       {/* ---------------------------------------------------- */}
@@ -1791,6 +1814,20 @@ function AppContent() {
               ingestionMessage={backgroundIngestion?.message || ''}
             />
           </React.Suspense>
+        )}
+
+        {/* ==================================================== */}
+        {/* TAB 5: 3D MOLECULAR LAB & SAR STUDIO                 */}
+        {/* ==================================================== */}
+        {activeTab === '3d-lab' && examStatus !== 'active' && (
+          <div className="w-full min-h-[calc(100vh-4rem)] p-4 max-w-7xl mx-auto">
+            <ThreeDLabLibrary
+              initialDrugName={selected3DDrug}
+              initialPdbId={selected3DPdbId}
+              structures={currentPageStructures}
+              onBackToReview={() => switchTab('document-review')}
+            />
+          </div>
         )}
 
         {/* ==================================================== */}
