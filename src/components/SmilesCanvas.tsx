@@ -322,6 +322,24 @@ export const SmilesCanvas: React.FC<SmilesCanvasProps> = ({
               }
             }
 
+            // 3. Fallback: if matches is still empty, attempt relaxed bond/topology query
+            if (matches.length === 0 && (candidateSmarts.includes('=') || candidateSmarts.includes(':'))) {
+              let relaxedQmol: Mol | null = null;
+              try {
+                const relaxedSmarts = candidateSmarts.replace(/[:=]/g, '~');
+                relaxedQmol = rdkit.get_qmol(relaxedSmarts);
+                if (relaxedQmol && relaxedQmol.is_valid()) {
+                  const relaxedStr = mol.get_substruct_match(relaxedQmol);
+                  const relaxedObj = JSON.parse(relaxedStr || '{}');
+                  if (relaxedObj.atoms || relaxedObj.bonds) {
+                    matches = [relaxedObj];
+                  }
+                }
+              } catch {} finally {
+                relaxedQmol?.delete();
+              }
+            }
+
             const rgba = hexToRgba(pharma.color || '#2563eb', 0.35);
 
             matches.forEach((matchObj) => {

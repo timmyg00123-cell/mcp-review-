@@ -1028,6 +1028,46 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       region: { x: 18, y: 34, width: 42, height: 44, isRing: true, label: 'Decalin Scaffold (Hydrophobic Pocket Anchor)' },
     },
   ],
+
+  // Amiloride (CID 16231) - ENaC Blocker / Potassium-Sparing Diuretic
+  amiloride: [
+    {
+      id: 'amiloride_pyrazine',
+      name: 'Pyrazine Ring Core',
+      purpose:
+        'Electron-deficient 1,4-diazine aromatic core that rigidly scaffolds the guanidinocarbonyl warhead and substituents for optimal occlusion of the luminal ENaC pore.',
+      category: 'binding',
+      smarts: 'c1cnccn1',
+      region: { x: 20, y: 25, width: 35, height: 45, isRing: true, label: 'Pyrazine Ring Core' },
+    },
+    {
+      id: 'amiloride_guanidinocarbonyl',
+      name: 'Guanidinocarbonyl Moiety',
+      purpose:
+        'Strongly basic acylguanidine warhead (pKa 8.7) that remains cationic at physiological pH; mimics a hydrated sodium ion to competitively plug the luminal ENaC pore selectivity filter.',
+      category: 'binding',
+      smarts: '[CX3](=[OX1])[#7]~[CX3](~[#7])~[#7]',
+      region: { x: 55, y: 15, width: 42, height: 40, isRing: false, label: 'Guanidinocarbonyl Moiety' },
+    },
+    {
+      id: 'amiloride_chloro',
+      name: '6-Chloro Substituent',
+      purpose:
+        'Electronegative halogen that increases lipophilicity, retards hepatic metabolism, and enhances channel-blocking affinity.',
+      category: 'binding',
+      smarts: '[Cl]',
+      region: { x: 5, y: 50, width: 20, height: 25, isRing: false, label: '6-Chloro Substituent' },
+    },
+    {
+      id: 'amiloride_diamino',
+      name: '3,5-Diamino Groups',
+      purpose:
+        'Primary amines that provide essential hydrogen-bonding donors within the ENaC vestibule and modulate the acylguanidine pKa through electronic conjugation.',
+      category: 'binding',
+      smarts: 'c[NX3H2]',
+      region: { x: 25, y: 70, width: 35, height: 25, isRing: false, label: '3,5-Diamino Groups' },
+    },
+  ],
 };
 
 /**
@@ -1072,6 +1112,7 @@ export const normalizeDrugKey = (structure: ChemicalStructure): string => {
   if (name.includes('losartan') || structure.cid === 3961) return 'losartan';
   if (name.includes('hydrochlorothiazide') || name.includes('hctz') || structure.cid === 7239) return 'hydrochlorothiazide';
   if (name.includes('clonidine') || structure.cid === 2803) return 'clonidine';
+  if (name.includes('amiloride') || id.includes('amiloride') || structure.cid === 16231) return 'amiloride';
   return name.replace(/[^a-z0-9]/g, '');
 };
 
