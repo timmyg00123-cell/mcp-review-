@@ -7,13 +7,24 @@ import {
   toggleCardSuspension,
   applyProgressToCards,
 } from '../utils/spacedRepetitionService';
-import { StructureFlashcardCardFace } from './StructureFlashcardCardFace';
+import {
+  StructureFlashcardCardFace,
+  type FlashcardDisplaySettings,
+  DEFAULT_FLASHCARD_DISPLAY_SETTINGS,
+} from './StructureFlashcardCardFace';
+import {
+  THERAPEUTIC_CATEGORIES,
+  type TherapeuticClassCategory,
+} from '../data/topDrugsTaxonomyData';
+import { getTherapeuticCategoriesForCards } from '../utils/topDrugsTaxonomy';
 import {
   CheckCircle2,
   X,
   Filter,
   Layers,
   RotateCcw,
+  ArrowUpDown,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 export interface StructureFlashcardDeckProps {
@@ -29,6 +40,12 @@ export interface ModuleCategory {
 }
 
 export type ModuleFilterState = Record<string, boolean>;
+
+export type DeckFilterMode = 'curriculum' | 'taxonomy';
+
+export type FlashcardSortMode = 'class-number' | 'subclass' | 'due-date' | 'alphabetical';
+
+export const DISPLAY_SETTINGS_STORAGE_KEY = 'medchem_flashcard_display_settings';
 
 export const KNOWN_MODULE_CATEGORIES: ModuleCategory[] = [
   { key: 'renal', label: 'Renal', matchPattern: /renal/i },
@@ -131,6 +148,96 @@ export function cardMatchesModuleFilter(
 }
 
 /**
+ * Checks whether a flashcard matches the selected 2-tier Top Drugs taxonomy filter.
+ * - categoryNumber === null matches all categories.
+ * - specificSubclass === null matches all subclasses in that category.
+ */
+export function cardMatchesTaxonomyFilter(
+  card: FlashcardItem,
+  categoryNumber: number | null,
+  specificSubclass: string | null
+): boolean {
+  if (categoryNumber !== null && card.structure.therapeuticClassNumber !== categoryNumber) {
+    return false;
+  }
+  if (specificSubclass !== null) {
+    const cardSubclass =
+      card.structure.specificPharmacologicClass ||
+      card.structure.pharmacologicalClass ||
+      '';
+    if (cardSubclass !== specificSubclass) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Stably sorts flashcards according to the chosen sort mode.
+ * - 'class-number': Stably sorts by numeric class (1-39), falling back to 999 for non-taxonomy cards,
+ *   then by subclass, then alphabetically by drug name.
+ * - 'subclass': Sorts by specific or pharmacological subclass.
+ * - 'due-date': Sorts by spaced repetition dueTimestamp.
+ * - 'alphabetical': Sorts by drug generic name.
+ */
+export function sortFlashcards(
+  cards: FlashcardItem[],
+  sortBy: FlashcardSortMode
+): FlashcardItem[] {
+  const shallow = [...cards];
+  return shallow.sort((a, b) => {
+    if (sortBy === 'class-number') {
+      const numA = a.structure.therapeuticClassNumber ?? 999;
+      const numB = b.structure.therapeuticClassNumber ?? 999;
+      if (numA !== numB) return numA - numB;
+      const nameA = a.structure.name || a.drugName || '';
+      const nameB = b.structure.name || b.drugName || '';
+      return nameA.localeCompare(nameB);
+    }
+    if (sortBy === 'subclass') {
+      const subA = a.structure.specificPharmacologicClass || a.structure.pharmacologicalClass || '';
+      const subB = b.structure.specificPharmacologicClass || b.structure.pharmacologicalClass || '';
+      if (subA !== subB) return subA.localeCompare(subB);
+      const nameA = a.structure.name || a.drugName || '';
+      const nameB = b.structure.name || b.drugName || '';
+      return nameA.localeCompare(nameB);
+    }
+    if (sortBy === 'due-date') {
+      return a.dueTimestamp - b.dueTimestamp;
+    }
+    const nameA = a.structure.name || a.drugName || '';
+    const nameB = b.structure.name || b.drugName || '';
+    return nameA.localeCompare(nameB);
+  });
+}
+
+/**
+ * Centralized queue candidate builder applying filters and stable sorting.
+ */
+function buildCandidateQueue(
+  cards: FlashcardItem[],
+  mode: DeckFilterMode,
+  moduleF: ModuleFilterState,
+  categoryNum: number | null,
+  subclass: string | null,
+  sort: FlashcardSortMode,
+  availFilters: ModuleCategory[]
+): FlashcardItem[] {
+  const unSuspended = cards.filter((c) => !c.isSuspended);
+  let filtered: FlashcardItem[] = [];
+  if (mode === 'curriculum') {
+    filtered = unSuspended.filter((c) =>
+      cardMatchesModuleFilter(c, moduleF, availFilters)
+    );
+  } else {
+    filtered = unSuspended.filter((c) =>
+      cardMatchesTaxonomyFilter(c, categoryNum, subclass)
+    );
+  }
+  return sortFlashcards(filtered, sort);
+}
+
+/**
  * Anki-Style Flashcard Component for Rapid Chemical Structure Recall
  *
  * Implements:
@@ -139,7 +246,9 @@ export function cardMatchesModuleFilter(
  *   pharmacophore tags, clinical pharmacology (metabolism, BBB, pregnancy risk), and SAR notes.
  * - 4-interval spaced repetition bar: Again (< 1 min), Hard (4 min), Good (10 min), Easy (1 day).
  * - Keyboard shortcuts: Space (flip), 1 (Again), 2 (Hard), 3 (Good), 4 (Easy) with input focus guard.
- * - Module filter toggles (Dynamic exam-aware categories including Renal, Respiratory, Antiplatelets, etc.).
+ * - Hierarchical taxonomy filtering (Curriculum Modules vs Top Drugs Taxonomy cascading filter).
+ * - Stable sorting engine (Class Number with 999 fallback, Subclass, Due Date, Alphabetical).
+ * - Display settings popover ("⚙️ Display") with density mode and clutter reduction controls.
  * - Active session counters (Remaining, In-session, Graduated).
  */
 export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
@@ -153,6 +262,9 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   // Dynamic available module categories derived from cards
   const availableFilters = useMemo(() => getAvailableModuleFilters(cards), [cards]);
 
+  // Filter mode toggle: 'curriculum' (default) or 'taxonomy' (Top Drugs 39 classes)
+  const [filterMode, setFilterMode] = useState<DeckFilterMode>('curriculum');
+
   // Module filter toggles
   const [moduleFilter, setModuleFilter] = useState<ModuleFilterState>(() => {
     const initial: ModuleFilterState = {};
@@ -163,6 +275,85 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     return initial;
   });
 
+  // 2-tier cascading taxonomy filters
+  const [selectedCategoryNumber, setSelectedCategoryNumber] = useState<number | null>(null);
+  const [selectedSubclass, setSelectedSubclass] = useState<string | null>(null);
+
+  // Sorting state: 'class-number' (default), 'subclass', 'due-date', 'alphabetical'
+  const [sortBy, setSortBy] = useState<FlashcardSortMode>('class-number');
+
+  // Display Settings Popover state & persistence
+  const [isDisplayPopoverOpen, setIsDisplayPopoverOpen] = useState<boolean>(false);
+  const [displaySettings, setDisplaySettings] = useState<FlashcardDisplaySettings>(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const saved = window.localStorage.getItem(DISPLAY_SETTINGS_STORAGE_KEY);
+        if (saved) {
+          return { ...DEFAULT_FLASHCARD_DISPLAY_SETTINGS, ...JSON.parse(saved) };
+        }
+      } catch {
+        // Fallback to defaults
+      }
+    }
+    return DEFAULT_FLASHCARD_DISPLAY_SETTINGS;
+  });
+
+  // Sync display settings to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        window.localStorage.setItem(
+          DISPLAY_SETTINGS_STORAGE_KEY,
+          JSON.stringify(displaySettings)
+        );
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  }, [displaySettings]);
+
+  // Available therapeutic categories present in current deck
+  const availableCategories = useMemo(() => {
+    const filtered = getTherapeuticCategoriesForCards(cards);
+    return filtered.length > 0 ? filtered : THERAPEUTIC_CATEGORIES;
+  }, [cards]);
+
+  // Available subclasses based on selected category
+  const availableSubclasses = useMemo(() => {
+    if (selectedCategoryNumber !== null) {
+      const matchedCategory = availableCategories.find(
+        (c) => c.classNumber === selectedCategoryNumber
+      );
+      if (matchedCategory && matchedCategory.specificSubclasses.length > 0) {
+        return matchedCategory.specificSubclasses;
+      }
+      const cardSubs = new Set<string>();
+      for (const card of deck) {
+        if (card.structure.therapeuticClassNumber === selectedCategoryNumber) {
+          const sub =
+            card.structure.specificPharmacologicClass ||
+            card.structure.pharmacologicalClass;
+          if (sub) cardSubs.add(sub);
+        }
+      }
+      return Array.from(cardSubs).sort();
+    }
+
+    const allSubs = new Set<string>();
+    for (const cat of availableCategories) {
+      for (const sub of cat.specificSubclasses) {
+        allSubs.add(sub);
+      }
+    }
+    for (const card of deck) {
+      const sub =
+        card.structure.specificPharmacologicClass ||
+        card.structure.pharmacologicalClass;
+      if (sub) allSubs.add(sub);
+    }
+    return Array.from(allSubs).sort();
+  }, [selectedCategoryNumber, availableCategories, deck]);
+
   // Active in-session queue and position index
   const [activeQueue, setActiveQueue] = useState<FlashcardItem[]>(() => {
     const initialized = applyProgressToCards(cards);
@@ -171,8 +362,14 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     for (const f of filters) {
       initialFilterState[f.key] = true;
     }
-    return initialized.filter(
-      (c) => !c.isSuspended && cardMatchesModuleFilter(c, initialFilterState, filters)
+    return buildCandidateQueue(
+      initialized,
+      'curriculum',
+      initialFilterState,
+      null,
+      null,
+      'class-number',
+      filters
     );
   });
 
@@ -182,13 +379,28 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   // Restart deck handler (resets active queue to full filtered deck, currentIndex to 0, isFlipped to false)
   const handleRestartDeck = useCallback(() => {
     const initialized = applyProgressToCards(cards);
-    const filtered = initialized.filter(
-      (c) => !c.isSuspended && cardMatchesModuleFilter(c, moduleFilter, availableFilters)
+    setDeck(initialized);
+    const filtered = buildCandidateQueue(
+      initialized,
+      filterMode,
+      moduleFilter,
+      selectedCategoryNumber,
+      selectedSubclass,
+      sortBy,
+      availableFilters
     );
     setActiveQueue(filtered);
     setCurrentIndex(0);
     setIsFlipped(false);
-  }, [cards, moduleFilter, availableFilters]);
+  }, [
+    cards,
+    filterMode,
+    moduleFilter,
+    selectedCategoryNumber,
+    selectedSubclass,
+    sortBy,
+    availableFilters,
+  ]);
 
   // Sync state if cards prop identity updates
   useEffect(() => {
@@ -200,23 +412,126 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       nextFilterState[f.key] = true;
     }
     setModuleFilter(nextFilterState);
-    setActiveQueue(
-      withProgress.filter(
-        (c) => !c.isSuspended && cardMatchesModuleFilter(c, nextFilterState, filters)
-      )
+    const nextQueue = buildCandidateQueue(
+      withProgress,
+      filterMode,
+      nextFilterState,
+      selectedCategoryNumber,
+      selectedSubclass,
+      sortBy,
+      filters
     );
+    setActiveQueue(nextQueue);
     setCurrentIndex(0);
     setIsFlipped(false);
   }, [cards]);
 
-  // Handle module filter change
+  // Handle filter mode toggle
+  const handleFilterModeChange = (newMode: DeckFilterMode) => {
+    setFilterMode(newMode);
+    const nextQueue = buildCandidateQueue(
+      deck,
+      newMode,
+      moduleFilter,
+      selectedCategoryNumber,
+      selectedSubclass,
+      sortBy,
+      availableFilters
+    );
+    setActiveQueue(nextQueue);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  // Handle category dropdown change
+  const handleCategoryChange = (catNum: number | null) => {
+    setSelectedCategoryNumber(catNum);
+    setSelectedSubclass(null);
+    const nextQueue = buildCandidateQueue(
+      deck,
+      filterMode,
+      moduleFilter,
+      catNum,
+      null,
+      sortBy,
+      availableFilters
+    );
+    setActiveQueue(nextQueue);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  // Handle subclass dropdown change
+  const handleSubclassChange = (subclass: string | null) => {
+    setSelectedSubclass(subclass);
+    const nextQueue = buildCandidateQueue(
+      deck,
+      filterMode,
+      moduleFilter,
+      selectedCategoryNumber,
+      subclass,
+      sortBy,
+      availableFilters
+    );
+    setActiveQueue(nextQueue);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  // Handle sorting dropdown change
+  const handleSortChange = (newSort: FlashcardSortMode) => {
+    setSortBy(newSort);
+    const nextQueue = buildCandidateQueue(
+      deck,
+      filterMode,
+      moduleFilter,
+      selectedCategoryNumber,
+      selectedSubclass,
+      newSort,
+      availableFilters
+    );
+    setActiveQueue(nextQueue);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  // Handle module filter toggle
   const handleToggleModule = (moduleKey: string, checked: boolean) => {
     const nextFilter = { ...moduleFilter, [moduleKey]: checked };
     setModuleFilter(nextFilter);
-    const nextFiltered = deck.filter(
-      (c) => !c.isSuspended && cardMatchesModuleFilter(c, nextFilter, availableFilters)
+    const nextQueue = buildCandidateQueue(
+      deck,
+      filterMode,
+      nextFilter,
+      selectedCategoryNumber,
+      selectedSubclass,
+      sortBy,
+      availableFilters
     );
-    setActiveQueue(nextFiltered);
+    setActiveQueue(nextQueue);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  // Handle Reset Filters action
+  const handleResetFilters = () => {
+    setSelectedCategoryNumber(null);
+    setSelectedSubclass(null);
+    const nextModuleFilter: ModuleFilterState = {};
+    for (const f of availableFilters) {
+      nextModuleFilter[f.key] = true;
+    }
+    setModuleFilter(nextModuleFilter);
+    const nextQueue = buildCandidateQueue(
+      deck,
+      filterMode,
+      nextModuleFilter,
+      null,
+      null,
+      sortBy,
+      availableFilters
+    );
+    setActiveQueue(nextQueue);
     setCurrentIndex(0);
     setIsFlipped(false);
   };
@@ -226,12 +541,14 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   // Active session queue counters
   const remainingCount = Math.max(0, activeQueue.length - currentIndex);
   const inSessionCount = activeQueue.length;
-  const graduatedCount = deck.filter(
-    (c) =>
-      !c.isSuspended &&
-      cardMatchesModuleFilter(c, moduleFilter, availableFilters) &&
-      (c.state === 'review' || c.state === 'mastered')
-  ).length;
+  const graduatedCount = deck.filter((c) => {
+    if (c.isSuspended) return false;
+    const matches =
+      filterMode === 'curriculum'
+        ? cardMatchesModuleFilter(c, moduleFilter, availableFilters)
+        : cardMatchesTaxonomyFilter(c, selectedCategoryNumber, selectedSubclass);
+    return matches && (c.state === 'review' || c.state === 'mastered');
+  }).length;
 
   // Spaced repetition rating handler
   const handleGrade = useCallback(
@@ -300,12 +617,13 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   // Keyboard shortcut listener: Space (flip), 1 (Again), 2 (Hard), 3 (Good), 4 (Easy)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Guard against typing in form inputs, textareas, or contenteditable elements
+      // Guard against typing in form inputs, textareas, selects, or contenteditable elements
       const target = e.target as HTMLElement | null;
       if (
         target &&
         (target.tagName === 'INPUT' ||
           target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
           target.isContentEditable ||
           target.getAttribute('contenteditable') === 'true')
       ) {
@@ -338,8 +656,43 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     };
   }, [isFlipped, handleGrade]);
 
+  // Dedicated Empty Filter view when active filters yield 0 matching cards
+  if (activeQueue.length === 0) {
+    return (
+      <div className="w-full max-w-2xl mx-auto p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl text-center flex flex-col items-center text-slate-900 dark:text-slate-100">
+        <div className="w-16 h-16 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
+          <Filter className="w-8 h-8" />
+        </div>
+        <h3 className="text-2xl font-bold mb-2">No Cards Match Current Filter</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mb-6 leading-relaxed">
+          No chemical structures in your deck match the active filter criteria. Try adjusting your category or subclass selection, or reset your filters.
+        </p>
+
+        <div className="flex items-center gap-3 flex-wrap justify-center">
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="px-6 py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset Filters
+          </button>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              Close Deck
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Session completion view when active queue is exhausted
-  if (!currentCard || activeQueue.length === 0 || currentIndex >= activeQueue.length) {
+  if (!currentCard || currentIndex >= activeQueue.length) {
     const struggled = deck.filter((c) => (c.struggleCount ?? 0) > 0);
     return (
       <div className="w-full max-w-2xl mx-auto p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl text-center flex flex-col items-center text-slate-900 dark:text-slate-100">
@@ -412,7 +765,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
                 Rapid Structure Recall Deck
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Spaced repetition chemical structure recognition & pharmacophore identification
+                Spaced repetition chemical structure recognition &amp; pharmacophore identification
               </p>
             </div>
           </div>
@@ -438,30 +791,293 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
           </div>
         </div>
 
-        {/* Module Filter Toggles & Session Counters */}
-        <div className="flex items-center justify-between flex-wrap gap-3 text-xs pt-1">
+        {/* Filter Mode Toggle, Sort Controls & Display Settings Popover */}
+        <div className="flex items-center justify-between flex-wrap gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5" /> Modules:
-            </span>
-            {availableFilters.map((category) => {
-              const isChecked = moduleFilter[category.key] !== false;
-              return (
-                <label
-                  key={category.key}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={(e) => handleToggleModule(category.key, e.target.checked)}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span>{category.label}</span>
-                </label>
-              );
-            })}
+            <span className="font-semibold text-slate-500 dark:text-slate-400">Filter Mode:</span>
+            <div className="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => handleFilterModeChange('curriculum')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
+                  filterMode === 'curriculum'
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                Curriculum Modules
+              </button>
+              <button
+                type="button"
+                onClick={() => handleFilterModeChange('taxonomy')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
+                  filterMode === 'taxonomy'
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                Top Drugs Taxonomy
+              </button>
+            </div>
           </div>
+
+          <div className="flex items-center gap-2.5">
+            <label className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400">
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              <span>Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => handleSortChange(e.target.value as FlashcardSortMode)}
+                className="py-1 px-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="class-number">Class Number (1-39)</option>
+                <option value="subclass">Subclass</option>
+                <option value="due-date">Due Date</option>
+                <option value="alphabetical">Alphabetical</option>
+              </select>
+            </label>
+
+            {/* Display Settings Popover Button */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsDisplayPopoverOpen((prev) => !prev)}
+                className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Card Display Settings"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>⚙️ Display</span>
+              </button>
+
+              {isDisplayPopoverOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 text-slate-900 dark:text-slate-100 flex flex-col gap-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Display Settings
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setIsDisplayPopoverOpen(false)}
+                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Density Mode */}
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                      Layout Density
+                    </span>
+                    <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDisplaySettings((prev) => ({ ...prev, density: 'split' }))
+                        }
+                        className={`py-1 rounded font-medium transition-colors cursor-pointer ${
+                          displaySettings.density === 'split'
+                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        Split
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDisplaySettings((prev) => ({
+                            ...prev,
+                            density: 'structure-focus',
+                          }))
+                        }
+                        className={`py-1 rounded font-medium transition-colors cursor-pointer ${
+                          displaySettings.density === 'structure-focus'
+                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        Focus
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDisplaySettings((prev) => ({
+                            ...prev,
+                            density: 'minimalist',
+                          }))
+                        }
+                        className={`py-1 rounded font-medium transition-colors cursor-pointer ${
+                          displaySettings.density === 'minimalist'
+                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        Minimal
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Section Visibility Toggles */}
+                  <div className="flex flex-col gap-2 pt-1">
+                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                      Visible Sections
+                    </span>
+
+                    <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={displaySettings.showBrandNames}
+                        onChange={(e) =>
+                          setDisplaySettings((prev) => ({
+                            ...prev,
+                            showBrandNames: e.target.checked,
+                          }))
+                        }
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span>Brand Names</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(
+                          displaySettings.showHierarchyBreadcrumb ??
+                            displaySettings.showTaxonomyBreadcrumbs
+                        )}
+                        onChange={(e) =>
+                          setDisplaySettings((prev) => ({
+                            ...prev,
+                            showHierarchyBreadcrumb: e.target.checked,
+                            showTaxonomyBreadcrumbs: e.target.checked,
+                          }))
+                        }
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span>Hierarchy Breadcrumbs</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(
+                          displaySettings.showPharmacophoreTagStrip ??
+                            displaySettings.showPharmacophoreTags
+                        )}
+                        onChange={(e) =>
+                          setDisplaySettings((prev) => ({
+                            ...prev,
+                            showPharmacophoreTagStrip: e.target.checked,
+                            showPharmacophoreTags: e.target.checked,
+                          }))
+                        }
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span>Pharmacophore Tags</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={displaySettings.showClinicalPearls}
+                        onChange={(e) =>
+                          setDisplaySettings((prev) => ({
+                            ...prev,
+                            showClinicalPearls: e.target.checked,
+                          }))
+                        }
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span>Clinical Pearls &amp; MOA</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Controls Bar & Session Counters */}
+        <div className="flex items-center justify-between flex-wrap gap-3 text-xs pt-1">
+          {filterMode === 'curriculum' ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                <Filter className="w-3.5 h-3.5" /> Modules:
+              </span>
+              {availableFilters.map((category) => {
+                const isChecked = moduleFilter[category.key] !== false;
+                return (
+                  <label
+                    key={category.key}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) => handleToggleModule(category.key, e.target.checked)}
+                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>{category.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">
+                  Category:
+                </span>
+                <select
+                  value={selectedCategoryNumber !== null ? String(selectedCategoryNumber) : ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    handleCategoryChange(val ? parseInt(val, 10) : null);
+                  }}
+                  className="py-1 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-blue-500 cursor-pointer max-w-[210px] truncate"
+                >
+                  <option value="">All Categories (1-39)</option>
+                  {availableCategories.map((cat) => (
+                    <option key={cat.classNumber} value={cat.classNumber}>
+                      {cat.categoryName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">
+                  Subclass:
+                </span>
+                <select
+                  value={selectedSubclass ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    handleSubclassChange(val || null);
+                  }}
+                  className="py-1 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-blue-500 cursor-pointer max-w-[230px] truncate"
+                >
+                  <option value="">All Subclasses</option>
+                  {availableSubclasses.map((sub) => (
+                    <option key={sub} value={sub}>
+                      {sub}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {(selectedCategoryNumber !== null || selectedSubclass !== null) && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                >
+                  Reset Filters
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-2 font-mono text-[11px]">
             <span className="px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
@@ -485,6 +1101,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         isSuspended={Boolean(currentCard.isSuspended)}
         onToggleSuspend={handleToggleSuspend}
         onFlip={() => setIsFlipped(true)}
+        displaySettings={displaySettings}
       >
         {/* 4-Interval Anki Rating Bar */}
         <div className="grid grid-cols-4 gap-2">
