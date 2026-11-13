@@ -734,3 +734,6 @@ export function findMedChemProfile(geneSymbolOrPdbId: string): TargetMedChemProf
     );
   });
 }
+
+export { findCanonicalTargetForDrug } from '../utils/canonicalTargets';
+

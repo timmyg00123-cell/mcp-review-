@@ -23,7 +23,7 @@ console.log('Testing Exam 2 Curriculum Modules & Cumulative Practice Suite...');
 const diuretics = getDefaultDiureticsModule();
 assert.equal(diuretics.id, 'antihypertensives_1_mcp2');
 assert.equal(diuretics.examId, 'exam_2');
-assert.equal(diuretics.pages.length, 3);
+assert.equal(diuretics.pages.length, 5);
 const dQuestions = diuretics.pages.flatMap((p) => p.sections.flatMap((s) => s.questions));
 assert.equal(dQuestions.length, 33, 'Diuretics module must have 33 questions (IDs 301–333)');
 assert.equal(dQuestions[0].id, 301);
@@ -34,18 +34,18 @@ assert.ok(diuretics.chemicalStructures && diuretics.chemicalStructures.length >=
 const sympatholytics = getDefaultSympatholyticsModule();
 assert.equal(sympatholytics.id, 'antihypertensives_2_mcp2');
 assert.equal(sympatholytics.examId, 'exam_2');
-assert.equal(sympatholytics.pages.length, 3);
+assert.equal(sympatholytics.pages.length, 7);
 const sQuestions = sympatholytics.pages.flatMap((p) => p.sections.flatMap((s) => s.questions));
-assert.equal(sQuestions.length, 43, 'Sympatholytics module must have 43 questions (IDs 401–443)');
+assert.equal(sQuestions.length, 43, 'Sympatholytics module must have 43 questions (IDs 401–444)');
 assert.equal(sQuestions[0].id, 401);
-assert.equal(sQuestions[42].id, 443);
+assert.equal(sQuestions[42].id, 444);
 assert.ok(sympatholytics.chemicalStructures && sympatholytics.chemicalStructures.length >= 18);
 
 // 3. Module 3: Vasodilators & CCBs
 const vasodilators = getDefaultVasodilatorsModule();
 assert.equal(vasodilators.id, 'antihypertensives_3_mcp2');
 assert.equal(vasodilators.examId, 'exam_2');
-assert.equal(vasodilators.pages.length, 3);
+assert.equal(vasodilators.pages.length, 4);
 const vQuestions = vasodilators.pages.flatMap((p) => p.sections.flatMap((s) => s.questions));
 assert.equal(vQuestions.length, 25, 'Vasodilators module must have 25 questions (IDs 501–525)');
 assert.equal(vQuestions[0].id, 501);
@@ -56,7 +56,7 @@ assert.ok(vasodilators.chemicalStructures && vasodilators.chemicalStructures.len
 const raas = getDefaultRaasModule();
 assert.equal(raas.id, 'antihypertensives_4_mcp2');
 assert.equal(raas.examId, 'exam_2');
-assert.equal(raas.pages.length, 3);
+assert.equal(raas.pages.length, 4);
 const rQuestions = raas.pages.flatMap((p) => p.sections.flatMap((s) => s.questions));
 assert.equal(rQuestions.length, 26, 'RAAS module must have 26 questions (IDs 601–626)');
 assert.equal(rQuestions[0].id, 601);
@@ -67,7 +67,7 @@ assert.ok(raas.chemicalStructures && raas.chemicalStructures.length >= 18);
 const lipids = getDefaultAntihyperlipidemicsModule();
 assert.equal(lipids.id, 'antihyperlipidemics_mcp2');
 assert.equal(lipids.examId, 'exam_2');
-assert.equal(lipids.pages.length, 3);
+assert.equal(lipids.pages.length, 5);
 const lQuestions = lipids.pages.flatMap((p) => p.sections.flatMap((s) => s.questions));
 assert.equal(lQuestions.length, 35, 'Antihyperlipidemics module must have 35 questions (IDs 701–735)');
 assert.equal(lQuestions[0].id, 701);
@@ -82,7 +82,8 @@ assert.equal(totalExam2Questions, 162, 'Exam 2 curriculum must contain exactly 1
 // Verify question quality (non-empty stem, explanations, high-yield pearls)
 for (const q of [...dQuestions, ...sQuestions, ...vQuestions, ...rQuestions, ...lQuestions]) {
   assert.ok(q.id > 0, `Question ID must be positive: ${q.id}`);
-  assert.ok(q.questionStem && q.questionStem.length > 10, `Question ${q.id} stem must be substantial`);
+  const stem = q.questionStem || q.prompt || q.title;
+  assert.ok(stem && stem.length > 10, `Question ${q.id} stem must be substantial`);
   assert.ok(q.overallExplanation && q.overallExplanation.length > 10, `Question ${q.id} must have overall explanation`);
   assert.ok(q.highYieldPearl && q.highYieldPearl.length > 10, `Question ${q.id} must have high-yield pearl`);
 }

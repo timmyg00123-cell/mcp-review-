@@ -118,7 +118,9 @@ export async function fetchPdbCoordinates(pdbId: string, signal?: AbortSignal): 
   }
 
   const cleanId = pdbId.trim().toUpperCase();
-  const url = `https://files.rcsb.org/download/${cleanId}.pdb`;
+  const lowerId = cleanId.toLowerCase();
+  const primaryUrl = `https://www.ebi.ac.uk/pdbe/entry-files/download/pdb${lowerId}.ent`;
+  const fallbackUrl = `https://files.rcsb.org/download/${cleanId}.pdb`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
@@ -138,10 +140,28 @@ export async function fetchPdbCoordinates(pdbId: string, signal?: AbortSignal): 
   }
 
   try {
-    const response = await fetch(url, { signal: controller.signal });
-    if (!response.ok) {
-      const statusText = response.statusText ? ` ${response.statusText}` : '';
-      throw new Error(`Failed to fetch PDB coordinates for ${cleanId}: HTTP ${response.status}${statusText}`);
+    let response: Response;
+    try {
+      response = await fetch(primaryUrl, { signal: controller.signal });
+      if (!response.ok) {
+        throw new Error(`EBI PDBe returned HTTP ${response.status}`);
+      }
+    } catch (primaryErr) {
+      if (controller.signal.aborted) {
+        throw primaryErr;
+      }
+      try {
+        response = await fetch(fallbackUrl, { signal: controller.signal });
+        if (!response.ok) {
+          const statusText = response.statusText ? ` ${response.statusText}` : '';
+          throw new Error(`Failed to fetch PDB coordinates for ${cleanId}: HTTP ${response.status}${statusText}`);
+        }
+      } catch (fallbackErr) {
+        if (fallbackErr instanceof Error && fallbackErr.message.startsWith(`Failed to fetch PDB coordinates for ${cleanId}: HTTP`)) {
+          throw fallbackErr;
+        }
+        throw new Error(`Failed to fetch PDB coordinates for ${cleanId}: ${(primaryErr as Error).message}; ${(fallbackErr as Error).message}`);
+      }
     }
     return await response.text();
   } catch (err: any) {
