@@ -1,4 +1,5 @@
 import type { OpenFdaClinicalData } from '../services/openFdaService';
+import type { TopDrugStructureRecord } from '../data/topDrugsSmilesData';
 
 export interface PubChemAuditInfo {
   cid?: number;
@@ -46,6 +47,7 @@ export interface ChemicalStructure {
   cid?: number;
 
   // Top Drugs Taxonomy Additions:
+  structureRecord?: TopDrugStructureRecord;
   therapeuticClassNumber?: number; // 1 to 39
   therapeuticCategory?: string; // e.g. "2. Antibiotic", "11. Cardiovascular --- Antihypertensive"
   broadPharmacologicClass?: string; // e.g. "Cephalosporin", "Opioid"
