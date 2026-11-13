@@ -263,7 +263,7 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
                 <span>{tab.label}</span>
                 {tab.badge && (
                   <span
-                    className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
+                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full font-bold ${
                       isActive
                         ? 'bg-white/20 text-white'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
@@ -353,7 +353,7 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
                   >
                     <span>Curriculum Structures</span>
                     <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
                         deckMode === 'curriculum'
                           ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
                           : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
@@ -376,7 +376,7 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
                   >
                     <span>Top 200 Drugs Catalog</span>
                     <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
                         deckMode === 'top200'
                           ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
                           : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
