@@ -23,6 +23,7 @@ import type {
   TargetMedChemProfile,
   InteractionType,
 } from '../types/structure3d';
+import { isMolstarSupported } from '../services/molstarLoader';
 
 export interface TwoDPocketFallbackViewProps {
   pdbId: string;
@@ -121,7 +122,11 @@ export const TwoDPocketFallbackView: React.FC<TwoDPocketFallbackViewProps> = ({
 
   const ligandCode = medChemProfile?.ligandCode || detectedLigand?.resn || 'LIG';
 
-  const cleanDrugName = drugName.replace(/\s*\(.*?\)\s*/g, '').trim() || ligandCode;
+  const cleanDrugName =
+    drugName
+      .replace(/\s*\(.*?\)\s*/g, '')
+      .replace(/\s+(Active|Analog|Inhibitor).*/i, '')
+      .trim() || ligandCode;
   const pubChemImgUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(cleanDrugName)}/PNG`;
 
   const handleGroupClick = (group: PharmacophorePkPdGroup) => {
@@ -162,7 +167,9 @@ export const TwoDPocketFallbackView: React.FC<TwoDPocketFallbackViewProps> = ({
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               <span className="text-xs text-amber-300 font-medium">
-                WebGL Acceleration Unavailable • 2D Pocket &amp; SAR Schematic Mode
+                {isMolstarSupported()
+                  ? '2D Pocket & SAR Schematic Mode'
+                  : 'WebGL Acceleration Unavailable • 2D Pocket & SAR Schematic Mode'}
               </span>
             </div>
           </div>
@@ -405,6 +412,7 @@ export const TwoDPocketFallbackView: React.FC<TwoDPocketFallbackViewProps> = ({
                     key={group.id}
                     type="button"
                     data-pharmacophore-id={group.id}
+                    aria-pressed={isSelected}
                     onClick={() => handleGroupClick(group)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
                       isSelected
@@ -536,6 +544,7 @@ export const TwoDPocketFallbackView: React.FC<TwoDPocketFallbackViewProps> = ({
                     key={`${residue.resi}-${residue.resn}-${residue.chain || 'A'}`}
                     type="button"
                     data-residue-resi={residue.resi}
+                    aria-pressed={isSelected}
                     onClick={() => handleResidueClick(residue)}
                     className={`text-left p-3.5 rounded-xl border transition-all flex flex-col justify-between gap-2.5 focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
                       isSelected

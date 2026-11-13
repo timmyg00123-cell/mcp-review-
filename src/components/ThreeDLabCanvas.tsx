@@ -960,6 +960,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         {is2DFallbackActive ? (
           <div className="w-full h-full overflow-y-auto">
             <TwoDPocketFallbackView
+              key={cleanPdbId}
               pdbId={cleanPdbId}
               targetName={targetName}
               geneSymbol={geneSymbol}
@@ -1100,83 +1101,95 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
             )}
 
             {/* Upgraded WebGL Diagnostic & Error Overlay */}
-            {loadError && !isLoading && (
-              <div className="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center gap-4 z-30 p-6 text-center overflow-y-auto">
-                <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0">
-                  <AlertCircle className="w-6 h-6 text-rose-400" />
-                </div>
+            {loadError && !isLoading && (() => {
+              const isWebGlFailure =
+                !isMolstarSupported() ||
+                loadError.toLowerCase().includes('webgl') ||
+                loadError.toLowerCase().includes('acceleration') ||
+                loadError.toLowerCase().includes('context');
 
-                <div className="max-w-lg space-y-1.5">
-                  <h3 className="text-base font-bold text-rose-300">
-                    {`Unable to load 3D structure for ${cleanPdbId}`}
-                  </h3>
-                  <p className="text-xs text-slate-300">
-                    WebGL is not supported or graphics acceleration is disabled in your current browser environment.
-                  </p>
-                  {loadError &&
-                    loadError !==
-                      'WebGL is not supported or graphics acceleration is disabled in your current browser environment.' && (
-                      <p className="text-[11px] text-slate-400 font-mono bg-slate-900/80 px-2 py-1 rounded border border-slate-800 inline-block">
-                        {loadError}
-                      </p>
-                    )}
-                </div>
-
-                {/* In-App Browser Diagnostic Card */}
-                <div className="max-w-md w-full bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-left shadow-lg space-y-2.5">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
-                    <Info className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span>How to enable graphics acceleration:</span>
+              return (
+                <div className="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center gap-4 z-30 p-6 text-center overflow-y-auto">
+                  <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0">
+                    <AlertCircle className="w-6 h-6 text-rose-400" />
                   </div>
-                  <ol className="list-decimal list-inside space-y-1.5 text-[11px] text-slate-300">
-                    <li className="leading-relaxed">
-                      Open{' '}
-                      <code className="text-cyan-300 font-mono bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
-                        chrome://settings/system
-                      </code>{' '}
-                      in browser address bar (or Settings &gt; System).
-                    </li>
-                    <li className="leading-relaxed">
-                      Toggle ON{' '}
-                      <strong className="text-slate-100">
-                        "Use graphics acceleration when available"
-                      </strong>
-                      .
-                    </li>
-                    <li className="leading-relaxed">Relaunch browser and retry.</li>
-                  </ol>
-                </div>
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setIs2DFallbackActive(true)}
-                    className="px-4 py-2 text-xs font-bold rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-colors shadow-sm shadow-cyan-950/50 cursor-pointer inline-flex items-center gap-1.5"
-                  >
-                    <Layers className="w-4 h-4" />
-                    <span>Switch to 2D Pocket Schematic</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setReloadTrigger((prev) => prev + 1)}
-                    className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors cursor-pointer inline-flex items-center gap-1.5"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Retry 3D WebGL</span>
-                  </button>
-                  <a
-                    href={`https://www.rcsb.org/structure/${cleanPdbId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors inline-flex items-center gap-1.5"
-                  >
-                    <span>View on RCSB</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                  </a>
+                  <div className="max-w-lg space-y-1.5">
+                    <h3 className="text-base font-bold text-rose-300">
+                      {`Unable to load 3D structure for ${cleanPdbId}`}
+                    </h3>
+                    <p className="text-xs text-slate-300">
+                      {isWebGlFailure
+                        ? 'WebGL is not supported or graphics acceleration is disabled in your current browser environment.'
+                        : 'Failed to stream macromolecular coordinates or structure. Please check your network connection or verify RCSB availability.'}
+                    </p>
+                    {loadError &&
+                      loadError !==
+                        'WebGL is not supported or graphics acceleration is disabled in your current browser environment.' && (
+                        <p className="text-[11px] text-slate-400 font-mono bg-slate-900/80 px-2 py-1 rounded border border-slate-800 inline-block">
+                          {loadError}
+                        </p>
+                      )}
+                  </div>
+
+                  {/* In-App Browser Diagnostic Card (displayed for WebGL issues) */}
+                  {isWebGlFailure && (
+                    <div className="max-w-md w-full bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-left shadow-lg space-y-2.5">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
+                        <Info className="w-4 h-4 text-cyan-400 shrink-0" />
+                        <span>How to enable graphics acceleration:</span>
+                      </div>
+                      <ol className="list-decimal list-inside space-y-1.5 text-[11px] text-slate-300">
+                        <li className="leading-relaxed">
+                          Open{' '}
+                          <code className="text-cyan-300 font-mono bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                            chrome://settings/system
+                          </code>{' '}
+                          in browser address bar (or Settings &gt; System).
+                        </li>
+                        <li className="leading-relaxed">
+                          Toggle ON{' '}
+                          <strong className="text-slate-100">
+                            "Use graphics acceleration when available"
+                          </strong>
+                          .
+                        </li>
+                        <li className="leading-relaxed">Relaunch browser and retry.</li>
+                      </ol>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setIs2DFallbackActive(true)}
+                      className="px-4 py-2 text-xs font-bold rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-colors shadow-sm shadow-cyan-950/50 cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      <Layers className="w-4 h-4" />
+                      <span>Switch to 2D Pocket Schematic</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setReloadTrigger((prev) => prev + 1)}
+                      className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Retry 3D WebGL</span>
+                    </button>
+                    <a
+                      href={`https://www.rcsb.org/structure/${cleanPdbId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors inline-flex items-center gap-1.5"
+                    >
+                      <span>View on RCSB</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                    </a>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </>
         )}
       </div>
