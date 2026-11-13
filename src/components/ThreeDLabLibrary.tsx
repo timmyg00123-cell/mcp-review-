@@ -13,19 +13,26 @@ import {
   Activity,
   X,
   ExternalLink,
+  Pill,
 } from 'lucide-react';
 import type { ChemicalStructure } from '../types/reviewModule';
+import type {
+  PharmacophorePkPdGroup,
+  KeyPocketResidueContact,
+} from '../types/structure3d';
 import {
   CANONICAL_MEDCHEM_TARGETS,
   findCanonicalTargetForDrug,
   type TargetPdbMapping,
 } from '../utils/canonicalTargets';
+import { findMedChemProfile } from '../data/canonicalPharmacophorePkData';
 import {
   fetchChemblBioactivity,
   type ChemblBioactivityRecord,
 } from '../services/chemblService';
 import { ThreeDLabCanvas } from './ThreeDLabCanvas';
 import { ThreeDLabTutorialModal } from './ThreeDLabTutorialModal';
+import { PharmacophorePkDrawer } from './PharmacophorePkDrawer';
 
 export interface ThreeDLabLibraryProps {
   initialDrugName?: string;
@@ -96,7 +103,11 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
   const [isLeftCollapsed, setIsLeftCollapsed] = useState<boolean>(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState<boolean>(false);
   const [isLeftDrawerOpen, setIsLeftDrawerOpen] = useState<boolean>(false);
-  const [isRightDrawerOpen, setIsRightDrawerOpen] = useState<boolean>(false);
+  const [activeRightDrawer, setActiveRightDrawer] = useState<'none' | 'chembl' | 'pharmacophore'>('none');
+
+  // Pharmacophore PK & PD State
+  const [activePharmacophoreGroup, setActivePharmacophoreGroup] = useState<PharmacophorePkPdGroup | null>(null);
+  const [selectedPocketResidue, setSelectedPocketResidue] = useState<KeyPocketResidueContact | null>(null);
 
   // ChEMBL SAR State
   const [chemblRecords, setChemblRecords] = useState<ChemblBioactivityRecord[]>([]);
@@ -109,6 +120,18 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
       (t) => t.pdbId.toUpperCase() === activePdbId.toUpperCase()
     );
   }, [activePdbId]);
+
+  // Look up canonical medchem profile
+  const medChemProfile = useMemo(
+    () => findMedChemProfile(currentTarget?.geneSymbol || activePdbId) || null,
+    [currentTarget, activePdbId]
+  );
+
+  // When target / drug / PDB changes, update activePharmacophoreGroup & clear selectedPocketResidue
+  useEffect(() => {
+    setActivePharmacophoreGroup(medChemProfile?.pharmacophoreGroups?.[0] || null);
+    setSelectedPocketResidue(null);
+  }, [medChemProfile, activePdbId, activeDrugName]);
 
   // Handle external prop changes
   useEffect(() => {
@@ -134,8 +157,8 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
       if (e.key === 'Escape') {
         if (isLeftDrawerOpen) {
           setIsLeftDrawerOpen(false);
-        } else if (isRightDrawerOpen) {
-          setIsRightDrawerOpen(false);
+        } else if (activeRightDrawer !== 'none') {
+          setActiveRightDrawer('none');
         } else {
           setIsFullscreen(false);
         }
@@ -146,7 +169,7 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isFullscreen, isLeftDrawerOpen, isRightDrawerOpen]);
+  }, [isFullscreen, isLeftDrawerOpen, activeRightDrawer]);
 
   // Fetch ChEMBL SAR whenever active drug changes
   useEffect(() => {
@@ -538,11 +561,28 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
           <ChevronRight className="w-3.5 h-3.5 text-cyan-400" />
         </button>
 
+        {/* Floating Slide-Out Drawer Tab (Right Edge): Pharmacophore PK */}
+        <button
+          type="button"
+          onClick={() =>
+            setActiveRightDrawer((prev) => (prev === 'pharmacophore' ? 'none' : 'pharmacophore'))
+          }
+          className="fixed right-0 top-20 z-[52] flex items-center gap-1.5 px-3 py-2 rounded-l-xl bg-slate-900/95 hover:bg-slate-850 text-indigo-300 border-y border-l border-indigo-500/50 shadow-2xl backdrop-blur-md transition-all cursor-pointer group hover:-translate-x-0.5 text-xs font-semibold"
+          title="Open Pharmacophore PK Drawer"
+          aria-label="Open Pharmacophore PK Drawer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Pharmacophore PK</span>
+          <Pill className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+        </button>
+
         {/* Floating Slide-Out Drawer Tab (Right Edge): ChEMBL SAR */}
         <button
           type="button"
-          onClick={() => setIsRightDrawerOpen(true)}
-          className="fixed right-0 top-20 z-[52] flex items-center gap-1.5 px-3 py-2 rounded-l-xl bg-slate-900/95 hover:bg-slate-850 text-purple-300 border-y border-l border-purple-500/50 shadow-2xl backdrop-blur-md transition-all cursor-pointer group hover:-translate-x-0.5 text-xs font-semibold"
+          onClick={() =>
+            setActiveRightDrawer((prev) => (prev === 'chembl' ? 'none' : 'chembl'))
+          }
+          className="fixed right-0 top-32 z-[52] flex items-center gap-1.5 px-3 py-2 rounded-l-xl bg-slate-900/95 hover:bg-slate-850 text-purple-300 border-y border-l border-purple-500/50 shadow-2xl backdrop-blur-md transition-all cursor-pointer group hover:-translate-x-0.5 text-xs font-semibold"
           title="Open ChEMBL SAR Drawer"
           aria-label="Open ChEMBL SAR Drawer"
         >
@@ -552,12 +592,12 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
         </button>
 
         {/* Backdrop for open drawers */}
-        {(isLeftDrawerOpen || isRightDrawerOpen) && (
+        {(isLeftDrawerOpen || activeRightDrawer === 'chembl') && (
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[55] transition-opacity animate-fadeIn"
             onClick={() => {
               setIsLeftDrawerOpen(false);
-              setIsRightDrawerOpen(false);
+              setActiveRightDrawer('none');
             }}
           />
         )}
@@ -593,7 +633,7 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
         {/* Right Drawer Panel: ChEMBL SAR */}
         <aside
           className={`fixed inset-y-0 right-0 w-80 sm:w-96 max-w-[85vw] bg-white dark:bg-slate-900 z-[60] shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 transition-transform duration-300 ease-in-out ${
-            isRightDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+            activeRightDrawer === 'chembl' ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
           <div className="p-3 bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
@@ -605,7 +645,7 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => setIsRightDrawerOpen(false)}
+              onClick={() => setActiveRightDrawer('none')}
               className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
               title="Close Drawer"
               aria-label="Close Drawer"
@@ -628,8 +668,26 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
             onOpenTutorial={() => setIsTutorialOpen(true)}
             targetName={currentTarget?.targetName}
             geneSymbol={currentTarget?.geneSymbol}
+            activePharmacophoreGroup={activePharmacophoreGroup}
+            onSelectPharmacophoreGroup={setActivePharmacophoreGroup}
+            onSelectPocketResidue={setSelectedPocketResidue}
+            isPkDrawerOpen={activeRightDrawer === 'pharmacophore'}
+            onTogglePkDrawer={() =>
+              setActiveRightDrawer((prev) => (prev === 'pharmacophore' ? 'none' : 'pharmacophore'))
+            }
           />
         </div>
+
+        {/* Pharmacophore PK & PD Drawer */}
+        <PharmacophorePkDrawer
+          isOpen={activeRightDrawer === 'pharmacophore'}
+          onClose={() => setActiveRightDrawer('none')}
+          activeGroup={activePharmacophoreGroup}
+          profile={medChemProfile}
+          selectedPocketResidue={selectedPocketResidue}
+          onSelectGroup={setActivePharmacophoreGroup}
+          onSelectPocketResidue={setSelectedPocketResidue}
+        />
 
         {/* Educational Tutorial Modal */}
         <ThreeDLabTutorialModal
@@ -747,8 +805,11 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
           {isRightCollapsed && (
             <button
               type="button"
-              onClick={() => setIsRightCollapsed(false)}
-              className="absolute right-2 top-2 z-30 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-purple-300 border border-purple-700/60 shadow-lg text-xs font-semibold backdrop-blur-xs transition-colors cursor-pointer"
+              onClick={() => {
+                setIsRightCollapsed(false);
+                setActiveRightDrawer('chembl');
+              }}
+              className="absolute right-2 top-2 z-30 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-850 text-purple-300 border border-purple-700/60 shadow-lg text-xs font-semibold backdrop-blur-xs transition-colors cursor-pointer"
               title="Expand ChEMBL SAR panel"
               aria-label="Expand ChEMBL SAR panel"
             >
@@ -765,6 +826,19 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
             onOpenTutorial={() => setIsTutorialOpen(true)}
             targetName={currentTarget?.targetName}
             geneSymbol={currentTarget?.geneSymbol}
+            activePharmacophoreGroup={activePharmacophoreGroup}
+            onSelectPharmacophoreGroup={setActivePharmacophoreGroup}
+            onSelectPocketResidue={setSelectedPocketResidue}
+            isPkDrawerOpen={activeRightDrawer === 'pharmacophore'}
+            onTogglePkDrawer={() => {
+              setActiveRightDrawer((prev) => {
+                const next = prev === 'pharmacophore' ? 'none' : 'pharmacophore';
+                if (next === 'pharmacophore') {
+                  setIsRightCollapsed(true);
+                }
+                return next;
+              });
+            }}
           />
         </div>
 
@@ -781,7 +855,12 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
               </span>
               <button
                 type="button"
-                onClick={() => setIsRightCollapsed(true)}
+                onClick={() => {
+                  setIsRightCollapsed(true);
+                  if (activeRightDrawer === 'chembl') {
+                    setActiveRightDrawer('none');
+                  }
+                }}
                 className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
                 title="Collapse ChEMBL SAR Panel"
                 aria-label="Collapse ChEMBL SAR Panel"
@@ -793,6 +872,17 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
           </div>
         ) : null}
       </div>
+
+      {/* Pharmacophore PK & PD Drawer */}
+      <PharmacophorePkDrawer
+        isOpen={activeRightDrawer === 'pharmacophore'}
+        onClose={() => setActiveRightDrawer('none')}
+        activeGroup={activePharmacophoreGroup}
+        profile={medChemProfile}
+        selectedPocketResidue={selectedPocketResidue}
+        onSelectGroup={setActivePharmacophoreGroup}
+        onSelectPocketResidue={setSelectedPocketResidue}
+      />
 
       {/* Educational Tutorial Modal */}
       <ThreeDLabTutorialModal
