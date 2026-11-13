@@ -10,8 +10,6 @@ import {
   AlertTriangle,
   Atom,
   Layers,
-  ChevronRight,
-  ShieldAlert,
 } from 'lucide-react';
 import type {
   PharmacophorePkPdGroup,
@@ -185,7 +183,7 @@ export const PharmacophorePkDrawer: React.FC<PharmacophorePkDrawerProps> = ({
                       {activeGroup.atomNames.map((atom) => (
                         <span
                           key={atom}
-                          className="bg-slate-800 px-1.5 py-0.2 rounded text-[11px] font-mono text-slate-300 border border-slate-700/60"
+                          className="bg-slate-800 px-1.5 py-0.5 rounded text-[11px] font-mono text-slate-300 border border-slate-700/60"
                         >
                           {atom}
                         </span>
