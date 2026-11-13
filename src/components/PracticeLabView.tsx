@@ -1,0 +1,464 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import type {
+  StruggleDiagnosticReport,
+  FlashcardItem,
+} from '../types/cumulativeStudy';
+import type { ReviewModule } from '../types/reviewModule';
+import { type ExamDefinition, getExamDefinition } from '../types/examTypes';
+import { getCumulativeQuestionBank } from '../data/cumulativeQuizData';
+import { harvestCumulativeFlashcards } from '../utils/cumulativeStructureHarvester';
+import { getTop200Flashcards } from '../utils/topDrugsTaxonomy';
+import { generateStruggleReport } from '../utils/struggleDiagnosticService';
+import { CumulativePracticeTestView } from './CumulativePracticeTestView';
+import { StructureFlashcardDeck } from './StructureFlashcardDeck';
+import { StruggleDiagnosticOverview } from './StruggleDiagnosticOverview';
+import {
+  GraduationCap,
+  X,
+  Layers,
+  Activity,
+  Sparkles,
+  BookOpenCheck,
+  RotateCcw,
+  ArrowRight,
+  ShieldAlert,
+} from 'lucide-react';
+
+export type PracticeLabTab = 'practice-test' | 'flashcards' | 'diagnostics';
+export type FlashcardDeckMode = 'curriculum' | 'top200';
+
+export interface PracticeLabViewProps {
+  initialTab?: PracticeLabTab;
+  activeExamId?: string;
+  activeExam?: ExamDefinition;
+  examModules?: ReviewModule[];
+  initialDeckMode?: FlashcardDeckMode;
+  onClose?: () => void;
+}
+
+/**
+ * Dedicated Full-Screen Practice Lab Workspace View
+ *
+ * Provides a first-class, unconstrained workspace for:
+ * 1. Practice Tests: Cross-curriculum SAR deduction with multi-select scoring
+ * 2. Structure Flashcards: Anki-style rapid structure-to-class recall deck (Curriculum or Top 200)
+ * 3. Struggle Diagnostics: Friction-point breakdown & 1-click targeted remediation drills
+ */
+export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
+  initialTab = 'practice-test',
+  activeExamId = 'exam_3',
+  activeExam,
+  examModules,
+  initialDeckMode = 'curriculum',
+  onClose,
+}) => {
+  const [activeTab, setActiveTab] = useState<PracticeLabTab>(initialTab);
+  const [activeReport, setActiveReport] = useState<StruggleDiagnosticReport | null>(null);
+  const [drillCandidateIds, setDrillCandidateIds] = useState<string[]>([]);
+  const [deckMode, setDeckMode] = useState<FlashcardDeckMode>(initialDeckMode);
+
+  const currentExam = useMemo(() => {
+    return activeExam || getExamDefinition(activeExamId);
+  }, [activeExam, activeExamId]);
+
+  // Update active tab if initialTab changes
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  // Harvest curriculum chemical structures for flashcard deck, scoped to active exam
+  const harvestedCards = useMemo(() => {
+    return harvestCumulativeFlashcards(examModules, activeExamId);
+  }, [examModules, activeExamId]);
+
+  // Standalone Top 200 Drugs deck (250 drugs across 39 therapeutic classes)
+  const top200Cards = useMemo(() => {
+    return getTop200Flashcards();
+  }, []);
+
+  // Active flashcards passed to deck depending on selected preset
+  const activeFlashcards = useMemo(() => {
+    return deckMode === 'top200' ? top200Cards : harvestedCards;
+  }, [deckMode, top200Cards, harvestedCards]);
+
+  // Base question bank scoped to the active exam
+  const baseQuestions = useMemo(() => {
+    return getCumulativeQuestionBank(activeExamId);
+  }, [activeExamId]);
+
+  // Filter or prioritize questions when drilling struggled items from diagnostics
+  const activeQuestions = useMemo(() => {
+    if (drillCandidateIds.length === 0) {
+      return baseQuestions;
+    }
+
+    const drillSet = new Set(drillCandidateIds.map((id) => id.toLowerCase().trim()));
+
+    const matchingQuestions = baseQuestions.filter((q) => {
+      // Check candidate structures (Types A, C, D)
+      if (
+        Array.isArray(q.candidateStructures) &&
+        q.candidateStructures.some(
+          (s) =>
+            drillSet.has(s.id.toLowerCase().trim()) ||
+            (s.name && drillSet.has(s.name.toLowerCase().trim())) ||
+            (s.document_label && drillSet.has(s.document_label.toLowerCase().trim()))
+        )
+      ) {
+        return true;
+      }
+
+      // Check single structure (Type B)
+      if (
+        q.singleStructure &&
+        (drillSet.has(q.singleStructure.id.toLowerCase().trim()) ||
+          (q.singleStructure.name && drillSet.has(q.singleStructure.name.toLowerCase().trim())) ||
+          (q.singleStructure.document_label &&
+            drillSet.has(q.singleStructure.document_label.toLowerCase().trim())))
+      ) {
+        return true;
+      }
+
+      // Check correct structure IDs
+      if (
+        Array.isArray(q.correctStructureIds) &&
+        q.correctStructureIds.some((id) => drillSet.has(id.toLowerCase().trim()))
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
+    return matchingQuestions.length > 0 ? matchingQuestions : baseQuestions;
+  }, [baseQuestions, drillCandidateIds]);
+
+  // Handle Practice Test completion
+  const handlePracticeTestComplete = (report: StruggleDiagnosticReport) => {
+    setActiveReport(report);
+    setActiveTab('diagnostics');
+  };
+
+  // Handle Flashcard Deck completion
+  const handleFlashcardSessionComplete = (
+    struggledCards: FlashcardItem[],
+    fullDeck: FlashcardItem[]
+  ) => {
+    const reportDeck = fullDeck.length > 0 ? fullDeck : struggledCards;
+    const report = generateStruggleReport({
+      sessionType: 'flashcards',
+      flashcardHistory: reportDeck,
+    });
+    setActiveReport(report);
+    setActiveTab('diagnostics');
+  };
+
+  // Handle drilling struggled structures from diagnostics overview
+  const handleDrillStruggled = (remediationIds: string[]) => {
+    setDrillCandidateIds(remediationIds);
+    setActiveTab('practice-test');
+  };
+
+  // Handle resetting diagnostics to start clean
+  const handleResetDiagnostics = () => {
+    setDrillCandidateIds([]);
+    setActiveReport(null);
+    setActiveTab('practice-test');
+  };
+
+  const tabs: Array<{
+    id: PracticeLabTab;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: string;
+  }> = [
+    {
+      id: 'practice-test',
+      label: 'Practice Test',
+      icon: BookOpenCheck,
+      badge: drillCandidateIds.length > 0 ? `Drill (${drillCandidateIds.length})` : undefined,
+    },
+    {
+      id: 'flashcards',
+      label: 'Structure Flashcards',
+      icon: Layers,
+      badge: `${activeFlashcards.length} Cards`,
+    },
+    {
+      id: 'diagnostics',
+      label: 'Struggle Diagnostics',
+      icon: Activity,
+      badge: activeReport ? `${activeReport.scorePercentage}%` : undefined,
+    },
+  ];
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0 bg-slate-50/50 dark:bg-slate-950/50 overflow-hidden">
+      {/* ==================================================== */}
+      {/* WORKSPACE HEADER                                     */}
+      {/* ==================================================== */}
+      <header className="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between gap-4 shrink-0 transition-colors">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2.5 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 shadow-2xs shrink-0">
+            <GraduationCap className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-2xs">
+                {currentExam.code}
+              </span>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 truncate">
+                <span>{currentExam.shortTitle} Practice Lab</span>
+                <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                  <Sparkles className="w-3 h-3 text-indigo-500" />
+                  {currentExam.chapters}
+                </span>
+              </h2>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+              {currentExam.description}
+            </p>
+          </div>
+        </div>
+
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+            title="Close Practice Lab"
+            aria-label="Close Practice Lab"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </header>
+
+      {/* ==================================================== */}
+      {/* SECONDARY SUB-NAVIGATION BAR                         */}
+      {/* ==================================================== */}
+      <nav
+        className="px-5 py-2.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0 overflow-x-auto"
+        aria-label="Practice Lab Tabs"
+      >
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+                {tab.badge && (
+                  <span
+                    className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {drillCandidateIds.length > 0 && activeTab === 'practice-test' && (
+          <button
+            type="button"
+            onClick={() => setDrillCandidateIds([])}
+            className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer shrink-0"
+            title="Clear remediation drill filter and restore full question bank"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span>Reset Filter</span>
+          </button>
+        )}
+      </nav>
+
+      {/* ==================================================== */}
+      {/* ACTIVE TAB CONTENT                                   */}
+      {/* ==================================================== */}
+      <main className="flex-1 overflow-y-auto min-h-0 bg-slate-50/50 dark:bg-slate-950/50">
+        {/* TAB 1: PRACTICE TEST VIEW */}
+        {activeTab === 'practice-test' && (
+          <div className="p-3 sm:p-6 space-y-4">
+            {drillCandidateIds.length > 0 && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl flex items-center justify-between gap-3 text-xs text-amber-900 dark:text-amber-200 animate-fadeIn">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>
+                    <strong className="font-bold">Targeted Remediation Active:</strong> Showing{' '}
+                    {activeQuestions.length} practice question
+                    {activeQuestions.length === 1 ? '' : 's'} addressing your {drillCandidateIds.length} struggled molecule
+                    {drillCandidateIds.length === 1 ? '' : 's'}.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDrillCandidateIds([])}
+                  className="font-bold underline hover:no-underline text-amber-700 dark:text-amber-300 cursor-pointer shrink-0"
+                >
+                  Show Full Bank
+                </button>
+              </div>
+            )}
+
+            <CumulativePracticeTestView
+              questions={activeQuestions}
+              onComplete={handlePracticeTestComplete}
+              onClose={onClose}
+            />
+          </div>
+        )}
+
+        {/* TAB 2: RAPID STRUCTURE FLASHCARDS */}
+        {activeTab === 'flashcards' && (
+          <div className="p-3 sm:p-6 space-y-4">
+            {/* Deck Preset Selector */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  Deck Preset:
+                </span>
+                <div
+                  className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700/60"
+                  role="tablist"
+                  aria-label="Flashcard Deck Preset"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={deckMode === 'curriculum'}
+                    onClick={() => setDeckMode('curriculum')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                      deckMode === 'curriculum'
+                        ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 font-semibold shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <span>Curriculum Structures</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                        deckMode === 'curriculum'
+                          ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
+                          : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                      }`}
+                    >
+                      {harvestedCards.length}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={deckMode === 'top200'}
+                    onClick={() => setDeckMode('top200')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                      deckMode === 'top200'
+                        ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 font-semibold shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <span>Top 200 Drugs Catalog</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                        deckMode === 'top200'
+                          ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
+                          : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                      }`}
+                    >
+                      {top200Cards.length}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                {deckMode === 'curriculum' ? (
+                  <span>Exam-aligned chemical structures harvested across review modules</span>
+                ) : (
+                  <span>Standalone 39-class national outpatient pharmacy catalog (250 drugs)</span>
+                )}
+              </div>
+            </div>
+
+            <StructureFlashcardDeck
+              key={deckMode}
+              cards={activeFlashcards}
+              onSessionComplete={handleFlashcardSessionComplete}
+              onClose={onClose}
+            />
+          </div>
+        )}
+
+        {/* TAB 3: STRUGGLE DIAGNOSTICS OVERVIEW */}
+        {activeTab === 'diagnostics' && (
+          <div className="p-3 sm:p-6">
+            {activeReport ? (
+              <StruggleDiagnosticOverview
+                report={activeReport}
+                onDrillStruggled={handleDrillStruggled}
+                onReset={handleResetDiagnostics}
+                onClose={onClose}
+              />
+            ) : (
+              /* Inviting empty state when no diagnostic session has been generated yet */
+              <div className="p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm my-6">
+                <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/60 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center shadow-2xs">
+                  <Activity className="w-8 h-8" />
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    No Diagnostic Session Completed Yet
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Complete a cross-curriculum practice test or run a structure recall flashcard
+                    session to analyze your friction points, class recall breakdown, and unlock
+                    1-click targeted remediation drills.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('practice-test')}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer"
+                  >
+                    <BookOpenCheck className="w-4 h-4" />
+                    <span>Start Practice Test</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('flashcards')}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+                  >
+                    <Layers className="w-4 h-4 text-indigo-500" />
+                    <span>Launch Flashcards</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};

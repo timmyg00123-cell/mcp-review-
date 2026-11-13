@@ -24,6 +24,9 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 
+export { PracticeLabView } from './PracticeLabView';
+export type { PracticeLabViewProps, PracticeLabTab } from './PracticeLabView';
+
 export interface CumulativeStudyHubModalProps {
   isOpen: boolean;
   onClose: () => void;
