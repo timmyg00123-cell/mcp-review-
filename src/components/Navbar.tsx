@@ -24,8 +24,8 @@ import {
   MoreHorizontal,
   Layers,
   Sun,
-  GraduationCap,
   Box,
+  FlaskConical,
 } from 'lucide-react';
 import { exportReviewModuleAsJson } from '../utils/jsonPortability';
 import { isStudentMode } from '../utils/envMode';
@@ -46,8 +46,8 @@ export interface NavbarProps {
   onOpenImportJson?: () => void;
   onOpenEditor: () => void;
   onOpenQuizSetup: () => void;
-  activeTab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab';
-  onSelectTab: (tab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab') => void;
+  activeTab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab' | 'practice-lab';
+  onSelectTab: (tab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab' | 'practice-lab') => void;
   pagesCount: number;
   showKnowledgeGraph?: boolean;
   hideDrugNames: boolean;
@@ -68,6 +68,7 @@ export interface NavbarProps {
   onToggleTheme?: () => void;
   onOpenSettings: () => void;
   onOpenPubChem: () => void;
+  /** @deprecated Cumulative practice test is now embedded in Practice Lab tab */
   onOpenCumulativeHub?: () => void;
 }
 
@@ -440,7 +441,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* ==================================================== */}
         {/* 2. CENTER ZONE (VIEWS): Centered Segmented Tab Bar   */}
         {/* ==================================================== */}
-        <div className="hidden lg:flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs font-medium">
+        <div className="hidden md:flex items-center overflow-x-auto p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs font-medium">
           <button
             type="button"
             onClick={() => onSelectTab('dashboard')}
@@ -476,6 +477,21 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             type="button"
+            disabled={examStatus === 'active'}
+            onClick={() => onSelectTab('practice-lab')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed ${
+              activeTab === 'practice-lab'
+                ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+            title="Practice Lab: SAR deduction practice tests, rapid flashcards, and struggle diagnostics"
+          >
+            <FlaskConical className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Practice Lab</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => onSelectTab('matrix')}
             className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 ${
               activeTab === 'matrix'
@@ -495,7 +511,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold flex items-center gap-1.5 ${
                 activeTab === 'knowledge-graph'
                   ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               title="Interactive Pharmacology Knowledge Graph"
             >
@@ -517,18 +533,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Box className="w-3.5 h-3.5 text-cyan-500" />
             <span>3D Lab</span>
           </button>
-
-          {!isStudentMode() && (
-            <button
-              type="button"
-              onClick={onOpenEditor}
-              className="px-3 py-1.5 rounded-lg transition-all cursor-pointer font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5"
-              title="Author or edit practice questions and clinical rationales"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>Question Studio</span>
-            </button>
-          )}
         </div>
 
         {/* ==================================================== */}
@@ -648,19 +652,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
 
-          {/* Cumulative MedChem Study Hub Action Button */}
-          {onOpenCumulativeHub && (
-            <button
-              type="button"
-              onClick={onOpenCumulativeHub}
-              className="px-2.5 py-1 text-xs font-semibold rounded-full border border-indigo-300 dark:border-indigo-800 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer group"
-              title="Open Cumulative Study Hub: Practice Test, Rapid Flashcards, and Diagnostic Overview"
-              aria-label="Open Cumulative Study Hub"
-            >
-              <GraduationCap className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline font-bold">Cumulative</span>
-            </button>
-          )}
 
           {/* Color Settings & Preferences Shortcut (Light Icon) */}
           <button

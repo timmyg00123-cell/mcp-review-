@@ -479,76 +479,91 @@ assert.ok(topReport.remediationCandidateIds.includes(topAgain.structureId));
 console.log(`✓ Validated 250 Top Drugs cards across all 39 therapeutic classes with pharmacophores & SRS diagnostics.\n`);
 
 // ============================================================================
-// Step 8: CumulativeStudyHubModal Top 200 Preset Integration Contract Verification
+// Step 8: PracticeLabView Integration & Keep-Alive Lifecycle Contract Verification
 // ============================================================================
-console.log('Step 8: Verifying CumulativeStudyHubModal Top 200 preset integration contract...');
+console.log('Step 8: Verifying PracticeLabView Top 200 preset & App keep-alive integration contracts...');
 
-const modalPath = 'src/components/CumulativeStudyHubModal.tsx';
-assert.ok(fs.existsSync(modalPath), `Component file ${modalPath} must exist`);
-const modalContent = fs.readFileSync(modalPath, 'utf-8');
+const practiceLabPath = 'src/components/PracticeLabView.tsx';
+assert.ok(fs.existsSync(practiceLabPath), `Component file ${practiceLabPath} must exist`);
+const practiceLabContent = fs.readFileSync(practiceLabPath, 'utf-8');
 
 // Contract 1: getTop200Flashcards import
 assert.ok(
-  modalContent.includes('getTop200Flashcards') &&
-    (modalContent.includes("from '../utils/topDrugsTaxonomy'") ||
-      modalContent.includes('from "../utils/topDrugsTaxonomy"')),
-  'CumulativeStudyHubModal must import getTop200Flashcards from ../utils/topDrugsTaxonomy'
+  practiceLabContent.includes('getTop200Flashcards') &&
+    (practiceLabContent.includes("from '../utils/topDrugsTaxonomy'") ||
+      practiceLabContent.includes('from "../utils/topDrugsTaxonomy"')),
+  'PracticeLabView must import getTop200Flashcards from ../utils/topDrugsTaxonomy'
 );
 
 // Contract 2: Deck preset state definition ('curriculum' | 'top200')
 assert.ok(
-  modalContent.includes('deckMode') || modalContent.includes('deckPreset'),
-  'CumulativeStudyHubModal must maintain deck preset state (deckMode or deckPreset)'
+  practiceLabContent.includes('deckMode') || practiceLabContent.includes('deckPreset'),
+  'PracticeLabView must maintain deck preset state (deckMode or deckPreset)'
 );
 assert.ok(
-  modalContent.includes("'curriculum'") && modalContent.includes("'top200'"),
-  "CumulativeStudyHubModal must support 'curriculum' and 'top200' preset modes"
+  practiceLabContent.includes("'curriculum'") && practiceLabContent.includes("'top200'"),
+  "PracticeLabView must support 'curriculum' and 'top200' preset modes"
 );
 
 // Contract 3: Memoized loading of Top 200 cards via getTop200Flashcards()
 assert.ok(
-  modalContent.includes('getTop200Flashcards()'),
-  'CumulativeStudyHubModal must invoke getTop200Flashcards()'
+  practiceLabContent.includes('getTop200Flashcards()'),
+  'PracticeLabView must invoke getTop200Flashcards()'
 );
 
 // Contract 4: Feeding active deck cards to StructureFlashcardDeck
 assert.ok(
-  modalContent.includes('<StructureFlashcardDeck') &&
-    (modalContent.includes('cards={active') ||
-      modalContent.includes('cards={deckMode') ||
-      modalContent.includes('cards={currentCards')),
-  'CumulativeStudyHubModal must supply the active deck cards to StructureFlashcardDeck based on the selected preset'
+  practiceLabContent.includes('<StructureFlashcardDeck') &&
+    (practiceLabContent.includes('cards={active') ||
+      practiceLabContent.includes('cards={deckMode') ||
+      practiceLabContent.includes('cards={currentCards')),
+  'PracticeLabView must supply the active deck cards to StructureFlashcardDeck based on the selected preset'
 );
 
 // Contract 5: Accessible toggle or selector buttons for both presets with count badges
 assert.ok(
-  modalContent.includes('Curriculum') || modalContent.includes('Curriculum Structures'),
-  'CumulativeStudyHubModal must render Curriculum preset option'
+  practiceLabContent.includes('Curriculum') || practiceLabContent.includes('Curriculum Structures'),
+  'PracticeLabView must render Curriculum preset option'
 );
 assert.ok(
-  modalContent.includes('Top 200') || modalContent.includes('Top 200 Drugs'),
-  'CumulativeStudyHubModal must render Top 200 preset option'
+  practiceLabContent.includes('Top 200') || practiceLabContent.includes('Top 200 Drugs'),
+  'PracticeLabView must render Top 200 preset option'
 );
 assert.ok(
-  modalContent.includes('harvestedCards.length'),
-  'CumulativeStudyHubModal must display harvestedCards count badge'
+  practiceLabContent.includes('harvestedCards.length'),
+  'PracticeLabView must display harvestedCards count badge'
 );
 assert.ok(
-  modalContent.includes('top200Cards.length'),
-  'CumulativeStudyHubModal must display top200Cards count badge'
+  practiceLabContent.includes('top200Cards.length'),
+  'PracticeLabView must display top200Cards count badge'
 );
 
 // Contract 6: Spaced repetition session completion & struggle diagnostics preserved
 assert.ok(
-  modalContent.includes('onSessionComplete={handleFlashcardSessionComplete}'),
-  'CumulativeStudyHubModal must pass handleFlashcardSessionComplete to StructureFlashcardDeck'
-);
-assert.ok(
-  modalContent.includes('onClose={onClose}'),
-  'CumulativeStudyHubModal must pass onClose to StructureFlashcardDeck'
+  practiceLabContent.includes('onSessionComplete={handleFlashcardSessionComplete}'),
+  'PracticeLabView must pass handleFlashcardSessionComplete to StructureFlashcardDeck'
 );
 
-console.log('✓ CumulativeStudyHubModal Top 200 preset integration contracts verified.\n');
+// Contract 7: App.tsx Keep-Alive Lifecycle & Full-Screen Workspace Integration
+const appPath = 'src/App.tsx';
+const appSource = fs.readFileSync(appPath, 'utf-8');
+assert.ok(
+  appSource.includes("import('./components/PracticeLabView')") ||
+    appSource.includes('import("./components/PracticeLabView")'),
+  'App.tsx must lazy-load PracticeLabView'
+);
+assert.ok(
+  appSource.includes("activeTab === 'practice-lab'") &&
+    appSource.includes("examStatus !== 'active'") &&
+    appSource.includes("'flex flex-1 flex-col min-h-0' : 'hidden'"),
+  'App.tsx must mount PracticeLabView inside a keep-alive container with flex-1 min-h-0'
+);
+assert.ok(
+  !appSource.includes('isCumulativeHubOpen'),
+  'App.tsx must not maintain legacy isCumulativeHubOpen modal state'
+);
+
+console.log('✓ PracticeLabView integration & App keep-alive lifecycle contracts verified.\n');
 
 console.log('========================================================================');
 console.log('🎉 END-TO-END CUMULATIVE STUDY HUB INTEGRATION WORKFLOW TEST PASSED!');
