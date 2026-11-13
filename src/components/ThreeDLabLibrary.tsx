@@ -171,6 +171,17 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
     };
   }, [isFullscreen, isLeftDrawerOpen, activeRightDrawer]);
 
+  // Dispatch window resize event whenever sidebar layout or fullscreen toggles
+  // to ensure Mol* WebGL viewport recalculates aspect ratio cleanly without clipping
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('resize'));
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [isFullscreen, isLeftCollapsed, isRightCollapsed, activeRightDrawer]);
+
   // Fetch ChEMBL SAR whenever active drug changes
   useEffect(() => {
     if (!activeDrugName) {

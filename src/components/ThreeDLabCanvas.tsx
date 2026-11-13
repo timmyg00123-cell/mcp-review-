@@ -621,8 +621,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   // Resize handler for Fullscreen toggles & Drawer expansion
   // --------------------------------------------------------------------------
   useEffect(() => {
-    if (viewerRef.current) {
-      const timer = setTimeout(() => {
+    const handleResize = () => {
+      if (viewerRef.current) {
         try {
           if (viewerRef.current.plugin?.canvas3d?.requestResize) {
             viewerRef.current.plugin.canvas3d.requestResize();
@@ -630,9 +630,25 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
             viewerRef.current.resize();
           }
         } catch (_) {}
-      }, 150);
-      return () => clearTimeout(timer);
+      }
+    };
+
+    const timer = setTimeout(handleResize, 150);
+    window.addEventListener('resize', handleResize);
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      observer = new ResizeObserver(() => {
+        handleResize();
+      });
+      observer.observe(containerRef.current);
     }
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+      observer?.disconnect();
+    };
   }, [isFullscreen]);
 
   return (
