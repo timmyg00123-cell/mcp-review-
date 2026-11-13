@@ -82,6 +82,10 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
         return;
       }
 
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+
       if (e.key === '1') {
         e.preventDefault();
         handleSelectTab('pharmacology');
