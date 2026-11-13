@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Atom,
-  RotateCcw,
-  ExternalLink,
-  Download,
   Search,
   ArrowLeft,
   Loader2,
-  Info,
   Layers,
   ChevronRight,
+  ChevronLeft,
   Database,
   Sliders,
+  Activity,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 import type { ChemicalStructure } from '../types/reviewModule';
 import {
@@ -24,6 +24,8 @@ import {
   fetchChemblBioactivity,
   type ChemblBioactivityRecord,
 } from '../services/chemblService';
+import { ThreeDLabCanvas } from './ThreeDLabCanvas';
+import { ThreeDLabTutorialModal } from './ThreeDLabTutorialModal';
 
 export interface ThreeDLabLibraryProps {
   initialDrugName?: string;
@@ -87,7 +89,14 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [customPdbInput, setCustomPdbInput] = useState('');
   const [customPdbError, setCustomPdbError] = useState<string | null>(null);
-  const [iframeKey, setIframeKey] = useState<number>(0);
+
+  // Fullscreen, Tutorial & Sidebar/Drawer states
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState<boolean>(false);
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState<boolean>(false);
+  const [isRightCollapsed, setIsRightCollapsed] = useState<boolean>(false);
+  const [isLeftDrawerOpen, setIsLeftDrawerOpen] = useState<boolean>(false);
+  const [isRightDrawerOpen, setIsRightDrawerOpen] = useState<boolean>(false);
 
   // ChEMBL SAR State
   const [chemblRecords, setChemblRecords] = useState<ChemblBioactivityRecord[]>([]);
@@ -116,6 +125,28 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
       }
     }
   }, [initialDrugName, initialPdbId]);
+
+  // Handle Escape key to exit full-screen mode or close open drawers
+  useEffect(() => {
+    if (!isFullscreen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isLeftDrawerOpen) {
+          setIsLeftDrawerOpen(false);
+        } else if (isRightDrawerOpen) {
+          setIsRightDrawerOpen(false);
+        } else {
+          setIsFullscreen(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFullscreen, isLeftDrawerOpen, isRightDrawerOpen]);
 
   // Fetch ChEMBL SAR whenever active drug changes
   useEffect(() => {
@@ -153,11 +184,9 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
   // Combine structures from current module with canonical target example drugs
   const availableDrugsList = useMemo(() => {
     const set = new Set<string>();
-    // From module structures
     structures.forEach((s) => {
       if (s.name && s.name.trim()) set.add(s.name.trim());
     });
-    // From canonical targets
     CANONICAL_MEDCHEM_TARGETS.forEach((t) => {
       t.exampleDrugs.forEach((d) => set.add(d.trim()));
     });
@@ -197,9 +226,7 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
     }
     setCustomPdbError(null);
     setActivePdbId(cleaned);
-    setIframeKey((prev) => prev + 1);
 
-    // If matches a canonical target, sync drug
     const match = CANONICAL_MEDCHEM_TARGETS.find((t) => t.pdbId.toUpperCase() === cleaned);
     if (match && match.exampleDrugs.length > 0) {
       setActiveDrugName(match.exampleDrugs[0]);
@@ -210,7 +237,6 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
   const handleSelectTarget = (target: TargetPdbMapping) => {
     setActivePdbId(target.pdbId.toUpperCase());
     if (target.exampleDrugs.length > 0) {
-      // Pick first drug or keep current if it belongs to this target
       const currentInTarget = target.exampleDrugs.some(
         (d) => d.toLowerCase() === activeDrugName.toLowerCase()
       );
@@ -218,7 +244,6 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
         setActiveDrugName(target.exampleDrugs[0]);
       }
     }
-    setIframeKey((prev) => prev + 1);
   };
 
   // Handle drug selection
@@ -227,7 +252,6 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
     const canonical = findCanonicalTargetForDrug(drugName);
     if (canonical) {
       setActivePdbId(canonical.pdbId.toUpperCase());
-      setIframeKey((prev) => prev + 1);
     }
   };
 
@@ -244,8 +268,383 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
     return record?.mechanismOfAction;
   }, [chemblRecords]);
 
+  // Compute center canvas grid span in regular mode
+  const centerColSpanClass = useMemo(() => {
+    if (isLeftCollapsed && isRightCollapsed) return 'lg:col-span-12';
+    if (isLeftCollapsed || isRightCollapsed) return 'lg:col-span-9';
+    return 'lg:col-span-6';
+  }, [isLeftCollapsed, isRightCollapsed]);
+
+  // --------------------------------------------------------------------------
+  // Sub-renderers for Reusable Panels (Sidebars & Drawers)
+  // --------------------------------------------------------------------------
+
+  const renderTargetSelectorContent = () => (
+    <div className="flex flex-col h-full min-h-0">
+      {/* Drug Selector Autocomplete / Dropdown */}
+      <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2 shrink-0">
+        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <Atom className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+          <span>Select Molecule / Drug:</span>
+        </label>
+        <select
+          value={activeDrugName}
+          onChange={(e) => handleSelectDrug(e.target.value)}
+          className="w-full text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-cyan-500 cursor-pointer"
+        >
+          {availableDrugsList.map((drug) => (
+            <option key={drug} value={drug}>
+              {drug}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Search Targets & Custom PDB Input */}
+      <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2 shrink-0 bg-slate-50/50 dark:bg-slate-900/40">
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+          <input
+            type="text"
+            placeholder="Search target, gene, or drug..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-cyan-500"
+          />
+        </div>
+
+        {/* Custom PDB ID loader */}
+        <form onSubmit={handleLoadCustomPdb} className="space-y-1">
+          <div className="flex items-center gap-1.5">
+            <input
+              type="text"
+              maxLength={4}
+              placeholder="Custom PDB (e.g. 4NTJ)"
+              value={customPdbInput}
+              onChange={(e) => {
+                setCustomPdbInput(e.target.value);
+                if (customPdbError) setCustomPdbError(null);
+              }}
+              className="flex-1 px-2.5 py-1 text-xs font-mono uppercase rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-cyan-500"
+            />
+            <button
+              type="submit"
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white transition-colors cursor-pointer shrink-0"
+            >
+              Load
+            </button>
+          </div>
+          {customPdbError && (
+            <p className="text-[11px] text-rose-500 font-medium">{customPdbError}</p>
+          )}
+        </form>
+      </div>
+
+      {/* Canonical Targets Grouped Accordion / List */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+        <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span>Curricular Targets</span>
+          <span className="font-mono text-[10px]">
+            {Object.values(groupedTargets).reduce((acc, g) => acc + g.length, 0)} PDBs
+          </span>
+        </div>
+
+        {Object.keys(groupedTargets).length === 0 ? (
+          <div className="p-4 text-center text-xs text-slate-400">
+            No matching targets found for &quot;{searchQuery}&quot;
+          </div>
+        ) : (
+          Object.entries(groupedTargets).map(([category, targets]) => (
+            <div key={category} className="space-y-1.5">
+              <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                <Layers className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+                <span>{category}</span>
+              </div>
+
+              <div className="space-y-1">
+                {targets.map((t) => {
+                  const isSelected = t.pdbId.toUpperCase() === activePdbId.toUpperCase();
+                  return (
+                    <button
+                      key={t.pdbId}
+                      type="button"
+                      onClick={() => handleSelectTarget(t)}
+                      className={`w-full text-left p-2 rounded-lg border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-cyan-50 dark:bg-cyan-950/40 border-cyan-300 dark:border-cyan-700 shadow-2xs'
+                          : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
+                          {t.targetName}
+                        </span>
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
+                          {t.pdbId}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                        <span className="font-mono">{t.geneSymbol}</span>
+                        <span className="truncate max-w-[120px] italic">
+                          {t.exampleDrugs.join(', ')}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
+  const renderChemblSarContent = () => (
+    <div className="flex flex-col h-full min-h-0">
+      {/* ChEMBL Header */}
+      <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2 shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 font-bold text-xs text-slate-900 dark:text-slate-100">
+            <Database className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+            <span>ChEMBL Bioactivity & SAR</span>
+          </div>
+          <a
+            href={`https://www.ebi.ac.uk/chembl/g/#search_results/${encodeURIComponent(activeDrugName)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
+            title="Search ChEMBL directly"
+          >
+            <span>EMBL-EBI</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </a>
+        </div>
+
+        {/* Mechanism of Action */}
+        {primaryMechanism && (
+          <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 text-xs">
+            <span className="font-semibold text-purple-900 dark:text-purple-300 block text-[11px] mb-0.5">
+              Mechanism of Action:
+            </span>
+            <span className="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
+              {primaryMechanism}
+            </span>
+          </div>
+        )}
+
+        {/* Standard Type Filter Tabs */}
+        <div className="flex items-center gap-1 pt-1 overflow-x-auto text-[10px] font-mono">
+          {['ALL', 'KI', 'IC50', 'KD', 'EC50'].map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setActiveActivityFilter(type)}
+              className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+                activeActivityFilter === type
+                  ? 'bg-purple-600 text-white font-bold'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Activities List */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2.5 min-h-0">
+        {isChemblLoading ? (
+          <div className="p-8 text-center space-y-2">
+            <Loader2 className="w-5 h-5 text-purple-600 dark:text-purple-400 animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Fetching ChEMBL binding data for {activeDrugName}...
+            </p>
+          </div>
+        ) : filteredActivities.length === 0 ? (
+          <div className="p-6 text-center space-y-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              No quantitative binding data ({activeActivityFilter}) found in ChEMBL for &quot;
+              {activeDrugName}&quot;.
+            </p>
+            <a
+              href={`https://www.ebi.ac.uk/chembl/g/#search_results/${encodeURIComponent(activeDrugName)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
+            >
+              <span>Search ChEMBL Database</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        ) : (
+          filteredActivities.map((act, idx) => (
+            <div
+              key={`${act.moleculeChemblId}_${idx}`}
+              className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 hover:border-purple-300 dark:hover:border-purple-700 transition-colors space-y-1.5 shadow-2xs"
+            >
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[140px]">
+                  {act.targetName || act.prefName}
+                </span>
+                {act.standardType && (
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                    {act.standardType}
+                  </span>
+                )}
+              </div>
+
+              {/* Quantitative Value & Units */}
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-500 dark:text-slate-400">Affinity:</span>
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                  {act.relation ? `${act.relation} ` : ''}
+                  {act.standardValue != null ? `${act.standardValue} ${act.standardUnits || 'nM'}` : 'N/A'}
+                </span>
+              </div>
+
+              {/* pChEMBL value */}
+              {act.pchemblValue != null && (
+                <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100 dark:border-slate-800/60">
+                  <span className="text-slate-500 dark:text-slate-400">pChEMBL (-log M):</span>
+                  <span className="font-mono font-bold text-purple-600 dark:text-purple-400">
+                    {act.pchemblValue.toFixed(2)}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
+  // --------------------------------------------------------------------------
+  // FULLSCREEN MODE RENDER
+  // --------------------------------------------------------------------------
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-950 w-screen h-screen overflow-hidden flex flex-col">
+        {/* Floating Slide-Out Drawer Tab (Left Edge): Targets & Drugs */}
+        <button
+          type="button"
+          onClick={() => setIsLeftDrawerOpen(true)}
+          className="fixed left-0 top-20 z-[52] flex items-center gap-1.5 px-3 py-2 rounded-r-xl bg-slate-900/95 hover:bg-slate-850 text-cyan-300 border-y border-r border-cyan-500/50 shadow-2xl backdrop-blur-md transition-all cursor-pointer group hover:translate-x-0.5 text-xs font-semibold"
+          title="Open Targets & Drugs Drawer"
+          aria-label="Open Targets & Drugs Drawer"
+        >
+          <Sliders className="w-4 h-4 text-cyan-400 group-hover:rotate-45 transition-transform" />
+          <span>Targets & Drugs</span>
+          <ChevronRight className="w-3.5 h-3.5 text-cyan-400" />
+        </button>
+
+        {/* Floating Slide-Out Drawer Tab (Right Edge): ChEMBL SAR */}
+        <button
+          type="button"
+          onClick={() => setIsRightDrawerOpen(true)}
+          className="fixed right-0 top-20 z-[52] flex items-center gap-1.5 px-3 py-2 rounded-l-xl bg-slate-900/95 hover:bg-slate-850 text-purple-300 border-y border-l border-purple-500/50 shadow-2xl backdrop-blur-md transition-all cursor-pointer group hover:-translate-x-0.5 text-xs font-semibold"
+          title="Open ChEMBL SAR Drawer"
+          aria-label="Open ChEMBL SAR Drawer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 text-purple-400" />
+          <span>ChEMBL SAR</span>
+          <Activity className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+        </button>
+
+        {/* Backdrop for open drawers */}
+        {(isLeftDrawerOpen || isRightDrawerOpen) && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[55] transition-opacity animate-fadeIn"
+            onClick={() => {
+              setIsLeftDrawerOpen(false);
+              setIsRightDrawerOpen(false);
+            }}
+          />
+        )}
+
+        {/* Left Drawer Panel: Targets & Drugs */}
+        <aside
+          className={`fixed inset-y-0 left-0 w-80 sm:w-96 max-w-[85vw] bg-white dark:bg-slate-900 z-[60] shadow-2xl flex flex-col border-r border-slate-200 dark:border-slate-800 transition-transform duration-300 ease-in-out ${
+            isLeftDrawerOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <div className="p-3 bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-cyan-500" />
+              <span className="text-xs font-bold text-slate-900 dark:text-white">
+                Targets & Drugs
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsLeftDrawerOpen(false)}
+              className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
+              title="Close Drawer"
+              aria-label="Close Drawer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {renderTargetSelectorContent()}
+          </div>
+        </aside>
+
+        {/* Right Drawer Panel: ChEMBL SAR */}
+        <aside
+          className={`fixed inset-y-0 right-0 w-80 sm:w-96 max-w-[85vw] bg-white dark:bg-slate-900 z-[60] shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 transition-transform duration-300 ease-in-out ${
+            isRightDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <div className="p-3 bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-purple-500" />
+              <span className="text-xs font-bold text-slate-900 dark:text-white">
+                ChEMBL SAR Profile
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsRightDrawerOpen(false)}
+              className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
+              title="Close Drawer"
+              aria-label="Close Drawer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {renderChemblSarContent()}
+          </div>
+        </aside>
+
+        {/* 100% Center 3D Mol Canvas */}
+        <div className="flex-1 w-full h-full relative overflow-hidden">
+          <ThreeDLabCanvas
+            pdbId={activePdbId}
+            preferredLigandCode={currentTarget?.preferredLigandCode || currentTarget?.ligandCode}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={() => setIsFullscreen(false)}
+            onOpenTutorial={() => setIsTutorialOpen(true)}
+            targetName={currentTarget?.targetName}
+            geneSymbol={currentTarget?.geneSymbol}
+          />
+        </div>
+
+        {/* Educational Tutorial Modal */}
+        <ThreeDLabTutorialModal
+          isOpen={isTutorialOpen}
+          onClose={() => setIsTutorialOpen(false)}
+        />
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // REGULAR MODE RENDER
+  // --------------------------------------------------------------------------
   return (
-    <div className="flex flex-col h-[calc(100vh-5.5rem)] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+    <div className="flex flex-col h-[calc(100vh-5.5rem)] min-h-[580px] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
       {/* ==================================================== */}
       {/* 1. TOP HEADER & NAVIGATION BAR                       */}
       {/* ==================================================== */}
@@ -300,334 +699,106 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
       </header>
 
       {/* ==================================================== */}
-      {/* 2. THREE-PANEL WORKSPACE                             */}
+      {/* 2. THREE-PANEL WORKSPACE WITH COLLAPSIBLE SIDEBARS   */}
       {/* ==================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-hidden min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-hidden min-h-0 relative">
         {/* ==================================================== */}
         {/* LEFT PANEL: Target & Molecule Selector (3 cols)     */}
         {/* ==================================================== */}
-        <div className="lg:col-span-3 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex flex-col min-h-0 overflow-hidden">
-          {/* Drug Selector Autocomplete / Dropdown */}
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2 shrink-0">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-              <Atom className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>Select Molecule / Drug:</span>
-            </label>
-            <select
-              value={activeDrugName}
-              onChange={(e) => handleSelectDrug(e.target.value)}
-              className="w-full text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-cyan-500 cursor-pointer"
-            >
-              {availableDrugsList.map((drug) => (
-                <option key={drug} value={drug}>
-                  {drug}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Search Targets & Custom PDB Input */}
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2 shrink-0 bg-slate-50/50 dark:bg-slate-900/40">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-              <input
-                type="text"
-                placeholder="Search target, gene, or drug..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-cyan-500"
-              />
-            </div>
-
-            {/* Custom PDB ID loader */}
-            <form onSubmit={handleLoadCustomPdb} className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="text"
-                  maxLength={4}
-                  placeholder="Custom PDB (e.g. 4NTJ)"
-                  value={customPdbInput}
-                  onChange={(e) => {
-                    setCustomPdbInput(e.target.value);
-                    if (customPdbError) setCustomPdbError(null);
-                  }}
-                  className="flex-1 px-2.5 py-1 text-xs font-mono uppercase rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-cyan-500"
-                />
-                <button
-                  type="submit"
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white transition-colors cursor-pointer shrink-0"
-                >
-                  Load
-                </button>
-              </div>
-              {customPdbError && (
-                <p className="text-[11px] text-rose-500 font-medium">{customPdbError}</p>
-              )}
-            </form>
-          </div>
-
-          {/* Canonical Targets Grouped Accordion / List */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-4">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              <span>Curricular Targets</span>
-              <span className="font-mono text-[10px]">
-                {Object.values(groupedTargets).reduce((acc, g) => acc + g.length, 0)} PDBs
+        {!isLeftCollapsed ? (
+          <div className="lg:col-span-3 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex flex-col min-h-0 overflow-hidden">
+            {/* Header with collapse button */}
+            <div className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                <span>Targets & Drugs</span>
               </span>
-            </div>
-
-            {Object.keys(groupedTargets).length === 0 ? (
-              <div className="p-4 text-center text-xs text-slate-400">
-                No matching targets found for &quot;{searchQuery}&quot;
-              </div>
-            ) : (
-              Object.entries(groupedTargets).map(([category, targets]) => (
-                <div key={category} className="space-y-1.5">
-                  <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
-                    <Layers className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
-                    <span>{category}</span>
-                  </div>
-
-                  <div className="space-y-1">
-                    {targets.map((t) => {
-                      const isSelected = t.pdbId.toUpperCase() === activePdbId.toUpperCase();
-                      return (
-                        <button
-                          key={t.pdbId}
-                          type="button"
-                          onClick={() => handleSelectTarget(t)}
-                          className={`w-full text-left p-2 rounded-lg border transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-cyan-50 dark:bg-cyan-950/40 border-cyan-300 dark:border-cyan-700 shadow-2xs'
-                              : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
-                              {t.targetName}
-                            </span>
-                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
-                              {t.pdbId}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                            <span className="font-mono">{t.geneSymbol}</span>
-                            <span className="truncate max-w-[120px] italic">
-                              {t.exampleDrugs.join(', ')}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* ==================================================== */}
-        {/* CENTER PANEL: Mol* 3D Viewer & Controls (6 cols)     */}
-        {/* ==================================================== */}
-        <div className="lg:col-span-6 flex flex-col min-h-0 bg-slate-900 text-white relative">
-          {/* PDB Info & Quick-Actions Bar */}
-          <div className="px-3 py-2 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0 z-10">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 font-mono font-bold rounded bg-cyan-900/60 text-cyan-300 border border-cyan-700/60">
-                {activePdbId}
-              </span>
-              <span className="font-semibold text-slate-200 truncate max-w-[200px] sm:max-w-[280px]">
-                {currentTarget?.targetName || 'Co-crystal Complex'}
-              </span>
-              {currentTarget?.geneSymbol && (
-                <span className="text-[10px] font-mono text-slate-400">
-                  [{currentTarget.geneSymbol}]
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setIframeKey((prev) => prev + 1)}
-                className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
-                title="Reload 3D Structure Viewer"
+                onClick={() => setIsLeftCollapsed(true)}
+                className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
+                title="Collapse Targets Panel"
+                aria-label="Collapse Targets Panel"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
-              <a
-                href={`https://www.rcsb.org/structure/${activePdbId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors font-medium text-[11px]"
-                title="View on RCSB PDB Portal"
-              >
-                <span>RCSB</span>
-                <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
-              <a
-                href={`https://files.rcsb.org/download/${activePdbId}.cif`}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
-                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 transition-colors font-medium text-[11px]"
-                title="Download mmCIF Coordinate File"
-              >
-                <Download className="w-3 h-3" />
-                <span>CIF</span>
-              </a>
             </div>
+            {renderTargetSelectorContent()}
           </div>
+        ) : null}
 
-          {/* Interactive Mol* 3D Web Viewer Iframe */}
-          <div className="flex-1 w-full relative bg-slate-950 overflow-hidden">
-            <iframe
-              key={iframeKey}
-              src={`https://www.rcsb.org/3d-view/${encodeURIComponent(activePdbId)}`}
-              title={`3D Mol* Structure Viewer for PDB ${activePdbId}`}
-              className="w-full h-full border-0 absolute inset-0"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-            />
-          </div>
+        {/* Center Panel (3Dmol Canvas): 6, 9, or 12 cols */}
+        <div className={`${centerColSpanClass} flex flex-col min-h-[580px] h-[calc(100vh-14rem)] bg-slate-900 text-white relative overflow-hidden`}>
+          {/* Floating Expand Left Sidebar Button when collapsed */}
+          {isLeftCollapsed && (
+            <button
+              type="button"
+              onClick={() => setIsLeftCollapsed(false)}
+              className="absolute left-2 top-2 z-30 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-700/60 shadow-lg text-xs font-semibold backdrop-blur-xs transition-colors cursor-pointer"
+              title="Expand Targets & Drugs panel"
+              aria-label="Expand Targets & Drugs panel"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+              <span>Targets & Drugs</span>
+            </button>
+          )}
 
-          {/* Navigation Controls Tip Banner */}
-          <div className="px-3 py-1.5 bg-slate-950/95 border-t border-slate-800/80 text-[11px] text-slate-400 flex flex-wrap items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-1.5 text-cyan-400 font-medium">
-              <Info className="w-3.5 h-3.5" />
-              <span>Navigation:</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-slate-300">
-              <span>Rotate: Left-drag</span>
-              <span>•</span>
-              <span>Pan: Right-drag</span>
-              <span>•</span>
-              <span>Zoom: Scroll</span>
-              <span>•</span>
-              <span>Focus Ligand: Right-click atom</span>
-            </div>
-          </div>
+          {/* Floating Expand Right Sidebar Button when collapsed */}
+          {isRightCollapsed && (
+            <button
+              type="button"
+              onClick={() => setIsRightCollapsed(false)}
+              className="absolute right-2 top-2 z-30 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-purple-300 border border-purple-700/60 shadow-lg text-xs font-semibold backdrop-blur-xs transition-colors cursor-pointer"
+              title="Expand ChEMBL SAR panel"
+              aria-label="Expand ChEMBL SAR panel"
+            >
+              <span>ChEMBL SAR</span>
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          <ThreeDLabCanvas
+            pdbId={activePdbId}
+            preferredLigandCode={currentTarget?.preferredLigandCode || currentTarget?.ligandCode}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={() => setIsFullscreen(true)}
+            onOpenTutorial={() => setIsTutorialOpen(true)}
+            targetName={currentTarget?.targetName}
+            geneSymbol={currentTarget?.geneSymbol}
+          />
         </div>
 
         {/* ==================================================== */}
         {/* RIGHT PANEL: ChEMBL Quantitative SAR Panel (3 cols)  */}
         {/* ==================================================== */}
-        <div className="lg:col-span-3 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex flex-col min-h-0 overflow-hidden">
-          {/* ChEMBL Header */}
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2 shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 font-bold text-xs text-slate-900 dark:text-slate-100">
-                <Database className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                <span>ChEMBL Bioactivity & SAR</span>
-              </div>
-              <a
-                href={`https://www.ebi.ac.uk/chembl/g/#search_results/${encodeURIComponent(activeDrugName)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
-                title="Search ChEMBL directly"
+        {!isRightCollapsed ? (
+          <div className="lg:col-span-3 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex flex-col min-h-0 overflow-hidden">
+            {/* Header with collapse button */}
+            <div className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                <span>ChEMBL SAR</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsRightCollapsed(true)}
+                className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
+                title="Collapse ChEMBL SAR Panel"
+                aria-label="Collapse ChEMBL SAR Panel"
               >
-                <span>EMBL-EBI</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
-
-            {/* Mechanism of Action */}
-            {primaryMechanism && (
-              <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 text-xs">
-                <span className="font-semibold text-purple-900 dark:text-purple-300 block text-[11px] mb-0.5">
-                  Mechanism of Action:
-                </span>
-                <span className="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
-                  {primaryMechanism}
-                </span>
-              </div>
-            )}
-
-            {/* Standard Type Filter Tabs */}
-            <div className="flex items-center gap-1 pt-1 overflow-x-auto text-[10px] font-mono">
-              {['ALL', 'KI', 'IC50', 'KD', 'EC50'].map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setActiveActivityFilter(type)}
-                  className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
-                    activeActivityFilter === type
-                      ? 'bg-purple-600 text-white font-bold'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
+            {renderChemblSarContent()}
           </div>
-
-          {/* Activities List */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-2.5 min-h-0">
-            {isChemblLoading ? (
-              <div className="p-8 text-center space-y-2">
-                <Loader2 className="w-5 h-5 text-purple-600 dark:text-purple-400 animate-spin mx-auto" />
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  Fetching ChEMBL binding data for {activeDrugName}...
-                </p>
-              </div>
-            ) : filteredActivities.length === 0 ? (
-              <div className="p-6 text-center space-y-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  No quantitative binding data ({activeActivityFilter}) found in ChEMBL for &quot;
-                  {activeDrugName}&quot;.
-                </p>
-                <a
-                  href={`https://www.ebi.ac.uk/chembl/g/#search_results/${encodeURIComponent(activeDrugName)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900 transition-colors"
-                >
-                  <span>Search ChEMBL Database</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-            ) : (
-              filteredActivities.map((act, idx) => (
-                <div
-                  key={`${act.moleculeChemblId}_${idx}`}
-                  className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 hover:border-purple-300 dark:hover:border-purple-700 transition-colors space-y-1.5 shadow-2xs"
-                >
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[140px]">
-                      {act.targetName || act.prefName}
-                    </span>
-                    {act.standardType && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-                        {act.standardType}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Quantitative Value & Units */}
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-500 dark:text-slate-400">Affinity:</span>
-                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                      {act.relation ? `${act.relation} ` : ''}
-                      {act.standardValue != null ? `${act.standardValue} ${act.standardUnits || 'nM'}` : 'N/A'}
-                    </span>
-                  </div>
-
-                  {/* pChEMBL value */}
-                  {act.pchemblValue != null && (
-                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100 dark:border-slate-800/60">
-                      <span className="text-slate-500 dark:text-slate-400">pChEMBL (-log M):</span>
-                      <span className="font-mono font-bold text-purple-600 dark:text-purple-400">
-                        {act.pchemblValue.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        ) : null}
       </div>
+
+      {/* Educational Tutorial Modal */}
+      <ThreeDLabTutorialModal
+        isOpen={isTutorialOpen}
+        onClose={() => setIsTutorialOpen(false)}
+      />
     </div>
   );
 };

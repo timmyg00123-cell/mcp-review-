@@ -1820,7 +1820,7 @@ function AppContent() {
         {/* TAB 5: 3D MOLECULAR LAB & SAR STUDIO                 */}
         {/* ==================================================== */}
         {activeTab === '3d-lab' && examStatus !== 'active' && (
-          <div className="w-full min-h-[calc(100vh-4rem)] p-4 max-w-7xl mx-auto">
+          <div className="w-full min-h-[calc(100vh-4rem)] p-2 sm:p-4 max-w-[1920px] mx-auto">
             <ThreeDLabLibrary
               initialDrugName={selected3DDrug}
               initialPdbId={selected3DPdbId}

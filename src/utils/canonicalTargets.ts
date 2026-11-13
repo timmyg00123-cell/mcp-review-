@@ -12,6 +12,7 @@ export interface TargetPdbMapping {
   exampleDrugs: string[];
   chemblTargetId?: string;
   ligandCode?: string; // 3-letter HETATM residue code in PDB co-crystal
+  preferredLigandCode?: string; // Alias for curated ligand code in 3D viewer
 }
 
 export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
