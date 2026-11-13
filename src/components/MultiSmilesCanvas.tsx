@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dna, Layers, Shield } from 'lucide-react';
+import { Dna, Layers } from 'lucide-react';
 import type { TopDrugStructureRecord, MultiComponentPart } from '../data/topDrugsSmilesData.js';
 import { SmilesCanvas } from './SmilesCanvas.js';
 import {
