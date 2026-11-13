@@ -24,7 +24,6 @@ import {
   MoreHorizontal,
   Layers,
   Sun,
-  GraduationCap,
   Box,
   FlaskConical,
 } from 'lucide-react';
