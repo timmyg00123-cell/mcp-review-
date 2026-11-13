@@ -35,6 +35,7 @@ import {
   getCachedCoordinateUrl,
   isMolstarSupported,
 } from '../services/molstarLoader';
+import { TwoDPocketFallbackView } from './TwoDPocketFallbackView';
 
 export interface ThreeDLabCanvasProps {
   pdbId: string;
@@ -49,6 +50,8 @@ export interface ThreeDLabCanvasProps {
   onSelectPocketResidue?: (residue: KeyPocketResidueContact | null) => void;
   isPkDrawerOpen?: boolean;
   onTogglePkDrawer?: () => void;
+  initial2DFallback?: boolean;
+  initialLoadError?: string | null;
 }
 
 declare global {
@@ -88,11 +91,14 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   onSelectPocketResidue,
   isPkDrawerOpen,
   onTogglePkDrawer,
+  initial2DFallback = false,
+  initialLoadError = null,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
 
-  // Scene toggles & state
+  // Scene toggles & mode state
+  const [is2DFallbackActive, setIs2DFallbackActive] = useState<boolean>(initial2DFallback);
   const [detectedLigand, setDetectedLigand] = useState<DetectedLigandInfo | null>(null);
   const [showPocket, setShowPocket] = useState<boolean>(false);
   const [showPocketSurface, setShowPocketSurface] = useState<boolean>(false);
@@ -108,8 +114,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   } | null>(null);
 
   // Loading & error state
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!initialLoadError);
+  const [loadError, setLoadError] = useState<string | null>(initialLoadError);
   const [reloadTrigger, setReloadTrigger] = useState<number>(0);
 
   const cleanPdbId = pdbId ? pdbId.trim().toUpperCase() : '';
@@ -442,7 +448,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
       // Verify WebGL support in client runtime
       if (!isMolstarSupported()) {
         if (typeof window !== 'undefined') {
-          setLoadError('WebGL is not supported or is disabled in your current browser environment.');
+          setLoadError('WebGL is not supported or graphics acceleration is disabled in your current browser environment.');
           setIsLoading(false);
           return;
         }
@@ -765,287 +771,413 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
       </div>
 
       {/* ================================================================= */}
-      {/* SCENE CONTROLS TOOLBAR: One-Click Mol* Toggles                    */}
+      {/* SCENE CONTROLS TOOLBAR: One-Click Mol* Toggles & 2D/3D Mode       */}
       {/* ================================================================= */}
       <div className="px-3 py-1.5 bg-slate-900/90 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 shrink-0 z-20">
         <div className="flex flex-wrap items-center gap-1.5">
-          {/* Isolate Ligand (Action) */}
-          <button
-            type="button"
-            onClick={handleIsolateLigand}
-            disabled={!detectedLigand}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
-              detectedLigand
-                ? 'bg-slate-800 hover:bg-cyan-950 hover:border-cyan-500 border border-slate-700 text-cyan-200'
-                : 'opacity-40 cursor-not-allowed bg-slate-800/50 border border-slate-800 text-slate-500'
-            }`}
-            title="Isolate Ligand: Hides protein and pocket, focuses exclusively on ligand"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Isolate Ligand</span>
-          </button>
+          {is2DFallbackActive ? (
+            <div className="flex items-center gap-2 text-xs text-slate-400 py-0.5">
+              <span className="px-2 py-0.5 rounded font-mono font-bold text-[11px] bg-cyan-950/80 text-cyan-300 border border-cyan-800/80">
+                2D Pocket Schematic Active
+              </span>
+              <span className="text-[11px] text-slate-400 hidden sm:inline">
+                Interactive contact map &amp; SAR analysis mode
+              </span>
+            </div>
+          ) : (
+            <>
+              {/* Isolate Ligand (Action) */}
+              <button
+                type="button"
+                onClick={handleIsolateLigand}
+                disabled={!detectedLigand}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
+                  detectedLigand
+                    ? 'bg-slate-800 hover:bg-cyan-950 hover:border-cyan-500 border border-slate-700 text-cyan-200'
+                    : 'opacity-40 cursor-not-allowed bg-slate-800/50 border border-slate-800 text-slate-500'
+                }`}
+                title="Isolate Ligand: Hides protein and pocket, focuses exclusively on ligand"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Isolate Ligand</span>
+              </button>
 
-          {/* Pocket Sticks (5Å) (Classic Surrounding Residues) */}
-          <button
-            type="button"
-            onClick={handleTogglePocket}
-            disabled={!detectedLigand}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-              !detectedLigand
-                ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                : showPocket
-                ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 shadow-xs'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-            }`}
-            title="Binding Pocket (5Å): Toggle classic pocket residue sticks within 5Å of ligand"
-            aria-pressed={showPocket}
-          >
-            <Target className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Pocket Sticks (5Å)</span>
-          </button>
+              {/* Pocket Sticks (5Å) (Classic Surrounding Residues) */}
+              <button
+                type="button"
+                onClick={handleTogglePocket}
+                disabled={!detectedLigand}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+                  !detectedLigand
+                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
+                    : showPocket
+                    ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 shadow-xs'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                }`}
+                title="Binding Pocket (5Å): Toggle classic pocket residue sticks within 5Å of ligand"
+                aria-pressed={showPocket}
+              >
+                <Target className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Pocket Sticks (5Å)</span>
+              </button>
 
-          {/* Pocket Surface (Translucent Receptor Cavity) */}
-          <button
-            type="button"
-            onClick={handleTogglePocketSurface}
-            disabled={!detectedLigand}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-              !detectedLigand
-                ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                : showPocketSurface
-                ? 'bg-teal-950/80 border-teal-400 text-teal-200 shadow-xs'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-            }`}
-            title="Pocket Surface: Toggle translucent receptor cavity surface (opacity ~0.35) around drug"
-            aria-pressed={showPocketSurface}
-          >
-            <Layers className="w-3.5 h-3.5 text-teal-400" />
-            <span>Pocket Surface</span>
-          </button>
+              {/* Pocket Surface (Translucent Receptor Cavity) */}
+              <button
+                type="button"
+                onClick={handleTogglePocketSurface}
+                disabled={!detectedLigand}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+                  !detectedLigand
+                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
+                    : showPocketSurface
+                    ? 'bg-teal-950/80 border-teal-400 text-teal-200 shadow-xs'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                }`}
+                title="Pocket Surface: Toggle translucent receptor cavity surface (opacity ~0.35) around drug"
+                aria-pressed={showPocketSurface}
+              >
+                <Layers className="w-3.5 h-3.5 text-teal-400" />
+                <span>Pocket Surface</span>
+              </button>
 
-          {/* Toggle Protein Ribbon (Additive Toggle) */}
-          <button
-            type="button"
-            onClick={handleToggleRibbon}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-              showRibbon
-                ? 'bg-purple-950/80 border-purple-500 text-purple-300 shadow-xs'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-            }`}
-            title="Toggle Protein Ribbon: Show or hide secondary structure cartoon"
-            aria-pressed={showRibbon}
-          >
-            <Dna className="w-3.5 h-3.5 text-purple-400" />
-            <span>Toggle Protein Ribbon</span>
-          </button>
+              {/* Toggle Protein Ribbon (Additive Toggle) */}
+              <button
+                type="button"
+                onClick={handleToggleRibbon}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+                  showRibbon
+                    ? 'bg-purple-950/80 border-purple-500 text-purple-300 shadow-xs'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                }`}
+                title="Toggle Protein Ribbon: Show or hide secondary structure cartoon"
+                aria-pressed={showRibbon}
+              >
+                <Dna className="w-3.5 h-3.5 text-purple-400" />
+                <span>Toggle Protein Ribbon</span>
+              </button>
 
-          {/* Hydrogen Bonds / Non-Covalent Interactions */}
-          <button
-            type="button"
-            onClick={handleToggleHBonds}
-            disabled={!detectedLigand}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-              !detectedLigand
-                ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                : showHBonds
-                ? 'bg-amber-950/80 border-amber-500 text-amber-300 shadow-xs'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-            }`}
-            title="Hydrogen Bonds: Compute and display non-covalent contacts <= 3.2Å"
-            aria-pressed={showHBonds}
-          >
-            <Atom className="w-3.5 h-3.5 text-amber-400" />
-            <span>Hydrogen Bonds</span>
-          </button>
+              {/* Hydrogen Bonds / Non-Covalent Interactions */}
+              <button
+                type="button"
+                onClick={handleToggleHBonds}
+                disabled={!detectedLigand}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+                  !detectedLigand
+                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
+                    : showHBonds
+                    ? 'bg-amber-950/80 border-amber-500 text-amber-300 shadow-xs'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                }`}
+                title="Hydrogen Bonds: Compute and display non-covalent contacts <= 3.2Å"
+                aria-pressed={showHBonds}
+              >
+                <Atom className="w-3.5 h-3.5 text-amber-400" />
+                <span>Hydrogen Bonds</span>
+              </button>
 
-          {/* Atom Labels (Mol* GPU-Instanced Text Labels) */}
-          <button
-            type="button"
-            onClick={handleToggleAtomLabels}
-            disabled={!detectedLigand}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-              !detectedLigand
-                ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                : showAtomLabels
-                ? 'bg-cyan-950/80 border-cyan-500 text-cyan-300 shadow-xs'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-            }`}
-            title="Atom Labels: Display atom names using GPU-instanced glyphs (zero canvas freeze)"
-            aria-pressed={showAtomLabels}
-          >
-            <Tag className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Atom Labels</span>
-          </button>
+              {/* Atom Labels (Mol* GPU-Instanced Text Labels) */}
+              <button
+                type="button"
+                onClick={handleToggleAtomLabels}
+                disabled={!detectedLigand}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+                  !detectedLigand
+                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
+                    : showAtomLabels
+                    ? 'bg-cyan-950/80 border-cyan-500 text-cyan-300 shadow-xs'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                }`}
+                title="Atom Labels: Display atom names using GPU-instanced glyphs (zero canvas freeze)"
+                aria-pressed={showAtomLabels}
+              >
+                <Tag className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Atom Labels</span>
+              </button>
+            </>
+          )}
         </div>
 
-        {/* Recenter Camera (Action) */}
-        <div>
+        {/* Recenter Camera (Action) & 2D/3D Mode Switcher */}
+        <div className="flex items-center gap-1.5">
+          {/* Mode Toggle Button: 2D Pocket View <-> Switch to 3D Mol* */}
           <button
             type="button"
-            onClick={handleRecenterCamera}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-            title="Recenter Camera: Reset orientation and zoom to active selection"
+            onClick={() => {
+              if (is2DFallbackActive) {
+                setIs2DFallbackActive(false);
+                setReloadTrigger((prev) => prev + 1);
+              } else {
+                setIs2DFallbackActive(true);
+              }
+            }}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+              is2DFallbackActive
+                ? 'bg-cyan-950/90 hover:bg-cyan-900 border-cyan-400 text-cyan-200 shadow-xs'
+                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+            }`}
+            title={
+              is2DFallbackActive
+                ? 'Switch to 3D Mol* WebGL Viewer'
+                : 'Switch to 2D Binding Pocket Schematic'
+            }
+            aria-label={
+              is2DFallbackActive
+                ? 'Switch to 3D Mol*'
+                : '2D Pocket View'
+            }
           >
-            <Compass className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Recenter Camera</span>
+            {is2DFallbackActive ? (
+              <>
+                <Atom className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Switch to 3D Mol*</span>
+              </>
+            ) : (
+              <>
+                <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                <span>2D Pocket View</span>
+              </>
+            )}
           </button>
+
+          {!is2DFallbackActive && (
+            <button
+              type="button"
+              onClick={handleRecenterCamera}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+              title="Recenter Camera: Reset orientation and zoom to active selection"
+            >
+              <Compass className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Recenter Camera</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* ================================================================= */}
-      {/* 3D WEBGL CANVAS, CONTROLS & STATUS OVERLAYS                       */}
+      {/* 3D WEBGL CANVAS OR 2D POCKET FALLBACK VIEW                        */}
       {/* ================================================================= */}
-      <div className="flex-1 w-full relative bg-slate-950 overflow-hidden">
-        {/* Mol* WebGL Canvas Target Container */}
-        <div
-          ref={containerRef}
-          className="w-full h-full absolute inset-0 cursor-grab active:cursor-grabbing"
-          title="3D Molecular Graphics Canvas (Left-drag to rotate, Right-drag to pan, Scroll to zoom)"
-        />
-
-        {/* Clicked Atom Info Badge */}
-        {clickedAtomInfo && (
-          <div className="absolute top-3 left-3 z-20 px-2.5 py-1.5 rounded-md bg-slate-900/90 border border-cyan-500/60 text-xs shadow-lg backdrop-blur-xs flex items-center gap-2">
-            <Tag className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="font-mono text-cyan-300 font-semibold">
-              {clickedAtomInfo.resn} {clickedAtomInfo.resi}:{clickedAtomInfo.atom}
-            </span>
-            <span className="text-[10px] text-slate-400">({clickedAtomInfo.elem})</span>
-            <button
-              type="button"
-              onClick={() => setClickedAtomInfo(null)}
-              className="ml-1 text-slate-400 hover:text-white cursor-pointer"
-              aria-label="Dismiss atom info"
-            >
-              ×
-            </button>
+      <div className="flex-1 w-full relative bg-slate-950 overflow-hidden flex flex-col">
+        {is2DFallbackActive ? (
+          <div className="w-full h-full overflow-y-auto">
+            <TwoDPocketFallbackView
+              pdbId={cleanPdbId}
+              targetName={targetName}
+              geneSymbol={geneSymbol}
+              detectedLigand={detectedLigand}
+              medChemProfile={medChemProfile}
+              activePharmacophoreGroup={activePharmacophoreGroup}
+              onSelectPharmacophoreGroup={onSelectPharmacophoreGroup}
+              onSelectPocketResidue={onSelectPocketResidue}
+              onRetry3D={() => {
+                setIs2DFallbackActive(false);
+                setReloadTrigger((prev) => prev + 1);
+              }}
+              onOpenTutorial={onOpenTutorial}
+              className="w-full h-full min-h-[500px]"
+            />
           </div>
-        )}
+        ) : (
+          <>
+            {/* Mol* WebGL Canvas Target Container */}
+            <div
+              ref={containerRef}
+              className="w-full h-full absolute inset-0 cursor-grab active:cursor-grabbing"
+              title="3D Molecular Graphics Canvas (Left-drag to rotate, Right-drag to pan, Scroll to zoom)"
+            />
 
-        {/* Floating Pharmacophore Chips Toolbar */}
-        {medChemProfile && medChemProfile.pharmacophoreGroups.length > 0 && (
-          <div
-            data-testid="pharmacophore-chips-toolbar"
-            className="absolute bottom-3 left-3 right-16 z-20 flex items-center gap-2 overflow-x-auto py-1.5 px-2 rounded-lg bg-slate-950/90 border border-slate-800 backdrop-blur-xs shadow-lg"
-          >
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 shrink-0">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Pharmacophores:</span>
-            </div>
-            <div className="flex items-center gap-1.5 overflow-x-auto">
-              {medChemProfile.pharmacophoreGroups.map((group) => {
-                const isActive = activePharmacophoreGroup?.id === group.id;
-                return (
-                  <button
-                    key={group.id}
-                    type="button"
-                    onClick={() => handleChipClick(group)}
-                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium transition-all cursor-pointer shrink-0 border ${
-                      isActive
-                        ? 'bg-fuchsia-950/90 border-fuchsia-400 text-fuchsia-200 shadow-sm shadow-fuchsia-950'
-                        : 'bg-slate-900/90 hover:bg-slate-800 border-slate-700/80 text-slate-300 hover:text-white'
-                    }`}
-                    style={
-                      isActive && group.colorAccent
-                        ? { borderColor: group.colorAccent }
-                        : undefined
-                    }
-                    title={`${group.name}: Click to focus 3D atoms and view PK/PD`}
-                    aria-pressed={isActive}
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: group.colorAccent || '#ec4899' }}
-                    />
-                    <span className="truncate max-w-[140px] sm:max-w-[200px]">
-                      {group.name}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            {onTogglePkDrawer && (
-              <button
-                type="button"
-                onClick={onTogglePkDrawer}
-                className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-600/80 text-indigo-200 transition-colors shrink-0 cursor-pointer"
-                title="Toggle PK & Clinical Effects Drawer"
-                aria-label="Toggle PK & Clinical Effects Drawer"
-                aria-pressed={isPkDrawerOpen}
-              >
-                <Pill className="w-3 h-3 text-indigo-400" />
-                <span>PK/PD</span>
-              </button>
+            {/* Clicked Atom Info Badge */}
+            {clickedAtomInfo && (
+              <div className="absolute top-3 left-3 z-20 px-2.5 py-1.5 rounded-md bg-slate-900/90 border border-cyan-500/60 text-xs shadow-lg backdrop-blur-xs flex items-center gap-2">
+                <Tag className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="font-mono text-cyan-300 font-semibold">
+                  {clickedAtomInfo.resn} {clickedAtomInfo.resi}:{clickedAtomInfo.atom}
+                </span>
+                <span className="text-[10px] text-slate-400">({clickedAtomInfo.elem})</span>
+                <button
+                  type="button"
+                  onClick={() => setClickedAtomInfo(null)}
+                  className="ml-1 text-slate-400 hover:text-white cursor-pointer"
+                  aria-label="Dismiss atom info"
+                >
+                  ×
+                </button>
+              </div>
             )}
-          </div>
-        )}
 
-        {/* On-Canvas Floating Zoom Controls */}
-        <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-20">
-          <button
-            type="button"
-            onClick={handleZoomIn}
-            className="w-7 h-7 flex items-center justify-center rounded-md bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white transition-colors cursor-pointer shadow-md font-bold text-sm"
-            title="Zoom in"
-            aria-label="Zoom in"
-          >
-            +
-          </button>
-          <button
-            type="button"
-            onClick={handleZoomOut}
-            className="w-7 h-7 flex items-center justify-center rounded-md bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white transition-colors cursor-pointer shadow-md font-bold text-sm"
-            title="Zoom out"
-            aria-label="Zoom out"
-          >
-            −
-          </button>
-        </div>
+            {/* Floating Pharmacophore Chips Toolbar */}
+            {medChemProfile && medChemProfile.pharmacophoreGroups.length > 0 && (
+              <div
+                data-testid="pharmacophore-chips-toolbar"
+                className="absolute bottom-3 left-3 right-16 z-20 flex items-center gap-2 overflow-x-auto py-1.5 px-2 rounded-lg bg-slate-950/90 border border-slate-800 backdrop-blur-xs shadow-lg"
+              >
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 shrink-0">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Pharmacophores:</span>
+                </div>
+                <div className="flex items-center gap-1.5 overflow-x-auto">
+                  {medChemProfile.pharmacophoreGroups.map((group) => {
+                    const isActive = activePharmacophoreGroup?.id === group.id;
+                    return (
+                      <button
+                        key={group.id}
+                        type="button"
+                        onClick={() => handleChipClick(group)}
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium transition-all cursor-pointer shrink-0 border ${
+                          isActive
+                            ? 'bg-fuchsia-950/90 border-fuchsia-400 text-fuchsia-200 shadow-sm shadow-fuchsia-950'
+                            : 'bg-slate-900/90 hover:bg-slate-800 border-slate-700/80 text-slate-300 hover:text-white'
+                        }`}
+                        style={
+                          isActive && group.colorAccent
+                            ? { borderColor: group.colorAccent }
+                            : undefined
+                        }
+                        title={`${group.name}: Click to focus 3D atoms and view PK/PD`}
+                        aria-pressed={isActive}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: group.colorAccent || '#ec4899' }}
+                        />
+                        <span className="truncate max-w-[140px] sm:max-w-[200px]">
+                          {group.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {onTogglePkDrawer && (
+                  <button
+                    type="button"
+                    onClick={onTogglePkDrawer}
+                    className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-600/80 text-indigo-200 transition-colors shrink-0 cursor-pointer"
+                    title="Toggle PK & Clinical Effects Drawer"
+                    aria-label="Toggle PK & Clinical Effects Drawer"
+                    aria-pressed={isPkDrawerOpen}
+                  >
+                    <Pill className="w-3 h-3 text-indigo-400" />
+                    <span>PK/PD</span>
+                  </button>
+                )}
+              </div>
+            )}
 
-        {/* Loading Indicator Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center gap-3 z-30 p-4">
-            <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-            <div className="text-center space-y-1">
-              <p className="text-xs font-semibold text-slate-200">
-                Streaming Coordinates for PDB {cleanPdbId}...
-              </p>
-              <p className="text-[11px] text-slate-400">
-                Streaming binary mmCIF (.bcif) &amp; initializing Mol* WebGL engine
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Error State Overlay */}
-        {loadError && !isLoading && (
-          <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center gap-3 z-30 p-6 text-center">
-            <AlertCircle className="w-8 h-8 text-rose-400" />
-            <div className="max-w-md space-y-1.5">
-              <p className="text-xs font-bold text-rose-300">
-                Unable to load 3D structure for {cleanPdbId}
-              </p>
-              <p className="text-[11px] text-slate-400 font-mono">{loadError}</p>
-            </div>
-            <div className="flex items-center gap-2 pt-2">
+            {/* On-Canvas Floating Zoom Controls */}
+            <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-20">
               <button
                 type="button"
-                onClick={() => setReloadTrigger((prev) => prev + 1)}
-                className="px-3 py-1.5 text-xs font-semibold rounded bg-cyan-600 hover:bg-cyan-500 text-white transition-colors cursor-pointer"
+                onClick={handleZoomIn}
+                className="w-7 h-7 flex items-center justify-center rounded-md bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white transition-colors cursor-pointer shadow-md font-bold text-sm"
+                title="Zoom in"
+                aria-label="Zoom in"
               >
-                Retry
+                +
               </button>
-              <a
-                href={`https://www.rcsb.org/structure/${cleanPdbId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors inline-flex items-center gap-1"
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                className="w-7 h-7 flex items-center justify-center rounded-md bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white transition-colors cursor-pointer shadow-md font-bold text-sm"
+                title="Zoom out"
+                aria-label="Zoom out"
               >
-                <span>View on RCSB</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+                −
+              </button>
             </div>
-          </div>
+
+            {/* Loading Indicator Overlay */}
+            {isLoading && (
+              <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center gap-3 z-30 p-4">
+                <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+                <div className="text-center space-y-1">
+                  <p className="text-xs font-semibold text-slate-200">
+                    Streaming Coordinates for PDB {cleanPdbId}...
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Streaming binary mmCIF (.bcif) &amp; initializing Mol* WebGL engine
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Upgraded WebGL Diagnostic & Error Overlay */}
+            {loadError && !isLoading && (
+              <div className="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center gap-4 z-30 p-6 text-center overflow-y-auto">
+                <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center shrink-0">
+                  <AlertCircle className="w-6 h-6 text-rose-400" />
+                </div>
+
+                <div className="max-w-lg space-y-1.5">
+                  <h3 className="text-base font-bold text-rose-300">
+                    {`Unable to load 3D structure for ${cleanPdbId}`}
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    WebGL is not supported or graphics acceleration is disabled in your current browser environment.
+                  </p>
+                  {loadError &&
+                    loadError !==
+                      'WebGL is not supported or graphics acceleration is disabled in your current browser environment.' && (
+                      <p className="text-[11px] text-slate-400 font-mono bg-slate-900/80 px-2 py-1 rounded border border-slate-800 inline-block">
+                        {loadError}
+                      </p>
+                    )}
+                </div>
+
+                {/* In-App Browser Diagnostic Card */}
+                <div className="max-w-md w-full bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-left shadow-lg space-y-2.5">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
+                    <Info className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <span>How to enable graphics acceleration:</span>
+                  </div>
+                  <ol className="list-decimal list-inside space-y-1.5 text-[11px] text-slate-300">
+                    <li className="leading-relaxed">
+                      Open{' '}
+                      <code className="text-cyan-300 font-mono bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                        chrome://settings/system
+                      </code>{' '}
+                      in browser address bar (or Settings &gt; System).
+                    </li>
+                    <li className="leading-relaxed">
+                      Toggle ON{' '}
+                      <strong className="text-slate-100">
+                        "Use graphics acceleration when available"
+                      </strong>
+                      .
+                    </li>
+                    <li className="leading-relaxed">Relaunch browser and retry.</li>
+                  </ol>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIs2DFallbackActive(true)}
+                    className="px-4 py-2 text-xs font-bold rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-colors shadow-sm shadow-cyan-950/50 cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    <Layers className="w-4 h-4" />
+                    <span>Switch to 2D Pocket Schematic</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReloadTrigger((prev) => prev + 1)}
+                    className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Retry 3D WebGL</span>
+                  </button>
+                  <a
+                    href={`https://www.rcsb.org/structure/${cleanPdbId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors inline-flex items-center gap-1.5"
+                  >
+                    <span>View on RCSB</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                  </a>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -1057,15 +1189,25 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           <Info className="w-3.5 h-3.5" />
           <span>Navigation:</span>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-slate-300">
-          <span>Rotate: Left-drag</span>
-          <span>•</span>
-          <span>Pan: Right-drag</span>
-          <span>•</span>
-          <span>Zoom: Scroll / Buttons</span>
-          <span>•</span>
-          <span>Recenter: Click atom</span>
-        </div>
+        {is2DFallbackActive ? (
+          <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-slate-300">
+            <span>Select Residue: Click contact card</span>
+            <span>•</span>
+            <span>Filter: Pharmacophore chip</span>
+            <span>•</span>
+            <span>Switch: Use toolbar button</span>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-slate-300">
+            <span>Rotate: Left-drag</span>
+            <span>•</span>
+            <span>Pan: Right-drag</span>
+            <span>•</span>
+            <span>Zoom: Scroll / Buttons</span>
+            <span>•</span>
+            <span>Recenter: Click atom</span>
+          </div>
+        )}
       </div>
     </div>
   );
