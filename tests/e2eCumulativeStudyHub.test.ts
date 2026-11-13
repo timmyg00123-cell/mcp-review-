@@ -1,5 +1,6 @@
 // tests/e2eCumulativeStudyHub.test.ts
 import assert from 'node:assert';
+import fs from 'node:fs';
 import { harvestCumulativeFlashcards } from '../src/utils/cumulativeStructureHarvester';
 import {
   processReviewRating,
@@ -14,6 +15,11 @@ import {
   getCumulativeQuestionBank,
   CUMULATIVE_QUESTIONS,
 } from '../src/data/cumulativeQuizData';
+import {
+  getTop200Flashcards,
+  getTherapeuticCategoriesForCards,
+} from '../src/utils/topDrugsTaxonomy';
+import { getPharmacophoresForStructure } from '../src/utils/pharmacophoreData';
 import type {
   CumulativeQuestion,
   FlashcardItem,
@@ -360,6 +366,189 @@ isolatedDrillQuestions.forEach((q) => {
 });
 
 console.log(`✓ 1-click remediation filtered bank from ${bank.length} questions to ${isolatedDrillQuestions.length} targeted questions.\n`);
+
+// ============================================================================
+// Step 7: Standalone Top 200 Drugs Catalog Deck Retrieval & Taxonomy Verification
+// ============================================================================
+console.log('Step 7: Validating Standalone Top 200 Drugs deck retrieval and taxonomy metadata...');
+
+const top200Cards = getTop200Flashcards();
+assert.ok(Array.isArray(top200Cards), 'getTop200Flashcards() must return an array');
+assert.strictEqual(
+  top200Cards.length,
+  250,
+  `Top 200 catalog deck must contain exactly 250 drugs, got ${top200Cards.length}`
+);
+
+// Verify identifier uniqueness across all 250 cards
+const top200UniqueIds = new Set(top200Cards.map((c) => c.structureId));
+assert.strictEqual(
+  top200UniqueIds.size,
+  250,
+  'All 250 Top 200 flashcards must have strictly unique structureIds'
+);
+
+// Verify taxonomy metadata, structure integrity, and spaced repetition defaults
+const presentClasses = new Set<number>();
+top200Cards.forEach((c) => {
+  assert.ok(c.drugName && c.drugName.trim().length > 0, `Card ${c.structureId} must have drugName`);
+  assert.ok(c.structure && c.structure.id, `Card ${c.structureId} must have chemical structure`);
+  assert.ok(
+    c.structure.canonicalSmiles || c.structure.canonical_smiles || c.structure.smiles,
+    `Card ${c.structureId} (${c.drugName}) must have valid SMILES`
+  );
+  assert.strictEqual(c.state, 'new', `Top 200 card ${c.structureId} must start in "new" state`);
+  assert.strictEqual(c.intervalMinutes, 0, `Top 200 card ${c.structureId} must have intervalMinutes 0`);
+  assert.strictEqual(c.repetitionCount, 0, `Top 200 card ${c.structureId} must have repetitionCount 0`);
+  assert.strictEqual(c.struggleCount, 0, `Top 200 card ${c.structureId} must have struggleCount 0`);
+
+  // Taxonomy fields
+  const classNum = c.structure.therapeuticClassNumber;
+  assert.ok(
+    typeof classNum === 'number' && classNum >= 1 && classNum <= 39,
+    `Card ${c.drugName} must have valid therapeuticClassNumber (1-39), got ${classNum}`
+  );
+  presentClasses.add(classNum);
+
+  assert.ok(
+    c.structure.therapeuticCategory && c.structure.therapeuticCategory.trim().length > 0,
+    `Card ${c.drugName} must have non-empty therapeuticCategory`
+  );
+  assert.ok(
+    c.structure.broadPharmacologicClass && c.structure.broadPharmacologicClass.trim().length > 0,
+    `Card ${c.drugName} must have non-empty broadPharmacologicClass`
+  );
+  assert.ok(
+    c.structure.specificPharmacologicClass && c.structure.specificPharmacologicClass.trim().length > 0,
+    `Card ${c.drugName} must have non-empty specificPharmacologicClass`
+  );
+});
+
+assert.strictEqual(
+  presentClasses.size,
+  39,
+  'All 39 therapeutic classes (1 through 39) must be represented across the 250 Top Drugs catalog'
+);
+
+// Verify active categories derivation for the top 200 deck
+const activeCats = getTherapeuticCategoriesForCards(top200Cards);
+assert.strictEqual(
+  activeCats.length,
+  39,
+  'getTherapeuticCategoriesForCards on top200Cards must return all 39 therapeutic categories'
+);
+for (let i = 0; i < 39; i++) {
+  assert.strictEqual(activeCats[i].classNumber, i + 1, `Category index ${i} should be classNumber ${i + 1}`);
+}
+
+// Verify pharmacophore tag generation and highlighting compatibility on sample Top 200 cards
+const sampleDrugs = ['metoprolol', 'furosemide', 'cephalexin', 'lisinopril', 'amlodipine', 'atorvastatin'];
+for (const drug of sampleDrugs) {
+  const card = top200Cards.find((c) => c.drugName.toLowerCase().includes(drug));
+  assert.ok(card, `Top 200 cards must include sample drug ${drug}`);
+  const groups = getPharmacophoresForStructure(card.structure);
+  assert.ok(Array.isArray(groups) && groups.length > 0, `Pharmacophores for ${drug} must not be empty`);
+  groups.forEach((g) => {
+    assert.ok(g.id, `Pharmacophore group in ${drug} must have id`);
+    assert.ok(g.name, `Pharmacophore group in ${drug} must have name`);
+    assert.ok(g.purpose, `Pharmacophore group in ${drug} must have purpose`);
+    assert.ok(g.region, `Pharmacophore group in ${drug} must have region coordinates`);
+  });
+}
+
+// Verify spaced repetition and struggle diagnostic workflow on Top 200 cards
+const [topAgain, topGood] = top200Cards.slice(0, 2);
+const topAgainResult = processReviewRating(topAgain, 'again', now);
+assert.strictEqual(topAgainResult.nextCardState.struggleCount, 1);
+assert.strictEqual(topAgainResult.nextCardState.state, 'learning');
+
+const topGoodResult = processReviewRating(topGood, 'good', now);
+assert.strictEqual(topGoodResult.nextCardState.struggleCount, 0);
+assert.strictEqual(topGoodResult.nextCardState.state, 'review');
+
+const topReport = generateStruggleReport({
+  sessionType: 'flashcards',
+  flashcardHistory: [topAgainResult.nextCardState, topGoodResult.nextCardState],
+});
+assert.strictEqual(topReport.totalItemsReviewed, 2);
+assert.strictEqual(topReport.struggledStructures.length, 1);
+assert.strictEqual(topReport.struggledStructures[0].drugName, topAgain.drugName);
+assert.ok(Array.isArray(topReport.remediationCandidateIds), 'remediationCandidateIds must be an array');
+assert.ok(topReport.remediationCandidateIds.includes(topAgain.structureId));
+
+console.log(`✓ Validated 250 Top Drugs cards across all 39 therapeutic classes with pharmacophores & SRS diagnostics.\n`);
+
+// ============================================================================
+// Step 8: CumulativeStudyHubModal Top 200 Preset Integration Contract Verification
+// ============================================================================
+console.log('Step 8: Verifying CumulativeStudyHubModal Top 200 preset integration contract...');
+
+const modalPath = 'src/components/CumulativeStudyHubModal.tsx';
+assert.ok(fs.existsSync(modalPath), `Component file ${modalPath} must exist`);
+const modalContent = fs.readFileSync(modalPath, 'utf-8');
+
+// Contract 1: getTop200Flashcards import
+assert.ok(
+  modalContent.includes('getTop200Flashcards') &&
+    (modalContent.includes("from '../utils/topDrugsTaxonomy'") ||
+      modalContent.includes('from "../utils/topDrugsTaxonomy"')),
+  'CumulativeStudyHubModal must import getTop200Flashcards from ../utils/topDrugsTaxonomy'
+);
+
+// Contract 2: Deck preset state definition ('curriculum' | 'top200')
+assert.ok(
+  modalContent.includes('deckMode') || modalContent.includes('deckPreset'),
+  'CumulativeStudyHubModal must maintain deck preset state (deckMode or deckPreset)'
+);
+assert.ok(
+  modalContent.includes("'curriculum'") && modalContent.includes("'top200'"),
+  "CumulativeStudyHubModal must support 'curriculum' and 'top200' preset modes"
+);
+
+// Contract 3: Memoized loading of Top 200 cards via getTop200Flashcards()
+assert.ok(
+  modalContent.includes('getTop200Flashcards()'),
+  'CumulativeStudyHubModal must invoke getTop200Flashcards()'
+);
+
+// Contract 4: Feeding active deck cards to StructureFlashcardDeck
+assert.ok(
+  modalContent.includes('<StructureFlashcardDeck') &&
+    (modalContent.includes('cards={active') ||
+      modalContent.includes('cards={deckMode') ||
+      modalContent.includes('cards={currentCards')),
+  'CumulativeStudyHubModal must supply the active deck cards to StructureFlashcardDeck based on the selected preset'
+);
+
+// Contract 5: Accessible toggle or selector buttons for both presets with count badges
+assert.ok(
+  modalContent.includes('Curriculum') || modalContent.includes('Curriculum Structures'),
+  'CumulativeStudyHubModal must render Curriculum preset option'
+);
+assert.ok(
+  modalContent.includes('Top 200') || modalContent.includes('Top 200 Drugs'),
+  'CumulativeStudyHubModal must render Top 200 preset option'
+);
+assert.ok(
+  modalContent.includes('harvestedCards.length'),
+  'CumulativeStudyHubModal must display harvestedCards count badge'
+);
+assert.ok(
+  modalContent.includes('top200Cards.length'),
+  'CumulativeStudyHubModal must display top200Cards count badge'
+);
+
+// Contract 6: Spaced repetition session completion & struggle diagnostics preserved
+assert.ok(
+  modalContent.includes('onSessionComplete={handleFlashcardSessionComplete}'),
+  'CumulativeStudyHubModal must pass handleFlashcardSessionComplete to StructureFlashcardDeck'
+);
+assert.ok(
+  modalContent.includes('onClose={onClose}'),
+  'CumulativeStudyHubModal must pass onClose to StructureFlashcardDeck'
+);
+
+console.log('✓ CumulativeStudyHubModal Top 200 preset integration contracts verified.\n');
 
 console.log('========================================================================');
 console.log('🎉 END-TO-END CUMULATIVE STUDY HUB INTEGRATION WORKFLOW TEST PASSED!');
