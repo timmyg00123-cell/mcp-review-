@@ -44,11 +44,29 @@ export function isMolstarSupported(): boolean {
   }
   try {
     const canvas = document.createElement('canvas');
-    const gl =
-      canvas.getContext('webgl2') ||
-      canvas.getContext('webgl') ||
-      canvas.getContext('experimental-webgl');
-    return Boolean(gl);
+    const contextAttributes = {
+      failIfMajorPerformanceCaveat: false,
+      powerPreference: 'default' as const,
+    };
+    const gl = (
+      canvas.getContext('webgl2', contextAttributes) ||
+      canvas.getContext('webgl', contextAttributes) ||
+      canvas.getContext('experimental-webgl', contextAttributes)
+    ) as (WebGLRenderingContext | WebGL2RenderingContext | null);
+
+    if (!gl) return false;
+
+    // Immediately dispose of the test context to avoid exhausting the browser's context limit
+    try {
+      const loseContextExt = (gl as any).getExtension?.('WEBGL_lose_context');
+      if (loseContextExt && typeof loseContextExt.loseContext === 'function') {
+        loseContextExt.loseContext();
+      }
+    } catch {
+      // Ignore context loss failures in non-standard runtimes
+    }
+
+    return true;
   } catch {
     return false;
   }

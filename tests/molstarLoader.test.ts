@@ -60,6 +60,96 @@ test('isMolstarSupported detects WebGL availability environment', () => {
   }
 });
 
+test('isMolstarSupported requests permissive context attributes and disposes context via WEBGL_lose_context', () => {
+  const originalWindow = (globalThis as any).window;
+  const originalDocument = (globalThis as any).document;
+
+  try {
+    let loseContextCalls = 0;
+    let requestedType: string | null = null;
+    let requestedAttributes: any = null;
+
+    const mockLoseContextExt = {
+      loseContext: () => {
+        loseContextCalls++;
+      },
+    };
+
+    const mockGl = {
+      getExtension: (name: string) => {
+        if (name === 'WEBGL_lose_context') {
+          return mockLoseContextExt;
+        }
+        return null;
+      },
+    };
+
+    (globalThis as any).window = {};
+    (globalThis as any).document = {
+      createElement: (tag: string) => {
+        if (tag === 'canvas') {
+          return {
+            getContext: (type: string, attrs: any) => {
+              requestedType = type;
+              requestedAttributes = attrs;
+              return mockGl;
+            },
+          };
+        }
+        return {};
+      },
+    };
+
+    const supported = isMolstarSupported();
+    assert.equal(supported, true);
+    assert.equal(loseContextCalls, 1, 'loseContext() should be called exactly once');
+    assert.deepEqual(
+      requestedAttributes,
+      {
+        failIfMajorPerformanceCaveat: false,
+        powerPreference: 'default',
+      },
+      'getContext should be called with permissive attributes'
+    );
+
+    // Also verify when getExtension is missing or returns null, it still returns true and does not throw
+    loseContextCalls = 0;
+    const mockGlNoExt = {};
+    (globalThis as any).document = {
+      createElement: (tag: string) => {
+        if (tag === 'canvas') {
+          return {
+            getContext: () => mockGlNoExt,
+          };
+        }
+        return {};
+      },
+    };
+
+    assert.equal(isMolstarSupported(), true, 'Should return true when getExtension is not defined');
+    assert.equal(loseContextCalls, 0);
+
+    const mockGlNullExt = {
+      getExtension: () => null,
+    };
+    (globalThis as any).document = {
+      createElement: (tag: string) => {
+        if (tag === 'canvas') {
+          return {
+            getContext: () => mockGlNullExt,
+          };
+        }
+        return {};
+      },
+    };
+
+    assert.equal(isMolstarSupported(), true, 'Should return true when getExtension returns null');
+  } finally {
+    (globalThis as any).window = originalWindow;
+    (globalThis as any).document = originalDocument;
+  }
+});
+
 test('getCachedCoordinateUrl returns binary CIF URL and handles in-memory cache', async () => {
   clearCoordinateCache();
   const defaultUrl = await getCachedCoordinateUrl('4NTJ');
