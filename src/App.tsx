@@ -78,8 +78,8 @@ const KnowledgeGraphExplorer = React.lazy(() =>
 const PharmacophoreExplorerSidebar = React.lazy(() =>
   import('./components/PharmacophoreExplorerSidebar').then((m) => ({ default: m.PharmacophoreExplorerSidebar }))
 );
-const CumulativeStudyHubModal = React.lazy(() =>
-  import('./components/CumulativeStudyHubModal').then((m) => ({ default: m.CumulativeStudyHubModal }))
+const PracticeLabView = React.lazy(() =>
+  import('./components/PracticeLabView').then((m) => ({ default: m.PracticeLabView }))
 );
 import { GlobalPharmacophore } from './utils/globalPharmacophores';
 import {
@@ -140,7 +140,7 @@ import {
   Network,
 } from 'lucide-react';
 
-type AppTab = 'document-review' | 'matrix' | 'pubchem-inspector' | 'knowledge-graph' | 'dashboard' | '3d-lab';
+type AppTab = 'document-review' | 'matrix' | 'pubchem-inspector' | 'knowledge-graph' | 'dashboard' | '3d-lab' | 'practice-lab';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -634,8 +634,6 @@ function AppContent() {
   const [inspectedStructure, setInspectedStructure] = useState<ChemicalStructure | null>(null);
   const [isPubChemModalOpen, setIsPubChemModalOpen] = useState(false);
 
-  // Cumulative Study Hub modal state
-  const [isCumulativeHubOpen, setIsCumulativeHubOpen] = useState(false);
 
   // AI Tutor slide-over state
   const [showTutor, setShowTutor] = useState<boolean>(false);
@@ -885,6 +883,9 @@ function AppContent() {
   // Start Timed Exam Simulation Mode
   const handleStartExam = (minutes: number) => {
     React.startTransition(() => {
+      if (activeTab === 'practice-lab') {
+        switchTab('document-review');
+      }
       setOpenQuestionIds({});
       clearModuleProgress(activeModule.id);
       setSessionProgress(getEmptySessionProgress());
@@ -1223,7 +1224,6 @@ function AppContent() {
         onToggleTheme={toggleTheme}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenPubChem={() => handleOpenPubChem()}
-        onOpenCumulativeHub={() => setIsCumulativeHubOpen(true)}
         onOpenImportJson={() => jsonFileInputRef.current?.click()}
       />
 
@@ -1831,6 +1831,19 @@ function AppContent() {
         )}
 
         {/* ==================================================== */}
+        {/* TAB 6: PRACTICE LAB & CUMULATIVE STUDY WORKSPACE    */}
+        {/* ==================================================== */}
+        <div className={activeTab === 'practice-lab' && examStatus !== 'active' ? 'flex flex-1 flex-col min-h-0' : 'hidden'}>
+          <React.Suspense fallback={<div className="p-8 text-center text-slate-500">Loading Practice Lab...</div>}>
+            <PracticeLabView
+              activeExamId={activeExamId}
+              activeExam={activeExam}
+              examModules={examModules}
+            />
+          </React.Suspense>
+        </div>
+
+        {/* ==================================================== */}
         {/* DOCKED / SLIDE-OVER AI MEDCHEM TUTOR PANEL          */}
         {/* ==================================================== */}
         {!isStudentMode() && showTutor && examStatus !== 'active' && (
@@ -1969,20 +1982,6 @@ function AppContent() {
         </React.Suspense>
       )}
 
-      {/* ---------------------------------------------------- */}
-      {/* CUMULATIVE MEDCHEM STUDY HUB MODAL                   */}
-      {/* ---------------------------------------------------- */}
-      {isCumulativeHubOpen && (
-        <React.Suspense fallback={null}>
-          <CumulativeStudyHubModal
-            isOpen={isCumulativeHubOpen}
-            onClose={() => setIsCumulativeHubOpen(false)}
-            activeExamId={activeExamId}
-            activeExam={activeExam}
-            examModules={examModules}
-          />
-        </React.Suspense>
-      )}
 
       {/* ---------------------------------------------------- */}
       {/* NON-BLOCKING FLOATING INGESTION PANEL (BOTTOM-RIGHT) */}
