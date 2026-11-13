@@ -52,7 +52,7 @@ Students using the 3D Molecular Lab need to move beyond passive 3D viewing to ac
 ```mermaid
 flowchart TD
   subgraph Data Layer
-    A["canonicalPharmacophorePkData.ts<br/>(PK/PD Profiles & Pocket Contacts)"]
+    A["canonicalPharmacophorePkData.ts<br/>(Keyed by geneSymbol & pdbId)"]
     B["canonicalTargets.ts<br/>(Target-to-PDB Mappings)"]
   end
 
@@ -62,10 +62,10 @@ flowchart TD
     E["Protein Ribbon Engine<br/>({ hetflag: false })"]
     F["Atom Label Engine<br/>(addPropertyLabels & Hover Tooltip)"]
     G["3D Pharmacophore Highlighting<br/>(Color Accent / Spheres)"]
+    H["Pharmacophore Chips Toolbar<br/>(Floating above tips bar)"]
   end
 
   subgraph UI & Drawer: PharmacophorePkDrawer.tsx
-    H["Pharmacophore Chips Toolbar"]
     I["Dual PK & Clinical Effect Drawer"]
     I1["Tab 1: Pharmacokinetics (ADME, CYP, Prodrug)"]
     I2["Tab 2: Clinical Effect (PD, Efficacy, Toxicity)"]
@@ -82,7 +82,13 @@ flowchart TD
   C -.->|Atom / Residue Click| I
 ```
 
-### 4.1. 3Dmol Engine Enhancements (`src/components/ThreeDLabCanvas.tsx`)
+### 4.1. Builder Resolutions & Conflict Settle Calls
+- **Resolution 1 (PDB & Target Keying):** `canonicalPharmacophorePkData.ts` keys profiles primarily by canonical `geneSymbol` (e.g. `'P2RY12'`, `'ACE'`, `'AGTR1'`, `'HMGCR'`, `'ADRB1'`, `'PTGS2'`, `'DHFR'`, `'EGFR'`) with secondary lookup by `pdbId`. This ensures 100% data discovery across all target selection paths in `ThreeDLabLibrary` (`1O86`, `4Z9O`, `1HWK`, `7JJO`, `3LN1`, `1U72`, `1M17`).
+- **Resolution 2 (Ligand Atom Mapping & Fallback):** Atom names are mapped to the actual PDB HETATM coordinates of the target co-crystal structures (e.g. `AZD` in `4NTJ`, `1N4` in `1O86`, `4Z9` in `4Z9O`, `1HW` in `1HWK`, `CEL` in `3LN1`). For educational continuity, descriptions teach both the co-crystal SAR and class prototype drugs (e.g., Clopidogrel vs AZD1283). If any atom name is not found in the loaded PDB, 3Dmol falls back gracefully to highlighting the full ligand stick structure with colored glow rather than failing silently.
+- **Resolution 3 (Right Drawer Coexistence):** To prevent layout collisions or squishing the 3D canvas, right-side drawer state is coordinated as mutually exclusive: opening the Pharmacophore PK Drawer closes or slides back the ChEMBL SAR drawer (and vice versa). In fullscreen mode, each has its own slide-out tab trigger on the right edge (`Pharmacophore PK` and `ChEMBL SAR`). In regular mode, the PK drawer slides out as an overlay with backdrop or occupies the right column.
+- **Resolution 4 (Toolbar Placement & Custom PDBs):** The Pharmacophore Chips Toolbar floats smoothly over the bottom of the WebGL canvas, above the navigation tips bar. When an uncurated custom PDB is loaded, the toolbar is cleanly hidden without displaying empty errors.
+
+### 4.2. 3Dmol Engine Enhancements (`src/components/ThreeDLabCanvas.tsx`)
 
 1. **Protein Ribbon Selector Fix**:
    - Change `viewer.setStyle({ protein: true }, ...)` to:
