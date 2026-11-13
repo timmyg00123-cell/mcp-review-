@@ -7,6 +7,7 @@ import type { ReviewModule } from '../types/reviewModule';
 import { type ExamDefinition, getExamDefinition } from '../types/examTypes';
 import { getCumulativeQuestionBank } from '../data/cumulativeQuizData';
 import { harvestCumulativeFlashcards } from '../utils/cumulativeStructureHarvester';
+import { getTop200Flashcards } from '../utils/topDrugsTaxonomy';
 import { generateStruggleReport } from '../utils/struggleDiagnosticService';
 import { CumulativePracticeTestView } from './CumulativePracticeTestView';
 import { StructureFlashcardDeck } from './StructureFlashcardDeck';
@@ -30,9 +31,11 @@ export interface CumulativeStudyHubModalProps {
   activeExamId?: string;
   activeExam?: ExamDefinition;
   examModules?: ReviewModule[];
+  initialDeckMode?: 'curriculum' | 'top200';
 }
 
 export type CumulativeStudyTab = 'practice-test' | 'flashcards' | 'diagnostics';
+export type FlashcardDeckMode = 'curriculum' | 'top200';
 
 /**
  * Cumulative MedChem Study Hub Modal
@@ -49,10 +52,12 @@ export const CumulativeStudyHubModal: React.FC<CumulativeStudyHubModalProps> = (
   activeExamId = 'exam_3',
   activeExam,
   examModules,
+  initialDeckMode = 'curriculum',
 }) => {
   const [activeTab, setActiveTab] = useState<CumulativeStudyTab>(initialTab);
   const [activeReport, setActiveReport] = useState<StruggleDiagnosticReport | null>(null);
   const [drillCandidateIds, setDrillCandidateIds] = useState<string[]>([]);
+  const [deckMode, setDeckMode] = useState<FlashcardDeckMode>(initialDeckMode);
 
   const currentExam = useMemo(() => {
     return activeExam || getExamDefinition(activeExamId);
@@ -83,6 +88,16 @@ export const CumulativeStudyHubModal: React.FC<CumulativeStudyHubModalProps> = (
   const harvestedCards = useMemo(() => {
     return harvestCumulativeFlashcards(examModules, activeExamId);
   }, [examModules, activeExamId]);
+
+  // Standalone Top 200 Drugs deck (250 drugs across 39 therapeutic classes)
+  const top200Cards = useMemo(() => {
+    return getTop200Flashcards();
+  }, []);
+
+  // Active flashcards passed to deck depending on selected preset
+  const activeFlashcards = useMemo(() => {
+    return deckMode === 'top200' ? top200Cards : harvestedCards;
+  }, [deckMode, top200Cards, harvestedCards]);
 
   // Base question bank scoped to the active exam
   const baseQuestions = useMemo(() => {
@@ -189,7 +204,7 @@ export const CumulativeStudyHubModal: React.FC<CumulativeStudyHubModalProps> = (
       id: 'flashcards',
       label: 'Structure Flashcards',
       icon: Layers,
-      badge: `${harvestedCards.length} Cards`,
+      badge: `${activeFlashcards.length} Cards`,
     },
     {
       id: 'diagnostics',
@@ -344,9 +359,78 @@ export const CumulativeStudyHubModal: React.FC<CumulativeStudyHubModalProps> = (
 
           {/* TAB 2: RAPID STRUCTURE FLASHCARDS */}
           {activeTab === 'flashcards' && (
-            <div className="p-3 sm:p-6">
+            <div className="p-3 sm:p-6 space-y-4">
+              {/* Deck Preset Selector */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl shadow-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    Deck Preset:
+                  </span>
+                  <div
+                    className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700/60"
+                    role="tablist"
+                    aria-label="Flashcard Deck Preset"
+                  >
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={deckMode === 'curriculum'}
+                      onClick={() => setDeckMode('curriculum')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                        deckMode === 'curriculum'
+                          ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 font-semibold shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      <span>Curriculum Structures</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                          deckMode === 'curriculum'
+                            ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
+                            : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                        }`}
+                      >
+                        {harvestedCards.length}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={deckMode === 'top200'}
+                      onClick={() => setDeckMode('top200')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                        deckMode === 'top200'
+                          ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 font-semibold shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      <span>Top 200 Drugs Catalog</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                          deckMode === 'top200'
+                            ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
+                            : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                        }`}
+                      >
+                        {top200Cards.length}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  {deckMode === 'curriculum' ? (
+                    <span>Exam-aligned chemical structures harvested across review modules</span>
+                  ) : (
+                    <span>Standalone 39-class national outpatient pharmacy catalog (250 drugs)</span>
+                  )}
+                </div>
+              </div>
+
               <StructureFlashcardDeck
-                cards={harvestedCards}
+                key={deckMode}
+                cards={activeFlashcards}
                 onSessionComplete={handleFlashcardSessionComplete}
                 onClose={onClose}
               />

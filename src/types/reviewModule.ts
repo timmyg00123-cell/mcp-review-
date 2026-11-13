@@ -44,6 +44,12 @@ export interface ChemicalStructure {
   chemicalClass: string; // e.g., 'N-sulfonyl tyrosine-based peptidomimetic'
   pharmacologicalClass: string; // e.g., 'Glycoprotein IIb/IIIa inhibitor'
   cid?: number;
+
+  // Top Drugs Taxonomy Additions:
+  therapeuticClassNumber?: number; // 1 to 39
+  therapeuticCategory?: string; // e.g. "2. Antibiotic", "11. Cardiovascular --- Antihypertensive"
+  broadPharmacologicClass?: string; // e.g. "Cephalosporin", "Opioid"
+  specificPharmacologicClass?: string; // e.g. "1st Generation Cephalosporin", "Opioid partial agonist"
   canonical_smiles?: string; // Valid raw Daylight Canonical SMILES string
   canonicalSmiles?: string; // Valid Daylight Canonical SMILES string
   smiles?: string; // Canonical or isomeric SMILES fallback

@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { ChemicalStructure } from '../types/reviewModule';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import { SmilesCanvas } from './SmilesCanvas';
+import {
+  PharmacophoreTagList,
+  ColorPaletteItem,
+  PHARMACOPHORE_COLOR_PALETTE,
+} from './PharmacophoreTagList';
+import { getPharmacophoresForStructure } from '../utils/pharmacophoreData';
 import { resolveChemicalClass } from '../utils/chemicalClassDictionary';
 import {
   resolveClinicalPharmacology,
@@ -26,8 +32,28 @@ import {
   BookmarkX,
   Lightbulb,
   ArrowRight,
-  Info,
+  ChevronDown,
 } from 'lucide-react';
+
+export interface FlashcardDisplaySettings {
+  density: 'split' | 'structure-focus' | 'minimalist';
+  showBrandNames: boolean;
+  showTaxonomyBreadcrumbs: boolean;
+  showHierarchyBreadcrumb?: boolean; // alias for cross-compatibility
+  showPharmacophoreTags: boolean;
+  showPharmacophoreTagStrip?: boolean; // alias for cross-compatibility
+  showClinicalPearls: boolean;
+}
+
+export const DEFAULT_FLASHCARD_DISPLAY_SETTINGS: FlashcardDisplaySettings = {
+  density: 'split',
+  showBrandNames: true,
+  showTaxonomyBreadcrumbs: true,
+  showHierarchyBreadcrumb: true,
+  showPharmacophoreTags: true,
+  showPharmacophoreTagStrip: true,
+  showClinicalPearls: true,
+};
 
 export interface StructureFlashcardCardFaceProps {
   structure: ChemicalStructure;
@@ -37,6 +63,7 @@ export interface StructureFlashcardCardFaceProps {
   onToggleSuspend?: () => void;
   onFlip: () => void;
   children?: React.ReactNode; // Rating buttons slot on back face
+  displaySettings?: FlashcardDisplaySettings;
 }
 
 /**
@@ -45,8 +72,11 @@ export interface StructureFlashcardCardFaceProps {
  * Front face: Strictly blinded chemical structure canvas on `bg-[var(--structure-canvas-bg)]`,
  * MolBlock vector coordinates, and click-to-zoom modal.
  *
- * Back face (Option B): Two-column split deck layout featuring reference drug properties
- * on the left and comprehensive clinical pharmacology (metabolism, BBB, pregnancy safety) on the right.
+ * Back face: Supports interactive multi-color pharmacophore highlighting, 3-tier Top Drugs
+ * taxonomy breadcrumb trail, brand name badges, and 3 customizable density modes:
+ * - 'split': Default responsive 2-column layout (structure on left; clinical pharmacology on right).
+ * - 'structure-focus': Single-column layout prioritizing structure and pharmacophores with expandable clinical details.
+ * - 'minimalist': Ultra-compact rapid-recall view with structure, clean name, brand badge, and rating actions.
  */
 export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProps> = ({
   structure,
@@ -56,6 +86,7 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
   onToggleSuspend,
   onFlip,
   children,
+  displaySettings = DEFAULT_FLASHCARD_DISPLAY_SETTINGS,
 }) => {
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
 
@@ -70,14 +101,138 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isZoomModalOpen]);
 
+  // Derived display settings with fallback aliases
+  const density = displaySettings.density || 'split';
+  const showBrandNames = displaySettings.showBrandNames ?? true;
+  const showTaxonomyBreadcrumbs =
+    displaySettings.showTaxonomyBreadcrumbs ??
+    displaySettings.showHierarchyBreadcrumb ??
+    true;
+  const showPharmacophoreTags =
+    displaySettings.showPharmacophoreTags ??
+    displaySettings.showPharmacophoreTagStrip ??
+    true;
+  const showClinicalPearls = displaySettings.showClinicalPearls ?? true;
+
+  // Multi-color pharmacophore highlighting state
+  const [activePharmacophoreIds, setActivePharmacophoreIds] = useState<Record<string, ColorPaletteItem>>({});
+  const [hoveredPharmacophoreId, setHoveredPharmacophoreId] = useState<string | null>(null);
+
+  // Reset interactive highlights on card flip or structure change
+  useEffect(() => {
+    setActivePharmacophoreIds({});
+    setHoveredPharmacophoreId(null);
+  }, [structure.id, isFlipped]);
+
+  const pharmacophores = useMemo(() => getPharmacophoresForStructure(structure), [structure]);
+
+  // Derive active highlights list for SmilesCanvas
+  const activePharmacophoresList = useMemo(() => {
+    const list: Array<{ smarts?: string; color: string; name?: string; id?: string }> = [];
+    Object.entries(activePharmacophoreIds).forEach(([id, color]) => {
+      if (id === hoveredPharmacophoreId) return;
+      const g = pharmacophores.find((p) => p.id === id);
+      if (g) {
+        list.push({
+          id: g.id,
+          name: g.name,
+          smarts: g.smarts,
+          color: color.hex || (color as any).pinBg || '#3b82f6',
+        });
+      }
+    });
+
+    if (hoveredPharmacophoreId) {
+      const g = pharmacophores.find((p) => p.id === hoveredPharmacophoreId);
+      if (g) {
+        const activeColor = activePharmacophoreIds[hoveredPharmacophoreId];
+        list.push({
+          id: g.id,
+          name: g.name,
+          smarts: g.smarts,
+          color: activeColor ? activeColor.hex : '#3b82f6',
+        });
+      }
+    }
+
+    return list;
+  }, [activePharmacophoreIds, hoveredPharmacophoreId, pharmacophores]);
+
+  const handleTogglePharmacophore = (group: PharmacophoreGroup) => {
+    setActivePharmacophoreIds((prev) => {
+      const copy = { ...prev };
+      if (copy[group.id]) {
+        delete copy[group.id];
+        return copy;
+      }
+      const usedHexes = new Set(Object.values(copy).map((c) => c.hex));
+      const nextColor =
+        PHARMACOPHORE_COLOR_PALETTE.find((c) => !usedHexes.has(c.hex)) ||
+        PHARMACOPHORE_COLOR_PALETTE[Object.keys(copy).length % PHARMACOPHORE_COLOR_PALETTE.length];
+      copy[group.id] = nextColor;
+      return copy;
+    });
+  };
+
+  const handleClearAllPharmacophores = () => {
+    setActivePharmacophoreIds({});
+  };
+
   const canonicalSmiles =
     structure.canonical_smiles || structure.canonicalSmiles || structure.smiles || '';
 
   const cleanName = (structure.name || drugName || '').replace(/\[.*?\]\s*/g, '').trim();
+
+  // Resolved brand names for display badge
+  const brandList = useMemo(() => {
+    const set = new Set<string>();
+    if (Array.isArray(structure.brandNames)) {
+      structure.brandNames.forEach((b) => {
+        if (b && typeof b === 'string' && b.trim()) set.add(b.trim());
+      });
+    }
+    if (structure.tradeName && structure.tradeName.trim()) {
+      set.add(structure.tradeName.trim());
+    }
+    return Array.from(set);
+  }, [structure.brandNames, structure.tradeName]);
+
   const tradeSuffix =
-    structure.tradeName && structure.tradeName.toLowerCase() !== cleanName.toLowerCase()
+    showBrandNames && structure.tradeName && structure.tradeName.toLowerCase() !== cleanName.toLowerCase()
       ? ` (${structure.tradeName})`
       : '';
+
+  // 3-tier hierarchy breadcrumb parts:
+  // e.g. ["Therapeutic Class 2: Antibiotic", "Cephalosporin", "1st Generation Cephalosporin"]
+  const breadcrumbParts = useMemo(() => {
+    const parts: string[] = [];
+    if (structure.therapeuticCategory) {
+      let cat = structure.therapeuticCategory.trim();
+      if (!cat.toLowerCase().startsWith('therapeutic class') && !cat.toLowerCase().startsWith('class')) {
+        if (structure.therapeuticClassNumber) {
+          cat = `Therapeutic Class ${structure.therapeuticClassNumber}: ${cat.replace(/^\d+\.\s*/, '')}`;
+        }
+      }
+      parts.push(cat);
+    } else if (structure.therapeuticClassNumber) {
+      parts.push(`Therapeutic Class ${structure.therapeuticClassNumber}`);
+    }
+
+    if (structure.broadPharmacologicClass && structure.broadPharmacologicClass.trim()) {
+      parts.push(structure.broadPharmacologicClass.trim());
+    }
+
+    if (structure.specificPharmacologicClass && structure.specificPharmacologicClass.trim()) {
+      parts.push(structure.specificPharmacologicClass.trim());
+    }
+
+    return parts;
+  }, [
+    structure.therapeuticCategory,
+    structure.therapeuticClassNumber,
+    structure.broadPharmacologicClass,
+    structure.specificPharmacologicClass,
+  ]);
 
   const mw =
     structure.mw ?? structure.pubchemAudit?.molecularWeight
@@ -98,17 +253,17 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
   const chemicalClass = resolveChemicalClass(structure);
   const clinicalProfile: ClinicalPharmacologyProfile = resolveClinicalPharmacology(structure);
 
-  const keyMoieties: string[] =
-    structure.keyFunctionalGroups && structure.keyFunctionalGroups.length > 0
-      ? structure.keyFunctionalGroups
-      : ['Aromatic pharmacophore core', 'Receptor binding moiety'];
-
   const sarText =
     structure.sarNotes ||
     structure.sar_rationale ||
     structure.moa_summary ||
     clinicalProfile.clinicalPearls ||
     'Target binding mediated by key stereocenters and complementary electrostatic interactions.';
+
+  const keyMoieties: string[] =
+    structure.keyFunctionalGroups && structure.keyFunctionalGroups.length > 0
+      ? structure.keyFunctionalGroups
+      : [];
 
   // Color helper for Pregnancy Safety Badge
   const getPregnancyBadge = () => {
@@ -137,10 +292,211 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
 
   const pregBadge = getPregnancyBadge();
 
+  // Helper renderer: Structure Canvas + Interactive Pharmacophores
+  const renderStructureSection = (isProminent: boolean = false) => (
+    <div className="space-y-3">
+      {/* Structure Canvas Container with Click-to-Zoom */}
+      <div
+        onClick={() => setIsZoomModalOpen(true)}
+        className={`w-full ${
+          isProminent ? 'h-72 max-w-xl mx-auto' : 'h-64'
+        } bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors`}
+        title="Click to zoom chemical structure"
+      >
+        <SmilesCanvas
+          smiles={canonicalSmiles}
+          molBlock={structure.pubchemMolBlock}
+          fallbackImageUrl={structure.pngUrl}
+          cid={structure.cid}
+          activePharmacophores={activePharmacophoresList}
+          width={isProminent ? 480 : 340}
+          height={isProminent ? 260 : 220}
+          altText={`${cleanName} chemical structure`}
+          className="w-full h-full flex items-center justify-center pointer-events-none"
+        />
+
+        <div className="absolute inset-0 bg-slate-900/10 dark:bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+          <span className="px-2.5 py-1 rounded bg-slate-900/80 text-white text-[11px] font-medium flex items-center gap-1 shadow-md">
+            <ZoomIn className="w-3.5 h-3.5" />
+            <span>Click to zoom</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Interactive Pharmacophore Tag Strip or Fallback Functional Groups */}
+      {showPharmacophoreTags ? (
+        <PharmacophoreTagList
+          structure={structure}
+          activePharmacophoreIds={activePharmacophoreIds}
+          hoveredPharmacophoreId={hoveredPharmacophoreId}
+          onTogglePharmacophore={handleTogglePharmacophore}
+          onHoverPharmacophore={setHoveredPharmacophoreId}
+          onClearAllHighlights={handleClearAllPharmacophores}
+          containerClassName="mt-2.5"
+        />
+      ) : keyMoieties.length > 0 ? (
+        <div className="mt-2.5 space-y-1.5">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+            Key Functional Groups
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {keyMoieties.map((moiety, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-800/60 text-blue-800 dark:text-blue-300 text-xs font-semibold flex items-center gap-1.5"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                <span>{moiety}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  // Helper renderer: Standard 2x2 / 2x3 Property Grid
+  const renderPropertyGrid = () => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+      {/* Molecular Weight */}
+      <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50">
+        <span className="text-[10px] font-semibold uppercase text-slate-400 block">
+          Molecular Wt
+        </span>
+        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate block">
+          {mw}
+        </span>
+      </div>
+
+      {/* LogP */}
+      <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50">
+        <span className="text-[10px] font-semibold uppercase text-slate-400 block">
+          xLogP
+        </span>
+        <span className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate block">
+          {logP}
+        </span>
+      </div>
+
+      {/* Drug State */}
+      <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50">
+        <span className="text-[10px] font-semibold uppercase text-slate-400 block">
+          Drug State
+        </span>
+        <span className="font-medium text-slate-800 dark:text-slate-200 truncate block">
+          {drugState}
+        </span>
+      </div>
+
+      {/* Target Receptor & Reversibility */}
+      <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50 col-span-2">
+        <span className="text-[10px] font-semibold uppercase text-slate-400 block">
+          Primary Target Receptor
+        </span>
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+            {target}
+          </span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium shrink-0">
+            {reversibility}
+          </span>
+        </div>
+      </div>
+
+      {/* Route of Administration */}
+      <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50">
+        <span className="text-[10px] font-semibold uppercase text-slate-400 block">
+          Route
+        </span>
+        <span className="font-medium text-slate-800 dark:text-slate-200 truncate block">
+          {route}
+        </span>
+      </div>
+    </div>
+  );
+
+  // Helper renderer: Clinical Pharmacology Callouts
+  const renderClinicalCallouts = () => (
+    <div className="space-y-3.5">
+      {/* 1. Metabolism & Bioactivation Card */}
+      <div className="p-3.5 rounded-xl bg-orange-50/40 dark:bg-orange-950/20 border border-orange-200/80 dark:border-orange-900/40 space-y-1">
+        <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-400">
+          <Flame className="w-4 h-4 shrink-0" />
+          <span className="text-xs font-bold uppercase tracking-wider">
+            Metabolism & Bioactivation
+          </span>
+        </div>
+        <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
+          {clinicalProfile.metabolism}
+        </p>
+        {clinicalProfile.metabolismLocation && (
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">
+            Location: {clinicalProfile.metabolismLocation}
+          </p>
+        )}
+      </div>
+
+      {/* 2. Blood-Brain Barrier (BBB) Penetration Card */}
+      <div className="p-3.5 rounded-xl bg-indigo-50/40 dark:bg-indigo-950/20 border border-indigo-200/80 dark:border-indigo-900/40 space-y-1">
+        <div className="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-400">
+          <Brain className="w-4 h-4 shrink-0" />
+          <span className="text-xs font-bold uppercase tracking-wider">
+            Blood-Brain Barrier (BBB) Penetration
+          </span>
+        </div>
+        <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+          {clinicalProfile.bbbCrossing}
+        </p>
+        {clinicalProfile.bbbCnsEffects && (
+          <p className="text-[11px] text-slate-600 dark:text-slate-400">
+            <strong className="font-semibold text-slate-700 dark:text-slate-300">CNS Manifestations:</strong>{' '}
+            {clinicalProfile.bbbCnsEffects}
+          </p>
+        )}
+      </div>
+
+      {/* 3. Pregnancy Safety & Teratogenicity Profile Card */}
+      <div className={`p-3.5 rounded-xl border space-y-1.5 ${pregBadge.bg}`}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            {pregBadge.icon}
+            <span className="text-xs font-bold uppercase tracking-wider">
+              Pregnancy Profile
+            </span>
+          </div>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/80 dark:bg-slate-900/80 shadow-2xs">
+            {pregBadge.badgeText}
+          </span>
+        </div>
+        <p className="text-xs leading-relaxed font-normal">
+          {clinicalProfile.pregnancySummary}
+        </p>
+        {clinicalProfile.pregnancyCategory && (
+          <span className="inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-bold">
+            {clinicalProfile.pregnancyCategory}
+          </span>
+        )}
+      </div>
+
+      {/* 4. Structure-Activity Relationship (SAR) Notes */}
+      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-1">
+        <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+          <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+          <span className="text-xs font-bold uppercase tracking-wider">
+            Structure-Activity Relationship (SAR) Notes
+          </span>
+        </div>
+        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          {sarText}
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full">
       {/* ========================================================= */}
-      {/* FRONT FACE (BLINDED) */}
+      {/* FRONT FACE (BLINDED - STRICT ZERO LEAKS) */}
       {/* ========================================================= */}
       {!isFlipped && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
@@ -228,13 +584,38 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
       )}
 
       {/* ========================================================= */}
-      {/* BACK FACE: OPTION B TWO-COLUMN SPLIT DECK LAYOUT */}
+      {/* BACK FACE: CUSTOMIZABLE DENSITY LAYOUTS */}
       {/* ========================================================= */}
       {isFlipped && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-          {/* 1. Header Banner: Drug Identity, Class, Scaffolds & Actions */}
+          {/* 1. Header Banner: Breadcrumbs, Drug Identity, Brand Badges & Actions */}
           <div className="p-4 sm:p-5 bg-slate-50/90 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
-            <div className="space-y-1 min-w-0">
+            <div className="space-y-1.5 min-w-0">
+              {/* Optional 3-tier hierarchy breadcrumbs */}
+              {showTaxonomyBreadcrumbs && breadcrumbParts.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {breadcrumbParts.map((part, idx) => (
+                    <React.Fragment key={idx}>
+                      {idx > 0 && (
+                        <span className="text-slate-300 dark:text-slate-600 font-bold select-none">
+                          ›
+                        </span>
+                      )}
+                      <span
+                        className={
+                          idx === breadcrumbParts.length - 1
+                            ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                            : ''
+                        }
+                      >
+                        {part}
+                      </span>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+
+              {/* Pharmacologic & Chemical Class Badges + Brand Badges */}
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider">
                   {structure.pharmacologicalClass || 'Cardiovascular Therapeutic Agent'}
@@ -242,8 +623,15 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                 <span className="px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300 text-xs font-medium truncate max-w-xs">
                   {chemicalClass}
                 </span>
+
+                {showBrandNames && brandList.length > 0 && (
+                  <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-200 text-xs font-semibold">
+                    Brand: {brandList.join(', ')}
+                  </span>
+                )}
               </div>
 
+              {/* Drug Name Heading */}
               <div className="flex items-baseline gap-2">
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                   {cleanName}
@@ -306,16 +694,60 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
             </div>
           </div>
 
-          {/* 2. Responsive Two-Column Body Grid */}
-          <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            {/* ---------------------------------------------------- */}
-            {/* LEFT COLUMN: CHEMICAL STRUCTURE & COMPARATOR STATS */}
-            {/* ---------------------------------------------------- */}
-            <div className="space-y-4">
-              {/* Structure Canvas Container */}
+          {/* 2. Body Presentation Based on Density Mode */}
+          {density === 'split' && (
+            <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              {/* Left Column: Chemical Structure & Reference Stats */}
+              <div className="space-y-4">
+                {renderStructureSection(false)}
+                {renderPropertyGrid()}
+              </div>
+
+              {/* Right Column: Clinical Pharmacology Callouts */}
+              <div className="space-y-3.5">
+                {showClinicalPearls ? (
+                  renderClinicalCallouts()
+                ) : (
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 italic text-center">
+                    Clinical pharmacology and SAR pearls hidden by display settings.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {density === 'structure-focus' && (
+            <div className="p-4 sm:p-6 space-y-5 max-w-3xl mx-auto w-full">
+              {/* Prominent Structure Canvas & Pharmacophores */}
+              {renderStructureSection(true)}
+
+              {/* Compact Reference Property Grid */}
+              {renderPropertyGrid()}
+
+              {/* Expandable Accordion for Clinical Pearls */}
+              {showClinicalPearls && (
+                <details className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 overflow-hidden">
+                  <summary className="px-4 py-3 cursor-pointer font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center justify-between hover:bg-slate-100/60 dark:hover:bg-slate-800/60 select-none transition-colors">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-indigo-500" />
+                      <span>Clinical Pharmacology & SAR Details</span>
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform duration-200" />
+                  </summary>
+                  <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3.5">
+                    {renderClinicalCallouts()}
+                  </div>
+                </details>
+              )}
+            </div>
+          )}
+
+          {density === 'minimalist' && (
+            <div className="p-4 sm:p-6 space-y-4 max-w-xl mx-auto w-full flex flex-col items-center">
+              {/* Ultra-compact Canvas View */}
               <div
                 onClick={() => setIsZoomModalOpen(true)}
-                className="w-full h-64 bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                className="w-full h-56 bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
                 title="Click to zoom chemical structure"
               >
                 <SmilesCanvas
@@ -323,8 +755,9 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                   molBlock={structure.pubchemMolBlock}
                   fallbackImageUrl={structure.pngUrl}
                   cid={structure.cid}
+                  activePharmacophores={activePharmacophoresList}
                   width={340}
-                  height={220}
+                  height={210}
                   altText={`${cleanName} chemical structure`}
                   className="w-full h-full flex items-center justify-center pointer-events-none"
                 />
@@ -337,161 +770,23 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                 </div>
               </div>
 
-              {/* Key Moieties / Pharmacophore Badges */}
-              <div className="space-y-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                  Key Pharmacophore Moieties & Functional Groups
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {keyMoieties.map((moiety, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-800/60 text-blue-800 dark:text-blue-300 text-xs font-semibold flex items-center gap-1.5"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                      <span>{moiety}</span>
-                    </span>
-                  ))}
+              {/* Optional Pharmacophore Tags in Minimalist Mode */}
+              {showPharmacophoreTags && (
+                <div className="w-full">
+                  <PharmacophoreTagList
+                    structure={structure}
+                    activePharmacophoreIds={activePharmacophoreIds}
+                    hoveredPharmacophoreId={hoveredPharmacophoreId}
+                    onTogglePharmacophore={handleTogglePharmacophore}
+                    onHoverPharmacophore={setHoveredPharmacophoreId}
+                    onClearAllHighlights={handleClearAllPharmacophores}
+                    containerClassName="mt-1"
+                    compact={true}
+                  />
                 </div>
-              </div>
-
-              {/* 2x2/2x3 Reference Property Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                {/* Molecular Weight */}
-                <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50">
-                  <span className="text-[10px] font-semibold uppercase text-slate-400 block">
-                    Molecular Wt
-                  </span>
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate block">
-                    {mw}
-                  </span>
-                </div>
-
-                {/* LogP */}
-                <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50">
-                  <span className="text-[10px] font-semibold uppercase text-slate-400 block">
-                    xLogP
-                  </span>
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate block">
-                    {logP}
-                  </span>
-                </div>
-
-                {/* Drug State */}
-                <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50">
-                  <span className="text-[10px] font-semibold uppercase text-slate-400 block">
-                    Drug State
-                  </span>
-                  <span className="font-medium text-slate-800 dark:text-slate-200 truncate block">
-                    {drugState}
-                  </span>
-                </div>
-
-                {/* Target Receptor & Reversibility */}
-                <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50 col-span-2">
-                  <span className="text-[10px] font-semibold uppercase text-slate-400 block">
-                    Primary Target Receptor
-                  </span>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                      {target}
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium shrink-0">
-                      {reversibility}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Route of Administration */}
-                <div className="p-2 rounded-lg bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/50">
-                  <span className="text-[10px] font-semibold uppercase text-slate-400 block">
-                    Route
-                  </span>
-                  <span className="font-medium text-slate-800 dark:text-slate-200 truncate block">
-                    {route}
-                  </span>
-                </div>
-              </div>
+              )}
             </div>
-
-            {/* ---------------------------------------------------- */}
-            {/* RIGHT COLUMN: CLINICAL PHARMACOLOGY CALLOUTS */}
-            {/* ---------------------------------------------------- */}
-            <div className="space-y-3.5">
-              {/* 1. Metabolism & Bioactivation Card */}
-              <div className="p-3.5 rounded-xl bg-orange-50/40 dark:bg-orange-950/20 border border-orange-200/80 dark:border-orange-900/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-400">
-                  <Flame className="w-4 h-4 shrink-0" />
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    Metabolism & Bioactivation
-                  </span>
-                </div>
-                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
-                  {clinicalProfile.metabolism}
-                </p>
-                {clinicalProfile.metabolismLocation && (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">
-                    Location: {clinicalProfile.metabolismLocation}
-                  </p>
-                )}
-              </div>
-
-              {/* 2. Blood-Brain Barrier (BBB) Penetration Card */}
-              <div className="p-3.5 rounded-xl bg-indigo-50/40 dark:bg-indigo-950/20 border border-indigo-200/80 dark:border-indigo-900/40 space-y-1">
-                <div className="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-400">
-                  <Brain className="w-4 h-4 shrink-0" />
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    Blood-Brain Barrier (BBB) Penetration
-                  </span>
-                </div>
-                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {clinicalProfile.bbbCrossing}
-                </p>
-                {clinicalProfile.bbbCnsEffects && (
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                    <strong className="font-semibold text-slate-700 dark:text-slate-300">CNS Manifestations:</strong>{' '}
-                    {clinicalProfile.bbbCnsEffects}
-                  </p>
-                )}
-              </div>
-
-              {/* 3. Pregnancy Safety & Teratogenicity Profile Card */}
-              <div className={`p-3.5 rounded-xl border space-y-1.5 ${pregBadge.bg}`}>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    {pregBadge.icon}
-                    <span className="text-xs font-bold uppercase tracking-wider">
-                      Pregnancy Profile
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/80 dark:bg-slate-900/80 shadow-2xs">
-                    {pregBadge.badgeText}
-                  </span>
-                </div>
-                <p className="text-xs leading-relaxed font-normal">
-                  {clinicalProfile.pregnancySummary}
-                </p>
-                {clinicalProfile.pregnancyCategory && (
-                  <span className="inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-bold">
-                    {clinicalProfile.pregnancyCategory}
-                  </span>
-                )}
-              </div>
-
-              {/* 4. Structure-Activity Relationship (SAR) Notes */}
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-1">
-                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                  <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    Structure-Activity Relationship (SAR) Notes
-                  </span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {sarText}
-                </p>
-              </div>
-            </div>
-          </div>
+          )}
 
           {/* 3. Bottom Slot: Anki Spaced Repetition Rating Buttons */}
           {children && (
@@ -541,6 +836,7 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                 molBlock={structure.pubchemMolBlock}
                 fallbackImageUrl={structure.pngUrl}
                 cid={structure.cid}
+                activePharmacophores={isFlipped ? activePharmacophoresList : undefined}
                 width={560}
                 height={360}
                 altText={`${isFlipped ? cleanName : 'Blinded'} chemical structure enlarged`}

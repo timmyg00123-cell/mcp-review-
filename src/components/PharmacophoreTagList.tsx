@@ -8,7 +8,10 @@ import {
 } from '../utils/pharmacophoreData';
 import { Sparkles, RotateCcw, Info, Check, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 
-interface PharmacophoreTagListProps {
+export type { ColorPaletteItem };
+export { PHARMACOPHORE_COLOR_PALETTE };
+
+export interface PharmacophoreTagListProps {
   structure: ChemicalStructure;
   activePharmacophoreIds: Record<string, ColorPaletteItem>;
   hoveredPharmacophoreId: string | null;
@@ -16,6 +19,7 @@ interface PharmacophoreTagListProps {
   onHoverPharmacophore: (id: string | null) => void;
   onClearAllHighlights: () => void;
   compact?: boolean;
+  containerClassName?: string;
 }
 
 export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
@@ -26,6 +30,7 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
   onHoverPharmacophore,
   onClearAllHighlights,
   compact = false,
+  containerClassName,
 }) => {
   const [showPurposeGuide, setShowPurposeGuide] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -57,7 +62,7 @@ export const PharmacophoreTagList: React.FC<PharmacophoreTagListProps> = ({
   const activeCount = Object.keys(activePharmacophoreIds).length;
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${containerClassName || ''}`.trim()}>
       {/* Header with Title & Active Count / Reset */}
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">

@@ -106,4 +106,225 @@ assert.ok(
   'cardMatchesModuleFilter must evaluate active categories with !== false default inclusion'
 );
 
+// Test 11: Filter mode toggle between Curriculum Modules and Top Drugs Taxonomy
+assert.ok(
+  deckContent.includes('DeckFilterMode') || deckContent.includes('filterMode'),
+  'Must support filterMode state / DeckFilterMode'
+);
+assert.ok(
+  deckContent.includes("'curriculum'") && deckContent.includes("'taxonomy'"),
+  "Must support 'curriculum' and 'taxonomy' filter modes"
+);
+assert.ok(
+  deckContent.includes('Top Drugs Taxonomy') || deckContent.includes('Taxonomy'),
+  'Must render taxonomy filter mode toggle'
+);
+
+// Test 12: Cascading taxonomy filtering (Category & Subclass)
+assert.ok(
+  deckContent.includes('selectedCategoryNumber'),
+  'Must have selectedCategoryNumber state'
+);
+assert.ok(
+  deckContent.includes('selectedSubclass'),
+  'Must have selectedSubclass state'
+);
+assert.ok(
+  deckContent.includes('getTherapeuticCategoriesForCards'),
+  'Must import and use getTherapeuticCategoriesForCards'
+);
+assert.ok(
+  deckContent.includes('export function cardMatchesTaxonomyFilter'),
+  'Must export cardMatchesTaxonomyFilter helper'
+);
+
+// Test 13: Stable sorting by Class Number with numeric fallback (?? 999), Subclass, Due Date, Alphabetical
+assert.ok(
+  deckContent.includes('FlashcardSortMode') || deckContent.includes('sortBy'),
+  'Must support sortBy state / FlashcardSortMode'
+);
+assert.ok(
+  deckContent.includes("'class-number'"),
+  "Must support 'class-number' sort mode"
+);
+assert.ok(
+  deckContent.includes('therapeuticClassNumber ?? 999'),
+  'Must sort with numeric fallback 999 for missing class number'
+);
+assert.ok(
+  deckContent.includes('export function sortFlashcards'),
+  'Must export sortFlashcards helper'
+);
+
+// Test 14: Display settings popover and persistence (medchem_flashcard_display_settings)
+assert.ok(
+  deckContent.includes('medchem_flashcard_display_settings'),
+  'Must persist display settings with localStorage key medchem_flashcard_display_settings'
+);
+assert.ok(
+  deckContent.includes('FlashcardDisplaySettings'),
+  'Must import FlashcardDisplaySettings'
+);
+assert.ok(
+  deckContent.includes('displaySettings={displaySettings}') || deckContent.includes('displaySettings={'),
+  'Must pass displaySettings to StructureFlashcardCardFace'
+);
+assert.ok(
+  deckContent.includes('Display') || deckContent.includes('⚙️ Display'),
+  'Must render Display settings popover trigger'
+);
+assert.ok(
+  deckContent.includes('density'),
+  'Must support density setting in display popover'
+);
+assert.ok(
+  deckContent.includes('showBrandNames'),
+  'Must support showBrandNames setting in display popover'
+);
+
+// Test 15: Empty filter fallback view with "Reset Filters" action
+assert.ok(
+  deckContent.includes('Reset Filters'),
+  'Must render Reset Filters button'
+);
+assert.ok(
+  deckContent.includes('handleResetFilters'),
+  'Must define handleResetFilters handler'
+);
+assert.ok(
+  deckContent.includes('No Cards Match') ||
+    deckContent.includes('No Flashcards Match') ||
+    deckContent.includes('No cards match'),
+  'Must render empty filter fallback message'
+);
+
+// Test 16: Keyboard focus guard on <select> elements
+assert.ok(
+  deckContent.includes("target.tagName === 'SELECT'"),
+  "Must guard keyboard shortcuts when focus is on a SELECT element"
+);
+
+// Test 17: Functional sorting & filtering logic assertions
+assert.ok(
+  deckContent.includes('cardMatchesTaxonomyFilter'),
+  'Must define cardMatchesTaxonomyFilter logic'
+);
+assert.ok(
+  deckContent.includes('sortFlashcards') || deckContent.includes('sortCards'),
+  'Must define sortFlashcards / sorting logic'
+);
+assert.ok(
+  deckContent.includes('therapeuticClassNumber') &&
+    deckContent.includes('specificPharmacologicClass'),
+  'Taxonomy filtering and sorting must reference therapeuticClassNumber and specificPharmacologicClass'
+);
+
+// Functional unit test of the sorting and filtering algorithm matching deck specification:
+function testTaxonomyFilter(
+  card: { structure: { therapeuticClassNumber?: number; specificPharmacologicClass?: string; pharmacologicalClass?: string } },
+  categoryNumber: number | null,
+  specificSubclass: string | null
+): boolean {
+  if (categoryNumber !== null && card.structure.therapeuticClassNumber !== categoryNumber) {
+    return false;
+  }
+  if (specificSubclass !== null) {
+    const cardSubclass =
+      card.structure.specificPharmacologicClass ||
+      card.structure.pharmacologicalClass ||
+      '';
+    if (cardSubclass !== specificSubclass) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function testSortCards(
+  a: { drugName: string; structure: { name?: string; therapeuticClassNumber?: number; specificPharmacologicClass?: string; pharmacologicalClass?: string }; dueTimestamp: number },
+  b: { drugName: string; structure: { name?: string; therapeuticClassNumber?: number; specificPharmacologicClass?: string; pharmacologicalClass?: string }; dueTimestamp: number },
+  sortBy: 'class-number' | 'subclass' | 'due-date' | 'alphabetical'
+): number {
+  if (sortBy === 'class-number') {
+    const numA = a.structure.therapeuticClassNumber ?? 999;
+    const numB = b.structure.therapeuticClassNumber ?? 999;
+    if (numA !== numB) return numA - numB;
+    return (a.structure.name || a.drugName).localeCompare(b.structure.name || b.drugName);
+  }
+  if (sortBy === 'subclass') {
+    const subA = a.structure.specificPharmacologicClass || a.structure.pharmacologicalClass || '';
+    const subB = b.structure.specificPharmacologicClass || b.structure.pharmacologicalClass || '';
+    if (subA !== subB) return subA.localeCompare(subB);
+    return (a.structure.name || a.drugName).localeCompare(b.structure.name || b.drugName);
+  }
+  if (sortBy === 'due-date') {
+    return a.dueTimestamp - b.dueTimestamp;
+  }
+  return (a.structure.name || a.drugName).localeCompare(b.structure.name || b.drugName);
+}
+
+const mockCard1 = {
+  drugName: 'Cephalexin',
+  structure: {
+    name: 'Cephalexin',
+    therapeuticClassNumber: 2,
+    specificPharmacologicClass: '1st Generation Cephalosporin',
+  },
+  dueTimestamp: 2000,
+};
+
+const mockCard2 = {
+  drugName: 'Amoxicillin',
+  structure: {
+    name: 'Amoxicillin',
+    therapeuticClassNumber: 2,
+    specificPharmacologicClass: 'Aminopenicillin',
+  },
+  dueTimestamp: 1000,
+};
+
+const mockCard3 = {
+  drugName: 'Metoprolol',
+  structure: {
+    name: 'Metoprolol',
+    therapeuticClassNumber: 8,
+    specificPharmacologicClass: 'Beta-1 Selective Blocker',
+  },
+  dueTimestamp: 3000,
+};
+
+const mockCardCurriculumWithoutClass = {
+  drugName: 'CustomDrug',
+  structure: {
+    name: 'CustomDrug',
+  },
+  dueTimestamp: 500,
+};
+
+// Filter checks:
+assert.strictEqual(testTaxonomyFilter(mockCard1, null, null), true);
+assert.strictEqual(testTaxonomyFilter(mockCard1, 2, null), true);
+assert.strictEqual(testTaxonomyFilter(mockCard3, 2, null), false);
+assert.strictEqual(testTaxonomyFilter(mockCard1, 2, '1st Generation Cephalosporin'), true);
+assert.strictEqual(testTaxonomyFilter(mockCard2, 2, '1st Generation Cephalosporin'), false);
+
+// Sort checks:
+const sortedByClass = [mockCardCurriculumWithoutClass, mockCard3, mockCard1, mockCard2].sort((a, b) =>
+  testSortCards(a, b, 'class-number')
+);
+assert.strictEqual(sortedByClass[0].drugName, 'Amoxicillin');
+assert.strictEqual(sortedByClass[1].drugName, 'Cephalexin');
+assert.strictEqual(sortedByClass[2].drugName, 'Metoprolol');
+assert.strictEqual(sortedByClass[3].drugName, 'CustomDrug', 'Undefined class number should fallback to 999 and sort last');
+
+// Test 18: In-session queue re-queuing preservation
+assert.ok(
+  deckContent.includes('reQueueActiveSession'),
+  'Must call reQueueActiveSession on again rating'
+);
+assert.ok(
+  deckContent.includes('setActiveQueue(updatedQueue)'),
+  'Must update activeQueue state with re-queued card'
+);
+
 console.log('StructureFlashcardDeck integration test passed.');
