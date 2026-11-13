@@ -103,24 +103,33 @@ This project delivers two closely coordinated improvements:
 
 ### 5.2 Drug Intelligence Inspector (`PubChemInspectorModal.tsx`)
 
-#### Data Integration
-The inspector aggregates data from multiple existing internal services and dictionaries:
-1. **Canonical Targets & PK/PD:** `findCanonicalTargetForDrug(drugName)` and `findMedChemProfile(geneSymbol | pdbId)` from `canonicalPharmacophorePkData.ts`.
-2. **Clinical Safety & Warnings:** `fetchClinicalDossier(drugName)` from `clinicalDossierService.ts` for boxed warnings and contraindications.
-3. **Chemical Class & Taxonomy:** `findChemicalClassForDrug(drugName)` from `chemicalClassDictionary.ts` and `topDrugsTaxonomyData.ts`.
-4. **PubChem Physicochemical Specs:** PUG REST API query for formula, MW, XLogP, SMILES, and 2D PNG.
+#### Data Integration & Multi-Tier Resolution
+The inspector aggregates data using a robust tiered resolution pipeline:
+1. **Curated Clinical PK/PD & Decision Catalog (`src/data/drugIntelligenceData.ts`):**
+   - Provides discrete, structured profiles: `isProdrug`, `prodrugActivation`, `halfLife`, `tMax`, `bioavailability`, `proteinBinding`, `volumeOfDistribution`, `cypMetabolism`, `clearance`, and `clinicalDecisionRationale` ("When and why to select this drug").
+   - Enriched with curricular pearls and metabolism details from `src/utils/clinicalPharmacologyDictionary.ts`.
+2. **Canonical Targets & Pharmacophore Groups:**
+   - Resolved via `findCanonicalTargetForDrug(drugName)` and `findMedChemProfile(geneSymbol | pdbId)` from `canonicalPharmacophorePkData.ts`.
+   - Supplies interactive functional group chips (`PharmacophorePkPdGroup`), SAR descriptions, and binding pocket residues (`keyPocketResidues`).
+3. **Clinical Safety & Warnings:**
+   - High-yield clinical contraindications, toxicity risks, and pearls from `CLINICAL_PHARMACOLOGY_DICTIONARY`.
+   - Boxed warnings fetched and cached via `fetchClinicalDossier(drugName)` (`clinicalDossierService.ts`). Rendered in high-visibility alert cards without raw unformatted legal walls of text.
+4. **PubChem Physicochemical Specs:**
+   - Real-time PUG REST API query for formula, molecular weight, XLogP, SMILES, and 2D structure.
 
-#### Navigation Tabs
+#### Navigation Tabs & Fallback States
 1. **Tab 1: Clinical PK/PD & Decision Guidance**
-   - Active Drug vs. Prodrug badge with mechanism of activation (e.g. CYP2C19 bioactivation).
-   - Core metrics grid: Half-life ($T_{1/2}$), Time to peak ($T_{\max}$), Oral bioavailability ($F$), Plasma Protein Binding (PPB), Volume of Distribution ($V_d$), Elimination/Excretion.
-   - Clinical selection card: "Why choose this agent?" (onset speed, reversibility, resistance profiles, renal/hepatic considerations).
+   - Active Drug vs. Prodrug badge with clear activation mechanism (e.g. "CYP2C19 two-step oxidation").
+   - Structured metrics grid: Half-life ($T_{1/2}$), $T_{\max}$, Bioavailability ($F$), Plasma Protein Binding (PPB), CYP Enzymes, Elimination.
+   - Clinical selection card: "Why choose this agent?" (onset, duration, resistance risks, renal/hepatic considerations).
+   - *Fallback:* If a compound is not in the curated dictionary, displays general physicochemical drug-likeness hints (Lipinski Rule of 5 evaluation based on MW and XLogP).
 2. **Tab 2: Pharmacophores & SAR**
    - Pharmacophore tags carousel/chips using `PharmacophorePkPdGroup`.
-   - Structural role annotation per group (e.g., covalent bonding handle, lipophilic anchor, metabolic soft spot).
+   - Structural role annotation per group (e.g. covalent warhead, lipophilic anchor, metabolic soft spot).
    - Associated target binding pocket residues (e.g. Cys97, Arg256).
+   - *Fallback:* If no canonical co-crystal profile is mapped, renders an informative medchem notice: *"3D Pharmacophore SAR groups are curated for core curricular targets."*
 3. **Tab 3: Safety, Toxicities & Warnings**
-   - FDA Boxed Warnings banner (highlighted in rose/amber alerts).
+   - Boxed warnings banner with amber/rose alert styling.
    - Major contraindications and high-risk patient populations.
    - Organ toxicities and key laboratory monitoring parameters.
 4. **Tab 4: Chemical Properties & PubChem**
@@ -131,8 +140,9 @@ The inspector aggregates data from multiple existing internal services and dicti
    - External NIH PubChem record link.
 
 #### Header Action: "Launch 3D Lab (Fullscreen)"
-- Displays target gene symbol and resolved PDB ID (e.g. "Target: P2Y12 Receptor (PDB: 4NTJ)").
-- One-click button with `Box` / `Maximize2` icon that invokes `onOpenIn3DLab(structure, true)` and closes the modal.
+- Resolves canonical target and PDB ID (e.g. "Target: P2Y12 Receptor (PDB: 4NTJ)").
+- If a co-crystal target is available: Renders an active, glowing teal button **"Open in 3D Lab (Fullscreen)"** with `Box` / `Maximize2` icon that switches to `3d-lab` with `initialFullscreen=true` and closes the modal.
+- If no PDB co-crystal is mapped: Renders a disabled button with badge: *"3D Co-crystal Not Available for this Compound"*.
 
 ---
 
