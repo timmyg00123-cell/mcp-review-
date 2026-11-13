@@ -37,6 +37,7 @@ interface PubChemPropertyData {
   MolecularWeight?: number;
   CanonicalSMILES?: string;
   IsomericSMILES?: string;
+  InChIKey?: string;
   IUPACName?: string;
   XLogP?: number;
   RotatableBondCount?: number;
@@ -63,6 +64,7 @@ export const PubChemInspectorModal: React.FC<PubChemInspectorModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [compoundData, setCompoundData] = useState<PubChemPropertyData | null>(null);
   const [copiedSmiles, setCopiedSmiles] = useState(false);
+  const [copiedInChIKey, setCopiedInChIKey] = useState(false);
   const [selectedPharmacophoreId, setSelectedPharmacophoreId] = useState<string | null>(null);
   const [dossier, setDossier] = useState<ClinicalDossierRecord | null>(null);
 
@@ -102,7 +104,7 @@ export const PubChemInspectorModal: React.FC<PubChemInspectorModalProps> = ({
       }
 
       // Fetch compound physical & chemical properties
-      const propUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/Title,IUPACName,MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,XLogP,RotatableBondCount/JSON`;
+      const propUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/Title,IUPACName,MolecularFormula,MolecularWeight,CanonicalSMILES,IsomericSMILES,InChIKey,XLogP,RotatableBondCount/JSON`;
       const propRes = await fetch(propUrl);
       if (!propRes.ok) {
         throw new Error(`PubChem property lookup failed for CID ${cid}`);
@@ -128,6 +130,12 @@ export const PubChemInspectorModal: React.FC<PubChemInspectorModalProps> = ({
     navigator.clipboard.writeText(smiles);
     setCopiedSmiles(true);
     setTimeout(() => setCopiedSmiles(false), 2000);
+  };
+
+  const handleCopyInChIKey = (inchiKey: string) => {
+    navigator.clipboard.writeText(inchiKey);
+    setCopiedInChIKey(true);
+    setTimeout(() => setCopiedInChIKey(false), 2000);
   };
 
   // Resolve current drug name and intelligence profiles
@@ -883,6 +891,34 @@ export const PubChemInspectorModal: React.FC<PubChemInspectorModalProps> = ({
                         </div>
                         <p className="font-mono text-[10px] text-slate-600 dark:text-slate-300 break-all select-all">
                           {compoundData.IsomericSMILES || compoundData.CanonicalSMILES}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* InChIKey with Copy button */}
+                    {compoundData.InChIKey && (
+                      <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-slate-400 text-[11px]">InChIKey:</span>
+                          <button
+                            onClick={() => handleCopyInChIKey(compoundData.InChIKey || '')}
+                            className="text-[11px] flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            {copiedInChIKey ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-500" />
+                                <span>Copied</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <p className="font-mono text-[10px] text-slate-600 dark:text-slate-300 break-all select-all">
+                          {compoundData.InChIKey}
                         </p>
                       </div>
                     )}

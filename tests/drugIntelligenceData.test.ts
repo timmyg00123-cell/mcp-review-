@@ -48,7 +48,7 @@ test('getDrugIntelligenceProfile handles word boundary composite lookup correctl
 
 test('DRUG_INTELLIGENCE_CATALOG contains rich profiles for major cardiovascular and curricular drugs', () => {
   const catalogKeys = Object.keys(DRUG_INTELLIGENCE_CATALOG);
-  assert.ok(catalogKeys.length >= 8, 'Has at least 8 curricular drug profiles');
+  assert.ok(catalogKeys.length >= 12, 'Has at least 12 curricular drug profiles');
   
   // Verify mandatory fields across all catalog entries
   for (const [key, profile] of Object.entries(DRUG_INTELLIGENCE_CATALOG)) {
@@ -62,4 +62,53 @@ test('DRUG_INTELLIGENCE_CATALOG contains rich profiles for major cardiovascular 
     assert.ok(profile.clinicalDecisionRationale, `Missing clinicalDecisionRationale on ${key}`);
     assert.ok(Array.isArray(profile.contraindications), `contraindications must be an array on ${key}`);
   }
+});
+
+test('getDrugIntelligenceProfile resolves all 12 core curricular drugs and their aliases', () => {
+  const coreCurricularDrugs = [
+    'clopidogrel',
+    'prasugrel',
+    'ticagrelor',
+    'aspirin',
+    'atorvastatin',
+    'rosuvastatin',
+    'lisinopril',
+    'losartan',
+    'amlodipine',
+    'hydrochlorothiazide',
+    'furosemide',
+    'spironolactone',
+  ];
+
+  for (const drug of coreCurricularDrugs) {
+    const profile = getDrugIntelligenceProfile(drug);
+    assert.ok(profile, `Core curricular drug '${drug}' must resolve a profile`);
+    assert.ok(profile.clinicalDecisionRationale.length > 20, `Drug '${drug}' must have substantial clinical rationale`);
+    assert.ok(profile.targetGeneSymbol, `Drug '${drug}' should have a targetGeneSymbol`);
+  }
+
+  // Check aliases for new cardiovascular drugs
+  const crestor = getDrugIntelligenceProfile('Crestor');
+  assert.equal(crestor?.drugName, 'Rosuvastatin');
+  assert.equal(crestor?.pdbId, '1HWK');
+
+  const zestril = getDrugIntelligenceProfile('Zestril');
+  assert.equal(zestril?.drugName, 'Lisinopril');
+  assert.equal(zestril?.pdbId, '1O86');
+
+  const norvasc = getDrugIntelligenceProfile('Norvasc');
+  assert.equal(norvasc?.drugName, 'Amlodipine');
+  assert.equal(norvasc?.pdbId, '6JP5');
+
+  const hctz = getDrugIntelligenceProfile('HCTZ');
+  assert.equal(hctz?.drugName, 'Hydrochlorothiazide');
+
+  const lasix = getDrugIntelligenceProfile('Lasix');
+  assert.equal(lasix?.drugName, 'Furosemide');
+  assert.equal(lasix?.pdbId, '7S1C');
+
+  const aldactone = getDrugIntelligenceProfile('Aldactone');
+  assert.equal(aldactone?.drugName, 'Spironolactone');
+  assert.equal(aldactone?.isProdrug, true);
+  assert.equal(aldactone?.pdbId, '2OAX');
 });

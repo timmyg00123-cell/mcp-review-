@@ -309,6 +309,147 @@ export const DRUG_INTELLIGENCE_CATALOG: Record<string, DrugIntelligenceProfile> 
     targetGeneSymbol: 'ADRB1',
     pdbId: '7JJO',
   },
+
+  rosuvastatin: {
+    drugName: 'Rosuvastatin',
+    isProdrug: false,
+    halfLife: '~19 hours (longest terminal half-life among statins, permitting once-daily administration at any time)',
+    tMax: '~3-5 hours',
+    bioavailability: '~20% (hydrophilic statin with hepatocyte-selective OATP1B1 uptake)',
+    proteinBinding: '88% to human serum albumin',
+    volumeOfDistribution: '~134 L',
+    cypMetabolism: 'Minimal CYP metabolism (~10% by CYP2C9); not a substrate or inhibitor for CYP3A4, conferring very low vulnerability to CYP3A4-mediated drug interactions',
+    clearance: 'Fecal/biliary excretion (90% as parent drug), renal excretion (10%)',
+    clinicalDecisionRationale:
+      'High-intensity hydrophilic statin delivering 55-63% LDL-C reduction at 20-40 mg. Preferred over atorvastatin in polymedicated patients receiving CYP3A4 inhibitors (e.g., protease inhibitors, azole antifungals, macrolides, CCBs) because it bypasses CYP3A4 metabolism. Requires dose reduction in patients of Asian descent due to higher systemic exposure (start at 5 mg daily).',
+    contraindications: [
+      'Active liver disease or unexplained persistent transaminase elevations',
+      'Pregnancy and breastfeeding (teratogenic / disrupts fetal cholesterol synthesis)',
+      'Concomitant use with cyclosporine (severe OATP1B1 inhibition increases myopathy/rhabdomyolysis risk)',
+    ],
+    boxedWarnings:
+      'Risk of statin-associated muscle symptoms (SAMS), myopathy, and rhabdomyolysis, particularly at 40 mg dose or when coadministered with gemfibrozil. Increased exposure in patients of Asian ancestry.',
+    targetGeneSymbol: 'HMGCR',
+    pdbId: '1HWK',
+  },
+
+  lisinopril: {
+    drugName: 'Lisinopril',
+    isProdrug: false,
+    halfLife: '~12 hours (sustained 24-hour target ACE inhibition)',
+    tMax: '~6-8 hours (delayed absorption peak)',
+    bioavailability: '~25% (range 6-60%, highly variable; unaffected by food)',
+    proteinBinding: 'Negligible (does not bind serum proteins other than circulating ACE)',
+    volumeOfDistribution: '~124 L',
+    cypMetabolism: 'None (does not undergo hepatic CYP metabolism or phase II conjugation)',
+    clearance: 'Exclusively renal excretion as unchanged drug (100%); requires dose adjustment in renal impairment (CrCl < 30 mL/min)',
+    clinicalDecisionRationale:
+      'First-line oral ACE inhibitor for hypertension, HFrEF (proven reduction in mortality and ventricular remodeling), and post-MI left ventricular dysfunction. Preferred over enalapril or captopril when once-daily adherence is critical or in hepatic dysfunction because it is an active drug (not a prodrug) that undergoes zero hepatic metabolism and is cleared 100% unchanged by the kidneys.',
+    contraindications: [
+      'History of ACE inhibitor-induced or hereditary/idiopathic angioedema',
+      'Concomitant use with sacubitril/neprilysin inhibitors (minimum 36-hour washout required to avoid fatal angioedema)',
+      'Concomitant use with aliskiren in patients with diabetes mellitus',
+      'Pregnancy (all trimesters)',
+    ],
+    boxedWarnings:
+      'Fetal Toxicity: Drugs acting directly on the renin-angiotensin system (RAS) can cause injury and death to the developing fetus (oligohydramnios, skull hypoplasia, neonatal renal failure). Discontinue immediately when pregnancy is detected.',
+    targetGeneSymbol: 'ACE',
+    pdbId: '1O86',
+  },
+
+  amlodipine: {
+    drugName: 'Amlodipine',
+    isProdrug: false,
+    halfLife: '30-50 hours (prolonged elimination half-life supporting smooth 24-hour BP control)',
+    tMax: '6-12 hours (gradual absorption prevents reflex sympathetic tachycardia)',
+    bioavailability: '64-90% (high and consistent oral bioavailability)',
+    proteinBinding: '98% to plasma proteins',
+    volumeOfDistribution: '~21 L/kg (extensive tissue distribution)',
+    cypMetabolism: 'Extensive hepatic metabolism by CYP3A4 to inactive pyridine metabolites',
+    clearance: 'Renal (60% as metabolites, 10% parent drug) and fecal (20-25%)',
+    clinicalDecisionRationale:
+      'First-line dihydropyridine calcium channel blocker (DHP-CCB) for hypertension and chronic stable/vasospastic angina. Preferred over short-acting DHPs (e.g. nifedipine IR) because its prolonged half-life (30-50 hours) and slow onset (Tmax 6-12h) prevent rapid vasodilation and reflex tachycardia. Ideal first-line agent in elderly patients, isolated systolic hypertension, and African American patients where low-renin hypertension responds well to CCBs.',
+    contraindications: [
+      'Severe hypotension (systolic BP < 90 mmHg)',
+      'Cardiogenic shock',
+      'Known hypersensitivity to amlodipine or other dihydropyridines',
+    ],
+    boxedWarnings:
+      'May worsen peripheral edema (dose-dependent precapillary arteriolar vasodilation) and rare acute worsening of angina/MI upon initiation or dose escalation in severe obstructive CAD.',
+    targetGeneSymbol: 'CACNA1C',
+    pdbId: '6JP5',
+  },
+
+  hydrochlorothiazide: {
+    drugName: 'Hydrochlorothiazide',
+    isProdrug: false,
+    halfLife: '6-15 hours',
+    tMax: '1.5-4 hours',
+    bioavailability: '65-75% (rapid oral absorption)',
+    proteinBinding: '40-68%',
+    volumeOfDistribution: '3.6-7.8 L/kg',
+    cypMetabolism: 'Not metabolized; cleared unchanged',
+    clearance: 'Exclusively renal (>=61% excreted unchanged in urine via organic acid transporter OAT1/OAT3)',
+    clinicalDecisionRationale:
+      'Cornerstone thiazide diuretic for primary essential hypertension, frequently combined with ACEIs, ARBs, or CCBs. Inhibits the Na+/Cl- cotransporter (NCC) in the early distal convoluted tubule (DCT). Note: loses diuretic efficacy when eGFR < 30 mL/min (where loop diuretics such as furosemide or bumetanide must be substituted). Increases uric acid (gout risk) and glucose, and causes hypokalemia, hyponatremia, and hypercalcemia.',
+    contraindications: [
+      'Anuria or severe renal failure (eGFR < 30 mL/min)',
+      'Hypersensitivity to sulfonamide-derived drugs or thiazides',
+      'Refractory hypokalemia, hyponatremia, or hypercalcemia',
+    ],
+    boxedWarnings:
+      'Electrolyte disturbances (hypokalemia, hyponatremia, hypomagnesemia), hyperuricemia/gout precipitation, and mild hyperglycemia. Acute angle-closure glaucoma and choroidal effusion reported rarely.',
+    targetGeneSymbol: 'SLC12A3',
+  },
+
+  furosemide: {
+    drugName: 'Furosemide',
+    isProdrug: false,
+    halfLife: '1.5-2 hours (normal renal function); prolonged up to 2-4 hours in ESRD',
+    tMax: 'Oral: 1-1.5 hours; IV: 15-30 minutes',
+    bioavailability: 'Oral: ~50% (wide inter- and intra-individual variation: 10-90%; food delays absorption)',
+    proteinBinding: '91-99% (predominantly albumin; high protein binding limits glomerular filtration, requiring active proximal tubular secretion via OAT to reach luminal NKCC2)',
+    volumeOfDistribution: '0.1-0.2 L/kg (restricted primarily to extracellular fluid)',
+    cypMetabolism: 'Minimal hepatic glucuronidation (~10-20% by UGT1A1/UGT1A9); not CYP-dependent',
+    clearance: 'Renal (60-70% via active proximal tubular secretion) and non-renal/fecal (30%)',
+    clinicalDecisionRationale:
+      'First-line high-ceiling loop diuretic for acute and chronic volume overload in heart failure, pulmonary edema, ascites, and renal insufficiency (remains effective even when eGFR < 30 mL/min). Preferred over thiazides in CKD and symptomatic congestion. Requires potassium monitoring/replacement due to potent kaliuresis and magnesium wasting.',
+    contraindications: [
+      'Anuria unresponsive to test dose',
+      'Hepatic coma or severe electrolyte depletion until corrected',
+      'Severe hypersensitivity to furosemide or sulfonamides',
+    ],
+    boxedWarnings:
+      'Profound Diuresis: Furosemide is a potent diuretic that, if given in excessive amounts, can lead to profound diuresis with water and electrolyte depletion (hypokalemia, hyponatremia, dehydration, hypovolemia, circulatory collapse). Careful medical supervision and dose adjustment required.',
+    targetGeneSymbol: 'SLC12A1',
+    pdbId: '7S1C',
+  },
+
+  spironolactone: {
+    drugName: 'Spironolactone',
+    isProdrug: true,
+    prodrugActivation:
+      'Extensively metabolized by hepatic enzymes via dethioacetylation and hydroxylation into primary active metabolites canrenone, 7alpha-thiomethylspironolactone, and 6beta-hydroxy-7alpha-thiomethylspironolactone, which account for ~80% of systemic mineralocorticoid receptor antagonism.',
+    halfLife: 'Parent spironolactone: ~1.4 hours; Active metabolites (canrenone): ~16-24 hours',
+    tMax: 'Parent: ~1.5-2.5 hours; Canrenone: ~2.5-4 hours',
+    bioavailability: '>=73-90% (oral absorption significantly enhanced when taken with food)',
+    proteinBinding: '90-98% for parent drug and active canrenone metabolite',
+    volumeOfDistribution: '~0.05-0.1 L/kg (parent drug); active metabolites distribute widely',
+    cypMetabolism: 'Hepatic metabolism via CYP3A4, CYP3A5, and non-CYP sulfotransferases and esterases',
+    clearance: 'Renal (47-57% as metabolites) and biliary/fecal (35-42%)',
+    clinicalDecisionRationale:
+      'First-line mineralocorticoid receptor antagonist (MRA) for HFrEF (reduces all-cause mortality and myocardial fibrosis), resistant hypertension, and primary aldosteronism/hepatic cirrhosis with ascites. Inhibits aldosterone in the late DCT and cortical collecting duct, promoting natriuresis while conserving potassium and magnesium. Caveat: non-selective steroid antagonism of androgen/progesterone receptors can cause gynecomastia, breast tenderness, and menstrual irregularities (eplerenone is a selective alternative).',
+    contraindications: [
+      'Hyperkalemia (serum potassium > 5.0 mEq/L at baseline)',
+      'Severe renal impairment (eGFR < 30 mL/min or CrCl < 30 mL/min; serum creatinine > 2.5 mg/dL in men or > 2.0 mg/dL in women)',
+      'Addison disease or other forms of adrenal insufficiency',
+      'Concomitant use of eplerenone or potassium supplements',
+    ],
+    boxedWarnings:
+      'Hyperkalemia: Can cause severe, life-threatening hyperkalemia, especially in patients with renal impairment, diabetes, or concomitant ACEI/ARB/NSAID therapy. Frequent serum potassium and renal function monitoring required.',
+    targetGeneSymbol: 'NR3C2',
+    pdbId: '2OAX',
+  },
 };
 
 /**
@@ -373,6 +514,31 @@ const DRUG_ALIASES: Record<string, string> = {
   lopressor: 'metoprolol',
   'metoprolol succinate': 'metoprolol',
   'metoprolol tartrate': 'metoprolol',
+
+  // Rosuvastatin
+  crestor: 'rosuvastatin',
+
+  // Lisinopril
+  prinivil: 'lisinopril',
+  zestril: 'lisinopril',
+  qbrelis: 'lisinopril',
+
+  // Amlodipine
+  norvasc: 'amlodipine',
+  katerzia: 'amlodipine',
+  amlo: 'amlodipine',
+
+  // Hydrochlorothiazide
+  hctz: 'hydrochlorothiazide',
+  microzide: 'hydrochlorothiazide',
+  esidrix: 'hydrochlorothiazide',
+
+  // Furosemide
+  lasix: 'furosemide',
+
+  // Spironolactone
+  aldactone: 'spironolactone',
+  carospir: 'spironolactone',
 };
 
 /**
