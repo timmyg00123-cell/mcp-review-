@@ -71,15 +71,15 @@ async function runTests() {
   );
 
   // --------------------------------------------------------------------------
-  // Test 4: Atom Labels Toggle Contract
+  // Test 4: Atom Labels Toggle Contract (Mol* GPU-Instanced Labels)
   // --------------------------------------------------------------------------
   assert.ok(
-    fileContent.includes('addPropertyLabels'),
-    'Must invoke viewer.addPropertyLabels for atom labels'
+    !fileContent.includes('viewer.addPropertyLabels("atom"'),
+    'Must eliminate legacy 3Dmol addPropertyLabels canvas texture freeze'
   );
   assert.ok(
-    fileContent.includes('"atom"'),
-    'addPropertyLabels must request "atom" property'
+    fileContent.includes('showAtomLabels'),
+    'Must track showAtomLabels state for GPU-instanced labels'
   );
 
   // --------------------------------------------------------------------------
