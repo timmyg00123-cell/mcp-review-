@@ -449,12 +449,17 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
       }
 
       try {
-        // 1. Identify primary small-molecule ligand from coordinates
-        const pdbData = await fetchPdbCoordinates(cleanPdbId);
-        if (!isMounted) return;
+        // 1. Identify primary small-molecule ligand from coordinates (non-fatal if text coordinates fail)
+        let ligand: any = null;
+        try {
+          const pdbData = await fetchPdbCoordinates(cleanPdbId);
+          if (!isMounted) return;
 
-        const ligand = identifyLigandResidue(pdbData, preferredLigandCode);
-        setDetectedLigand(ligand);
+          ligand = identifyLigandResidue(pdbData, preferredLigandCode);
+          setDetectedLigand(ligand);
+        } catch (coordErr) {
+          console.warn(`[ThreeDLabCanvas] Non-fatal: Could not pre-fetch text PDB coordinates for ${cleanPdbId}, proceeding with Mol* binary mmCIF stream:`, coordErr);
+        }
 
         // Initial representation toggles
         const initialRibbon = !ligand; // Default ribbon active for apo structures

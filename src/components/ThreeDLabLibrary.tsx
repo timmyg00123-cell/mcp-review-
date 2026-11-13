@@ -37,6 +37,7 @@ import { PharmacophorePkDrawer } from './PharmacophorePkDrawer';
 export interface ThreeDLabLibraryProps {
   initialDrugName?: string;
   initialPdbId?: string;
+  initialFullscreen?: boolean;
   structures?: ChemicalStructure[];
   onBackToReview?: () => void;
 }
@@ -67,6 +68,7 @@ function getTargetCategory(target: TargetPdbMapping): string {
 export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
   initialDrugName,
   initialPdbId,
+  initialFullscreen = false,
   structures = [],
   onBackToReview,
 }) => {
@@ -98,7 +100,7 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
   const [customPdbError, setCustomPdbError] = useState<string | null>(null);
 
   // Fullscreen, Tutorial & Sidebar/Drawer states
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(initialFullscreen ?? false);
   const [isTutorialOpen, setIsTutorialOpen] = useState<boolean>(false);
   const [isLeftCollapsed, setIsLeftCollapsed] = useState<boolean>(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState<boolean>(false);
@@ -147,7 +149,10 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
         }
       }
     }
-  }, [initialDrugName, initialPdbId]);
+    if (initialFullscreen !== undefined) {
+      setIsFullscreen(initialFullscreen);
+    }
+  }, [initialDrugName, initialPdbId, initialFullscreen]);
 
   // Handle Escape key to exit full-screen mode or close open drawers
   useEffect(() => {

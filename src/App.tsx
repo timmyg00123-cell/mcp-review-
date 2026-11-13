@@ -382,11 +382,13 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<AppTab>('document-review');
   const [selected3DDrug, setSelected3DDrug] = useState<string | undefined>(undefined);
   const [selected3DPdbId, setSelected3DPdbId] = useState<string | undefined>(undefined);
+  const [is3DFullscreenRequested, setIs3DFullscreenRequested] = useState<boolean>(false);
 
-  const handleOpenIn3DLab = (structure: ChemicalStructure) => {
+  const handleOpenIn3DLab = (structure: ChemicalStructure, launchFullscreen: boolean = false) => {
     setSelected3DDrug(structure.name);
     const canonical = findCanonicalTargetForDrug(structure.name);
     setSelected3DPdbId(canonical?.pdbId);
+    setIs3DFullscreenRequested(launchFullscreen);
     switchTab('3d-lab');
   };
 
@@ -1824,6 +1826,7 @@ function AppContent() {
             <ThreeDLabLibrary
               initialDrugName={selected3DDrug}
               initialPdbId={selected3DPdbId}
+              initialFullscreen={is3DFullscreenRequested}
               structures={currentPageStructures}
               onBackToReview={() => switchTab('document-review')}
             />
