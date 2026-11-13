@@ -1895,6 +1895,7 @@ function AppContent() {
             initialStructure={inspectedStructure}
             isOpen={isPubChemModalOpen}
             onClose={() => setIsPubChemModalOpen(false)}
+            onOpenIn3DLab={handleOpenIn3DLab}
           />
         </React.Suspense>
       )}
