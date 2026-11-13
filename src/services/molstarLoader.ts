@@ -5,6 +5,8 @@
  * Binary mmCIF (.bcif) URL generation, and coordinate caching.
  */
 
+import { PDB_COORDINATE_ALIASES } from './structure3dService';
+
 export interface MolstarLoaderOptions {
   timeoutMs?: number;
   forceReload?: boolean;
@@ -30,7 +32,9 @@ let activeLoaderPromise: Promise<any> | null = null;
  */
 export function getBinaryCifUrl(pdbId: string): string {
   if (!pdbId || typeof pdbId !== 'string') return '';
-  const normalized = pdbId.trim().toLowerCase();
+  const upper = pdbId.trim().toUpperCase();
+  const actualId = PDB_COORDINATE_ALIASES[upper]?.actualPdbId || upper;
+  const normalized = actualId.toLowerCase();
   if (!normalized) return '';
   return `https://models.rcsb.org/${normalized}.bcif`;
 }

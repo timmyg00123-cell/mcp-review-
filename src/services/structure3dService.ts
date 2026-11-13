@@ -12,6 +12,27 @@ export interface DetectedLigandInfo {
 }
 
 /**
+ * Canonical PDB coordinate aliases for curricular drug targets where a specific
+ * co-crystal structure with the target drug is required (e.g. 4Z9O GGT1 -> 4ZUD AT1R with Olmesartan).
+ */
+export const PDB_COORDINATE_ALIASES: Record<string, { actualPdbId: string; ligandCode: string }> = {
+  '4Z9O': { actualPdbId: '4ZUD', ligandCode: 'OLM' },
+};
+
+/**
+ * Curricular ligand code aliases mapping legacy/curriculum codes to actual 3-letter PDB HETATM chemical component IDs.
+ */
+export const LIGAND_CODE_ALIASES: Record<string, string> = {
+  '4Z9': 'OLM',
+  'AZD': 'AZJ',
+  '1N4': 'LPR',
+  '1HW': '117',
+  'NEN': '5FW',
+  'MPO': 'FLP',
+  '10A': 'ROC',
+};
+
+/**
  * Common crystallographic buffer salts, solvents, lipids, cryoprotectants,
  * and detergents to exclude when automatically detecting small-molecule drug ligands.
  */
@@ -19,6 +40,19 @@ export const EXCLUDED_HETERO_RESIDUES: readonly string[] = [
   'HOH',
   'WAT',
   'CLR', // Cholesterol / membrane lipid additive
+  'OLC', // (2R)-2,3-dihydroxypropyl (9Z)-octadec-9-enoate (monoolein lipid)
+  'OLA', // Oleic acid lipid
+  'BOG', // Octyl beta-D-glucopyranoside detergent
+  'OG',  // Octyl glucoside
+  'PLM', // Palmitic acid
+  '12P', // Polyethylene glycol derivative
+  'BU1', // 1,4-butanediol
+  'ACM', // Acetamide
+  'HEM', // Heme cofactor
+  'ADP', // Adenosine-5'-diphosphate cofactor
+  'ATP', // Adenosine-5'-triphosphate cofactor
+  'NDP', // NADPH cofactor
+  'CD',  // Cadmium ion
   'SO4', // Sulfate ion
   'PO4', // Phosphate ion
   'MG',  // Magnesium
@@ -76,12 +110,20 @@ export function identifyLigandResidue(
     return null;
   }
 
-  // If preferred ligand code is supplied and present, select it
-  if (normalizedPreferred && residueAtomCounts.has(normalizedPreferred)) {
-    return {
-      resn: normalizedPreferred,
-      atomCount: residueAtomCounts.get(normalizedPreferred)!,
-    };
+  // If preferred ligand code is supplied and present, select it (or its PDB component alias)
+  if (normalizedPreferred) {
+    const candidateCodes = [normalizedPreferred];
+    if (LIGAND_CODE_ALIASES[normalizedPreferred]) {
+      candidateCodes.push(LIGAND_CODE_ALIASES[normalizedPreferred]);
+    }
+    for (const code of candidateCodes) {
+      if (residueAtomCounts.has(code)) {
+        return {
+          resn: code,
+          atomCount: residueAtomCounts.get(code)!,
+        };
+      }
+    }
   }
 
   // Otherwise, select the residue with the largest atom count
@@ -118,9 +160,10 @@ export async function fetchPdbCoordinates(pdbId: string, signal?: AbortSignal): 
   }
 
   const cleanId = pdbId.trim().toUpperCase();
-  const lowerId = cleanId.toLowerCase();
+  const actualId = PDB_COORDINATE_ALIASES[cleanId]?.actualPdbId || cleanId;
+  const lowerId = actualId.toLowerCase();
   const primaryUrl = `https://www.ebi.ac.uk/pdbe/entry-files/download/pdb${lowerId}.ent`;
-  const fallbackUrl = `https://files.rcsb.org/download/${cleanId}.pdb`;
+  const fallbackUrl = `https://files.rcsb.org/download/${actualId}.pdb`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {

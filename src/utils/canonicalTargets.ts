@@ -24,6 +24,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     exampleDrugs: ['Clopidogrel', 'Prasugrel', 'Ticagrelor', 'Cangrelor'],
     chemblTargetId: 'CHEMBL4821',
     ligandCode: 'AZD',
+    preferredLigandCode: 'AZJ',
   },
   {
     targetName: 'Angiotensin-Converting Enzyme',
@@ -33,6 +34,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     exampleDrugs: ['Captopril', 'Enalapril', 'Lisinopril', 'Ramipril'],
     chemblTargetId: 'CHEMBL1824',
     ligandCode: '1N4',
+    preferredLigandCode: 'LPR',
   },
   {
     targetName: 'Angiotensin II Type 1 Receptor',
@@ -42,6 +44,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     exampleDrugs: ['Losartan', 'Valsartan', 'Candesartan', 'Irbesartan'],
     chemblTargetId: 'CHEMBL233',
     ligandCode: '4Z9',
+    preferredLigandCode: 'OLM',
   },
   {
     targetName: 'HMG-CoA Reductase',
@@ -51,6 +54,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     exampleDrugs: ['Atorvastatin', 'Rosuvastatin', 'Simvastatin', 'Pravastatin'],
     chemblTargetId: 'CHEMBL402',
     ligandCode: '1HW',
+    preferredLigandCode: '117',
   },
   {
     targetName: 'Beta-1 Adrenergic Receptor',
@@ -60,6 +64,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     exampleDrugs: ['Metoprolol', 'Atenolol', 'Bisoprolol', 'Esmolol'],
     chemblTargetId: 'CHEMBL213',
     ligandCode: 'NEN',
+    preferredLigandCode: '5FW',
   },
   {
     targetName: 'Beta-2 Adrenergic Receptor',
@@ -87,6 +92,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     exampleDrugs: ['Aspirin', 'Ibuprofen', 'Naproxen', 'Indomethacin'],
     chemblTargetId: 'CHEMBL221',
     ligandCode: 'MPO',
+    preferredLigandCode: 'FLP',
   },
   {
     targetName: 'Dihydrofolate Reductase',
@@ -114,6 +120,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     exampleDrugs: ['Ritonavir', 'Saquinavir', 'Darunavir', 'Atazanavir'],
     chemblTargetId: 'CHEMBL243',
     ligandCode: '10A',
+    preferredLigandCode: 'ROC',
   },
   {
     targetName: 'Bacterial Penicillin-Binding Protein',

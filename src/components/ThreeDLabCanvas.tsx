@@ -102,7 +102,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   const [detectedLigand, setDetectedLigand] = useState<DetectedLigandInfo | null>(null);
   const [showPocket, setShowPocket] = useState<boolean>(false);
   const [showPocketSurface, setShowPocketSurface] = useState<boolean>(false);
-  const [showRibbon, setShowRibbon] = useState<boolean>(false);
+  const [showRibbon, setShowRibbon] = useState<boolean>(true);
   const [showHBonds, setShowHBonds] = useState<boolean>(false);
   const [showAtomLabels, setShowAtomLabels] = useState<boolean>(false);
   const [clickedAtomInfo, setClickedAtomInfo] = useState<{
@@ -147,7 +147,16 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           viewer.visual.clearHighlight();
         }
 
-        // Apply Mol* high-level visual representations if PDBeMolstar visual API is present
+        // 1. Protein backbone cartoon ribbon & hetero small molecule visibility
+        if (typeof viewer.visual?.visibility === 'function') {
+          viewer.visual.visibility({
+            polymer: ribbonActive,
+            het: true,
+            water: false,
+          });
+        }
+
+        // Apply Mol* high-level visual representations if legacy update API is present
         if (typeof viewer.visual?.update === 'function') {
           viewer.visual.update({
             // Protein backbone cartoon ribbon (using { hetflag: false } polymer selector)
@@ -165,20 +174,59 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           });
         }
 
-        // 1. High-contrast Ligand Sticks & Base Selection
-        if (ligand && typeof viewer.visual?.select === 'function') {
-          viewer.visual.select({
-            data: [
-              {
-                chem_comp_id: ligand.resn,
-                color: MOLSTAR_THEME_COLORS.cyanCarbon,
-                focus: !pharmacophoreGroup,
-              },
-            ],
-          });
+        // 2. High-contrast Ligand Sticks & Pocket Residue Sticks
+        if (typeof viewer.visual?.select === 'function') {
+          const selectData: any[] = [];
+
+          // Primary small-molecule drug ligand as cyan ball-and-stick
+          if (ligand) {
+            selectData.push({
+              chem_comp_id: ligand.resn,
+              representation: 'ball-and-stick',
+              representationColor: MOLSTAR_THEME_COLORS.cyanCarbon,
+              color: MOLSTAR_THEME_COLORS.cyanCarbon,
+              focus: !pharmacophoreGroup,
+            });
+          }
+
+          // Key pocket residues as emerald ball-and-stick when pocket sticks are toggled on
+          if (pocketActive && medChemProfile?.keyPocketResidues?.length) {
+            for (const residue of medChemProfile.keyPocketResidues) {
+              selectData.push({
+                struct_asym_id: residue.chain || 'A',
+                residue_number: residue.resi,
+                representation: 'ball-and-stick',
+                representationColor: MOLSTAR_THEME_COLORS.emeraldPocket,
+                color: MOLSTAR_THEME_COLORS.emeraldPocket,
+              });
+            }
+          }
+
+          // Active pharmacophore group accent highlighting
+          if (pharmacophoreGroup && ligand) {
+            const accentHex = pharmacophoreGroup.colorAccent || '#ec4899';
+            const r = parseInt(accentHex.slice(1, 3), 16) || 236;
+            const g = parseInt(accentHex.slice(3, 5), 16) || 72;
+            const b = parseInt(accentHex.slice(5, 7), 16) || 153;
+
+            selectData.push({
+              chem_comp_id: ligand.resn,
+              atoms: pharmacophoreGroup.atomNames,
+              representation: 'ball-and-stick',
+              representationColor: { r, g, b },
+              color: { r, g, b },
+              focus: true,
+            });
+          }
+
+          if (selectData.length > 0) {
+            viewer.visual.select({
+              data: selectData,
+            });
+          }
         }
 
-        // 2. Pharmacophore Group Accent Highlighting
+        // 3. Highlight active pharmacophore group if highlight API is available
         if (pharmacophoreGroup && ligand && typeof viewer.visual?.highlight === 'function') {
           const accentHex = pharmacophoreGroup.colorAccent || '#ec4899';
           const r = parseInt(accentHex.slice(1, 3), 16) || 236;
@@ -196,11 +244,25 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
             ],
           });
         }
+
+        // 4. Focus camera on the ligand or active pharmacophore group
+        if (ligand && typeof viewer.visual?.focus === 'function') {
+          if (pharmacophoreGroup) {
+            viewer.visual.focus({
+              chem_comp_id: ligand.resn,
+              atoms: pharmacophoreGroup.atomNames,
+            });
+          } else {
+            viewer.visual.focus({
+              chem_comp_id: ligand.resn,
+            });
+          }
+        }
       } catch (err) {
         console.warn('Mol* scene styling notification:', err);
       }
     },
-    []
+    [medChemProfile]
   );
 
   // --------------------------------------------------------------------------
@@ -467,8 +529,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           console.warn(`[ThreeDLabCanvas] Non-fatal: Could not pre-fetch text PDB coordinates for ${cleanPdbId}, proceeding with Mol* binary mmCIF stream:`, coordErr);
         }
 
-        // Initial representation toggles
-        const initialRibbon = !ligand; // Default ribbon active for apo structures
+        // Initial representation toggles: default ribbon active so students see the receptor fold
+        const initialRibbon = true;
         const initialPocket = false;
         const initialPocketSurface = false;
         const initialHBonds = false;
@@ -506,6 +568,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               clearHighlight: () => {},
               reset: () => {},
               update: () => {},
+              visibility: () => {},
+              focus: () => {},
             },
             plugin: {
               canvas3d: {
@@ -543,6 +607,18 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
 
         if (typeof viewer.render === 'function') {
           await viewer.render(containerRef.current, molstarOptions);
+          if (isMounted) {
+            renderScene(
+              viewer,
+              ligand,
+              initialPocket,
+              initialPocketSurface,
+              initialRibbon,
+              initialHBonds,
+              showAtomLabels,
+              activePharmacophoreGroup
+            );
+          }
         }
 
         // Subscribe to atom click events for camera recentering & pocket contact inspection
