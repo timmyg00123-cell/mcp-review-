@@ -477,6 +477,7 @@ export const diureticsPages: ReviewPage[] = [
             title: 'High-Ceiling Loop Diuretics Landmark Properties Matching',
             category: 'Medicinal Chemistry SAR',
             type: 'matching',
+            questionStem: 'Drag each chemical structure (Structure I - Structure IV) to its matching medicinal chemistry or clinical pharmacology property:',
             prompt: 'Drag each chemical structure (Structure I - Structure IV) to its matching medicinal chemistry or clinical pharmacology property:',
             options: ['Structure I', 'Structure II', 'Structure III', 'Structure IV'],
             matchingTargets: [
