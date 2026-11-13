@@ -11,6 +11,7 @@ export interface TargetPdbMapping {
   description: string;
   exampleDrugs: string[];
   chemblTargetId?: string;
+  ligandCode?: string; // 3-letter HETATM residue code in PDB co-crystal
 }
 
 export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
@@ -21,6 +22,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'P2Y12 purinergic receptor involved in platelet aggregation inhibition',
     exampleDrugs: ['Clopidogrel', 'Prasugrel', 'Ticagrelor', 'Cangrelor'],
     chemblTargetId: 'CHEMBL4821',
+    ligandCode: 'AZD',
   },
   {
     targetName: 'Angiotensin-Converting Enzyme',
@@ -29,6 +31,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Zinc metallopeptidase converting angiotensin I to angiotensin II',
     exampleDrugs: ['Captopril', 'Enalapril', 'Lisinopril', 'Ramipril'],
     chemblTargetId: 'CHEMBL1824',
+    ligandCode: '1N4',
   },
   {
     targetName: 'Angiotensin II Type 1 Receptor',
@@ -37,6 +40,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Angiotensin II type 1 G-protein coupled receptor mediating vasoconstriction',
     exampleDrugs: ['Losartan', 'Valsartan', 'Candesartan', 'Irbesartan'],
     chemblTargetId: 'CHEMBL233',
+    ligandCode: '4Z9',
   },
   {
     targetName: 'HMG-CoA Reductase',
@@ -45,6 +49,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Rate-limiting enzyme in cholesterol biosynthesis pathway',
     exampleDrugs: ['Atorvastatin', 'Rosuvastatin', 'Simvastatin', 'Pravastatin'],
     chemblTargetId: 'CHEMBL402',
+    ligandCode: '1HW',
   },
   {
     targetName: 'Beta-1 Adrenergic Receptor',
@@ -53,6 +58,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'G-protein coupled adrenergic receptor regulating cardiac rate and inotropy',
     exampleDrugs: ['Metoprolol', 'Atenolol', 'Bisoprolol', 'Esmolol'],
     chemblTargetId: 'CHEMBL213',
+    ligandCode: 'NEN',
   },
   {
     targetName: 'Beta-2 Adrenergic Receptor',
@@ -61,6 +67,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Adrenergic receptor mediating bronchial smooth muscle relaxation',
     exampleDrugs: ['Albuterol', 'Salmeterol', 'Formoterol'],
     chemblTargetId: 'CHEMBL210',
+    ligandCode: 'CAU',
   },
   {
     targetName: 'Cyclooxygenase-2',
@@ -69,6 +76,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Inducible prostaglandin-endoperoxide synthase responsible for inflammatory prostanoids',
     exampleDrugs: ['Celecoxib', 'Meloxicam', 'Diclofenac'],
     chemblTargetId: 'CHEMBL230',
+    ligandCode: 'CEL',
   },
   {
     targetName: 'Cyclooxygenase-1',
@@ -77,6 +85,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Constitutive cyclooxygenase producing cytoprotective prostaglandins and thromboxane A2',
     exampleDrugs: ['Aspirin', 'Ibuprofen', 'Naproxen', 'Indomethacin'],
     chemblTargetId: 'CHEMBL221',
+    ligandCode: 'MPO',
   },
   {
     targetName: 'Dihydrofolate Reductase',
@@ -85,6 +94,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Key enzyme in tetrahydrofolate synthesis for purine and thymidylate generation',
     exampleDrugs: ['Methotrexate', 'Trimethoprim'],
     chemblTargetId: 'CHEMBL202',
+    ligandCode: 'MTX',
   },
   {
     targetName: 'EGFR Tyrosine Kinase',
@@ -93,6 +103,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Receptor tyrosine kinase controlling cell proliferation and survival signaling',
     exampleDrugs: ['Erlotinib', 'Gefitinib', 'Osimertinib'],
     chemblTargetId: 'CHEMBL203',
+    ligandCode: 'AQ4',
   },
   {
     targetName: 'HIV-1 Protease',
@@ -101,6 +112,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Viral aspartyl protease essential for cleavage of HIV gag-pol polyproteins',
     exampleDrugs: ['Ritonavir', 'Saquinavir', 'Darunavir', 'Atazanavir'],
     chemblTargetId: 'CHEMBL243',
+    ligandCode: '10A',
   },
   {
     targetName: 'Bacterial Penicillin-Binding Protein',
@@ -109,6 +121,7 @@ export const CANONICAL_MEDCHEM_TARGETS: TargetPdbMapping[] = [
     description: 'Transpeptidase responsible for bacterial peptidoglycan cell wall crosslinking',
     exampleDrugs: ['Amoxicillin', 'Ampicillin', 'Penicillin', 'Ceftriaxone'],
     chemblTargetId: 'CHEMBL4005',
+    ligandCode: 'AMO',
   },
 ];
 
