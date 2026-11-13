@@ -186,6 +186,69 @@ async function runTests() {
     html.includes('4NTJ'),
     'Rendered HTML must reflect initial PDB ID'
   );
+  assert.ok(
+    html.includes('Mol* / RCSB &amp; ChEMBL') || html.includes('Mol* / RCSB & ChEMBL'),
+    'Rendered HTML must reflect Mol* engine badge in header'
+  );
+
+  // --------------------------------------------------------------------------
+  // Test 9: Mol* Canvas Integration & Layout Coordination
+  // --------------------------------------------------------------------------
+  console.log('9. Testing Mol* Canvas integration and layout coordination...');
+  assert.ok(
+    fileContent.includes('<ThreeDLabCanvas'),
+    'ThreeDLabLibrary must mount ThreeDLabCanvas'
+  );
+  assert.ok(
+    fileContent.includes('centerColSpanClass'),
+    'ThreeDLabLibrary must dynamically compute center canvas column span'
+  );
+  assert.ok(
+    fileContent.includes('lg:col-span-12') &&
+      fileContent.includes('lg:col-span-9') &&
+      fileContent.includes('lg:col-span-6'),
+    'Center canvas must expand dynamically across 6, 9, or 12 grid columns depending on sidebar collapse states'
+  );
+
+  // --------------------------------------------------------------------------
+  // Test 10: Canvas Resize Synchronization & Window Events
+  // --------------------------------------------------------------------------
+  console.log('10. Testing canvas resize event dispatching and coordination...');
+  assert.ok(
+    fileContent.includes("window.dispatchEvent(new Event('resize'))") ||
+      fileContent.includes('window.dispatchEvent(new Event("resize"))'),
+    'ThreeDLabLibrary must dispatch window resize event to trigger Mol* canvas3d.requestResize upon layout changes'
+  );
+
+  const canvasPath = 'src/components/ThreeDLabCanvas.tsx';
+  assert.ok(fs.existsSync(canvasPath), `Canvas component file ${canvasPath} must exist`);
+  const canvasContent = fs.readFileSync(canvasPath, 'utf8');
+  assert.ok(
+    canvasContent.includes('requestResize'),
+    'ThreeDLabCanvas must support requestResize on Mol* canvas3d'
+  );
+  assert.ok(
+    canvasContent.includes("window.addEventListener('resize'") ||
+      canvasContent.includes('window.addEventListener("resize"'),
+    'ThreeDLabCanvas must listen for window resize events to recalculate WebGL aspect ratio'
+  );
+
+  // --------------------------------------------------------------------------
+  // Test 11: Drawer Mutual Exclusivity and Escape Hierarchy
+  // --------------------------------------------------------------------------
+  console.log('11. Testing right-side drawer mutual exclusivity and hierarchy...');
+  assert.ok(
+    fileContent.includes("activeRightDrawer === 'pharmacophore'"),
+    'Correctly evaluates activeRightDrawer for pharmacophore'
+  );
+  assert.ok(
+    fileContent.includes("activeRightDrawer === 'chembl'"),
+    'Correctly evaluates activeRightDrawer for chembl'
+  );
+  assert.ok(
+    fileContent.includes('setIsRightCollapsed(true)'),
+    'Opening pharmacophore drawer must collapse right sidebar in regular mode to avoid collision'
+  );
 
   console.log('✅ All 3D Lab Pharmacophore & Drawer Coordination Integration tests passed successfully!');
 }

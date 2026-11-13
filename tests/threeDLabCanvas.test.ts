@@ -119,15 +119,15 @@ async function runTests() {
   assert.ok(html.includes('Recenter: Click atom'), 'Tips bar must describe recentering');
 
   // --------------------------------------------------------------------------
-  // Test 8: 3Dmol.js Script Loading & CDN Integration
+  // Test 8: Mol* WebGL Engine Script Loading & Binary mmCIF Streaming
   // --------------------------------------------------------------------------
   assert.ok(
-    fileContent.includes('https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.2/3Dmol-min.js'),
-    'Must dynamically load 3Dmol-min.js from Cloudflare CDN 2.4.2'
+    fileContent.includes('loadMolstarPluginScript') || fileContent.includes('loadMolstarBundle'),
+    'Must dynamically load Mol* plugin via loader'
   );
   assert.ok(
-    fileContent.includes('$3Dmol'),
-    'Must reference window.$3Dmol'
+    fileContent.includes('PDBeMolstarPlugin') || fileContent.includes('molstar'),
+    'Must reference window.PDBeMolstarPlugin or molstar'
   );
 
   // --------------------------------------------------------------------------
