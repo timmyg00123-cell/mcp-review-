@@ -386,6 +386,10 @@ function normalizeName(input: string): string {
     .replace(/\s+/g, ' ');
 }
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  * Retrieves the curated drug intelligence and clinical decision profile for a given drug.
  * Supports case-insensitivity, common trade/brand names, acronyms, and variations.
@@ -409,6 +413,10 @@ export function getDrugIntelligenceProfile(drugName: string): DrugIntelligencePr
   }
 
   const cleaned = normalizeName(drugName);
+  if (!cleaned) {
+    return null;
+  }
+
   if (DRUG_INTELLIGENCE_CATALOG[cleaned]) {
     return DRUG_INTELLIGENCE_CATALOG[cleaned];
   }
@@ -418,15 +426,17 @@ export function getDrugIntelligenceProfile(drugName: string): DrugIntelligencePr
     return DRUG_INTELLIGENCE_CATALOG[canonicalKey] || null;
   }
 
-  // Substring / prefix match for composite names (e.g. "Enalaprilat (Vasotec IV)")
+  // Word-boundary match for composite names (e.g. "Enalaprilat (Vasotec IV formulation)", "Plavix 75 mg oral tablet")
   for (const [key, profile] of Object.entries(DRUG_INTELLIGENCE_CATALOG)) {
-    if (cleaned.includes(key) || key.includes(cleaned)) {
+    const regex = new RegExp(`\\b${escapeRegExp(key)}\\b`, 'i');
+    if (regex.test(cleaned)) {
       return profile;
     }
   }
 
   for (const [alias, canonicalKey] of Object.entries(DRUG_ALIASES)) {
-    if (cleaned.includes(alias)) {
+    const regex = new RegExp(`\\b${escapeRegExp(alias)}\\b`, 'i');
+    if (regex.test(cleaned)) {
       return DRUG_INTELLIGENCE_CATALOG[canonicalKey] || null;
     }
   }
