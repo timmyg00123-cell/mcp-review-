@@ -47,7 +47,7 @@ export interface NavbarProps {
   onOpenEditor: () => void;
   onOpenQuizSetup: () => void;
   activeTab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab' | 'practice-lab';
-  onSelectTab: ((tab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab' | 'practice-lab') => void) & ((tab: any) => void);
+  onSelectTab: (tab: 'document-review' | 'matrix' | 'knowledge-graph' | 'dashboard' | '3d-lab' | 'practice-lab') => void;
   pagesCount: number;
   showKnowledgeGraph?: boolean;
   hideDrugNames: boolean;

@@ -293,7 +293,7 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
       {/* ==================================================== */}
       {/* ACTIVE TAB CONTENT                                   */}
       {/* ==================================================== */}
-      <main className="flex-1 overflow-y-auto min-h-0 bg-slate-50/50 dark:bg-slate-950/50">
+      <section aria-label="Practice Lab Content" className="flex-1 overflow-y-auto min-h-0 bg-slate-50/50 dark:bg-slate-950/50">
         {/* TAB 1: PRACTICE TEST VIEW */}
         {activeTab === 'practice-test' && (
           <div className="p-3 sm:p-6 space-y-4">
@@ -458,7 +458,7 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
             )}
           </div>
         )}
-      </main>
+      </section>
     </div>
   );
 };
