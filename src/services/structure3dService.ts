@@ -116,12 +116,14 @@ interface LigandInstanceRecord {
  */
 export function identifyLigandResidue(
   pdbData: string,
-  preferredLigandCode?: string
+  preferredLigandCode?: string,
+  preferredChain?: string
 ): DetectedLigandInfo | null {
   if (!pdbData || typeof pdbData !== 'string') return null;
 
   const excludedSet = new Set(EXCLUDED_HETERO_RESIDUES.map((r) => r.toUpperCase()));
   const normalizedPreferred = preferredLigandCode ? preferredLigandCode.trim().toUpperCase() : undefined;
+  const normalizedPreferredChain = preferredChain ? preferredChain.trim().toUpperCase() : undefined;
 
   const lines = pdbData.split(/\r?\n/);
   const instancesByKey = new Map<string, LigandInstanceRecord>();
@@ -209,8 +211,13 @@ export function identifyLigandResidue(
 
   const candidateInstances = instancesByResn.get(targetResn)!;
 
-  // Prefer Chain A (with largest atomCount), otherwise highest atomCount in file order
+  // Prefer caller's preferredChain first, then Chain A (with largest atomCount), otherwise highest atomCount
   const selectedInstance = [...candidateInstances].sort((a, b) => {
+    if (normalizedPreferredChain) {
+      const aMatchesPref = a.chain.toUpperCase() === normalizedPreferredChain ? 1 : 0;
+      const bMatchesPref = b.chain.toUpperCase() === normalizedPreferredChain ? 1 : 0;
+      if (aMatchesPref !== bMatchesPref) return bMatchesPref - aMatchesPref;
+    }
     const aIsChainA = a.chain.toUpperCase() === 'A' ? 1 : 0;
     const bIsChainA = b.chain.toUpperCase() === 'A' ? 1 : 0;
     if (aIsChainA !== bIsChainA) return bIsChainA - aIsChainA;

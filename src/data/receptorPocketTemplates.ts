@@ -3186,4 +3186,1449 @@ export const RECEPTOR_POCKET_TEMPLATES: Record<string, ReceptorPocketTemplate> =
       },
     ],
   },
+
+  ampk_metformin: {
+    templateId: 'ampk_metformin',
+    pdbId: '4CFE',
+    ligandCode: '992',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Allosteric Activator in Human AMPK Alpha-2 / Beta-1 Complex',
+    exactDrugIds: [],
+    targetName: 'AMP-Activated Protein Kinase & Mitochondrial Energy Sensor (PRKAA2)',
+    geneSymbol: 'PRKAA2',
+    pocketMechanismSummary:
+      'Mildly inhibits hepatocyte mitochondrial respiratory Complex I to elevate intracellular AMP:ATP ratios and trigger AMPK activation, suppressing hepatic gluconeogenesis and enhancing peripheral GLUT4 glucose uptake without stimulating insulin release.',
+    bindingSites: [
+      {
+        id: 'ampk_arg83_adam',
+        siteName: 'Arg83 / Asp88 Kinase-CBM Energy-Sensing Interface',
+        drugMoiety: 'Protonated Biguanide Dicationic Pharmacophore',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ARG', resi: 83, chain: 'A', label: 'Arg83 (Kinase-CBM Polar Interface)' },
+          { resn: 'ASP', resi: 88, chain: 'A', label: 'Asp88 (Cationic Salt-Bridge Partner)' },
+        ],
+        reactionSummary:
+          'Positively charged biguanide accumulates in hepatocyte mitochondria to restrain Complex I NADH oxidation, raising AMP to lock AMPK in its phosphorylated active conformation.',
+        clinicalRelevance:
+          'Weight-neutral first-line oral T2DM agent with minimal hypoglycemia risk; cleared 100% unchanged by renal OCT2/MATE tubular secretion (contraindicated if eGFR < 30 mL/min due to lactic acidosis risk).',
+      },
+      {
+        id: 'ampk_lys29_catalytic',
+        siteName: 'Lys29 Alpha-Subunit Kinase Activation Cleft',
+        drugMoiety: 'Planar Delocalized Guanidinium Core',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#3b82f6',
+        residues: [{ resn: 'LYS', resi: 29, chain: 'A', label: 'Lys29 (Alpha-2 Catalytic Loop)' }],
+        reactionSummary:
+          'Stabilizes phosphorylated Thr172 on the AMPK alpha subunit to inhibit ACC lipogenesis and TORC2/PEPCK gluconeogenic transcription.',
+        clinicalRelevance:
+          'Hold temporarily before/after iodinated contrast in impaired renal function and monitor periodic vitamin B12 levels during chronic therapy.',
+      },
+    ],
+  },
+
+  katp_sur1: {
+    templateId: 'katp_sur1',
+    pdbId: '6BAA',
+    ligandCode: 'GBM',
+    ligandChain: 'E',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Sulfonylurea (Glibenclamide) in Pancreatic SUR1 / Kir6.2 KATP Complex',
+    exactDrugIds: [],
+    targetName: 'ATP-Sensitive Potassium Channel Sulfonylurea Receptor (SUR1 / ABCC8)',
+    geneSymbol: 'ABCC8',
+    pocketMechanismSummary:
+      'Modulates the SUR/Kir6.2 ATP-sensitive K+ (KATP) channel octamer—either closing beta-cell KATP channels to depolarize and trigger Ca2+-dependent insulin exocytosis (glipizide, glimepiride) or opening vascular/beta-cell KATP channels to hyperpolarize arteriolar smooth muscle (diazoxide, minoxidil sulfate).',
+    bindingSites: [
+      {
+        id: 'sur1_arg1246_urea',
+        siteName: 'Arg1246 / Arg1300 SUR1 Sulfonylurea Transmembrane Clamp',
+        drugMoiety: 'Deprotonated Sulfonylurea (-SO2NHCONH-) or Benzothiadiazine / N-O-Sulfate',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ARG', resi: 1246, chain: 'E', label: 'Arg1246 (TM16 Sulfonylurea Salt Bridge)' },
+          { resn: 'TYR', resi: 377, chain: 'E', label: 'Tyr377 (TMD1 Aromatic Anchor)' },
+        ],
+        reactionSummary:
+          'Bridges TMD1 and TMD2 inside SUR1 to prevent MgADP activation in sulfonylureas—whereas KATP openers (diazoxide, minoxidil N-O-sulfate) stabilize the MgADP-bound open pore.',
+        clinicalRelevance:
+          'Sulfonylureas stimulate insulin release regardless of blood glucose (causing hypoglycemia and weight gain); minoxidil causes potent arteriolar vasodilation with reflex tachycardia, fluid retention, and hypertrichosis.',
+      },
+      {
+        id: 'sur1_trp1297_bsite',
+        siteName: 'Trp1297 Secondary Carboxamide Selectivity Pocket',
+        drugMoiety: 'Pyrazine / Methylpyrrole Carboxamide Tail (2nd-Gen Sulfonylurea)',
+        interactionType: 'pi-stacking',
+        colorAccent: '#8b5cf6',
+        residues: [{ resn: 'TRP', resi: 1297, chain: 'E', label: 'Trp1297 (SUR1 B-Site Wall)' }],
+        reactionSummary:
+          'Extended aryl-carboxamide tail occupies the secondary B-site, conferring 100x higher potency to second-generation glipizide and glimepiride.',
+        clinicalRelevance:
+          'Glipizide forms inactive metabolites (preferred sulfonylurea in mild-moderate CKD), whereas diazoxide also suppresses insulin release in insulinoma.',
+      },
+    ],
+  },
+
+  enac_amiloride: {
+    templateId: 'enac_amiloride',
+    pdbId: '4NTX',
+    ligandCode: 'AMR',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Amiloride Blocking the Extracellular Na+ Channel Pore',
+    exactDrugIds: ['amiloride'],
+    targetName: 'Epithelial Amiloride-Sensitive Sodium Channel Pore (ENaC / SCNN1A)',
+    geneSymbol: 'SCNN1A',
+    pocketMechanismSummary:
+      'Directly plugs the luminal Na+-conducting pore of cortical collecting-duct epithelial sodium channels (ENaC) without requiring aldosterone antagonism—halting apical Na+ entry, abolishing the lumen-negative electrical potential, and sparing K+ and H+ excretion.',
+    bindingSites: [
+      {
+        id: 'enac_asp433_guanidinium',
+        siteName: 'Asp433 / Gly435 Outer Vestibule Cationic Pore Plug',
+        drugMoiety: 'Protonated Acylguanidinium (Amiloride) or 2,4,7-Triaminopteridine (Triamterene)',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ASP', resi: 433, chain: 'A', label: 'Asp433 (Acidic Pore Ring)' },
+          { resn: 'GLY', resi: 435, chain: 'A', label: 'Gly435 (Selectivity Filter Gate)' },
+        ],
+        reactionSummary:
+          'Protonated guanidinium/aminopteridine headgroup projects into the acidic outer vestibule right above the Gly/Ser selectivity filter, sterically blocking Na+ permeation.',
+        clinicalRelevance:
+          'Potassium-sparing diuresis independent of aldosterone (uniquely effective in Liddle syndrome gain-of-function ENaC and lithium-induced nephrogenic diabetes insipidus); watch for hyperkalemia with ACEi/ARBs.',
+      },
+      {
+        id: 'enac_glu63_pyrazine',
+        siteName: 'Glu63 Extracellular Vestibule Polar Wall',
+        drugMoiety: '6-Chloro-3,5-Diaminopyrazine / Phenylpteridine Core',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'GLU', resi: 63, chain: 'A', label: 'Glu63 (Vestibule H-Bond Partner)' }],
+        reactionSummary:
+          'Exocyclic amino groups hydrogen-bond with acidic vestibule side chains after OCT2-mediated proximal tubular secretion into tubular fluid.',
+        clinicalRelevance:
+          'Triamterene is hepatically hydroxylated/sulfated and poorly soluble (can precipitate bluish fluorescent renal casts/stones and weakly inhibit DHFR).',
+      },
+    ],
+  },
+
+  sgc_nitrate: {
+    templateId: 'sgc_nitrate',
+    pdbId: '7D9R',
+    ligandCode: 'GZO',
+    ligandChain: 'B',
+    ligandMode: 'het',
+    crystallizedLigandName: 'NO-Heme & Stimulator-Activated Human Soluble Guanylyl Cyclase',
+    exactDrugIds: [],
+    targetName: 'Vascular Soluble Guanylyl Cyclase Beta-1 H-NOX Complex (GUCY1B1)',
+    geneSymbol: 'GUCY1B1',
+    pocketMechanismSummary:
+      'Releases nitric oxide (NO) inside vascular smooth muscle—either enzymatically via ALDH2 bioactivation of organic nitrates (nitroglycerin, isosorbide mononitrate/dinitrate) or spontaneously from sodium nitroprusside—to coordinate ferrous heme on soluble guanylyl cyclase (sGC), surge cGMP, dephosphorylate myosin light chains, and relax venous/arteriolar tone.',
+    bindingSites: [
+      {
+        id: 'sgc_his105_heme',
+        siteName: 'His105 Beta-1 H-NOX Ferrous Heme Nitrosylation Site',
+        drugMoiety: 'Bioactivated Nitric Oxide (NO•) Radical / Direct Vasodilator Trigger',
+        interactionType: 'coordination',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'HIS', resi: 105, chain: 'B', label: 'His105 (Proximal Heme Axial Ligand)' },
+          { resn: 'TYR', resi: 112, chain: 'B', label: 'Tyr112 (H-NOX Heme Propionate Anchor)' },
+        ],
+        reactionSummary:
+          'NO coordinates the distal Fe(II) face of sGC heme and cleaves the proximal Fe–His105 bond, triggering a coiled-coil rotation that activates the catalytic GTP->cGMP domain ~200-fold.',
+        clinicalRelevance:
+          'ABSOLUTE CONTRAINDICATION with PDE5 inhibitors (sildenafil, tadalafil) or riociguat: simultaneous cGMP generation + blocked cGMP breakdown causes life-threatening refractory hypotension!',
+      },
+      {
+        id: 'sgc_arg116_allosteric',
+        siteName: 'Arg116 H-NOX / Coiled-Coil Signal Transduction Cleft',
+        drugMoiety: 'Organic Nitrate Ester / Hydralazine Arteriolar Vasodilator Pathway',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#3b82f6',
+        residues: [{ resn: 'ARG', resi: 116, chain: 'B', label: 'Arg116 (Heme Propionate Salt Bridge)' }],
+        reactionSummary:
+          'Propagates H-NOX conformational rearrangement to stimulate PKG-mediated Ca2+ efflux; hydralazine complements venous nitrates (e.g., BiDil in HFrEF) via selective arteriolar smooth-muscle relaxation.',
+        clinicalRelevance:
+          'Organic nitrates require a daily 10–12 h nitrate-free interval to regenerate vascular thiols/ALDH2; prolonged IV nitroprusside risks cyanide/thiocyanate toxicity; hydralazine carries NAT2-slow-acetylator drug-induced lupus risk.',
+      },
+    ],
+  },
+
+  cyslt1_antagonist: {
+    templateId: 'cyslt1_antagonist',
+    pdbId: '6RZ5',
+    ligandCode: 'ZLK',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Zafirlukast in Human Cysteinyl Leukotriene Receptor 1',
+    exactDrugIds: ['zafirlukast'],
+    targetName: 'Cysteinyl Leukotriene Receptor 1 (CysLT1R / CYSLTR1)',
+    geneSymbol: 'CYSLTR1',
+    pocketMechanismSummary:
+      'Competitively blocks Gq-coupled CysLT1 receptors on bronchial smooth muscle and airway leukocytes against cysteinyl leukotrienes (LTC4, LTD4, LTE4), preventing leukotriene-driven bronchoconstriction, mucosal edema, and eosinophilic recruitment.',
+    bindingSites: [
+      {
+        id: 'cyslt1_arg79_acid',
+        siteName: 'Arg79 / Tyr104 Acidic Carboxylate-Sulfonamide Clamp',
+        drugMoiety: 'Cyclopropyl-Acetic Carboxylate (Montelukast) or Acylsulfonamide Bioisostere (Zafirlukast)',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ARG', resi: 79, chain: 'A', label: 'Arg79 (TM2 Cationic Headgroup Anchor)' },
+          { resn: 'TYR', resi: 104, chain: 'A', label: 'Tyr104 (TM3 Polar H-Bond)' },
+        ],
+        reactionSummary:
+          'Anionic carboxylate or sulfonamide mimics the peptidyl-glycine acid headgroup of LTD4 to lock Arg79/Tyr104 in an inactive state.',
+        clinicalRelevance:
+          'Oral leukotriene modifier particularly useful in aspirin-exacerbated respiratory disease (AERD), exercise-induced bronchospasm, and allergic rhinitis; montelukast carries an FDA boxed warning for neuropsychiatric events.',
+      },
+      {
+        id: 'cyslt1_arg253_lipophilic',
+        siteName: 'Tyr249 / Arg253 Lateral Lipid-Cleft Quinoline/Indole Arm',
+        drugMoiety: 'Chloroquinoline-Thiomethyl (Montelukast) or Indole-Carbamate Tail (Zafirlukast)',
+        interactionType: 'pi-stacking',
+        colorAccent: '#10b981',
+        residues: [
+          { resn: 'TYR', resi: 249, chain: 'A', label: 'Tyr249 (TM6 Aromatic Wall)' },
+          { resn: 'ARG', resi: 253, chain: 'A', label: 'Arg253 (ECL2/TM6 Polar Cap)' },
+        ],
+        reactionSummary:
+          'Spans the amphipathic leukotriene lipid cleft toward the TM4–TM5 membrane fenestration.',
+        clinicalRelevance:
+          'Zafirlukast inhibits CYP2C9 (elevating warfarin INR) and requires dosing 1 h before or 2 h after meals, whereas montelukast is dosed once daily without food restrictions.',
+      },
+    ],
+  },
+
+  gpr35_cromolyn: {
+    templateId: 'gpr35_cromolyn',
+    pdbId: '8H8J',
+    ligandCode: 'WYB',
+    ligandChain: 'C',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Symmetric Chromone-Like Diacid Mast-Cell Stabilizer in Human GPR35',
+    exactDrugIds: [],
+    targetName: 'Mast-Cell Stabilizer Receptor (GPR35)',
+    geneSymbol: 'GPR35',
+    pocketMechanismSummary:
+      'Engages the positively charged diacid-binding arginine cage of mast-cell/mucosal GPR35 and inhibits mast-cell chloride/Ca2+ influx channels, stabilizing mast-cell membranes to prevent IgE-triggered histamine and leukotriene degranulation.',
+    bindingSites: [
+      {
+        id: 'gpr35_arg108_diacid',
+        siteName: 'Arg108 / Arg151 Symmetric Bis-Carboxylate Arginine Cage',
+        drugMoiety: 'Twin Chromone-2-Carboxylate Anions (Disodium Cromoglycate)',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ARG', resi: 108, chain: 'C', label: 'Arg108 (TM3 Diacid Salt Bridge)' },
+          { resn: 'ARG', resi: 151, chain: 'C', label: 'Arg151 (TM4 Twin-Acid Clamp)' },
+        ],
+        reactionSummary:
+          'Both ionized carboxylate arms chelate the electropositive Arg108/Arg151 cluster at opposite ends of the orthosteric pocket.',
+        clinicalRelevance:
+          'Purely prophylactic mast-cell stabilizer (NO direct bronchodilator activity—ineffective for acute asthma rescue!); permanently ionized dianion has <1% oral systemic absorption.',
+      },
+      {
+        id: 'gpr35_tyr259_chromone',
+        siteName: 'Tyr259 Planar Bis-Chromone Linker Shelf',
+        drugMoiety: '2-Hydroxypropoxy-Linked Bis-Benzopyranone Rings',
+        interactionType: 'pi-stacking',
+        colorAccent: '#3b82f6',
+        residues: [{ resn: 'TYR', resi: 259, chain: 'C', label: 'Tyr259 (TM6/7 Aromatic Shelf)' }],
+        reactionSummary:
+          'Planar heterocyclic rings stack across Tyr259 to stabilize mucosal and connective-tissue mast cells.',
+        clinicalRelevance:
+          'Exceptionally safe topical/inhaled/intranasal profile for allergic rhinitis, vernal keratoconjunctivitis, and systemic mastocytosis.',
+      },
+    ],
+  },
+
+  alox5_zileuton: {
+    templateId: 'alox5_zileuton',
+    pdbId: '6NCF',
+    ligandCode: 'AF7',
+    ligandChain: 'B',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Inhibitor at Arachidonate 5-Lipoxygenase Catalytic Iron Cleft',
+    exactDrugIds: [],
+    targetName: 'Arachidonate 5-Lipoxygenase Catalytic Iron Cleft (5-LOX / ALOX5)',
+    geneSymbol: 'ALOX5',
+    pocketMechanismSummary:
+      'Chelates the catalytic non-heme iron of leukocyte 5-lipoxygenase (5-LOX) via its N-hydroxyurea group and reduces Fe3+ to inactive Fe2+, halting conversion of arachidonic acid to LTA4 and blocking BOTH neutrophil chemoattractant LTB4 and bronchoconstrictor cysteinyl leukotrienes (LTC4–LTE4).',
+    bindingSites: [
+      {
+        id: 'alox5_his367_iron',
+        siteName: 'His367 / His372 / Ile673 Non-Heme Catalytic Iron Chelation Triad',
+        drugMoiety: 'N-Hydroxyurea Bidentate Iron-Chelating Warhead',
+        interactionType: 'coordination',
+        colorAccent: '#f59e0b',
+        residues: [
+          { resn: 'HIS', resi: 367, chain: 'B', label: 'His367 (Non-Heme Fe Ligand)' },
+          { resn: 'HIS', resi: 372, chain: 'B', label: 'His372 (Non-Heme Fe Ligand)' },
+          { resn: 'ILE', resi: 673, chain: 'B', label: 'Ile673 (C-Terminal Carboxylate Fe Ligand)' },
+        ],
+        reactionSummary:
+          'Bidentate O,O-chelation and single-electron reduction of the His367/His372/Ile673-coordinated iron prevent hydrogen abstraction at C7 of arachidonic acid.',
+        clinicalRelevance:
+          'Unlike CysLT1 antagonists (montelukast), zileuton blocks upstream LTB4 synthesis in addition to LTC4/LTD4/LTE4.',
+      },
+      {
+        id: 'alox5_benzo_cleft',
+        siteName: 'Trp147 / Leu414 Benzothiophene Arachidonate Cavity',
+        drugMoiety: '1-(Benzo[b]thiophen-2-yl)ethyl Lipophilic Core',
+        interactionType: 'hydrophobic',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'LEU', resi: 414, chain: 'B', label: 'Leu414 (Arachidonate Tunnel Wall)' }],
+        reactionSummary:
+          'Lipophilic benzothiophene ring anchors inside the U-shaped arachidonate substrate cavity adjacent to the iron center.',
+        clinicalRelevance:
+          'Requires baseline and periodic ALT/LFT monitoring (hepatotoxicity risk) and inhibits CYP1A2 (increasing theophylline and R-warfarin exposure).',
+      },
+    ],
+  },
+
+  alpha1_adrenergic: {
+    templateId: 'alpha1_adrenergic',
+    pdbId: '7YM8',
+    ligandCode: 'J5C',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Orthosteric Ligand in Human Alpha-1A Adrenergic Receptor',
+    exactDrugIds: [],
+    targetName: 'Alpha-1A Adrenergic Receptor (ADRA1A)',
+    geneSymbol: 'ADRA1A',
+    pocketMechanismSummary:
+      'Competitively antagonizes Gq-coupled postsynaptic alpha-1 adrenergic receptors via Asp106 protonated-amine salt-bridging—either selectively relaxing prostatic/bladder-neck smooth muscle (alpha-1A uroselective tamsulosin) or dilating systemic resistance arterioles and veins (quinazolines prazosin, doxazosin, terazosin).',
+    bindingSites: [
+      {
+        id: 'a1a_asp106_amine',
+        siteName: 'Asp106 Conserved TM3 Protonated Amine Salt Bridge',
+        drugMoiety: 'Protonated Piperazine-Quinazoline (Prazosin/Doxazosin/Terazosin) or Phenethylamine (Tamsulosin)',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ASP', resi: 106, chain: 'A', label: 'Asp106 (TM3 Orthosteric Salt Bridge)' },
+          { resn: 'TRP', resi: 285, chain: 'A', label: 'Trp285 (TM6 Toggle Switch)' },
+        ],
+        reactionSummary:
+          'Electrostatic pairing at Asp106 blocks norepinephrine-induced Gq/IP3/Ca2+ smooth-muscle contraction.',
+        clinicalRelevance:
+          'Non-subtype-selective quinazolines (prazosin, terazosin, doxazosin) cause "first-dose" orthostatic syncope (initiate at bedtime!), whereas uroselective tamsulosin spares vascular alpha-1B blood pressure.',
+      },
+      {
+        id: 'a1a_phe288_selectivity',
+        siteName: 'Phe288 / Phe312 Alpha-1A Methoxyphenyl / Sulfonamide Subpocket',
+        drugMoiety: '2-Ethoxyphenoxyethyl + Sulfonamide (Tamsulosin) or 6,7-Dimethoxyquinazoline',
+        interactionType: 'pi-stacking',
+        colorAccent: '#8b5cf6',
+        residues: [
+          { resn: 'PHE', resi: 288, chain: 'A', label: 'Phe288 (TM6 Aromatic Clamp)' },
+          { resn: 'PHE', resi: 312, chain: 'A', label: 'Phe312 (TM7 Alpha-1A Selectivity Wall)' },
+        ],
+        reactionSummary:
+          'Aromatic contacts with Phe288/Phe312 confer 10–38x alpha-1A over alpha-1B selectivity for tamsulosin.',
+        clinicalRelevance:
+          'SURGICAL PEARL: Alpha-1A blockade in iris dilator muscle causes Intraoperative Floppy Iris Syndrome (IFIS) during cataract surgery—always notify the ophthalmologist prior to surgery!',
+      },
+    ],
+  },
+
+  clc2_lubiprostone: {
+    templateId: 'clc2_lubiprostone',
+    pdbId: '8TA2',
+    ligandCode: 'GH6',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Pore-Gating Ligand in Human ClC-2 Chloride Channel',
+    exactDrugIds: [],
+    targetName: 'Apical Enterocyte ClC-2 Chloride Channel (CLCN2)',
+    geneSymbol: 'CLCN2',
+    pocketMechanismSummary:
+      'Locally activates apical ClC-2 chloride channels on gastrointestinal luminal enterocytes as a bicyclic prostanoic acid derivative (lubiprostone), driving Cl--rich paracellular fluid secretion into the intestinal lumen to soften stool and accelerate transit without altering serum electrolytes.',
+    bindingSites: [
+      {
+        id: 'clc2_glu205_gate',
+        siteName: 'Glu205 Fast-Gating Glutamate & Cl- Permeation Pore',
+        drugMoiety: 'Bicyclic 13,14-Dihydro-15-Keto-16,16-Difluoro Prostanoic Acid Core',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#3b82f6',
+        residues: [
+          { resn: 'GLU', resi: 205, chain: 'A', label: 'Glu205 (Protopore Gating Glutamate)' },
+          { resn: 'SER', resi: 162, chain: 'A', label: 'Ser162 (Central Cl- Coordination Site)' },
+        ],
+        reactionSummary:
+          'Promotes outward movement of the Glu205 gating side chain to open Cl- conduction across the apical enterocyte membrane.',
+        clinicalRelevance:
+          'Approved for chronic idiopathic constipation, IBS-C, and opioid-induced constipation (reverses mu-opioid secretory arrest independently of enteric nerve plexuses).',
+      },
+      {
+        id: 'clc2_tyr553_vestibule',
+        siteName: 'Tyr553 Selectivity-Filter Stabilization Wall',
+        drugMoiety: 'Gem-Difluoro Cyclopentane-Hemiketal Tautomer',
+        interactionType: 'hydrophobic',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'TYR', resi: 553, chain: 'A', label: 'Tyr553 (Inner Cl- Pore Tyr)' }],
+        reactionSummary:
+          '16,16-difluoro substitution blocks rapid metabolic beta-oxidation while keeping systemic bioavailability negligible.',
+        clinicalRelevance:
+          'Take with food and water to reduce dose-dependent nausea; contraindicated in known or suspected mechanical GI obstruction.',
+      },
+    ],
+  },
+
+  npc1l1_ezetimibe: {
+    templateId: 'npc1l1_ezetimibe',
+    pdbId: '7DFZ',
+    ligandCode: 'H56',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Ezetimibe Blocking the Human NPC1L1 Sterol Tunnel',
+    exactDrugIds: ['ezetimibe'],
+    targetName: 'Intestinal Brush-Border Cholesterol Transporter (NPC1L1)',
+    geneSymbol: 'NPC1L1',
+    pocketMechanismSummary:
+      'Plugs the intramolecular sterol-conducting tunnel between the N-terminal domain and sterol-sensing domain of jejunal enterocyte NPC1L1, blocking dietary and biliary cholesterol absorption by ~54% and upregulating hepatic LDL receptors.',
+    bindingSites: [
+      {
+        id: 'npc1l1_tyr635_azetidinone',
+        siteName: 'Tyr635 / Met543 Central 2-Azetidinone Tunnel Bottleneck',
+        drugMoiety: 'Chiral 2-Azetidinone Ring & Phenolic / Glucuronide Headgroup',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'TYR', resi: 635, chain: 'A', label: 'Tyr635 (Sterol-Tunnel Polar Gate)' },
+          { resn: 'MET', resi: 543, chain: 'A', label: 'Met543 (Tunnel Constriction Wall)' },
+        ],
+        reactionSummary:
+          'Both parent ezetimibe and its active phenolic O-glucuronide metabolite (which undergoes enterohepatic recirculation to the brush border) sterically bottleneck the cholesterol transport conduit.',
+        clinicalRelevance:
+          'Lowers LDL-C an additional 18–25% on top of statin therapy without impairing absorption of fat-soluble vitamins (A, D, E, K) or bile acids.',
+      },
+      {
+        id: 'npc1l1_phe532_fluorophenyl',
+        siteName: 'Phe532 Dual p-Fluorophenyl Hydrophobic Clamp',
+        drugMoiety: 'Twin para-Fluorophenyl Arms',
+        interactionType: 'pi-stacking',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'PHE', resi: 532, chain: 'A', label: 'Phe532 (Aromatic Tunnel Clamp)' }],
+        reactionSummary:
+          'Para-fluoro substituents block metabolic CYP hydroxylation while pi-stacking inside the hydrophobic sterol neck.',
+        clinicalRelevance:
+          'Enterohepatic recycling gives a ~22-hour effective half-life for once-daily dosing; separate from bile-acid sequestrants by >=2 hours before or >=4 hours after.',
+      },
+    ],
+  },
+
+  mttp_lomitapide: {
+    templateId: 'mttp_lomitapide',
+    pdbId: '6I7S',
+    ligandCode: 'PE5',
+    ligandChain: 'G',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Lipid-Mimetic Ligand in Human Microsomal Triglyceride Transfer Protein',
+    exactDrugIds: [],
+    targetName: 'Microsomal Triglyceride Transfer Protein Complex (MTP / MTTP)',
+    geneSymbol: 'MTTP',
+    pocketMechanismSummary:
+      'Occupies the central beta-barrel lipid-transfer cavity of endoplasmic-reticulum Microsomal Triglyceride Transfer Protein (MTP) in hepatocytes and enterocytes, preventing triglyceride loading onto apoB-100 and apoB-48 to lower VLDL/LDL production independently of LDL receptors.',
+    bindingSites: [
+      {
+        id: 'mttp_phe772_cavity',
+        siteName: 'Phe772 / Leu734 Beta-Barrel Neutral-Lipid Cavity',
+        drugMoiety: 'Trifluoroethyl-Carboxamide Fluorene & CF3-Biphenyl Core',
+        interactionType: 'hydrophobic',
+        colorAccent: '#10b981',
+        residues: [
+          { resn: 'PHE', resi: 772, chain: 'G', label: 'Phe772 (Lipid-Binding Beta-Barrel)' },
+          { resn: 'LEU', resi: 734, chain: 'G', label: 'Leu734 (Hydrophobic Acyl Tunnel)' },
+        ],
+        reactionSummary:
+          'Displaces triacylglycerol and cholesteryl ester cargo inside the large hydrophobic MTP beta-barrel cavity.',
+        clinicalRelevance:
+          'Uniquely lowers LDL-C by ~40–50% in homozygous familial hypercholesterolemia (HoFH) patients who completely lack functional LDL receptors.',
+      },
+      {
+        id: 'mttp_val608_neck',
+        siteName: 'Val608 Piperidine Linker Entrance Gate',
+        drugMoiety: 'Central Piperidinyl-Butyl Linker',
+        interactionType: 'hydrophobic',
+        colorAccent: '#f59e0b',
+        residues: [{ resn: 'VAL', resi: 608, chain: 'G', label: 'Val608 (Cavity Entrance Neck)' }],
+        reactionSummary:
+          'Seals the entrance of the lipid shuttle domain partnered with protein disulfide-isomerase (PDI).',
+        clinicalRelevance:
+          'REMS-restricted (Juxtapid) due to hepatic steatosis/hepatotoxicity, strict <20% fat diet + vitamin E/fatty-acid supplementation requirement, and potent CYP3A4 victim/perpetrator interactions.',
+      },
+    ],
+  },
+
+  acly_bempedoic: {
+    templateId: 'acly_bempedoic',
+    pdbId: '6O0H',
+    ligandCode: 'LBG',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Allosteric/Citrate-Domain Inhibitor in Human ATP-Citrate Lyase',
+    exactDrugIds: [],
+    targetName: 'Hepatic ATP-Citrate Lyase (ACLY)',
+    geneSymbol: 'ACLY',
+    pocketMechanismSummary:
+      'Bioactivated exclusively inside hepatocytes by ACSVL1 into bempedoyl-CoA, which inhibits ATP-citrate lyase two steps upstream of HMG-CoA reductase—suppressing de novo cholesterol synthesis and upregulating hepatic LDL receptors while sparing skeletal muscle.',
+    bindingSites: [
+      {
+        id: 'acly_arg379_citrate',
+        siteName: 'Arg379 / Thr348 Citrate-CoA Synthase Catalytic Cleft',
+        drugMoiety: 'Bempedoyl-CoA Thioester & Terminal Carboxylate',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ARG', resi: 379, chain: 'A', label: 'Arg379 (Citrate/CoA Polar Clamp)' },
+          { resn: 'THR', resi: 348, chain: 'A', label: 'Thr348 (Oxyanion Hydrogen-Bond)' },
+        ],
+        reactionSummary:
+          'Competes at the citrate-CoA catalytic module to block cleavage of cytosolic citrate into acetyl-CoA and oxaloacetate.',
+        clinicalRelevance:
+          'Skeletal myocytes lack ACSVL1 (SLC27A2), so bempedoic acid is never activated in muscle—avoiding statin-like myopathy!',
+      },
+      {
+        id: 'acly_phe347_lipophilic',
+        siteName: 'Phe347 Gem-Dialkyl Acyl Chain Tunnel',
+        drugMoiety: '8-Hydroxy-2,2,14,14-Tetramethylpentadecanedioic Scaffold',
+        interactionType: 'hydrophobic',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'PHE', resi: 347, chain: 'A', label: 'Phe347 (Hydrophobic Acyl Wall)' }],
+        reactionSummary:
+          'Alpha,alpha-tetramethyl groups block peroxisomal beta-oxidation while packing into the hydrophobic CoA cleft.',
+        clinicalRelevance:
+          'Weakly inhibits renal OAT2 (modestly raising serum uric acid -> gout risk) and carries a rare tendon rupture warning; cap simvastatin <=20 mg and pravastatin <=40 mg.',
+      },
+    ],
+  },
+
+  ptgfr_latanoprost: {
+    templateId: 'ptgfr_latanoprost',
+    pdbId: '8IUK',
+    ligandCode: 'UGU',
+    ligandChain: 'R',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Prostaglandin F2-Alpha Agonist in Human FP Receptor',
+    exactDrugIds: [],
+    targetName: 'Ciliary Prostaglandin F2-Alpha Receptor (FP / PTGFR)',
+    geneSymbol: 'PTGFR',
+    pocketMechanismSummary:
+      'Hydrolyzed across the cornea from an isopropyl ester prodrug into active latanoprost acid, which activates Gq-coupled FP prostaglandin receptors in ciliary muscle and trabecular meshwork to remodel extracellular matrix via MMPs and increase uveoscleral aqueous humor outflow.',
+    bindingSites: [
+      {
+        id: 'fp_arg291_acid',
+        siteName: 'Arg291 / Thr187 Alpha-Chain Carboxylate & Cyclopentane Diol Pocket',
+        drugMoiety: 'Unmasked C1 Carboxylate & 9-Alpha,11-Alpha-Dihydroxy Cyclopentane',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ARG', resi: 291, chain: 'R', label: 'Arg291 (TM7 C1-Carboxylate Salt Bridge)' },
+          { resn: 'THR', resi: 187, chain: 'R', label: 'Thr187 (ECL2 Cyclopentane H-Bond)' },
+        ],
+        reactionSummary:
+          'Corneal esterases cleave the lipophilic isopropyl ester to expose the anionic C1 carboxylate required to engage Arg291.',
+        clinicalRelevance:
+          'First-line once-nightly glaucoma therapy; remove contact lenses before instillation (benzalkonium chloride preservative) and wait 15 minutes before reinserting.',
+      },
+      {
+        id: 'fp_trp260_omega',
+        siteName: 'Trp260 Omega-Chain Phenyl-Substituted Hydrophobic Pocket',
+        drugMoiety: '17-Phenyl-Trinor-PGF2alpha Omega-Chain',
+        interactionType: 'pi-stacking',
+        colorAccent: '#8b5cf6',
+        residues: [{ resn: 'TRP', resi: 260, chain: 'R', label: 'Trp260 (TM6 Toggle Switch)' }],
+        reactionSummary:
+          'Terminal phenyl ring replaces the metabolically labile C16–C20 alkyl tail of PGF2alpha, conferring high FP receptor selectivity and metabolic stability.',
+        clinicalRelevance:
+          'Characteristic local prostaglandin effects: irreversible brown iris hyperpigmentation (melanosome synthesis), eyelash lengthening/thickening, and periorbital fat atrophy.',
+      },
+    ],
+  },
+
+  gabab_baclofen: {
+    templateId: 'gabab_baclofen',
+    pdbId: '4MS4',
+    ligandCode: '2C0',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: '(R)-Baclofen in Human GABA-B1 Venus Flytrap Domain',
+    exactDrugIds: ['baclofen'],
+    targetName: 'Metabotropic GABA-B Receptor Heterodimer (GABBR1 / GABBR2)',
+    geneSymbol: 'GABBR1',
+    pocketMechanismSummary:
+      'Binds selectively as a beta-(4-chlorophenyl)-GABA analog inside the extracellular Venus Flytrap cleft of Gi/o-coupled metabotropic GABA-B1 subunits—closing spinal presynaptic Ca2+ channels and opening postsynaptic K+ channels to suppress monosynaptic and polysynaptic spasticity reflexes.',
+    bindingSites: [
+      {
+        id: 'gabab_ser130_zwitterion',
+        siteName: 'Ser130 / Glu349 GABA-Mimetic Zwitterion Clamp',
+        drugMoiety: 'Gamma-Ammonium & Alpha-Carboxylate Zwitterion Backbone',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'SER', resi: 130, chain: 'A', label: 'Ser130 (LB1 Carboxylate H-Bond)' },
+          { resn: 'GLU', resi: 349, chain: 'A', label: 'Glu349 (LB2 Ammonium Salt Bridge)' },
+        ],
+        reactionSummary:
+          'Bridges the upper LB1 and lower LB2 lobes of the GABA-B1 Venus Flytrap domain to snap the cleft closed and trans-activate G-protein signaling via GABA-B2.',
+        clinicalRelevance:
+          'First-line oral/intrathecal antispastic for multiple sclerosis and spinal cord injury; excreted ~70–85% unchanged renally (requires strict CKD dose reduction to avoid encephalopathy!).',
+      },
+      {
+        id: 'gabab_tyr250_chlorophenyl',
+        siteName: 'Tyr250 / Trp65 Para-Chlorophenyl Lipophilic Pocket',
+        drugMoiety: 'Chiral (R)-Beta-(4-Chlorophenyl) Ring',
+        interactionType: 'pi-stacking',
+        colorAccent: '#10b981',
+        residues: [
+          { resn: 'TYR', resi: 250, chain: 'A', label: 'Tyr250 (LB2 Aromatic Pocket)' },
+          { resn: 'TRP', resi: 65, chain: 'A', label: 'Trp65 (LB1 Hydrophobic Lid)' },
+        ],
+        reactionSummary:
+          'Para-chlorophenyl substituent enables blood-brain barrier penetration (unlike zwitterionic GABA itself) while sterically excluding ionotropic GABA-A receptors.',
+        clinicalRelevance:
+          'BLACK BOX / WITHDRAWAL WARNING: Never stop oral or intrathecal baclofen abruptly—triggers life-threatening rebound spasticity, hyperthermia, rhabdomyolysis, and seizures!',
+      },
+    ],
+  },
+
+  sv2a_levetiracetam: {
+    templateId: 'sv2a_levetiracetam',
+    pdbId: '8JLC',
+    ligandCode: 'UKX',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Levetiracetam in Human Synaptic Vesicle Glycoprotein 2A',
+    exactDrugIds: ['levetiracetam'],
+    targetName: 'Synaptic Vesicle Glycoprotein 2A (SV2A)',
+    geneSymbol: 'SV2A',
+    pocketMechanismSummary:
+      'Crosses presynaptic membranes to bind the central transmembrane cavity of Synaptic Vesicle Glycoprotein 2A (SV2A), Restraining hyper-synchronized vesicular neurotransmitter exocytosis during high-frequency epileptiform bursts without altering normal resting neurotransmission.',
+    bindingSites: [
+      {
+        id: 'sv2a_asp670_amide',
+        siteName: 'Asp670 / Tyr462 Polar Pyrrolidinone-Butanamide H-Bond Network',
+        drugMoiety: '2-Oxopyrrolidine Carbonyl & Primary S-Butanamide (-CONH2)',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#3b82f6',
+        residues: [
+          { resn: 'ASP', resi: 670, chain: 'A', label: 'Asp670 (TM10 Amide H-Bond Anchor)' },
+          { resn: 'TYR', resi: 462, chain: 'A', label: 'Tyr462 (TM7 Polar Pocket)' },
+        ],
+        reactionSummary:
+          'Purely stereoselective (S)-enantiomer hydrogen-bonds simultaneously to Asp670 and Tyr462 inside the 12-TM MFS transporter fold (R-enantiomer has >1,000x lower affinity).',
+        clinicalRelevance:
+          'Broad-spectrum focal and generalized antiseizure agent with ZERO cytochrome P450 induction/inhibition and <10% plasma protein binding—ideal in polypharmacy, oncology, and pregnancy.',
+      },
+      {
+        id: 'sv2a_trp300_hydrophobic',
+        siteName: 'Trp300 Aromatic Pyrrolidine Cage',
+        drugMoiety: '5-Membered Lactam Ring & Chiral Ethyl Side Chain',
+        interactionType: 'pi-stacking',
+        colorAccent: '#8b5cf6',
+        residues: [{ resn: 'TRP', resi: 300, chain: 'A', label: 'Trp300 (TM5 Aromatic Wall)' }],
+        reactionSummary:
+          'Dispersion/CH-pi contacts against Trp300 stabilize the lumenal-open SV2A conformation (propyl substitution in brivaracetam increases Trp300 pocket affinity ~20x).',
+        clinicalRelevance:
+          'Cleared 66% unchanged in urine + 24% non-hepatic enzymatic amide hydrolysis (adjust dose by CrCl); monitor for irritability, agitation, or mood changes ("Keppra rage").',
+      },
+    ],
+  },
+
+  nmda_memantine: {
+    templateId: 'nmda_memantine',
+    pdbId: '7SAD',
+    ligandCode: '377',
+    ligandChain: 'B',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Memantine Blocking the Human GluN1 / GluN2B NMDA Channel Pore',
+    exactDrugIds: ['memantine'],
+    targetName: 'NMDA Ionotropic Glutamate Receptor Pore (GRIN1 / GRIN2B)',
+    geneSymbol: 'GRIN1',
+    pocketMechanismSummary:
+      'Acts as a voltage-dependent, uncompetitive, fast-off-rate open-channel blocker inside the transmembrane Mg2+ selectivity filter of NMDA glutamate receptors—suppressing pathological tonic Ca2+ excitotoxicity in moderate-to-severe Alzheimer’s disease while preserving physiological phasic LTP signaling.',
+    bindingSites: [
+      {
+        id: 'nmda_asn616_ring',
+        siteName: 'GluN1 Asn616 / GluN2B Asn615 Selectivity-Filter "N-Site" Ring',
+        drugMoiety: 'Protonated Primary Bridgehead Amine (-NH3+)',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ASN', resi: 616, chain: 'A', label: 'Asn616 (GluN1 M2 Pore Loop Apex)' },
+          { resn: 'ASN', resi: 615, chain: 'B', label: 'Asn615 (GluN2B M2 Pore Loop Apex)' },
+        ],
+        reactionSummary:
+          'Protonated primary ammonium sits directly atop the asparagine ring at the narrowest constriction of the open Ca2+-permeable pore.',
+        clinicalRelevance:
+          'Moderate affinity + rapid voltage-dependent unblocking spares normal synaptic learning while preventing dissociative/psychotomimetic toxicity seen with high-affinity slow blockers (ketamine, PCP).',
+      },
+      {
+        id: 'nmda_val644_adamantane',
+        siteName: 'GluN2B Val644 Twin-Methyl Adamantane Cage',
+        drugMoiety: '3,5-Dimethyltricyclo[3.3.1.1]decane (Adamantane) Cage',
+        interactionType: 'hydrophobic',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'VAL', resi: 644, chain: 'B', label: 'Val644 (M3 Hydrophobic Vestibule)' }],
+        reactionSummary:
+          '3,5-dimethyl groups anchor the spherical adamantane cage in lateral hydrophobic pockets of the M3 vestibule, tuning the ideal "Goldilocks" residence time.',
+        clinicalRelevance:
+          'Eliminated primarily unchanged via pH-dependent renal tubular secretion (severe urine alkalinization pH > 8 drastically reduces memantine clearance!).',
+      },
+    ],
+  },
+
+  ddc_carbidopa: {
+    templateId: 'ddc_carbidopa',
+    pdbId: '1JS3',
+    ligandCode: '142',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Carbidopa-Pyridoxal-5\'-Phosphate Hydrazone Adduct in DOPA Decarboxylase',
+    exactDrugIds: ['carbidopa'],
+    targetName: 'Peripheral Aromatic L-Amino Acid / DOPA Decarboxylase (DDC)',
+    geneSymbol: 'DDC',
+    pocketMechanismSummary:
+      'Remains restricted to peripheral tissues (unable to cross the blood-brain barrier) and condenses via its alpha-hydrazino group with the active-site pyridoxal-5\'-phosphate (PLP) cofactor of DOPA decarboxylase—preventing peripheral conversion of levodopa to dopamine.',
+    bindingSites: [
+      {
+        id: 'ddc_lys303_plp',
+        siteName: 'Lys303 / His192 PLP Cofactor Hydrazone-Capture Site',
+        drugMoiety: 'Nucleophilic Alpha-Hydrazino (-NH-NH2) Group',
+        interactionType: 'covalent',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'LYS', resi: 303, chain: 'A', label: 'Lys303 (Internal PLP Schiff-Base Lysine)' },
+          { resn: 'HIS', resi: 192, chain: 'A', label: 'His192 (Catalytic Proton Relay)' },
+        ],
+        reactionSummary:
+          'Transaldimination displaces Lys303 from PLP to form a dead-end, non-hydrolyzable PLP-carbidopa hydrazone adduct inside the catalytic site.',
+        clinicalRelevance:
+          'Reduces the required oral levodopa dose by ~75%, eliminates severe peripheral dopamine-mediated nausea/vomiting (area postrema) and arrhythmias, and maximizes CNS levodopa delivery (~10% vs ~1–3%).',
+      },
+      {
+        id: 'ddc_phe80_catechol',
+        siteName: 'Phe80 Catechol Substrate-Mimicry Pocket',
+        drugMoiety: '3,4-Dihydroxyphenyl (Catechol) & Alpha-Methyl Carboxylate',
+        interactionType: 'pi-stacking',
+        colorAccent: '#3b82f6',
+        residues: [{ resn: 'PHE', resi: 80, chain: 'A', label: 'Phe80 (Substrate Catechol Wall)' }],
+        reactionSummary:
+          'Exact structural mimicry of L-DOPA directs carbidopa selectively into DDC while its polar hydrazino-zwitterion prevents LAT1 blood-brain barrier transport.',
+        clinicalRelevance:
+          'At least ~70–100 mg/day of carbidopa is required to saturate peripheral DDC.',
+      },
+    ],
+  },
+
+  h2_famotidine: {
+    templateId: 'h2_famotidine',
+    pdbId: '7UL3',
+    ligandCode: 'FO9',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Famotidine in Human Histamine H2 Receptor',
+    exactDrugIds: ['famotidine'],
+    targetName: 'Gastric Parietal Histamine H2 Receptor (HRH2)',
+    geneSymbol: 'HRH2',
+    pocketMechanismSummary:
+      'Competitively and inverse-agonistically blocks Gs-coupled histamine H2 receptors on the basolateral membrane of gastric parietal cells, lowering intracellular cAMP and suppressing nocturnal and meal-stimulated H+/K+-ATPase acid secretion.',
+    bindingSites: [
+      {
+        id: 'h2_asp98_guanidine',
+        siteName: 'Asp98 TM3 Guanidinothiazole Salt Bridge',
+        drugMoiety: '2-Guanidinothiazole Basic Headgroup',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [{ resn: 'ASP', resi: 98, chain: 'A', label: 'Asp98 (TM3 Orthosteric Salt Bridge)' }],
+        reactionSummary:
+          'Protonated guanidinothiazole forms a bidentate salt bridge with Asp98, mimicking histamine’s ethylamine cation with 20–50x higher potency than cimetidine/ranitidine.',
+        clinicalRelevance:
+          'Unlike imidazole-based cimetidine, famotidine’s thiazole scaffold does NOT coordinate hepatic CYP450 heme iron and causes ZERO antiandrogenic gynecomastia!',
+      },
+      {
+        id: 'h2_asp186_sulfamide',
+        siteName: 'Asp186 / Tyr250 H2-Selective Sulfamoylpropionamidine Pocket',
+        drugMoiety: 'Sulfamoylpropionamidine Polar Tail',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#3b82f6',
+        residues: [
+          { resn: 'ASP', resi: 186, chain: 'A', label: 'Asp186 (TM5 H2-Subtype Selectivity Anchor)' },
+          { resn: 'TYR', resi: 250, chain: 'A', label: 'Tyr250 (TM6 Toggle Wall)' },
+        ],
+        reactionSummary:
+          'Polar sulfamide tail forms extensive hydrogen bonds with TM5 Asp186 (which is Thr/Ala in H1R), conferring complete H2 over H1 selectivity without CNS sedation.',
+        clinicalRelevance:
+          'Cleared ~70% unchanged by the kidneys—reduce dose by 50% when CrCl < 50 mL/min to prevent CNS confusion/delirium in older adults.',
+      },
+    ],
+  },
+
+  srd5a2_finasteride: {
+    templateId: 'srd5a2_finasteride',
+    pdbId: '7BW1',
+    ligandCode: 'NDX',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'NADP–Dihydrofinasteride Bisubstrate Adduct in Human Steroid 5-Alpha-Reductase 2',
+    exactDrugIds: ['finasteride'],
+    targetName: 'Steroid 5-Alpha-Reductase Type 2 (SRD5A2)',
+    geneSymbol: 'SRD5A2',
+    pocketMechanismSummary:
+      'Enters the membrane-embedded catalytic cavity of steroid 5-alpha-reductase as a 4-azasteroid mechanism-based inhibitor and accepts a hydride from NADPH to form a covalent NADP–dihydroazasteroid bisubstrate adduct (Ki ~10^-13 M), halting conversion of testosterone to potent dihydrotestosterone (DHT).',
+    bindingSites: [
+      {
+        id: 'srd5a_glu57_adduct',
+        siteName: 'Glu57 / Tyr91 Catalytic Hydride-Transfer & Lactam Site',
+        drugMoiety: 'Delta-1-4-Azasteroid A-Ring Lactam & NADP Covalent C2-C4 Adduct',
+        interactionType: 'covalent',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'GLU', resi: 57, chain: 'A', label: 'Glu57 (A-Ring Lactam H-Bond Base)' },
+          { resn: 'TYR', resi: 91, chain: 'A', label: 'Tyr91 (Catalytic Oxyanion Proton Donor)' },
+        ],
+        reactionSummary:
+          'Glu57/Tyr91 polarize the 3-keto-4-aza-delta-1 enone so NADPH attacks C2, generating a femtomolar-affinity covalent NADP-dihydrofinasteride adduct that traps the enzyme for weeks.',
+        clinicalRelevance:
+          'Shrinks hyperplastic prostate volume by ~20–30% over 6 months (lowering acute urinary retention and BPH surgery risk) and lowers serum PSA by ~50% (double measured PSA when screening for prostate cancer!).',
+      },
+      {
+        id: 'srd5a_arg114_carboxamide',
+        siteName: 'Arg114 C17-Carboxamide Lipophilic Steroid Pocket',
+        drugMoiety: 'C17 tert-Butylcarboxamide (Finasteride) or Bis-CF3-Phenylcarboxamide (Dutasteride)',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'ARG', resi: 114, chain: 'A', label: 'Arg114 (Cofactor/Steroid Cavity Wall)' }],
+        reactionSummary:
+          'Finasteride selectively inhibits prostatic/follicular Type 2 SRD5A2 (~70% serum DHT drop), whereas dutasteride’s lipophilic bis-trifluoromethylphenyl tail inhibits BOTH Type 1 and Type 2 (>90% serum DHT drop, t1/2 ~5 weeks).',
+        clinicalRelevance:
+          'PREGNANCY CATEGORY X / TERATOGEN: Pregnant women must not handle crushed or broken tablets (blocks external male genital virilization in a male fetus).',
+      },
+    ],
+  },
+
+  cav_alpha2delta_gabapentinoid: {
+    templateId: 'cav_alpha2delta_gabapentinoid',
+    pdbId: '8FD7',
+    ligandCode: 'GBN',
+    ligandChain: 'D',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Gabapentin Bound to the Human Cav Alpha-2-Delta-1 Subunit',
+    exactDrugIds: ['gabapentin'],
+    targetName: 'Voltage-Gated Calcium Channel Alpha-2-Delta-1 Auxiliary Subunit (CACNA2D1)',
+    geneSymbol: 'CACNA2D1',
+    pocketMechanismSummary:
+      'Despite structural resemblance to GABA, does NOT bind GABA-A or GABA-B receptors—instead binds with high affinity to the extracellular Cache1 amino-acid pocket of presynaptic voltage-gated Ca2+ channel alpha-2-delta-1 subunits, reducing forward membrane trafficking of Cav channels and dampening excitatory glutamate/substance P release in neuropathic pain and focal seizures.',
+    bindingSites: [
+      {
+        id: 'a2d_arg243_zwitterion',
+        siteName: 'Arg243 ("RRR Motif") Alpha-Amino-Acid Zwitterion Clamp',
+        drugMoiety: 'Gamma-Amino & Carboxylate Zwitterion Headgroup',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ARG', resi: 243, chain: 'D', label: 'Arg243 (Signature RRR Motif Salt Bridge)' },
+          { resn: 'TYR', resi: 452, chain: 'D', label: 'Tyr452 (Ammonium Polar Anchor)' },
+        ],
+        reactionSummary:
+          'Competes with endogenous L-leucine/L-isoleucine at the Arg243 Cache1 pocket on the extracellular alpha-2-delta-1 subunit.',
+        clinicalRelevance:
+          'Pregabalin exhibits linear, nonsaturable GI absorption (>90% bioavailability), whereas gabapentin relies on saturable LAT1 intestinal transport (bioavailability drops from 60% at 300 mg to 33% at 1,200 mg!).',
+      },
+      {
+        id: 'a2d_trp245_cyclohexyl',
+        siteName: 'Trp245 Lipophilic Cyclohexyl / Isobutyl Pocket',
+        drugMoiety: 'Spiro-Cyclohexyl Ring (Gabapentin) or Chiral (S)-3-Isobutyl Group (Pregabalin)',
+        interactionType: 'hydrophobic',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'TRP', resi: 245, chain: 'D', label: 'Trp245 (Hydrophobic Cache1 Cage)' }],
+        reactionSummary:
+          'Bulky hydrophobic beta-substituents bury against Trp245, enabling LAT1 blood-brain barrier transport while preventing any activity at GABA receptors or transaminases.',
+        clinicalRelevance:
+          'Both drugs undergo 0% hepatic metabolism and 100% unchanged renal excretion (mandatory CrCl dose adjustment); caution for additive respiratory depression when combined with opioids!',
+      },
+    ],
+  },
+
+  v2r_tolvaptan: {
+    templateId: 'v2r_tolvaptan',
+    pdbId: '9UVY',
+    ligandCode: 'A1IT8',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Tolvaptan in Human Vasopressin V2 Receptor',
+    exactDrugIds: ['tolvaptan'],
+    targetName: 'Renal Collecting-Duct Vasopressin V2 Receptor (AVPR2)',
+    geneSymbol: 'AVPR2',
+    pocketMechanismSummary:
+      'Competitively antagonizes Gs-coupled basolateral vasopressin V2 receptors ("vaptan" aquaretic) on renal collecting-duct principal cells, preventing cAMP/PKA-driven insertion of apical Aquaporin-2 water channels to excrete electrolyte-free water and raise serum Na+.',
+    bindingSites: [
+      {
+        id: 'v2r_gln174_benzazepine',
+        siteName: 'Gln174 / Tyr205 Benzazepine-Benzamide Polar Core',
+        drugMoiety: 'Chloro-Hydroxybenzazepine & Ortho-Toluamide Linker',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#3b82f6',
+        residues: [
+          { resn: 'GLN', resi: 174, chain: 'A', label: 'Gln174 (TM4 Benzamide H-Bond)' },
+          { resn: 'TYR', resi: 205, chain: 'A', label: 'Tyr205 (TM5 Polar Wall)' },
+        ],
+        reactionSummary:
+          'Non-peptide benzazepine scaffold wedges deeper into the transmembrane bundle than cyclic peptide AVP, locking V2R in an inactive state.',
+        clinicalRelevance:
+          'Pure "aquaretic" (increases free-water clearance without Na+ or K+ wasting) for euvolemic/hypervolemic hyponatremia (SIADH, heart failure) and ADPKD cyst slowing; IV conivaptan blocks both V1a and V2.',
+      },
+      {
+        id: 'v2r_trp284_toggle',
+        siteName: 'Trp284 / Phe178 Deep Biphenylamide Toggle Lock',
+        drugMoiety: 'Methylbenzoylamino-Benzoyl Aromatic Tail',
+        interactionType: 'pi-stacking',
+        colorAccent: '#8b5cf6',
+        residues: [
+          { resn: 'TRP', resi: 284, chain: 'A', label: 'Trp284 (TM6 Toggle Switch)' },
+          { resn: 'PHE', resi: 178, chain: 'A', label: 'Phe178 (TM4 Aromatic Clamp)' },
+        ],
+        reactionSummary:
+          'Pi-stacking directly atop Trp284 blocks TM6 outward activation.',
+        clinicalRelevance:
+          'CRITICAL SAFETY: Initiate/re-initiate Samsca in a hospital setting with close serum Na+ checks (correct <=8–12 mEq/L per 24 h to prevent osmotic demyelination syndrome!), limit Samsca <=30 days (hepatotoxicity REMS for Jynarque), and avoid strong CYP3A4 inhibitors.',
+      },
+    ],
+  },
+
+  hcn4_ivabradine: {
+    templateId: 'hcn4_ivabradine',
+    pdbId: '8OFI',
+    ligandCode: 'VNZ',
+    ligandChain: 'C',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Ivabradine Blocking the Intracellular Pore of Human HCN4',
+    exactDrugIds: ['ivabradine'],
+    targetName: 'Sinoatrial Hyperpolarization-Activated Pacemaker Channel (If / HCN4)',
+    geneSymbol: 'HCN4',
+    pocketMechanismSummary:
+      'Enters open sinoatrial node HCN4 channels from the intracellular side in a use-dependent manner to block mixed Na+/K+ pacemaker "funny current" (If)—flattening Phase 4 diastolic depolarization and slowing sinus heart rate with ZERO negative inotropy or blood-pressure drop.',
+    bindingSites: [
+      {
+        id: 'hcn4_tyr507_pore',
+        siteName: 'Tyr507 / Phe510 S6 Inner-Cavity Benzocyclobutane Clamp',
+        drugMoiety: 'Dimethoxy-Benzocyclobutane & Protonated Tertiary Propylamine',
+        interactionType: 'pi-stacking',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'TYR', resi: 507, chain: 'C', label: 'Tyr507 (S6 Inner-Pore Gatekeeper)' },
+          { resn: 'PHE', resi: 510, chain: 'C', label: 'Phe510 (Pore Fenestration Wall)' },
+        ],
+        reactionSummary:
+          'Bent U-shaped ivabradine straddles Tyr507 right beneath the selectivity filter, physically obstructing inward pacemaker Na+/K+ flux.',
+        clinicalRelevance:
+          'Reduces HF hospitalizations in HFrEF (LVEF <=35%) ONLY when the patient is in normal SINUS RHYTHM with resting HR >=70 bpm on maximally tolerated beta-blocker (ineffective in atrial fibrillation!).',
+      },
+      {
+        id: 'hcn4_ile511_benzazepinone',
+        siteName: 'Ile511 S6 Hydrophobic Benzazepinone Pocket',
+        drugMoiety: 'Dimethoxy-Tetrahydrobenzazepinone Ring',
+        interactionType: 'hydrophobic',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'ILE', resi: 511, chain: 'C', label: 'Ile511 (Intracellular Cavity)' }],
+        reactionSummary:
+          'Faster heart rates open HCN4 channels more frequently, producing stronger block exactly during tachycardia ("use-dependence").',
+        clinicalRelevance:
+          'Cross-inhibition of retinal HCN1 Ih channels causes luminous visual phenomena ("phosphenes"); take with meals and avoid strong CYP3A4 inhibitors.',
+      },
+    ],
+  },
+
+  vmat2_reserpine: {
+    templateId: 'vmat2_reserpine',
+    pdbId: '8JTC',
+    ligandCode: 'YHR',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Reserpine Trapped in Human Vesicular Monoamine Transporter 2',
+    exactDrugIds: ['reserpine'],
+    targetName: 'Presynaptic Vesicular Monoamine Transporter 2 (VMAT2 / SLC18A2)',
+    geneSymbol: 'SLC18A2',
+    pocketMechanismSummary:
+      'Binds nearly irreversibly to the cytoplasm-facing state of presynaptic Vesicular Monoamine Transporter 2 (VMAT2), blocking H+-coupled vesicular sequestration of norepinephrine, dopamine, and serotonin so cytosolic monoamines are degraded by MAO and sympathetic nerve terminals are depleted.',
+    bindingSites: [
+      {
+        id: 'vmat2_glu312_amine',
+        siteName: 'Glu312 / Asp399 Central Proton-Coupled Amine Relay',
+        drugMoiety: 'Indoloquinolizidine Tertiary Nitrogen & Ester Linker',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'GLU', resi: 312, chain: 'A', label: 'Glu312 (Central Monoamine/H+ Antiport Acid)' },
+          { resn: 'ASP', resi: 399, chain: 'A', label: 'Asp399 (TM10 Polar Latch)' },
+        ],
+        reactionSummary:
+          'Spans the entire central transport vestibule around Glu312/Asp399, dead-locking the rocker-switch antiport cycle; guanethidine similarly displaces norepinephrine from presynaptic adrenergic vesicles.',
+        clinicalRelevance:
+          'Depletes both peripheral sympathetic norepinephrine (orthostatic hypotension, bradycardia, nasal stuffiness) AND central serotonin/dopamine/NE (severe dose-related depression/suicidality and parkinsonism!).',
+      },
+      {
+        id: 'vmat2_phe135_trimethoxy',
+        siteName: 'Phe135 / Asn34 Trimethoxybenzoyl Deep Hydrophobic Pocket',
+        drugMoiety: '3,4,5-Trimethoxybenzoyl Ester Tail',
+        interactionType: 'pi-stacking',
+        colorAccent: '#8b5cf6',
+        residues: [
+          { resn: 'PHE', resi: 135, chain: 'A', label: 'Phe135 (TM2 Aromatic Gate)' },
+          { resn: 'ASN', resi: 34, chain: 'A', label: 'Asn34 (TM1 Methoxy H-Bond)' },
+        ],
+        reactionSummary:
+          'Trimethoxybenzoyl tail wedges deep into the Phe135 subpocket, explaining why recovery of sympathetic stores requires weeks of new vesicle synthesis.',
+        clinicalRelevance:
+          'Direct-acting sympathomimetics cause exaggerated denervation supersensitivity, whereas indirect-acting sympathomimetics (tyramine, ephedrine) lose efficacy.',
+      },
+    ],
+  },
+
+  casr_cinacalcet: {
+    templateId: 'casr_cinacalcet',
+    pdbId: '7M3G',
+    ligandCode: 'H43',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Calcimimetic Positive Allosteric Modulator in Human CaSR 7TM Bundle',
+    exactDrugIds: [],
+    targetName: 'Parathyroid Extracellular Calcium-Sensing Receptor (CaSR / CASR)',
+    geneSymbol: 'CASR',
+    pocketMechanismSummary:
+      'Binds as a calcimimetic positive allosteric modulator inside the 7-transmembrane bundle of parathyroid chief-cell Calcium-Sensing Receptors (CaSR), increasing receptor sensitivity to extracellular Ca2+ to suppress parathyroid hormone (PTH) secretion and lower serum calcium.',
+    bindingSites: [
+      {
+        id: 'casr_glu837_amine',
+        siteName: 'Glu837 TM7 Chiral Secondary Amine Salt Bridge',
+        drugMoiety: 'Protonated (R)-1-(1-Naphthyl)ethylamine Cation',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [{ resn: 'GLU', resi: 837, chain: 'A', label: 'Glu837 (TM7 Calcimimetic Anchor)' }],
+        reactionSummary:
+          'Essential salt bridge between the chiral (R)-secondary ammonium and Glu837 stabilizes the active Gq/Gi-coupled transmembrane conformation (R-enantiomer is ~75x more potent than S).',
+        clinicalRelevance:
+          'Lowers PTH, Ca2+, and Ca x PO4 product in dialysis secondary hyperparathyroidism and parathyroid carcinoma; check baseline serum Ca2+ (contraindicated if hypocalcemic—QT prolongation/seizure risk!).',
+      },
+      {
+        id: 'casr_trp818_naphthyl',
+        siteName: 'Trp818 / Phe684 Naphthyl & Trifluoromethylphenyl Cage',
+        drugMoiety: 'Naphthyl Ring & m-(Trifluoromethyl)phenyl Propyl Tail',
+        interactionType: 'pi-stacking',
+        colorAccent: '#3b82f6',
+        residues: [
+          { resn: 'TRP', resi: 818, chain: 'A', label: 'Trp818 (TM6 Aromatic Toggle)' },
+          { resn: 'PHE', resi: 684, chain: 'A', label: 'Phe684 (TM3 Hydrophobic Clamp)' },
+        ],
+        reactionSummary:
+          'Dual aromatic end-groups pack against Trp818 and Phe684 inside the 7TM cavity.',
+        clinicalRelevance:
+          'Take with food (increases bioavailability 50–80%) and note potent CYP2D6 inhibition (raises metoprolol, carvedilol, TCA, and codeine/tramadol prodrug levels).',
+      },
+    ],
+  },
+
+  mut_cobalamin: {
+    templateId: 'mut_cobalamin',
+    pdbId: '2XIQ',
+    ligandCode: 'B12',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Cobalamin (Vitamin B12) Bound to Human Methylmalonyl-CoA Mutase',
+    exactDrugIds: ['cyanocobalamin'],
+    targetName: 'Cobalamin-Dependent Methylmalonyl-CoA Mutase / Methionine Synthase (MMUT)',
+    geneSymbol: 'MMUT',
+    pocketMechanismSummary:
+      'Converted intracellularly from cyanocobalamin into active methylcobalamin and 5\'-deoxyadenosylcobalamin cofactors, where the cobalt-corrin macrocycle coordinates active-site His627 to drive homocysteine->methionine remethylation (preventing folate-trap megaloblastic anemia) and methylmalonyl-CoA->succinyl-CoA isomerization (maintaining myelin integrity).',
+    bindingSites: [
+      {
+        id: 'b12_his627_cobalt',
+        siteName: 'His627 / Asp625 "Base-Off / His-On" Cobalt-Corrin Axial Triad',
+        drugMoiety: 'Central Cobalt Ion & Tetrapyrrole Corrin Macrocycle',
+        interactionType: 'coordination',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'HIS', resi: 627, chain: 'A', label: 'His627 (Lower Axial Cobalt Ligand)' },
+          { resn: 'ASP', resi: 625, chain: 'A', label: 'Asp625 (His627 Proton-Relay Dyad)' },
+        ],
+        reactionSummary:
+          'Enzyme His627 replaces the intramolecular dimethylbenzimidazole base to axially coordinate cobalt, tuning Co–C bond homolysis for radical catalysis.',
+        clinicalRelevance:
+          'CRITICAL PEARL: Giving folic acid alone in B12 deficiency corrects megaloblastic anemia while allowing irreversible subacute combined degeneration of dorsal/lateral spinal columns (elevated methylmalonic acid) to progress!',
+      },
+      {
+        id: 'b12_tyr110_corrin',
+        siteName: 'Tyr110 Upper Catalytic Substrate-Radical Chamber',
+        drugMoiety: 'Upper Beta-Axial Cobalt Position & Corrin Acetamide Rim',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#3b82f6',
+        residues: [{ resn: 'TYR', resi: 110, chain: 'A', label: 'Tyr110 (Active-Site Radical Shield)' }],
+        reactionSummary:
+          'Positions the upper Co–C cofactor bond directly adjacent to methylmalonyl-CoA inside the TIM barrel.',
+        clinicalRelevance:
+          'Pernicious anemia, gastrectomy, ileal resection, chronic PPIs, and long-term metformin impair intrinsic-factor/ileal B12 absorption; monitor for hypokalemia during initial brisk reticulocytosis.',
+      },
+    ],
+  },
+
+  pfldh_antimalarial: {
+    templateId: 'pfldh_antimalarial',
+    pdbId: '1CET',
+    ligandCode: 'CLQ',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: '4-Aminoquinoline Bound in Parasite Heme / Cofactor Cleft',
+    exactDrugIds: [],
+    targetName: '4-Aminoquinoline Heme / Endolysosomal Pocket (PfLDH / TLR7-9)',
+    geneSymbol: 'PfLDH',
+    pocketMechanismSummary:
+      'Accumulates inside acidic food vacuoles and endolysosomes via diprotic weak-base ion trapping—capping toxic ferriprotoporphyrin IX heme/parasite enzymes in malaria and raising endosomal pH in human antigen-presenting cells to suppress TLR7/TLR9 nucleic-acid autoimmunity in SLE and rheumatoid arthritis.',
+    bindingSites: [
+      {
+        id: 'pfldh_glu122_quinoline',
+        siteName: 'Glu122 / Phe100 7-Chloro-4-Aminoquinoline Stacking Cleft',
+        drugMoiety: 'Planar 7-Chloro-4-Aminoquinoline Aromatic Ring',
+        interactionType: 'pi-stacking',
+        colorAccent: '#3b82f6',
+        residues: [
+          { resn: 'GLU', resi: 122, chain: 'A', label: 'Glu122 (Quinoline Ring H-Bond)' },
+          { resn: 'PHE', resi: 100, chain: 'A', label: 'Phe100 (Aromatic Stacking Pocket)' },
+        ],
+        reactionSummary:
+          'Planar 7-chloroquinoline pi-stacks against porphyrin/aromatic cofactor surfaces while Glu122 stabilizes the protonated quinoline nitrogen.',
+        clinicalRelevance:
+          'Cornerstone disease-modifying therapy in all SLE patients (reduces flares, thrombosis, and mortality; safe in pregnancy); beta-hydroxylation of an N-ethyl arm makes hydroxychloroquine safer than chloroquine.',
+      },
+      {
+        id: 'pfldh_ile119_diamine',
+        siteName: 'Ile119 Basic Hydroxyethyl-Pentanediamine Tail',
+        drugMoiety: 'Diprotic Basic Alkyl-Diamine Side Chain (-N(Et)CH2CH2OH)',
+        interactionType: 'hydrophobic',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'ILE', resi: 119, chain: 'A', label: 'Ile119 (Alkyl Chain Groove)' }],
+        reactionSummary:
+          'Two protonatable nitrogens drive >100-fold lysosomal accumulation ("lysosomotropism") and extremely large tissue volume of distribution (t1/2 ~40–50 days).',
+        clinicalRelevance:
+          'OPHTHALMIC SAFETY: Dose <=5 mg/kg/day actual body weight and perform baseline + annual OCT/visual-field screening after 5 years to prevent irreversible bull’s-eye retinopathy; also watch QT prolongation.',
+      },
+    ],
+  },
+
+  ilers_mupirocin: {
+    templateId: 'ilers_mupirocin',
+    pdbId: '1JZS',
+    ligandCode: 'MRC',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Mupirocin (Pseudomonic Acid A) in Bacterial Isoleucyl-tRNA Synthetase',
+    exactDrugIds: ['mupirocin'],
+    targetName: 'Bacterial Isoleucyl-tRNA Synthetase Rossmann Cleft (ileS)',
+    geneSymbol: 'ileS',
+    pocketMechanismSummary:
+      'Acts as a natural bisubstrate mimic of isoleucyl-adenylate inside the Rossmann-fold catalytic cleft of bacterial isoleucyl-tRNA synthetase (IleRS), halting charging of tRNA^Ile and arresting staphylococcal and streptococcal protein synthesis.',
+    bindingSites: [
+      {
+        id: 'ilers_asp55_epoxide',
+        siteName: 'Asp55 / Trp562 L-Isoleucine & Pyran-Epoxide Mimicry Pocket',
+        drugMoiety: 'Epoxy-Monic Acid Tail & Dihydroxy-Tetrahydropyran Ring',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ASP', resi: 55, chain: 'A', label: 'Asp55 (Aminoacyl Recognition Acid)' },
+          { resn: 'TRP', resi: 562, chain: 'A', label: 'Trp562 (Isoleucine Hydrophobic Pocket)' },
+        ],
+        reactionSummary:
+          'Methyl-branched epoxide terminus mimics the hydrophobic L-isoleucine side chain while pyran diols form tight H-bonds across the aminoacyl pocket.',
+        clinicalRelevance:
+          '>10,000-fold selectivity for prokaryotic IleRS over human cytoplasmic IleRS; standard topical therapy for impetigo and intranasal MRSA decolonization.',
+      },
+      {
+        id: 'ilers_his58_high',
+        siteName: 'His58 Signature "HIGH" Motif ATP-Binding Groove',
+        drugMoiety: '9-Hydroxynonanoic Acid Ester Tail',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#3b82f6',
+        residues: [{ resn: 'HIS', resi: 58, chain: 'A', label: 'His58 (Class I Synthetase HIGH Motif)' }],
+        reactionSummary:
+          'Ester-linked 9-hydroxynonanoate chain stretches across the ATP-binding HIGH-motif cleft, blocking both isoleucine and ATP simultaneously.',
+        clinicalRelevance:
+          'Strictly topical ONLY: rapid ester hydrolysis in human plasma/skin converts mupirocin into inactive monic acid, preventing systemic toxicity.',
+      },
+    ],
+  },
+
+  nima_metronidazole: {
+    templateId: 'nima_metronidazole',
+    pdbId: '1W3R',
+    ligandCode: '2MN',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Metronidazole in Microbial 5-Nitroimidazole Reductase Pocket',
+    exactDrugIds: ['metronidazole'],
+    targetName: 'Anaerobic 5-Nitroimidazole Reductase / Ferredoxin System (nimA)',
+    geneSymbol: 'nimA',
+    pocketMechanismSummary:
+      'Diffuses passively into anaerobic bacteria and protozoa, where low-redox-potential ferredoxin / pyruvate:ferredoxin oxidoreductase transfers an electron onto the C5-nitro group—maintaining a steep concentration gradient ("reductive sink") and generating cytotoxic nitroso/hydroxylamine radicals that fragment microbial DNA.',
+    bindingSites: [
+      {
+        id: 'nima_his71_nitro',
+        siteName: 'His71 / Tyr111 C5-Nitro Single-Electron Reduction Site',
+        drugMoiety: 'Electrophilic 5-Nitroimidazole Warhead (-NO2)',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'HIS', resi: 71, chain: 'A', label: 'His71 (Nitro-Group Polar Anchor)' },
+          { resn: 'TYR', resi: 111, chain: 'A', label: 'Tyr111 (Redox-Active Pocket Tyr)' },
+        ],
+        reactionSummary:
+          'Anaerobic single-electron reduction converts R-NO2 into the reactive R-NO2•- radical anion (aerobic human and bacterial cells have O2, which immediately quenches the radical back to parent metronidazole!).',
+        clinicalRelevance:
+          'Concentration-dependent bactericidal activity restricted to obligate anaerobes (Bacteroides, Clostridioides) and microaerophilic protozoa (Trichomonas, Giardia, Entamoeba); bacterial NimA two-electron reduction bypasses the radical to confer resistance.',
+      },
+      {
+        id: 'nima_phe18_imidazole',
+        siteName: 'Phe18 Imidazole-Ethanol Stacking Pocket',
+        drugMoiety: '2-Methyl-Imidazole Ring & N1-Hydroxyethyl Tail',
+        interactionType: 'pi-stacking',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'PHE', resi: 18, chain: 'A', label: 'Phe18 (Imidazole Stacking Wall)' }],
+        reactionSummary:
+          'Small, uncharged amphiphilic scaffold achieves ~100% oral bioavailability and excellent CNS/abscess penetration.',
+        clinicalRelevance:
+          'Counsel against ethanol during therapy and for 3 days after (disulfiram-like flushing/vomiting), monitor warfarin INR (potent CYP2C9 inhibition of S-warfarin!), and note metallic taste.',
+      },
+    ],
+  },
+
+  ht1a_buspirone: {
+    templateId: 'ht1a_buspirone',
+    pdbId: '8FYL',
+    ligandCode: 'YG7',
+    ligandChain: 'R',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Arylpiperazine Partial Agonist in Human 5-HT1A Receptor',
+    exactDrugIds: [],
+    targetName: 'Serotonin 5-HT1A Receptor (HTR1A)',
+    geneSymbol: 'HTR1A',
+    pocketMechanismSummary:
+      'Acts as a selective azapirone partial agonist at Gi/o-coupled somatodendritic 5-HT1A autoreceptors in the dorsal raphe and postsynaptic limbic 5-HT1A receptors—gradually recalibrating serotonergic tone in generalized anxiety disorder (GAD) with ZERO GABA-A binding.',
+    bindingSites: [
+      {
+        id: 'ht1a_asp116_piperazine',
+        siteName: 'Asp116 / Asn386 Pyrimidinyl-Piperazine Orthosteric Anchor',
+        drugMoiety: 'Protonated 1-(2-Pyrimidinyl)piperazine Headgroup',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ASP', resi: 116, chain: 'R', label: 'Asp116 (TM3 Conserved Amine Salt Bridge)' },
+          { resn: 'ASN', resi: 386, chain: 'R', label: 'Asn386 (TM7 Selectivity H-Bond)' },
+        ],
+        reactionSummary:
+          'Protonated piperazine nitrogen salt-bridges Asp116 while the 2-pyrimidinyl ring engages TM7 Asn386 (generated metabolically as active 1-PP as well).',
+        clinicalRelevance:
+          'Anxiolytic WITHOUT sedation, respiratory depression, psychomotor impairment, abuse potential, alcohol potentiation, or benzodiazepine cross-tolerance (cannot treat acute benzo or alcohol withdrawal!).',
+      },
+      {
+        id: 'ht1a_phe361_azaspiro',
+        siteName: 'Trp358 / Phe361 Azaspirodecane-Dione Partial-Agonist Wedge',
+        drugMoiety: 'Butyl-Linked Azaspiro[4.5]decane-7,9-dione Imide Tail',
+        interactionType: 'pi-stacking',
+        colorAccent: '#8b5cf6',
+        residues: [
+          { resn: 'TRP', resi: 358, chain: 'R', label: 'Trp358 (TM6 Toggle Switch)' },
+          { resn: 'PHE', resi: 361, chain: 'R', label: 'Phe361 (TM6 Partial-Agonist Clamp)' },
+        ],
+        reactionSummary:
+          'Moderates TM6 outward displacement to produce partial agonism rather than full 5-HT signaling.',
+        clinicalRelevance:
+          'Requires 2–4 weeks for full clinical onset, undergoes >95% CYP3A4 first-pass metabolism (grapefruit juice/ketoconazole sharply raise exposure; take consistently with or without food), and contraindicates MAOIs.',
+      },
+    ],
+  },
+
+  adora1_adenosine: {
+    templateId: 'adora1_adenosine',
+    pdbId: '7LD4',
+    ligandCode: 'ADN',
+    ligandChain: 'R',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Adenosine Bound in Human Adenosine A1 Receptor-Gi Complex',
+    exactDrugIds: ['adenosine'],
+    targetName: 'AV-Nodal Adenosine A1 Receptor (ADORA1)',
+    geneSymbol: 'ADORA1',
+    pocketMechanismSummary:
+      'Activates Gi/o-coupled Adenosine A1 receptors in sinoatrial and atrioventricular nodal myocytes—opening acetylcholine/adenosine-sensitive inward-rectifier K+ channels (IKACh/IKAdo) to hyperpolarize the membrane and inhibiting L-type Ca2+ current (ICa,L) to transiently halt AV-nodal reentrant SVT.',
+    bindingSites: [
+      {
+        id: 'a1r_asn254_purine',
+        siteName: 'Asn254 / Phe171 Adenine Purine Pi-Stack & Bidentate H-Bond',
+        drugMoiety: '6-Aminopurine (Adenine) Heterocycle',
+        interactionType: 'pi-stacking',
+        colorAccent: '#3b82f6',
+        residues: [
+          { resn: 'ASN', resi: 254, chain: 'R', label: 'Asn254 (TM6 Purine N6/N7 Bidentate Anchor)' },
+          { resn: 'PHE', resi: 171, chain: 'R', label: 'Phe171 (ECL2 Purine Pi-Stack)' },
+        ],
+        reactionSummary:
+          'Adenine ring pi-stacks against ECL2 Phe171 while forming signature twin hydrogen bonds with TM6 Asn254 (methylxanthines caffeine and theophylline competitively block this exact site!).',
+        clinicalRelevance:
+          'DRUG INTERACTION PEARL: Caffeine/theophylline antagonize A1R (requiring higher adenosine doses), whereas dipyridamole blocks ENT1 nucleoside uptake (potentiating adenosine -> cut initial dose to 3 mg!).',
+      },
+      {
+        id: 'a1r_thr277_ribose',
+        siteName: 'Thr277 / Glu172 Beta-D-Ribofuranose Agonist Activation Trigger',
+        drugMoiety: '2\',3\',5\'-Trihydroxy-Beta-D-Ribose Sugar',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#10b981',
+        residues: [
+          { resn: 'THR', resi: 277, chain: 'R', label: 'Thr277 (TM7 Ribose 3\'-OH Agonist Switch)' },
+          { resn: 'GLU', resi: 172, chain: 'R', label: 'Glu172 (ECL2 Entrance Polar Gate)' },
+        ],
+        reactionSummary:
+          'Ribose 2\'-OH and 3\'-OH pull TM7 Thr277 inward—the indispensable conformational trigger separating A1R agonists from xanthine antagonists.',
+        clinicalRelevance:
+          'Ultra-short plasma half-life (<10 seconds via RBC/endothelial ENT1 uptake and adenosine deaminase) demands rapid IV bolus + immediate saline flush for paroxysmal SVT; causes transient chest flushing/dyspnea and brief asystole.',
+      },
+    ],
+  },
+
+  d1_fenoldopam: {
+    templateId: 'd1_fenoldopam',
+    pdbId: '7CKW',
+    ligandCode: 'G3C',
+    ligandChain: 'R',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Fenoldopam in Human Dopamine D1 Receptor-Gs Complex',
+    exactDrugIds: ['fenoldopam'],
+    targetName: 'Vascular & Renal Dopamine D1 Receptor (DRD1)',
+    geneSymbol: 'DRD1',
+    pocketMechanismSummary:
+      'Selectively activates peripheral Gs-coupled dopamine D1 receptors (with ZERO alpha- or beta-adrenergic agonism) on systemic arterioles and renal proximal/afferent vessels—raising cAMP to produce rapid IV arteriolar vasodilation while increasing renal blood flow, GFR, and natriuresis.',
+    bindingSites: [
+      {
+        id: 'd1_ser198_catechol',
+        siteName: 'Ser198 / Ser202 / Asp103 Catechol-Benzazepine Agonist Core',
+        drugMoiety: '7,8-Dihydroxy-6-Chloro-3-Benzazepine Catechol & Protonated NH2+',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ASP', resi: 103, chain: 'R', label: 'Asp103 (TM3 Ammonium Salt Bridge)' },
+          { resn: 'SER', resi: 198, chain: 'R', label: 'Ser198 (TM5 Catechol H-Bond)' },
+          { resn: 'SER', resi: 202, chain: 'R', label: 'Ser202 (TM5 Catechol H-Bond)' },
+        ],
+        reactionSummary:
+          '6-chloro-catechol forms dual H-bonds to TM5 Ser198/Ser202 while the benzazepine secondary amine salt-bridges Asp103 to drive Gs coupling.',
+        clinicalRelevance:
+          'Uniquely preserves or improves renal perfusion and Na+ excretion during hypertensive emergencies with acute kidney injury; rapid t1/2 (~5 min) via COMT methylation/conjugation without cyanide risk.',
+      },
+      {
+        id: 'd1_trp285_phenol',
+        siteName: 'Trp285 C1-(4-Hydroxyphenyl) D1-Selectivity Pocket',
+        drugMoiety: 'Chiral (R)-1-(4-Hydroxyphenyl) Pendant Ring',
+        interactionType: 'pi-stacking',
+        colorAccent: '#3b82f6',
+        residues: [{ resn: 'TRP', resi: 285, chain: 'R', label: 'Trp285 (TM6 D1 Extended Pocket)' }],
+        reactionSummary:
+          'Pendant 4-hydroxyphenyl ring projects into the spacious D1 extended subpocket, conferring complete D1 over D2 selectivity and blocking BBB penetration.',
+        clinicalRelevance:
+          'Raises intraocular pressure—avoid or use extreme caution in patients with glaucoma; monitor for reflex tachycardia and hypokalemia.',
+      },
+    ],
+  },
+
+  npra_nesiritide: {
+    templateId: 'npra_nesiritide',
+    pdbId: '1T34',
+    ligandCode: 'H',
+    ligandChain: 'H',
+    ligandMode: 'chain',
+    crystallizedLigandName: 'Disulfide-Looped Natriuretic Peptide Bound to NPR-A Homodimer',
+    exactDrugIds: [],
+    targetName: 'Natriuretic Peptide Receptor-A Particulate Guanylyl Cyclase (NPR1)',
+    geneSymbol: 'NPR1',
+    pocketMechanismSummary:
+      'Binds as recombinant human B-type natriuretic peptide (32-aa cyclic disulfide ring) across the asymmetric extracellular cleft of homodimeric NPR-A particulate guanylyl cyclase—triggering rotational activation of intracellular cGMP synthesis to produce balanced arterial/venous vasodilation, lusitropy, and renal natriuresis.',
+    bindingSites: [
+      {
+        id: 'npra_glu187_clamp',
+        siteName: 'Glu187 / Arg95 Asymmetric Receptor-Dimer Peptide Clamp',
+        drugMoiety: '17-Residue Cys-Cys Disulfide Ring & Conserved Arg/Phe Core',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'GLU', resi: 187, chain: 'A', label: 'Glu187 (Monomer A Peptide Salt Bridge)' },
+          { resn: 'ARG', resi: 95, chain: 'A', label: 'Arg95 (Monomer A Polar Pocket)' },
+        ],
+        reactionSummary:
+          'Single cyclic peptide stoichiometrically bridges Monomer A and Monomer B (1:2 complex), inducing a ~24° juxtamembrane rotation that turns on particulate guanylyl cyclase.',
+        clinicalRelevance:
+          'Lowers pulmonary capillary wedge pressure (PCWP) in acutely decompensated heart failure without reflex neurohormonal aldosterone/endothelin surge; dose-limiting adverse effect is symptomatic hypotension.',
+      },
+      {
+        id: 'npra_phe188_dimer',
+        siteName: 'Phe188 Complementary Monomer-B Hydrophobic Patch',
+        drugMoiety: 'Conserved Phe-Gly-Arg Hydrophobic Face',
+        interactionType: 'pi-stacking',
+        colorAccent: '#10b981',
+        residues: [{ resn: 'PHE', resi: 188, chain: 'B', label: 'Phe188 (Monomer B Hydrophobic Clamp)' }],
+        reactionSummary:
+          'Hydrophobic burial against Monomer B Phe188 stabilizes the closed active homodimer.',
+        clinicalRelevance:
+          'Cleared rapidly (t1/2 ~18 min) via NPR-C clearance receptors and neutral endopeptidase / neprilysin cleavage (the exact enzyme inhibited by sacubitril in Entresto!).',
+      },
+    ],
+  },
+
+  thrombin_bivalirudin: {
+    templateId: 'thrombin_bivalirudin',
+    pdbId: '1ABI',
+    ligandCode: 'I',
+    ligandChain: 'I',
+    ligandMode: 'chain',
+    crystallizedLigandName: 'Bivalirudin (Hirulog) Bivalent 20-Residue Peptide Spanning Thrombin',
+    exactDrugIds: ['bivalirudin'],
+    targetName: 'Coagulation Thrombin Active Cleft & Exosite-1 (Factor IIa / F2)',
+    geneSymbol: 'F2',
+    pocketMechanismSummary:
+      'Spans BOTH the catalytic active cleft (via its N-terminal D-Phe-Pro-Arg-Pro head) and anion-binding fibrinogen Exosite-1 (via its C-terminal hirudin-like acidic dodecapeptide) of both free and clot-bound thrombin—before thrombin slowly cleaves its own Arg3–Pro4 bond to restore hemostasis.',
+    bindingSites: [
+      {
+        id: 'biv_asp189_catalytic',
+        siteName: 'Asp189 / Ser195 Catalytic Active-Site Reversible Cleavage Cleft',
+        drugMoiety: 'N-Terminal D-Phe1–Pro2–Arg3–Pro4 Active-Site Head',
+        interactionType: 'ionic',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'ASP', resi: 189, chain: 'H', label: 'Asp189 (S1 Specificity Salt Bridge)' },
+          { resn: 'SER', resi: 195, chain: 'H', label: 'Ser195 (Catalytic Serine Nucleophile)' },
+        ],
+        reactionSummary:
+          'Arg3 dives into the Asp189 S1 pocket while Pro4 stalls Ser195 proteolysis; slow enzymatic cleavage of Arg3–Pro4 yields predictable, reversible recovery (t1/2 ~25 min).',
+        clinicalRelevance:
+          'Direct parenteral thrombin inhibitor safe in heparin-induced thrombocytopenia (HIT) undergoing PCI (zero PF4 binding!) and ~80% cleared by plasma/tissue proteolytic cleavage (only ~20% renal).',
+      },
+      {
+        id: 'biv_arg73_exosite1',
+        siteName: 'Arg73 / Tyr76 Fibrinogen-Recognition Exosite-1 Groove',
+        drugMoiety: 'Tetraglycine Spacer + C-Terminal Hirudin Acidic Tail (Asn-Gly-Asp-Phe-Glu-Glu...)',
+        interactionType: 'ionic',
+        colorAccent: '#3b82f6',
+        residues: [
+          { resn: 'ARG', resi: 73, chain: 'H', label: 'Arg73 (Anion-Binding Exosite-1)' },
+          { resn: 'TYR', resi: 76, chain: 'H', label: 'Tyr76 (Exosite-1 Aromatic Groove)' },
+        ],
+        reactionSummary:
+          'Polyanionic Glu/Asp C-terminal tail electrostatically clamps electropositive Exosite-1 across a flexible Gly4 linker.',
+        clinicalRelevance:
+          'Bivalent active-site + Exosite-1 engagement inhibits fibrin-bound thrombin inside coronary thrombi where bulky AT-III–heparin complexes are sterically excluded.',
+      },
+    ],
+  },
 };

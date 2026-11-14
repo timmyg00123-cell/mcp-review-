@@ -142,3 +142,30 @@ test('ThreeDLabCanvas renders TwoDPocketFallbackView when 2D fallback mode is ac
     'Must render "Switch to 3D Mol*" button in toolbar when 2D mode is active'
   );
 });
+
+test('ThreeDLabCanvas synthesizes 2D pocket contacts from drugEntry.bindingSites for non-legacy targets', async () => {
+  const { ThreeDLabCanvas } = await import('../src/components/ThreeDLabCanvas.js');
+  const { resolveDrug3DEntry } = await import('../src/data/drug3dCatalog.js');
+  const aspirin = resolveDrug3DEntry('Aspirin')!;
+
+  const html = renderToString(
+    React.createElement(ThreeDLabCanvas, {
+      pdbId: aspirin.pdbId,
+      preferredLigandCode: aspirin.ligandCode,
+      drugEntry: aspirin,
+      targetName: aspirin.targetName,
+      geneSymbol: aspirin.geneSymbol,
+      isFullscreen: false,
+      onToggleFullscreen: () => {},
+      onOpenTutorial: () => {},
+      initial2DFallback: true,
+    })
+  );
+
+  assert.ok(html.includes('Aspirin'), 'Displays selected drug name in 2D fallback');
+  assert.ok(html.includes('Ser530'), 'Synthesizes Ser530 binding-site contact from drugEntry');
+  assert.ok(
+    !html.includes('No curated med chem pocket contacts'),
+    'Does not fall back to empty contacts state when drugEntry has bindingSites'
+  );
+});

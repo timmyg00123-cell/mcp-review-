@@ -66,6 +66,30 @@ export function selectDrugAndCollapse(drugId: string): {
 }
 
 /**
+ * Pure helper: formats a 1..39 therapeutic class label without doubling the leading
+ * class number when categoryName/therapeuticCategory already starts with "N. ".
+ */
+export function formatTherapeuticClassTitle(
+  classNumber: number,
+  categoryLabel: string
+): string {
+  const trimmed = categoryLabel.trim();
+  return /^\d+\.\s*/.test(trimmed) ? trimmed : `${classNumber}. ${trimmed}`;
+}
+
+/**
+ * Pure helper: resolves the controlled <select> value for an expanded class row.
+ * Returns '' whenever the active drug is filtered out of groupDrugs so even a
+ * single remaining <option> stays selectable and fires onChange.
+ */
+export function resolveClassSelectValue(
+  groupDrugs: Drug3DCatalogEntry[],
+  activeDrugId: string
+): string {
+  return groupDrugs.some((d) => d.id === activeDrugId) ? activeDrugId : '';
+}
+
+/**
  * Pure helper: filters the 1..39 therapeutic class groups by class number/name,
  * drug generic/brand name, pharmacologic class, or receptor target.
  */
@@ -239,7 +263,10 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
           ) : null}
         </div>
         <div className="text-[11px] text-slate-600 dark:text-slate-300">
-          {activeEntry.therapeuticClassNumber}. {activeEntry.therapeuticCategory}
+          {formatTherapeuticClassTitle(
+            activeEntry.therapeuticClassNumber,
+            activeEntry.therapeuticCategory
+          )}
         </div>
         <div className="text-[11px] font-medium text-cyan-800 dark:text-cyan-300 flex items-center gap-1">
           <Target className="w-3 h-3 shrink-0" />
@@ -313,7 +340,7 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
                       />
                     )}
                     <span className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">
-                      {group.classNumber}. {group.categoryName}
+                      {formatTherapeuticClassTitle(group.classNumber, group.categoryName)}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -331,8 +358,8 @@ export const ThreeDLabLibrary: React.FC<ThreeDLabLibraryProps> = ({
                 {isExpanded && (
                   <div className="px-2.5 pb-2.5 pt-1 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-950/40 rounded-b-lg">
                     <select
-                      aria-label={`Select drug in ${group.categoryName}`}
-                      value={containsActiveDrug ? activeEntry.id : ''}
+                      aria-label={`Select drug in ${formatTherapeuticClassTitle(group.classNumber, group.categoryName)}`}
+                      value={resolveClassSelectValue(group.drugs, activeEntry.id)}
                       onChange={(e) => handleChooseDrugFromDropdown(e.target.value)}
                       className="w-full text-xs font-medium rounded-lg border border-cyan-400 dark:border-cyan-600 bg-white dark:bg-slate-800 p-2 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-cyan-500 cursor-pointer"
                     >

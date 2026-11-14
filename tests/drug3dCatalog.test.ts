@@ -96,6 +96,95 @@ async function runTests() {
   assert.equal(resolveDrug3DEntry('Dabigatran etexilate')?.genericName, 'Dabigatran');
   assert.equal(resolveDrug3DEntry('EXP3174')?.genericName, 'Losartan');
   assert.equal(resolveDrug3DEntry('Enalaprilat')?.genericName, 'Enalapril');
+  assert.equal(resolveDrug3DEntry('alpha-Methylnorepinephrine')?.genericName, 'Methyldopa');
+  assert.equal(resolveDrug3DEntry('Canrenone')?.genericName, 'Spironolactone');
+  assert.equal(resolveDrug3DEntry('Fenofibric acid')?.genericName, 'Fenofibrate');
+  assert.ok(resolveDrug3DEntry('Adenosine Diphosphate (ADP)'), 'ADP resolves to P2Y12 pocket');
+  assert.ok(resolveDrug3DEntry('Norepinephrine'), 'Norepinephrine resolves to adrenergic pocket');
+  assert.ok(resolveDrug3DEntry('Aldosterone'), 'Aldosterone resolves to MR pocket');
+  assert.ok(resolveDrug3DEntry('Arginine Vasopressin (AVP)'), 'AVP resolves to V2R pocket');
+  assert.equal(resolveDrug3DEntry('Apomorphine'), undefined, 'Apomorphine must not substring-match Morphine');
+
+  // 7b. Supplemental curriculum review drugs resolve cleanly
+  for (const suppName of [
+    'Bivalirudin',
+    'Edoxaban',
+    'Ibutilide',
+    'Dofetilide',
+    'Adenosine',
+    'Nesiritide',
+    'Fenoldopam',
+    'Sodium Nitroprusside',
+    'Nicardipine',
+    'Felodipine',
+    'Nimodipine',
+    'Indapamide',
+    'Labetalol',
+    'Guanethidine',
+    'Quinapril',
+    'Fluvastatin',
+    'Pitavastatin',
+    'Bempedoic Acid',
+    'Zafirlukast',
+    'Epinephrine',
+    'Conivaptan',
+    'Cromolyn',
+  ]) {
+    assert.ok(resolveDrug3DEntry(suppName), `Supplemental curriculum drug ${suppName} must resolve`);
+  }
+
+  // 7c. Scientifically accurate biological receptor/enzyme targets (no unrelated class-sibling fallbacks)
+  const expectedTargetGenes: Array<[string, string]> = [
+    ['Metformin', 'PRKAA2'],
+    ['Glipizide', 'ABCC8'],
+    ['Glimepiride', 'ABCC8'],
+    ['Diazoxide', 'ABCC8'],
+    ['Minoxidil', 'ABCC8'],
+    ['Amiloride', 'SCNN1A'],
+    ['Triamterene', 'SCNN1A'],
+    ['Nitroglycerin', 'GUCY1B1'],
+    ['Isosorbide Mononitrate', 'GUCY1B1'],
+    ['Isosorbide Dinitrate', 'GUCY1B1'],
+    ['Hydralazine', 'GUCY1B1'],
+    ['Montelukast', 'CYSLTR1'],
+    ['Zileuton', 'ALOX5'],
+    ['Prazosin', 'ADRA1A'],
+    ['Doxazosin', 'ADRA1A'],
+    ['Terazosin', 'ADRA1A'],
+    ['Tamsulosin', 'ADRA1A'],
+    ['Lubiprostone', 'CLCN2'],
+    ['Ezetimibe', 'NPC1L1'],
+    ['Lomitapide', 'MTTP'],
+    ['Latanoprost', 'PTGFR'],
+    ['Baclofen', 'GABBR1'],
+    ['Levetiracetam', 'SV2A'],
+    ['Memantine', 'GRIN1'],
+    ['Carbidopa', 'DDC'],
+    ['Famotidine', 'HRH2'],
+    ['Finasteride', 'SRD5A2'],
+    ['Dutasteride', 'SRD5A2'],
+    ['Gabapentin', 'CACNA2D1'],
+    ['Pregabalin', 'CACNA2D1'],
+    ['Ivabradine', 'HCN4'],
+    ['Reserpine', 'SLC18A2'],
+    ['Cinacalcet', 'CASR'],
+    ['Cyanocobalamin', 'MMUT'],
+    ['Hydroxychloroquine', 'PfLDH'],
+    ['Mupirocin', 'ileS'],
+    ['Metronidazole', 'nimA'],
+    ['Buspirone', 'HTR1A'],
+  ];
+  for (const [drugName, expectedGene] of expectedTargetGenes) {
+    const entry = resolveDrug3DEntry(drugName);
+    assert.ok(entry, `${drugName} must resolve`);
+    assert.equal(
+      entry.geneSymbol,
+      expectedGene,
+      `${drugName} must map to biological target ${expectedGene} (got ${entry.geneSymbol})`
+    );
+  }
+  const tolvaptan = resolveDrug3DEntry('Tolvaptan');
+  assert.ok(tolvaptan && tolvaptan.geneSymbol === 'AVPR2' && tolvaptan.ligandMode === 'het', 'Tolvaptan uses non-peptide het V2R crystal');
 
   // 8. Every catalog entry has 4-char PDB ID, non-empty ligandCode, and 2..4 valid binding sites
   for (const entry of DRUG_3D_CATALOG) {

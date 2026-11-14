@@ -7,6 +7,7 @@ import {
   filterTherapeuticClassGroups,
   toggleExpandedClass,
   selectDrugAndCollapse,
+  resolveClassSelectValue,
 } from '../src/components/ThreeDLabLibrary';
 import { THERAPEUTIC_CLASS_3D_GROUPS } from '../src/data/drug3dCatalog';
 
@@ -16,6 +17,9 @@ async function runTests() {
   assert.ok(defaultHtml.includes('Clopidogrel'), 'Defaults to Clopidogrel');
   assert.ok(defaultHtml.includes('1. Analgesic'), 'Renders Class 1 header');
   assert.ok(defaultHtml.includes('39. Thyroid Product'), 'Renders Class 39 header');
+  assert.ok(!defaultHtml.includes('1. 1.'), 'Does not double-prefix Class 1 number');
+  assert.ok(!defaultHtml.includes('13. 13.'), 'Does not double-prefix Active Drug Class 13 label');
+  assert.ok(!defaultHtml.includes('39. 39.'), 'Does not double-prefix Class 39 number');
   assert.ok(!defaultHtml.includes('<select'), 'All 1..39 class dropdowns are collapsed by default on mount');
   assert.ok(defaultHtml.includes('All Binding Sites'), 'Right panel defaults to All Binding Sites overview');
   assert.ok(!defaultHtml.includes('ChEMBL') && !defaultHtml.includes('Custom PDB'), 'Removed ChEMBL sidebar and Custom PDB form');
@@ -29,6 +33,21 @@ async function runTests() {
   assert.equal(afterSelect.selectedDrugId, 'aspirin');
   assert.equal(afterSelect.expandedClassNumber, null, 'Selecting a drug collapses the class row');
   assert.equal(afterSelect.activeBindingSiteId, null, 'Selecting a drug resets activeBindingSiteId to All Sites');
+
+  // 3. Review Focus: Search filtering narrows classes/drugs without locking out single-option <select>
+  const prasugrelFiltered = filterTherapeuticClassGroups(THERAPEUTIC_CLASS_3D_GROUPS, 'prasugrel');
+  assert.equal(prasugrelFiltered.length, 1);
+  assert.equal(prasugrelFiltered[0].classNumber, 13);
+  assert.equal(
+    resolveClassSelectValue(prasugrelFiltered[0].drugs, 'clopidogrel'),
+    '',
+    'Returns empty placeholder value when active drug is filtered out so single filtered option can fire onChange'
+  );
+  assert.equal(
+    resolveClassSelectValue(THERAPEUTIC_CLASS_3D_GROUPS[12].drugs, 'clopidogrel'),
+    'clopidogrel',
+    'Returns activeDrugId when active drug is present in group.drugs'
+  );
 
   // 3. Review Focus: Search filtering narrows classes/drugs without breaking selection
   const aspirinFiltered = filterTherapeuticClassGroups(THERAPEUTIC_CLASS_3D_GROUPS, 'aspirin');

@@ -203,6 +203,12 @@ async function runTests() {
   assert.strictEqual(pinned.catalyticMetals![0].chain, 'A');
   assert.strictEqual(pinned.catalyticMetals![0].resi, 701);
 
+  // 7b. Explicit preferredChain overrides Chain A default so multimeric receptor bindingSites match monomer
+  const pinnedChainB = identifyLigandResidue(multimerPdb, '1HW', 'B');
+  assert.ok(pinnedChainB !== null, 'Should resolve ligand on preferredChain B');
+  assert.strictEqual(pinnedChainB.chain, 'B', 'Should pin to preferredChain B instead of Chain A');
+  assert.strictEqual(pinnedChainB.resi, 501, 'Should select Chain B residue 501');
+
   console.log('✅ All structure3dService and canonicalTargets tests passed successfully!');
 }
 

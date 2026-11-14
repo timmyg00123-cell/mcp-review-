@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Maximize2,
   Minimize2,
@@ -222,10 +222,51 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   const effectiveTargetName = drugEntry?.targetName || targetName;
   const effectiveGeneSymbol = drugEntry?.geneSymbol || geneSymbol;
 
-  const medChemProfile: TargetMedChemProfile | undefined =
-    propMedChemProfile ||
-    (effectiveGeneSymbol ? findMedChemProfile(effectiveGeneSymbol) : undefined) ||
-    (cleanPdbId ? findMedChemProfile(cleanPdbId) : undefined);
+  const medChemProfile: TargetMedChemProfile | undefined = useMemo(() => {
+    const legacy =
+      propMedChemProfile ||
+      (effectiveGeneSymbol ? findMedChemProfile(effectiveGeneSymbol) : undefined) ||
+      (cleanPdbId ? findMedChemProfile(cleanPdbId) : undefined);
+    if (legacy) return legacy;
+    if (!drugEntry) return undefined;
+
+    return {
+      targetGeneSymbol: drugEntry.geneSymbol,
+      pdbId: cleanPdbId || drugEntry.pdbId,
+      drugName: drugEntry.genericName,
+      ligandCode: drugEntry.ligandCode,
+      pharmacophoreGroups: drugEntry.bindingSites.map((site) => ({
+        id: site.id,
+        name: site.drugMoiety,
+        atomNames: [],
+        colorAccent: site.colorAccent,
+        pharmacokinetics: {
+          absorption: drugEntry.pharmacologicClass,
+          metabolism: drugEntry.prodrugNote || 'Direct active binding species in target pocket.',
+          prodrugRole: drugEntry.prodrugNote,
+          halfLifeAndClearance: `${drugEntry.targetName} (${drugEntry.geneSymbol})`,
+        },
+        clinicalPharmacodynamics: {
+          targetBindingRole: site.reactionSummary,
+          physiologicEffect: drugEntry.overallMechanism,
+          adverseEffectRisks: site.clinicalRelevance,
+        },
+      })),
+      keyPocketResidues: drugEntry.bindingSites.flatMap((site) =>
+        site.residues.map((res) => ({
+          resi: res.resi,
+          resn: res.resn,
+          chain: res.chain,
+          label: res.label,
+          interactionType: site.interactionType,
+          clinicalImpact: `${site.reactionSummary} ${site.clinicalRelevance}`,
+          subPocketName: site.siteName,
+          pharmacophoreGroupId: site.id,
+          colorAccent: site.colorAccent,
+        }))
+      ),
+    };
+  }, [propMedChemProfile, effectiveGeneSymbol, cleanPdbId, drugEntry]);
 
   // --------------------------------------------------------------------------
   // Scene Rendering Function via Mol* Visual Engine
@@ -611,6 +652,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   useEffect(() => {
     let isMounted = true;
     let mountNode: HTMLDivElement | null = null;
+    const abortController = new AbortController();
     const generation = ++loadGenerationRef.current;
 
     const loadMolstarAndInit = async () => {
@@ -640,13 +682,14 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         const resolvedChain = currentCfg.effectiveLigandChain;
         let ligand: DetectedLigandInfo | null = null;
 
-        // 1. Pre-parse small-molecule coordinates when in 'het' mode (non-fatal if PDBe text endpoint times out)
-        if (effectiveLigandMode === 'het') {
+        // 1. Pre-parse text PDB coordinates only when catalog drugEntry metadata is absent (avoids blocking .bcif on .ent timeouts)
+        if (effectiveLigandMode === 'het' && !currentCfg.drugEntry) {
           try {
-            const pdbData = await fetchPdbCoordinates(cleanPdbId);
+            const pdbData = await fetchPdbCoordinates(cleanPdbId, abortController.signal);
             if (!isMounted || generation !== loadGenerationRef.current) return;
-            ligand = identifyLigandResidue(pdbData, resolvedCode);
+            ligand = identifyLigandResidue(pdbData, resolvedCode, resolvedChain);
           } catch (coordErr) {
+            if (abortController.signal.aborted) return;
             console.warn(
               `[ThreeDLabCanvas] Non-fatal: Could not pre-fetch text PDB coordinates for ${cleanPdbId}, falling back to static catalog ligand:`,
               coordErr
@@ -824,6 +867,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
 
     return () => {
       isMounted = false;
+      abortController.abort();
       const activeViewer = viewerRef.current;
       viewerRef.current = null;
       if (activeViewer) {

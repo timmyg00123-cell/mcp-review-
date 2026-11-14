@@ -47,6 +47,8 @@ async function runTests() {
   const source = fs.readFileSync('src/components/ThreeDLabCanvas.tsx', 'utf8');
   assert.ok(source.includes("document.createElement('div')"), 'Mounts Mol* into a fresh child div');
   assert.ok(source.includes('plugin?.dispose') || source.includes('plugin.dispose'), 'Disposes Mol* plugin on cleanup');
+  assert.ok(source.includes('new AbortController()') && source.includes('abortController.abort()'), 'Aborts in-flight coordinate fetch on cleanup');
+  assert.ok(source.includes('identifyLigandResidue(pdbData, resolvedCode, resolvedChain)'), 'Forwards resolvedChain to identifyLigandResidue');
   assert.ok(!source.includes("visualStyle: 'cartoon'"), 'Does not force het components into cartoon visualStyle');
   assert.ok(source.includes('het: false'), 'Suppresses global het clutter');
   assert.ok(source.includes('color: null'), 'Preserves CPK heteroatom colors');
