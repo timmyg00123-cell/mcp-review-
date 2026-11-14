@@ -5,7 +5,6 @@ import {
   HelpCircle,
   RotateCcw,
   ExternalLink,
-  Download,
   Layers,
   Dna,
   Atom,
@@ -15,15 +14,17 @@ import {
   Loader2,
   AlertCircle,
   Tag,
-  Target,
-  Pill,
 } from 'lucide-react';
 import {
   fetchPdbCoordinates,
   identifyLigandResidue,
+  LIGAND_CODE_ALIASES,
   type DetectedLigandInfo,
 } from '../services/structure3dService';
 import type {
+  Drug3DCatalogEntry,
+  DrugBindingSite,
+  LigandRenderMode,
   PharmacophorePkPdGroup,
   KeyPocketResidueContact,
   TargetMedChemProfile,
@@ -43,11 +44,17 @@ import { TwoDPocketFallbackView } from './TwoDPocketFallbackView';
 export interface ThreeDLabCanvasProps {
   pdbId: string;
   preferredLigandCode?: string;
+  drugEntry?: Drug3DCatalogEntry;
+  ligandMode?: LigandRenderMode;
+  ligandChain?: string;
+  activeBindingSite?: DrugBindingSite | null;
+  onSelectBindingSite?: (site: DrugBindingSite | null) => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   onOpenTutorial: () => void;
   targetName?: string;
   geneSymbol?: string;
+  medChemProfile?: TargetMedChemProfile;
   activePharmacophoreGroup?: PharmacophorePkPdGroup | null;
   onSelectPharmacophoreGroup?: (group: PharmacophorePkPdGroup | null) => void;
   onSelectPocketResidue?: (residue: KeyPocketResidueContact | null) => void;
@@ -64,18 +71,13 @@ declare global {
   }
 }
 
-/**
- * High-performance color constants for Mol* representation styling.
- * cyanCarbon (#06b6d4) for high-contrast drug sticks,
- * magentaCarbon (#ec4899) for active pharmacophore accent highlighting.
- */
 export const MOLSTAR_THEME_COLORS = {
   cyanCarbon: { r: 6, g: 182, b: 212 },
   magentaCarbon: { r: 236, g: 72, b: 153 },
   emeraldPocket: { r: 16, g: 185, b: 129 },
   amberHBond: { r: 245, g: 158, b: 11 },
-  slateRibbon: { r: 100, g: 116, b: 139 }, // slate-500 #64748b muted receptor scaffold
-  slateBg: { r: 2, g: 6, b: 23 }, // slate-950 #020617
+  slateRibbon: { r: 100, g: 116, b: 139 },
+  slateBg: { r: 2, g: 6, b: 23 },
 };
 
 function hexToRgbColor(hex?: string, fallback = MOLSTAR_THEME_COLORS.magentaCarbon) {
@@ -92,36 +94,114 @@ function hexToRgbColor(hex?: string, fallback = MOLSTAR_THEME_COLORS.magentaCarb
 }
 
 /**
- * Mol* (MolStar) WebGL Molecular Graphics Canvas with Binary mmCIF (.bcif) Streaming,
- * Classic Pocket Sticks, Translucent Cavity Surface, GPU-Instanced Labels & Pharmacophore Engine.
+ * Builds a strict Mol* mmCIF QueryParam for a bound drug ligand.
+ * Never emits legacy fields (chem_comp_id, struct_asym_id, residue_number)
+ * that fail on binary mmCIF (.bcif) structures.
+ */
+export function buildMolstarLigandQuery(
+  ligand: Pick<DetectedLigandInfo, 'resn' | 'chain' | 'resi'> | null,
+  ligandMode: LigandRenderMode = 'het'
+): Record<string, unknown> | null {
+  if (!ligand) return null;
+
+  if (ligandMode === 'chain' || ligandMode === 'carbs') {
+    const chainId = (ligand.chain || ligand.resn || '').trim();
+    return chainId ? { auth_asym_id: chainId } : null;
+  }
+
+  const compId = (ligand.resn || '').trim();
+  if (!compId) return null;
+
+  const query: Record<string, unknown> = {
+    label_comp_id: compId,
+  };
+  if (ligand.chain) {
+    query.auth_asym_id = ligand.chain;
+  }
+  if (typeof ligand.resi === 'number' && ligand.resi > 0) {
+    query.auth_seq_id = ligand.resi;
+  }
+  return query;
+}
+
+/**
+ * Builds a strict Mol* mmCIF QueryParam for a receptor binding-pocket residue.
+ */
+export function buildMolstarResidueQuery(
+  chain: string,
+  resi: number
+): { auth_asym_id: string; auth_seq_id: number } {
+  return {
+    auth_asym_id: chain,
+    auth_seq_id: resi,
+  };
+}
+
+/**
+ * Resolves a static catalog fallback ligand descriptor when PDBe text coordinate
+ * pre-parsing fails, times out, or when rendering peptide ('chain') / oligosaccharide ('carbs') ligands.
+ */
+export function resolveFallbackLigandFromCatalog(
+  preferredLigandCode?: string,
+  ligandChain?: string,
+  ligandMode: LigandRenderMode = 'het'
+): DetectedLigandInfo | null {
+  if (ligandMode === 'chain' || ligandMode === 'carbs') {
+    const chain = (ligandChain || preferredLigandCode || '').trim();
+    if (!chain) return null;
+    return {
+      resn: (preferredLigandCode || chain).trim(),
+      chain,
+      resi: 0,
+      atomCount: 1,
+    };
+  }
+
+  const rawCode = preferredLigandCode?.trim().toUpperCase();
+  if (!rawCode) return null;
+  const resolvedCode = (LIGAND_CODE_ALIASES[rawCode] || rawCode).toUpperCase();
+
+  return {
+    resn: resolvedCode,
+    chain: (ligandChain || '').trim(),
+    resi: 0,
+    atomCount: 1,
+  };
+}
+
+/**
+ * Drug-Centered Mol* (MolStar) WebGL Molecular Graphics Canvas.
+ * Disposes previous plugin instances cleanly on drug transitions, queries binary mmCIF
+ * coordinates strictly via label_comp_id / auth_asym_id / auth_seq_id, and supports
+ * 'het', 'chain', and 'carbs' ligand modes plus clickable Binding Site walkthroughs.
  */
 export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   pdbId,
   preferredLigandCode,
+  drugEntry,
+  ligandMode,
+  ligandChain,
+  activeBindingSite = null,
+  onSelectBindingSite,
   isFullscreen,
   onToggleFullscreen,
   onOpenTutorial,
   targetName,
   geneSymbol,
-  activePharmacophoreGroup,
+  medChemProfile: propMedChemProfile,
+  activePharmacophoreGroup = null,
   onSelectPharmacophoreGroup,
   onSelectPocketResidue,
-  isPkDrawerOpen,
-  onTogglePkDrawer,
   initial2DFallback = false,
   initialLoadError = null,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
+  const loadGenerationRef = useRef<number>(0);
 
-  // Scene toggles & mode state
   const [is2DFallbackActive, setIs2DFallbackActive] = useState<boolean>(initial2DFallback);
   const [detectedLigand, setDetectedLigand] = useState<DetectedLigandInfo | null>(null);
-  const [showPocket, setShowPocket] = useState<boolean>(true);
-  const [showPocketSurface, setShowPocketSurface] = useState<boolean>(false);
   const [showRibbon, setShowRibbon] = useState<boolean>(true);
-  const [showHBonds, setShowHBonds] = useState<boolean>(true);
-  const [showAtomLabels, setShowAtomLabels] = useState<boolean>(false);
   const [subPocketColorMode, setSubPocketColorMode] = useState<boolean>(true);
   const [clickedAtomInfo, setClickedAtomInfo] = useState<{
     atom: string;
@@ -131,16 +211,20 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
     elem: string;
   } | null>(null);
 
-  // Loading & error state
   const [isLoading, setIsLoading] = useState<boolean>(!initialLoadError);
   const [loadError, setLoadError] = useState<string | null>(initialLoadError);
   const [reloadTrigger, setReloadTrigger] = useState<number>(0);
 
-  const cleanPdbId = pdbId ? pdbId.trim().toUpperCase() : '';
+  const cleanPdbId = (pdbId || drugEntry?.pdbId || '').trim().toUpperCase();
+  const effectiveLigandMode: LigandRenderMode = ligandMode || drugEntry?.ligandMode || 'het';
+  const effectiveLigandCode = preferredLigandCode || drugEntry?.ligandCode;
+  const effectiveLigandChain = ligandChain || drugEntry?.ligandChain;
+  const effectiveTargetName = drugEntry?.targetName || targetName;
+  const effectiveGeneSymbol = drugEntry?.geneSymbol || geneSymbol;
 
-  // Canonical medicinal chemistry profile for pharmacophore groups & key pocket residues
   const medChemProfile: TargetMedChemProfile | undefined =
-    (geneSymbol ? findMedChemProfile(geneSymbol) : undefined) ||
+    propMedChemProfile ||
+    (effectiveGeneSymbol ? findMedChemProfile(effectiveGeneSymbol) : undefined) ||
     (cleanPdbId ? findMedChemProfile(cleanPdbId) : undefined);
 
   // --------------------------------------------------------------------------
@@ -150,77 +234,56 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
     (
       viewer: any,
       ligand: DetectedLigandInfo | null,
-      pocketActive: boolean,
-      pocketSurfaceActive: boolean,
       ribbonActive: boolean,
-      hbondsActive: boolean,
-      atomLabelsActive: boolean = false,
-      pharmacophoreGroup: PharmacophorePkPdGroup | null = null,
-      subPocketZonesActive: boolean = subPocketColorMode
+      subPocketZonesActive: boolean,
+      selectedSite: DrugBindingSite | null = null,
+      pharmacophoreGroup: PharmacophorePkPdGroup | null = null
     ) => {
       if (!viewer) return;
 
       try {
-        // Reset or update selections
         if (typeof viewer.visual?.clearHighlight === 'function') {
           viewer.visual.clearHighlight();
         }
 
-        // 1. Suppress global HETATM clutter (lipids, detergents, glycans, duplicate chains)
-        // while keeping polymer cartoon controlled by ribbonActive
+        // 1. Suppress global HETATM clutter while keeping polymer ribbon (and carbs when ligandMode === 'carbs')
         if (typeof viewer.visual?.visibility === 'function') {
           viewer.visual.visibility({
             polymer: ribbonActive,
             het: false,
             water: false,
-            carbs: false,
+            carbs: effectiveLigandMode === 'carbs',
             nonStandard: false,
           });
         }
 
-        // Apply Mol* high-level visual representations if legacy update API is present
         if (typeof viewer.visual?.update === 'function') {
           viewer.visual.update({
-            // Protein backbone cartoon ribbon (using { hetflag: false } polymer selector)
             cartoon: ribbonActive,
-            // Pocket surrounding residues within 5Å as sticks
-            pocket: pocketActive,
+            pocket: Boolean(ligand),
             pocketDistance: 5.0,
-            // Translucent pocket cavity molecular surface (opacity ~0.35)
-            surface: pocketSurfaceActive,
-            surfaceOpacity: 0.35,
-            // Non-covalent polar contacts / H-bonds
-            interactions: hbondsActive,
-            // GPU-instanced text glyph labels (zero canvas texture allocations, zero CPU lag)
-            atomLabels: atomLabelsActive,
+            surface: false,
+            interactions: Boolean(ligand),
+            atomLabels: false,
           });
         }
 
-        const singleLigandQuery = ligand
-          ? {
-              chem_comp_id: ligand.resn,
-              label_comp_id: ligand.resn,
-              ...(ligand.chain ? { auth_asym_id: ligand.chain } : {}),
-              ...(ligand.resi ? { auth_seq_id: ligand.resi } : {}),
-            }
-          : null;
+        const singleLigandQuery = buildMolstarLigandQuery(ligand, effectiveLigandMode);
+        const allResidueQueries: Array<{ auth_asym_id: string; auth_seq_id: number }> = [];
+        const activeSiteResidueQueries: Array<{ auth_asym_id: string; auth_seq_id: number }> = [];
+        const tooltipItems: any[] = [];
 
-        // 2. Single-Ligand Isolation, True CPK Heteroatoms (color: null + type_symbol: 'C'),
-        //    and Color-Matched Binding Sub-Pocket Residues
         if (typeof viewer.visual?.select === 'function') {
           const selectData: any[] = [];
 
-          // A. Single bound drug ligand instance in ball-and-stick
+          // A. Bound drug ligand in ball-and-stick with CPK heteroatoms + cyan carbon skeleton
           if (ligand && singleLigandQuery) {
-            // Base representation with color: null so N, O, S, P, F, Cl keep native CPK element colors
             selectData.push({
               ...singleLigandQuery,
               representation: 'ball-and-stick',
               color: null,
-              focus: !pharmacophoreGroup,
             });
 
-            // Carbon skeleton color: base cyanCarbon
             selectData.push({
               ...singleLigandQuery,
               type_symbol: 'C',
@@ -229,28 +292,14 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               color: null,
             });
 
-            // When Sub-Pocket Zone mode is active, color each pharmacophore moiety's carbons
-            // to match its corresponding binding sub-pocket zone
-            if (subPocketZonesActive && medChemProfile?.pharmacophoreGroups?.length) {
-              for (const group of medChemProfile.pharmacophoreGroups) {
-                const groupRgb = hexToRgbColor(group.colorAccent, MOLSTAR_THEME_COLORS.cyanCarbon);
-                selectData.push({
-                  ...singleLigandQuery,
-                  atoms: group.atomNames,
-                  label_atom_id: group.atomNames,
-                  type_symbol: 'C',
-                  representation: 'ball-and-stick',
-                  representationColor: groupRgb,
-                  color: null,
-                });
-              }
-            }
+            tooltipItems.push({
+              ...singleLigandQuery,
+              tooltip: `Bound Drug Ligand: ${drugEntry?.crystallizedLigandName || ligand.resn} (Chain ${ligand.chain || effectiveLigandChain || 'A'})`,
+            });
 
-            // Active-site catalytic metal ions (e.g. Zn2+ in ACE 1O86) within 5Å of the single ligand
             if (ligand.catalyticMetals?.length) {
               for (const metal of ligand.catalyticMetals) {
                 selectData.push({
-                  chem_comp_id: metal.resn,
                   label_comp_id: metal.resn,
                   auth_asym_id: metal.chain,
                   auth_seq_id: metal.resi,
@@ -261,13 +310,49 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
             }
           }
 
-          // B. Key binding sub-pocket residues with CPK heteroatoms + sub-pocket carbon colors
-          if (pocketActive && medChemProfile?.keyPocketResidues?.length) {
+          // B. Drug Binding Sites (primary) or fallback MedChem pocket residues
+          if (drugEntry?.bindingSites?.length) {
+            for (const site of drugEntry.bindingSites) {
+              const isSiteActive = selectedSite?.id === site.id;
+              const siteRgb = subPocketZonesActive
+                ? hexToRgbColor(site.colorAccent, MOLSTAR_THEME_COLORS.emeraldPocket)
+                : isSiteActive
+                ? MOLSTAR_THEME_COLORS.magentaCarbon
+                : MOLSTAR_THEME_COLORS.emeraldPocket;
+
+              for (const residue of site.residues) {
+                const targetChain = residue.chain || ligand?.chain || effectiveLigandChain || 'A';
+                const resQuery = buildMolstarResidueQuery(targetChain, residue.resi);
+                allResidueQueries.push(resQuery);
+                if (isSiteActive) {
+                  activeSiteResidueQueries.push(resQuery);
+                }
+
+                selectData.push({
+                  ...resQuery,
+                  representation: 'ball-and-stick',
+                  color: null,
+                });
+
+                selectData.push({
+                  ...resQuery,
+                  type_symbol: 'C',
+                  representation: 'ball-and-stick',
+                  representationColor: siteRgb,
+                  color: siteRgb,
+                });
+
+                tooltipItems.push({
+                  ...resQuery,
+                  tooltip: `${residue.label} • ${site.siteName} (${site.interactionType})`,
+                });
+              }
+            }
+          } else if (medChemProfile?.keyPocketResidues?.length) {
             for (const residue of medChemProfile.keyPocketResidues) {
               const targetChain = residue.chain || ligand?.chain || 'A';
-              const isPairedWithActiveGroup = Boolean(
-                pharmacophoreGroup && residue.pharmacophoreGroupId === pharmacophoreGroup.id
-              );
+              const resQuery = buildMolstarResidueQuery(targetChain, residue.resi);
+              allResidueQueries.push(resQuery);
               const resRgb = subPocketZonesActive
                 ? hexToRgbColor(
                     resolvePocketResidueColor(residue, medChemProfile),
@@ -275,50 +360,33 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
                   )
                 : MOLSTAR_THEME_COLORS.emeraldPocket;
 
-              const residueQuery = {
-                struct_asym_id: targetChain,
-                auth_asym_id: targetChain,
-                residue_number: residue.resi,
-                auth_seq_id: residue.resi,
-              };
-
-              // Base side-chain sticks with color: null so N (blue), O (red), S (yellow) stay CPK
               selectData.push({
-                ...residueQuery,
+                ...resQuery,
                 representation: 'ball-and-stick',
                 color: null,
-                focus: isPairedWithActiveGroup,
               });
 
-              // Carbon-only overpaint matching the sub-pocket zone or emeraldPocket
               selectData.push({
-                ...residueQuery,
+                ...resQuery,
                 type_symbol: 'C',
                 representation: 'ball-and-stick',
                 representationColor: resRgb,
                 color: resRgb,
               });
 
-              // Optional translucent sub-pocket cavity surface
-              if (pocketSurfaceActive) {
-                selectData.push({
-                  ...residueQuery,
-                  representation: 'gaussian-surface',
-                  representationColor: resRgb,
-                  representationOpacity: 0.28,
-                  color: null,
-                });
-              }
+              tooltipItems.push({
+                ...resQuery,
+                tooltip: `${residue.label} • ${residue.subPocketName || residue.interactionType} (${residue.interactionType})`,
+              });
             }
           }
 
-          // C. Active pharmacophore group accent highlighting
-          if (pharmacophoreGroup && ligand && singleLigandQuery) {
+          // C. Optional legacy pharmacophore atom accenting
+          if (pharmacophoreGroup && ligand && singleLigandQuery && effectiveLigandMode === 'het') {
             const accentRgb = hexToRgbColor(
               pharmacophoreGroup.colorAccent || '#ec4899',
               MOLSTAR_THEME_COLORS.magentaCarbon
             );
-
             selectData.push({
               ...singleLigandQuery,
               atoms: pharmacophoreGroup.atomNames,
@@ -327,7 +395,6 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               representation: 'ball-and-stick',
               representationColor: accentRgb,
               color: accentRgb,
-              focus: true,
             });
           }
 
@@ -335,103 +402,79 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
             viewer.visual.select({
               data: selectData,
               nonSelectedColor: MOLSTAR_THEME_COLORS.slateRibbon,
-              nonSelectedOpacity: ligand && pocketActive ? 0.28 : 0.85,
+              nonSelectedOpacity: ligand ? 0.28 : 0.85,
             });
           }
         }
 
-        // 3. Trigger Mol* native 5Å pocket surroundings & 3D dashed non-covalent interactions
-        if (
-          ligand &&
-          singleLigandQuery &&
-          (hbondsActive || pocketActive) &&
-          typeof viewer.visual?.interactivityFocus === 'function'
-        ) {
+        // 3. Trigger Mol* 5Å pocket contacts & non-covalent interactions
+        if (ligand && singleLigandQuery && typeof viewer.visual?.interactivityFocus === 'function') {
           viewer.visual.interactivityFocus({
             data: [singleLigandQuery],
           });
         }
 
-        // 4. Attach custom 3D hover tooltips for the single ligand and sub-pocket residues
-        if (typeof viewer.visual?.tooltips === 'function') {
-          const tooltipItems: any[] = [];
-          if (ligand && singleLigandQuery) {
-            tooltipItems.push({
-              ...singleLigandQuery,
-              tooltip: `Bound Drug Ligand: ${ligand.resn} (Chain ${ligand.chain || 'A'})`,
-            });
-          }
-          if (medChemProfile?.keyPocketResidues?.length) {
-            for (const residue of medChemProfile.keyPocketResidues) {
-              const targetChain = residue.chain || ligand?.chain || 'A';
-              tooltipItems.push({
-                struct_asym_id: targetChain,
-                auth_asym_id: targetChain,
-                residue_number: residue.resi,
-                auth_seq_id: residue.resi,
-                tooltip: `${residue.label} • ${residue.subPocketName || residue.interactionType} (${residue.interactionType})`,
-              });
-            }
-          }
-          if (tooltipItems.length > 0) {
-            viewer.visual.tooltips({ data: tooltipItems });
-          }
+        // 4. Attach 3D hover tooltips
+        if (tooltipItems.length > 0 && typeof viewer.visual?.tooltips === 'function') {
+          viewer.visual.tooltips({ data: tooltipItems });
         }
 
-        // 5. Highlight active pharmacophore group if highlight API is available
-        if (pharmacophoreGroup && ligand && singleLigandQuery && typeof viewer.visual?.highlight === 'function') {
-          const accentRgb = hexToRgbColor(
-            pharmacophoreGroup.colorAccent || '#ec4899',
-            MOLSTAR_THEME_COLORS.magentaCarbon
-          );
-
+        // 5. Highlight active binding site residues
+        if (selectedSite && activeSiteResidueQueries.length > 0 && typeof viewer.visual?.highlight === 'function') {
+          const highlightRgb = hexToRgbColor(selectedSite.colorAccent, MOLSTAR_THEME_COLORS.magentaCarbon);
           viewer.visual.highlight({
-            data: [
-              {
-                ...singleLigandQuery,
-                atoms: pharmacophoreGroup.atomNames,
-                label_atom_id: pharmacophoreGroup.atomNames,
-                color: accentRgb, // magentaCarbon accent
-                focus: true,
-              },
-            ],
+            data: activeSiteResidueQueries.map((q) => ({
+              ...q,
+              color: highlightRgb,
+            })),
           });
         }
 
-        // 6. Focus camera on the single ligand + sub-pocket or active pharmacophore + paired pocket residues
-        if (ligand && singleLigandQuery && typeof viewer.visual?.focus === 'function') {
-          if (pharmacophoreGroup) {
-            const focusTargets: any[] = [
-              {
-                ...singleLigandQuery,
-                atoms: pharmacophoreGroup.atomNames,
-                label_atom_id: pharmacophoreGroup.atomNames,
-              },
-            ];
-            if (medChemProfile?.keyPocketResidues?.length) {
-              for (const residue of medChemProfile.keyPocketResidues) {
-                if (residue.pharmacophoreGroupId === pharmacophoreGroup.id) {
-                  const targetChain = residue.chain || ligand.chain || 'A';
-                  focusTargets.push({
-                    struct_asym_id: targetChain,
-                    auth_asym_id: targetChain,
-                    residue_number: residue.resi,
-                    auth_seq_id: residue.resi,
-                  });
-                }
-              }
-            }
+        // 6. Focus camera on active Binding Site + ligand, or full pocket + ligand
+        if (typeof viewer.visual?.focus === 'function') {
+          if (selectedSite && activeSiteResidueQueries.length > 0) {
+            const focusTargets = singleLigandQuery
+              ? [singleLigandQuery, ...activeSiteResidueQueries]
+              : [...activeSiteResidueQueries];
             viewer.visual.focus(focusTargets);
-          } else {
-            viewer.visual.focus([singleLigandQuery]);
+          } else if (singleLigandQuery) {
+            viewer.visual.focus([singleLigandQuery, ...allResidueQueries]);
           }
         }
       } catch (err) {
         console.warn('Mol* scene styling notification:', err);
       }
     },
-    [medChemProfile, subPocketColorMode]
+    [drugEntry, effectiveLigandChain, effectiveLigandMode, medChemProfile]
   );
+
+  const latestRenderSceneRef = useRef(renderScene);
+  latestRenderSceneRef.current = renderScene;
+
+  const latestConfigRef = useRef({
+    drugEntry,
+    effectiveLigandCode,
+    effectiveLigandChain,
+    showRibbon,
+    subPocketColorMode,
+    activeBindingSite,
+    activePharmacophoreGroup,
+    medChemProfile,
+    onSelectBindingSite,
+    onSelectPocketResidue,
+  });
+  latestConfigRef.current = {
+    drugEntry,
+    effectiveLigandCode,
+    effectiveLigandChain,
+    showRibbon,
+    subPocketColorMode,
+    activeBindingSite,
+    activePharmacophoreGroup,
+    medChemProfile,
+    onSelectBindingSite,
+    onSelectPocketResidue,
+  };
 
   // --------------------------------------------------------------------------
   // Scroll Zoom Sensitivity Dampener (~60% reduction, factor 0.04)
@@ -463,114 +506,50 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   }, []);
 
   // --------------------------------------------------------------------------
-  // Synchronize Active Pharmacophore Group or Scene Changes
+  // Synchronize Active Binding Site or Toggle State Changes
   // --------------------------------------------------------------------------
   useEffect(() => {
     if (viewerRef.current && detectedLigand) {
       renderScene(
         viewerRef.current,
         detectedLigand,
-        showPocket,
-        showPocketSurface,
         showRibbon,
-        showHBonds,
-        showAtomLabels,
-        activePharmacophoreGroup,
-        subPocketColorMode
+        subPocketColorMode,
+        activeBindingSite,
+        activePharmacophoreGroup
       );
     }
   }, [
-    activePharmacophoreGroup,
     detectedLigand,
-    showPocket,
-    showPocketSurface,
     showRibbon,
-    showHBonds,
-    showAtomLabels,
     subPocketColorMode,
+    activeBindingSite,
+    activePharmacophoreGroup,
     renderScene,
   ]);
 
   // --------------------------------------------------------------------------
-  // One-Click Scene Action Handlers
+  // Simplified Drug Studio Scene Action Handlers
   // --------------------------------------------------------------------------
-  const handleIsolateLigand = () => {
-    setShowPocket(false);
-    setShowPocketSurface(false);
-    setShowRibbon(false);
-    setShowHBonds(false);
-
+  const handleResetView = () => {
+    onSelectBindingSite?.(null);
+    setClickedAtomInfo(null);
     if (viewerRef.current) {
       renderScene(
         viewerRef.current,
         detectedLigand,
-        false,
-        false,
-        false,
-        false,
-        showAtomLabels,
-        activePharmacophoreGroup,
-        subPocketColorMode
+        showRibbon,
+        subPocketColorMode,
+        null,
+        activePharmacophoreGroup
       );
       if (typeof viewerRef.current.visual?.reset === 'function') {
         viewerRef.current.visual.reset({ camera: true });
       } else if (viewerRef.current.plugin?.canvas3d?.requestCameraReset) {
         viewerRef.current.plugin.canvas3d.requestCameraReset();
+      } else if (typeof viewerRef.current.zoomTo === 'function') {
+        viewerRef.current.zoomTo();
       }
-    }
-  };
-
-  const handleToggleSubPocketColorMode = () => {
-    const nextMode = !subPocketColorMode;
-    setSubPocketColorMode(nextMode);
-    if (viewerRef.current) {
-      renderScene(
-        viewerRef.current,
-        detectedLigand,
-        showPocket,
-        showPocketSurface,
-        showRibbon,
-        showHBonds,
-        showAtomLabels,
-        activePharmacophoreGroup,
-        nextMode
-      );
-    }
-  };
-
-  const handleTogglePocket = () => {
-    const nextPocket = !showPocket;
-    setShowPocket(nextPocket);
-    if (viewerRef.current) {
-      renderScene(
-        viewerRef.current,
-        detectedLigand,
-        nextPocket,
-        showPocketSurface,
-        showRibbon,
-        showHBonds,
-        showAtomLabels,
-        activePharmacophoreGroup,
-        subPocketColorMode
-      );
-    }
-  };
-
-  const handleTogglePocketSurface = () => {
-    const nextSurface = !showPocketSurface;
-    setShowPocketSurface(nextSurface);
-    if (viewerRef.current) {
-      renderScene(
-        viewerRef.current,
-        detectedLigand,
-        showPocket,
-        nextSurface,
-        showRibbon,
-        showHBonds,
-        showAtomLabels,
-        activePharmacophoreGroup,
-        subPocketColorMode
-      );
     }
   };
 
@@ -581,62 +560,26 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
       renderScene(
         viewerRef.current,
         detectedLigand,
-        showPocket,
-        showPocketSurface,
         nextRibbon,
-        showHBonds,
-        showAtomLabels,
-        activePharmacophoreGroup,
-        subPocketColorMode
+        subPocketColorMode,
+        activeBindingSite,
+        activePharmacophoreGroup
       );
     }
   };
 
-  const handleToggleHBonds = () => {
-    const nextHBonds = !showHBonds;
-    setShowHBonds(nextHBonds);
+  const handleToggleSubPocketColorMode = () => {
+    const nextMode = !subPocketColorMode;
+    setSubPocketColorMode(nextMode);
     if (viewerRef.current) {
       renderScene(
         viewerRef.current,
         detectedLigand,
-        showPocket,
-        showPocketSurface,
         showRibbon,
-        nextHBonds,
-        showAtomLabels,
-        activePharmacophoreGroup,
-        subPocketColorMode
+        nextMode,
+        activeBindingSite,
+        activePharmacophoreGroup
       );
-    }
-  };
-
-  const handleToggleAtomLabels = () => {
-    const nextAtomLabels = !showAtomLabels;
-    setShowAtomLabels(nextAtomLabels);
-    if (viewerRef.current) {
-      renderScene(
-        viewerRef.current,
-        detectedLigand,
-        showPocket,
-        showPocketSurface,
-        showRibbon,
-        showHBonds,
-        nextAtomLabels,
-        activePharmacophoreGroup,
-        subPocketColorMode
-      );
-    }
-  };
-
-  const handleRecenterCamera = () => {
-    if (viewerRef.current) {
-      if (typeof viewerRef.current.visual?.reset === 'function') {
-        viewerRef.current.visual.reset({ camera: true });
-      } else if (viewerRef.current.plugin?.canvas3d?.requestCameraReset) {
-        viewerRef.current.plugin.canvas3d.requestCameraReset();
-      } else if (typeof viewerRef.current.zoomTo === 'function') {
-        viewerRef.current.zoomTo();
-      }
     }
   };
 
@@ -662,23 +605,13 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
     }
   };
 
-  const handleChipClick = (group: PharmacophorePkPdGroup) => {
-    const isCurrentlyActive = activePharmacophoreGroup?.id === group.id;
-    if (isCurrentlyActive) {
-      onSelectPharmacophoreGroup?.(null);
-    } else {
-      onSelectPharmacophoreGroup?.(group);
-      if (!isPkDrawerOpen && onTogglePkDrawer) {
-        onTogglePkDrawer();
-      }
-    }
-  };
-
   // --------------------------------------------------------------------------
-  // Mol* WebGL Initialization & Binary mmCIF (.bcif) Streaming
+  // Mol* WebGL Initialization, Fresh Child Mount & Clean Disposal
   // --------------------------------------------------------------------------
   useEffect(() => {
     let isMounted = true;
+    let mountNode: HTMLDivElement | null = null;
+    const generation = ++loadGenerationRef.current;
 
     const loadMolstarAndInit = async () => {
       if (!cleanPdbId) {
@@ -689,52 +622,67 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
 
       setIsLoading(true);
       setLoadError(null);
+      setClickedAtomInfo(null);
 
-      // Verify WebGL support in client runtime
       if (!isMolstarSupported()) {
         if (typeof window !== 'undefined') {
-          setLoadError('WebGL is not supported or graphics acceleration is disabled in your current browser environment.');
+          setLoadError(
+            'WebGL is not supported or graphics acceleration is disabled in your current browser environment.'
+          );
           setIsLoading(false);
           return;
         }
       }
 
       try {
-        // 1. Identify primary small-molecule ligand from coordinates (non-fatal if text coordinates fail)
-        let ligand: any = null;
-        try {
-          const pdbData = await fetchPdbCoordinates(cleanPdbId);
-          if (!isMounted) return;
+        const currentCfg = latestConfigRef.current;
+        const resolvedCode = preferredLigandCode || currentCfg.effectiveLigandCode;
+        const resolvedChain = currentCfg.effectiveLigandChain;
+        let ligand: DetectedLigandInfo | null = null;
 
-          ligand = identifyLigandResidue(pdbData, preferredLigandCode);
-          setDetectedLigand(ligand);
-        } catch (coordErr) {
-          console.warn(`[ThreeDLabCanvas] Non-fatal: Could not pre-fetch text PDB coordinates for ${cleanPdbId}, proceeding with Mol* binary mmCIF stream:`, coordErr);
+        // 1. Pre-parse small-molecule coordinates when in 'het' mode (non-fatal if PDBe text endpoint times out)
+        if (effectiveLigandMode === 'het') {
+          try {
+            const pdbData = await fetchPdbCoordinates(cleanPdbId);
+            if (!isMounted || generation !== loadGenerationRef.current) return;
+            ligand = identifyLigandResidue(pdbData, resolvedCode);
+          } catch (coordErr) {
+            console.warn(
+              `[ThreeDLabCanvas] Non-fatal: Could not pre-fetch text PDB coordinates for ${cleanPdbId}, falling back to static catalog ligand:`,
+              coordErr
+            );
+          }
         }
 
-        // Initial representation toggles: when a ligand is present, default pocket sticks & 3D H-bonds ON
-        const hasLigand = Boolean(ligand);
-        const initialRibbon = true;
-        const initialPocket = hasLigand;
-        const initialPocketSurface = false;
-        const initialHBonds = hasLigand;
+        if (!isMounted || generation !== loadGenerationRef.current) return;
 
-        setShowRibbon(initialRibbon);
-        setShowPocket(initialPocket);
-        setShowPocketSurface(initialPocketSurface);
-        setShowHBonds(initialHBonds);
+        // Static catalog fallback for 'chain', 'carbs', or if coordinate pre-fetch failed / returned null
+        if (!ligand) {
+          ligand = resolveFallbackLigandFromCatalog(
+            resolvedCode,
+            resolvedChain,
+            effectiveLigandMode
+          );
+        }
 
-        // 2. Resolve Binary mmCIF (.bcif) coordinate URL with cached fallback
+        setDetectedLigand(ligand);
+        setShowRibbon(true);
+
+        // 2. Resolve Binary mmCIF (.bcif) coordinate URL
         const bcifUrl = getBinaryCifUrl(cleanPdbId);
         const coordinateUrl = (await getCachedCoordinateUrl(cleanPdbId)) || bcifUrl;
+        if (!isMounted || generation !== loadGenerationRef.current) return;
 
-        // 3. Dynamically inject and load Mol* / PDBeMolstar plugin
+        // 3. Dynamically load Mol* / PDBeMolstar plugin
         await loadMolstarPluginScript();
-        if (!isMounted || !containerRef.current) return;
+        if (!isMounted || generation !== loadGenerationRef.current || !containerRef.current) {
+          return;
+        }
 
-        containerRef.current.innerHTML = '';
+        mountNode = document.createElement('div');
+        mountNode.className = 'w-full h-full relative';
+        containerRef.current.replaceChildren(mountNode);
 
-        // Instantiate Mol* viewer
         const MolstarPluginClass =
           (window as any).PDBeMolstarPlugin || (window as any).molstar?.PDBeMolstarPlugin;
 
@@ -742,7 +690,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         if (typeof MolstarPluginClass === 'function') {
           viewer = new MolstarPluginClass();
         } else if (typeof (window as any).molstar?.createViewer === 'function') {
-          viewer = (window as any).molstar.createViewer(containerRef.current);
+          viewer = (window as any).molstar.createViewer(mountNode);
         } else {
           viewer = {
             visual: {
@@ -758,6 +706,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               tooltips: () => {},
             },
             plugin: {
+              dispose: () => {},
               canvas3d: {
                 camera: { zoom: () => {} },
                 requestCameraReset: () => {},
@@ -769,7 +718,6 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
 
         viewerRef.current = viewer;
 
-        // Configure Mol* viewport: suppress default het/water/carbs clutter so only our pinned ligand renders
         const molstarOptions = {
           moleculeId: cleanPdbId.toLowerCase(),
           customData: {
@@ -785,52 +733,45 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
             'controlToggle',
             'controlInfo',
           ],
-          hideStructure: ['het', 'water', 'carbs', 'nonStandard'],
+          hideStructure:
+            effectiveLigandMode === 'carbs'
+              ? ['het', 'water', 'nonStandard']
+              : ['het', 'water', 'carbs', 'nonStandard'],
           loadMaps: false,
-          visualStyle: 'cartoon',
           lighting: 'matte',
           alphafoldView: false,
         };
 
+        const applyLatestScene = () => {
+          if (!isMounted || generation !== loadGenerationRef.current) return;
+          const cfg = latestConfigRef.current;
+          latestRenderSceneRef.current(
+            viewer,
+            ligand,
+            true,
+            cfg.subPocketColorMode,
+            cfg.activeBindingSite,
+            cfg.activePharmacophoreGroup
+          );
+        };
+
         if (typeof viewer.render === 'function') {
-          await viewer.render(containerRef.current, molstarOptions);
-          if (isMounted) {
-            renderScene(
-              viewer,
-              ligand,
-              initialPocket,
-              initialPocketSurface,
-              initialRibbon,
-              initialHBonds,
-              showAtomLabels,
-              activePharmacophoreGroup,
-              subPocketColorMode
-            );
-          }
+          await viewer.render(mountNode, molstarOptions);
+          if (!isMounted || generation !== loadGenerationRef.current) return;
+          applyLatestScene();
         }
 
-        // Subscribe to atom click events for camera recentering & pocket contact inspection
         if (viewer.events?.loadComplete?.subscribe) {
           viewer.events.loadComplete.subscribe(() => {
-            if (!isMounted) return;
-            renderScene(
-              viewer,
-              ligand,
-              initialPocket,
-              initialPocketSurface,
-              initialRibbon,
-              initialHBonds,
-              showAtomLabels,
-              activePharmacophoreGroup,
-              subPocketColorMode
-            );
+            applyLatestScene();
           });
         }
 
-        // Subscribe to interactive selection / click events
         if (viewer.plugin?.behaviors?.interaction?.click?.subscribe) {
           viewer.plugin.behaviors.interaction.click.subscribe((event: any) => {
-            if (!isMounted || !event?.current) return;
+            if (!isMounted || generation !== loadGenerationRef.current || !event?.current) {
+              return;
+            }
             const item = event.current;
             const atomName = item.atom || item.name || 'C';
             const resName = item.resn || item.comp_id || 'LIG';
@@ -846,32 +787,33 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               elem,
             });
 
-            if (onSelectPocketResidue && medChemProfile) {
-              const matchedContact = medChemProfile.keyPocketResidues.find(
+            const cfg = latestConfigRef.current;
+            if (cfg.onSelectBindingSite && cfg.drugEntry?.bindingSites?.length) {
+              const matchedSite = cfg.drugEntry.bindingSites.find((site) =>
+                site.residues.some(
+                  (r) => r.resi === resSeq && (!r.chain || r.chain === chainId)
+                )
+              );
+              if (matchedSite) {
+                cfg.onSelectBindingSite(matchedSite);
+              }
+            }
+
+            if (cfg.onSelectPocketResidue && cfg.medChemProfile) {
+              const matchedContact = cfg.medChemProfile.keyPocketResidues.find(
                 (r) => r.resi === resSeq && (!r.resn || r.resn === resName)
               );
               if (matchedContact) {
-                onSelectPocketResidue(matchedContact);
+                cfg.onSelectPocketResidue(matchedContact);
               }
             }
           });
         }
 
-        renderScene(
-          viewer,
-          ligand,
-          initialPocket,
-          initialPocketSurface,
-          initialRibbon,
-          initialHBonds,
-          showAtomLabels,
-          activePharmacophoreGroup,
-          subPocketColorMode
-        );
-
+        applyLatestScene();
         setIsLoading(false);
       } catch (err: any) {
-        if (!isMounted) return;
+        if (!isMounted || generation !== loadGenerationRef.current) return;
         console.error(`Error initializing Mol* for PDB ${cleanPdbId}:`, err);
         setLoadError(err?.message || `Failed to stream coordinates for PDB ${cleanPdbId}`);
         setIsLoading(false);
@@ -882,20 +824,25 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
 
     return () => {
       isMounted = false;
-      if (viewerRef.current) {
+      const activeViewer = viewerRef.current;
+      viewerRef.current = null;
+      if (activeViewer) {
         try {
-          if (typeof viewerRef.current.clear === 'function') {
-            viewerRef.current.clear();
-          } else if (typeof viewerRef.current.destroy === 'function') {
-            viewerRef.current.destroy();
+          if (typeof activeViewer.plugin?.dispose === 'function') {
+            activeViewer.plugin.dispose();
+          } else if (typeof activeViewer.clear === 'function') {
+            activeViewer.clear();
+          } else if (typeof activeViewer.destroy === 'function') {
+            activeViewer.destroy();
           }
         } catch (_) {}
       }
+      mountNode?.remove();
     };
-  }, [cleanPdbId, preferredLigandCode, reloadTrigger, renderScene]);
+  }, [cleanPdbId, preferredLigandCode, effectiveLigandMode, reloadTrigger]);
 
   // --------------------------------------------------------------------------
-  // Resize handler for Fullscreen toggles & Drawer expansion
+  // Resize handler for Fullscreen toggles & Panel Collapse
   // --------------------------------------------------------------------------
   useEffect(() => {
     const handleResize = () => {
@@ -928,6 +875,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
     };
   }, [isFullscreen]);
 
+  const primaryTitle = drugEntry?.genericName || effectiveTargetName || 'Co-crystal Complex';
+
   return (
     <div
       className={`flex flex-col w-full h-full bg-slate-950 text-white relative overflow-hidden select-none ${
@@ -935,90 +884,71 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
       }`}
     >
       {/* ================================================================= */}
-      {/* TOP HEADER: Structure Info, Badges, Links & Prominent Actions     */}
+      {/* TOP HEADER: Drug Identity, Exact/Class Crystal Badge & Actions    */}
       {/* ================================================================= */}
       <div className="px-3 py-2 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0 z-20">
-        {/* Left: Structure Identity & Apo Fallback Badge */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="px-2 py-0.5 font-mono font-bold rounded bg-cyan-900/60 text-cyan-300 border border-cyan-700/60 shadow-xs">
-            {cleanPdbId}
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <span className="font-bold text-sm text-white truncate max-w-[200px] sm:max-w-[280px]">
+            {primaryTitle}
           </span>
-          <span className="font-semibold text-slate-200 truncate max-w-[180px] sm:max-w-[260px]">
-            {targetName || 'Co-crystal Complex'}
-          </span>
-          {geneSymbol && (
+          {drugEntry && effectiveTargetName && (
+            <span className="text-slate-300 font-medium truncate max-w-[180px] sm:max-w-[240px]">
+              • {effectiveTargetName}
+            </span>
+          )}
+          {effectiveGeneSymbol && (
             <span className="text-[10px] font-mono text-slate-400">
-              [{geneSymbol}]
+              [{effectiveGeneSymbol}]
             </span>
           )}
-          {!detectedLigand && !isLoading && !loadError && (
-            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-              Apo Protein (No bound ligand)
-            </span>
-          )}
-          {detectedLigand && (
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">
-              Ligand: {detectedLigand.resn} ({detectedLigand.atomCount} atoms
-              {detectedLigand.chain ? ` • Chain ${detectedLigand.chain}` : ''}
-              {detectedLigand.instanceCount && detectedLigand.instanceCount > 1
-                ? ` • 1 of ${detectedLigand.instanceCount} isolated`
-                : ''}
-              )
-            </span>
+
+          {drugEntry ? (
+            drugEntry.isExactDrugCrystal ? (
+              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-600/60">
+                Exact Drug Crystal (PDB {cleanPdbId})
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/90 text-amber-300 border border-amber-600/60">
+                Class Pocket Crystal: {drugEntry.crystallizedLigandName} (PDB {cleanPdbId})
+              </span>
+            )
+          ) : (
+            <>
+              <span className="px-2 py-0.5 font-mono font-bold rounded bg-cyan-900/60 text-cyan-300 border border-cyan-700/60">
+                {cleanPdbId}
+              </span>
+              {!detectedLigand && !isLoading && !loadError && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  Apo Protein (No bound ligand)
+                </span>
+              )}
+            </>
           )}
         </div>
 
-        {/* Right: Actions, Links, Fullscreen & Tutorial */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Reload Canvas */}
-          <button
-            type="button"
-            onClick={() => setReloadTrigger((prev) => prev + 1)}
-            className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
-            title="Reload 3D Structure"
-            aria-label="Reload 3D Structure"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-
-          {/* RCSB Portal Link */}
           <a
             href={`https://www.rcsb.org/structure/${cleanPdbId}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors font-medium text-[11px]"
-            title="View on RCSB PDB Portal (opens in new tab)"
+            title={`View PDB ${cleanPdbId} on RCSB Portal (opens in new tab)`}
           >
             <span>RCSB</span>
             <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
 
-          {/* CIF Download Link */}
-          <a
-            href={`https://files.rcsb.org/download/${cleanPdbId}.cif`}
-            target="_blank"
-            rel="noopener noreferrer"
-            download
-            className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 transition-colors font-medium text-[11px]"
-            title="Download mmCIF Coordinate File (opens in new tab)"
-          >
-            <Download className="w-3 h-3" />
-            <span>CIF</span>
-          </a>
-
-          {/* Tutorial & Guide Button */}
           <button
             type="button"
             onClick={onOpenTutorial}
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/80 text-indigo-200 transition-colors font-semibold text-[11px] cursor-pointer shadow-xs"
-            title="Open 3D Lab Pedagogical Tutorial & Guide"
-            aria-label="Open 3D Lab Pedagogical Tutorial & Guide"
+            title="Open 3D Lab Guide"
+            aria-label="Open 3D Lab Guide"
           >
             <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Tutorial &amp; Guide</span>
+            <span>Guide</span>
           </button>
 
-          {/* High-Contrast Fullscreen Button */}
           <button
             type="button"
             onClick={onToggleFullscreen}
@@ -1042,11 +972,11 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
       </div>
 
       {/* ================================================================= */}
-      {/* SCENE CONTROLS TOOLBAR: One-Click Mol* Toggles & 2D/3D Mode       */}
+      {/* SIMPLIFIED SCENE CONTROLS BAR                                     */}
       {/* ================================================================= */}
       <div className="px-3 py-1.5 bg-slate-900/90 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 shrink-0 z-20">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {is2DFallbackActive ? (
+        {is2DFallbackActive ? (
+          <div className="flex items-center justify-between w-full gap-2">
             <div className="flex items-center gap-2 text-xs text-slate-400 py-0.5">
               <span className="px-2 py-0.5 rounded font-mono font-bold text-[11px] bg-cyan-950/80 text-cyan-300 border border-cyan-800/80">
                 2D Pocket Schematic Active
@@ -1055,192 +985,63 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
                 Interactive contact map &amp; SAR analysis mode
               </span>
             </div>
-          ) : (
-            <>
-              {/* Isolate Ligand (Action) */}
-              <button
-                type="button"
-                onClick={handleIsolateLigand}
-                disabled={!detectedLigand}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
-                  detectedLigand
-                    ? 'bg-slate-800 hover:bg-cyan-950 hover:border-cyan-500 border border-slate-700 text-cyan-200'
-                    : 'opacity-40 cursor-not-allowed bg-slate-800/50 border border-slate-800 text-slate-500'
-                }`}
-                title="Isolate Ligand: Hides protein and pocket, focuses exclusively on ligand"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Isolate Ligand</span>
-              </button>
-
-              {/* Sub-Pocket Zones (Color-Matched Ligand & Pocket Pairs) */}
-              <button
-                type="button"
-                onClick={handleToggleSubPocketColorMode}
-                disabled={!detectedLigand}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-                  !detectedLigand
-                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                    : subPocketColorMode
-                    ? 'bg-fuchsia-950/80 border-fuchsia-500 text-fuchsia-200 shadow-xs'
-                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                }`}
-                title="Sub-Pocket Zones: Color-match ligand pharmacophore carbons with their partner binding sub-pocket residues while preserving CPK heteroatom colors"
-                aria-pressed={subPocketColorMode}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" />
-                <span>Sub-Pocket Zones</span>
-              </button>
-
-              {/* Pocket Sticks (5Å) (Classic Surrounding Residues) */}
-              <button
-                type="button"
-                onClick={handleTogglePocket}
-                disabled={!detectedLigand}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-                  !detectedLigand
-                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                    : showPocket
-                    ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 shadow-xs'
-                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                }`}
-                title="Binding Pocket (5Å): Toggle classic pocket residue sticks within 5Å of ligand"
-                aria-pressed={showPocket}
-              >
-                <Target className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Pocket Sticks (5Å)</span>
-              </button>
-
-              {/* Pocket Surface (Translucent Receptor Cavity) */}
-              <button
-                type="button"
-                onClick={handleTogglePocketSurface}
-                disabled={!detectedLigand}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-                  !detectedLigand
-                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                    : showPocketSurface
-                    ? 'bg-teal-950/80 border-teal-400 text-teal-200 shadow-xs'
-                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                }`}
-                title="Pocket Surface: Toggle translucent receptor cavity surface (opacity ~0.35) around drug"
-                aria-pressed={showPocketSurface}
-              >
-                <Layers className="w-3.5 h-3.5 text-teal-400" />
-                <span>Pocket Surface</span>
-              </button>
-
-              {/* Toggle Protein Ribbon (Additive Toggle) */}
-              <button
-                type="button"
-                onClick={handleToggleRibbon}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-                  showRibbon
-                    ? 'bg-purple-950/80 border-purple-500 text-purple-300 shadow-xs'
-                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                }`}
-                title="Toggle Protein Ribbon: Show or hide secondary structure cartoon"
-                aria-pressed={showRibbon}
-              >
-                <Dna className="w-3.5 h-3.5 text-purple-400" />
-                <span>Toggle Protein Ribbon</span>
-              </button>
-
-              {/* Hydrogen Bonds / Non-Covalent Interactions */}
-              <button
-                type="button"
-                onClick={handleToggleHBonds}
-                disabled={!detectedLigand}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-                  !detectedLigand
-                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                    : showHBonds
-                    ? 'bg-amber-950/80 border-amber-500 text-amber-300 shadow-xs'
-                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                }`}
-                title="Hydrogen Bonds: Compute and display non-covalent contacts <= 3.2Å"
-                aria-pressed={showHBonds}
-              >
-                <Atom className="w-3.5 h-3.5 text-amber-400" />
-                <span>Hydrogen Bonds</span>
-              </button>
-
-              {/* Atom Labels (Mol* GPU-Instanced Text Labels) */}
-              <button
-                type="button"
-                onClick={handleToggleAtomLabels}
-                disabled={!detectedLigand}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-                  !detectedLigand
-                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
-                    : showAtomLabels
-                    ? 'bg-cyan-950/80 border-cyan-500 text-cyan-300 shadow-xs'
-                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                }`}
-                title="Atom Labels: Display atom names using GPU-instanced glyphs (zero canvas freeze)"
-                aria-pressed={showAtomLabels}
-              >
-                <Tag className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Atom Labels</span>
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Recenter Camera (Action) & 2D/3D Mode Switcher */}
-        <div className="flex items-center gap-1.5">
-          {/* Mode Toggle Button: 2D Pocket View <-> Switch to 3D Mol* */}
-          <button
-            type="button"
-            onClick={() => {
-              if (is2DFallbackActive) {
-                setIs2DFallbackActive(false);
-                setReloadTrigger((prev) => prev + 1);
-              } else {
-                setIs2DFallbackActive(true);
-              }
-            }}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
-              is2DFallbackActive
-                ? 'bg-cyan-950/90 hover:bg-cyan-900 border-cyan-400 text-cyan-200 shadow-xs'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-            }`}
-            title={
-              is2DFallbackActive
-                ? 'Switch to 3D Mol* WebGL Viewer'
-                : 'Switch to 2D Binding Pocket Schematic'
-            }
-            aria-label={
-              is2DFallbackActive
-                ? 'Switch to 3D Mol*'
-                : '2D Pocket View'
-            }
-          >
-            {is2DFallbackActive ? (
-              <>
-                <Atom className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Switch to 3D Mol*</span>
-              </>
-            ) : (
-              <>
-                <Layers className="w-3.5 h-3.5 text-cyan-400" />
-                <span>2D Pocket View</span>
-              </>
-            )}
-          </button>
-
-          {!is2DFallbackActive && (
             <button
               type="button"
-              onClick={handleRecenterCamera}
+              onClick={() => {
+                setIs2DFallbackActive(false);
+                setReloadTrigger((prev) => prev + 1);
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border bg-cyan-950/90 hover:bg-cyan-900 border-cyan-400 text-cyan-200 shadow-xs"
+              title="Switch to 3D Mol* WebGL Viewer"
+              aria-label="Switch to 3D Mol*"
+            >
+              <Atom className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Switch to 3D Mol*</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleResetView}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-              title="Recenter Camera: Reset orientation and zoom to active selection"
+              title="Reset View: Recenter camera on drug and full binding pocket"
             >
               <Compass className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Recenter Camera</span>
+              <span>Reset View</span>
             </button>
-          )}
-        </div>
+
+            <button
+              type="button"
+              onClick={handleToggleRibbon}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+                showRibbon
+                  ? 'bg-purple-950/80 border-purple-500 text-purple-300 shadow-xs'
+                  : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+              }`}
+              title="Protein Ribbon: Show or hide receptor secondary structure cartoon"
+              aria-pressed={showRibbon}
+            >
+              <Dna className="w-3.5 h-3.5 text-purple-400" />
+              <span>Protein Ribbon</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleToggleSubPocketColorMode}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+                subPocketColorMode
+                  ? 'bg-fuchsia-950/80 border-fuchsia-500 text-fuchsia-200 shadow-xs'
+                  : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+              }`}
+              title="Sub-Pocket Colors: Color-code binding site residues to match their Binding Site cards"
+              aria-pressed={subPocketColorMode}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" />
+              <span>Sub-Pocket Colors</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ================================================================= */}
@@ -1252,8 +1053,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
             <TwoDPocketFallbackView
               key={cleanPdbId}
               pdbId={cleanPdbId}
-              targetName={targetName}
-              geneSymbol={geneSymbol}
+              targetName={effectiveTargetName}
+              geneSymbol={effectiveGeneSymbol}
               detectedLigand={detectedLigand}
               medChemProfile={medChemProfile}
               activePharmacophoreGroup={activePharmacophoreGroup}
@@ -1269,14 +1070,12 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           </div>
         ) : (
           <>
-            {/* Mol* WebGL Canvas Target Container */}
             <div
               ref={containerRef}
               className="w-full h-full absolute inset-0 cursor-grab active:cursor-grabbing"
               title="3D Molecular Graphics Canvas (Left-drag to rotate, Right-drag to pan, Scroll to zoom)"
             />
 
-            {/* Clicked Atom Info Badge */}
             {clickedAtomInfo && (
               <div className="absolute top-3 left-3 z-20 px-2.5 py-1.5 rounded-md bg-slate-900/90 border border-cyan-500/60 text-xs shadow-lg backdrop-blur-xs flex items-center gap-2">
                 <Tag className="w-3.5 h-3.5 text-cyan-400" />
@@ -1295,65 +1094,6 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               </div>
             )}
 
-            {/* Floating Pharmacophore Chips Toolbar */}
-            {medChemProfile && medChemProfile.pharmacophoreGroups.length > 0 && (
-              <div
-                data-testid="pharmacophore-chips-toolbar"
-                className="absolute bottom-3 left-3 right-16 z-20 flex items-center gap-2 overflow-x-auto py-1.5 px-2 rounded-lg bg-slate-950/90 border border-slate-800 backdrop-blur-xs shadow-lg"
-              >
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 shrink-0">
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Pharmacophores:</span>
-                </div>
-                <div className="flex items-center gap-1.5 overflow-x-auto">
-                  {medChemProfile.pharmacophoreGroups.map((group) => {
-                    const isActive = activePharmacophoreGroup?.id === group.id;
-                    return (
-                      <button
-                        key={group.id}
-                        type="button"
-                        onClick={() => handleChipClick(group)}
-                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium transition-all cursor-pointer shrink-0 border ${
-                          isActive
-                            ? 'bg-fuchsia-950/90 border-fuchsia-400 text-fuchsia-200 shadow-sm shadow-fuchsia-950'
-                            : 'bg-slate-900/90 hover:bg-slate-800 border-slate-700/80 text-slate-300 hover:text-white'
-                        }`}
-                        style={
-                          isActive && group.colorAccent
-                            ? { borderColor: group.colorAccent }
-                            : undefined
-                        }
-                        title={`${group.name}: Click to focus 3D atoms and view PK/PD`}
-                        aria-pressed={isActive}
-                      >
-                        <span
-                          className="w-2 h-2 rounded-full shrink-0"
-                          style={{ backgroundColor: group.colorAccent || '#ec4899' }}
-                        />
-                        <span className="truncate max-w-[140px] sm:max-w-[200px]">
-                          {group.name}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                {onTogglePkDrawer && (
-                  <button
-                    type="button"
-                    onClick={onTogglePkDrawer}
-                    className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-600/80 text-indigo-200 transition-colors shrink-0 cursor-pointer"
-                    title="Toggle PK & Clinical Effects Drawer"
-                    aria-label="Toggle PK & Clinical Effects Drawer"
-                    aria-pressed={isPkDrawerOpen}
-                  >
-                    <Pill className="w-3 h-3 text-indigo-400" />
-                    <span>PK/PD</span>
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* On-Canvas Floating Zoom Controls */}
             <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-20">
               <button
                 type="button"
@@ -1375,7 +1115,6 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               </button>
             </div>
 
-            {/* Loading Indicator Overlay */}
             {isLoading && (
               <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center gap-3 z-30 p-4">
                 <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
@@ -1384,13 +1123,12 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
                     Streaming Coordinates for PDB {cleanPdbId}...
                   </p>
                   <p className="text-[11px] text-slate-400">
-                    Streaming binary mmCIF (.bcif) &amp; initializing Mol* WebGL engine
+                    Streaming binary mmCIF (.bcif) &amp; isolating drug binding pocket
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Upgraded WebGL Diagnostic & Error Overlay */}
             {loadError && !isLoading && (() => {
               const isWebGlFailure =
                 !isMolstarSupported() ||
@@ -1422,7 +1160,6 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
                       )}
                   </div>
 
-                  {/* In-App Browser Diagnostic Card (displayed for WebGL issues) */}
                   {isWebGlFailure && (
                     <div className="max-w-md w-full bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-left shadow-lg space-y-2.5">
                       <div className="flex items-center gap-2 text-xs font-semibold text-cyan-300">
@@ -1449,7 +1186,6 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
                     </div>
                   )}
 
-                  {/* Action Buttons */}
                   <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
                     <button
                       type="button"
@@ -1495,8 +1231,6 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         {is2DFallbackActive ? (
           <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-slate-300">
             <span>Select Residue: Click contact card</span>
-            <span>•</span>
-            <span>Filter: Pharmacophore chip</span>
             <span>•</span>
             <span>Switch: Use toolbar button</span>
           </div>
