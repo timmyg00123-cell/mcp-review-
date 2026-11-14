@@ -1713,12 +1713,12 @@ export const RECEPTOR_POCKET_TEMPLATES: Record<string, ReceptorPocketTemplate> =
     targetName: 'Coagulation Factor Xa Serine Protease (F10)',
     geneSymbol: 'F10',
     pocketMechanismSummary:
-      'Adopts an L-shaped conformation spanning the deep S1 specificity pocket and S4 aromatic box of both free and prothrombinase-bound Factor Xa without requiring antithrombin, blocking prothrombin -> thrombin activation (or upstream VKORC1 gamma-carboxylation for warfarin).',
+      'Adopts an L-shaped conformation spanning the deep S1 specificity pocket and S4 aromatic box of both free and prothrombinase-bound Factor Xa without requiring antithrombin, blocking prothrombin -> thrombin activation.',
     bindingSites: [
       {
         id: 'fxa_s1_pocket',
         siteName: 'Asp189 / Ser195 S1 Specificity Pocket',
-        drugMoiety: 'p-Methoxyphenyl (Apixaban) or 5-Chlorothiophene (Rivaroxaban)',
+        drugMoiety: 'p-Methoxyphenyl Ring & Pyrazolopyridinone Core',
         interactionType: 'hydrogen-bond',
         colorAccent: '#3b82f6',
         residues: [
@@ -1726,14 +1726,14 @@ export const RECEPTOR_POCKET_TEMPLATES: Record<string, ReceptorPocketTemplate> =
           { resn: 'SER', resi: 195, chain: 'A', label: 'Ser195 (Catalytic Triad Entrance)' },
         ],
         reactionSummary:
-          'Neutral aryl/halothiophene group replaces unstable positively charged benzamidines inside S1, conferring high oral bioavailability.',
+          'Neutral p-methoxyphenyl group replaces unstable positively charged benzamidines inside S1, conferring high oral bioavailability.',
         clinicalRelevance:
           'Predictable oral anticoagulation without routine INR monitoring; reversed in life-threatening bleeding by decoy Factor Xa protein andexanet alfa.',
       },
       {
         id: 'fxa_s4_aromatic_box',
         siteName: 'Tyr99 / Phe174 / Trp215 S4 Aromatic Box',
-        drugMoiety: 'Phenyl-Piperidinone / Morpholinone Lactam Ring',
+        drugMoiety: 'Phenyl-Piperidinone Lactam Ring',
         interactionType: 'pi-stacking',
         colorAccent: '#8b5cf6',
         residues: [
@@ -1742,9 +1742,102 @@ export const RECEPTOR_POCKET_TEMPLATES: Record<string, ReceptorPocketTemplate> =
           { resn: 'TRP', resi: 215, chain: 'A', label: 'Trp215 (S4 Floor)' },
         ],
         reactionSummary:
-          'Cation-pi/aryl-pi stacking inside the three-walled S4 aromatic box drives sub-nanomolar Factor Xa selectivity.',
+          'Aryl-lactam pi-stacking inside the three-walled S4 aromatic box drives sub-nanomolar Factor Xa selectivity.',
         clinicalRelevance:
-          'Warfarin instead inhibits hepatic VKORC1 to deplete gamma-carboxylated Factors II, VII, IX, X (plus Proteins C & S), requiring INR monitoring and CYP2C9/vitamin K vigilance.',
+          'Eliminated via dual hepatic CYP3A4/P-gp and ~27% renal pathways, making apixaban favored in advanced chronic kidney disease.',
+      },
+    ],
+  },
+
+  fxa_rivaroxaban: {
+    templateId: 'fxa_rivaroxaban',
+    pdbId: '2W26',
+    ligandCode: 'RIV',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'Rivaroxaban in Factor Xa S1 / S4 Cleft',
+    exactDrugIds: ['rivaroxaban'],
+    targetName: 'Coagulation Factor Xa Serine Protease (F10)',
+    geneSymbol: 'F10',
+    pocketMechanismSummary:
+      'Binds directly and reversibly in an L-shaped pose across the S1 chlorine-pi pocket and S4 morpholinone aromatic box of free and clot-bound Factor Xa without requiring antithrombin III.',
+    bindingSites: [
+      {
+        id: 'riv_s1_chlorothiophene',
+        siteName: 'Tyr228 / Asp189 S1 Chlorothiophene Chlorine-Pi Pocket',
+        drugMoiety: '5-Chlorothiophene-2-Carboxamide Anchor',
+        interactionType: 'pi-stacking',
+        colorAccent: '#10b981',
+        residues: [
+          { resn: 'TYR', resi: 228, chain: 'A', label: 'Tyr228 (S1 Back-Wall Chlorine-Pi)' },
+          { resn: 'GLY', resi: 219, chain: 'A', label: 'Gly219 (Oxazolidinone H-Bond)' },
+        ],
+        reactionSummary:
+          '5-chlorothiophene chlorine forms a non-basic halogen-pi interaction directly against Tyr228 at the base of S1, eliminating any need for a charged amidine.',
+        clinicalRelevance:
+          'Confers high oral bioavailability (15 mg / 20 mg doses must be taken with food to reach >80% absorption); dual CYP3A4 + P-gp inhibitors significantly raise bleeding risk.',
+      },
+      {
+        id: 'riv_s4_aromatic_box',
+        siteName: 'Tyr99 / Phe174 / Trp215 S4 Aromatic Box',
+        drugMoiety: 'Aryl-Morpholinone & (S)-Oxazolidinone Core',
+        interactionType: 'pi-stacking',
+        colorAccent: '#8b5cf6',
+        residues: [
+          { resn: 'TYR', resi: 99, chain: 'A', label: 'Tyr99 (S4 Aromatic Wall)' },
+          { resn: 'PHE', resi: 174, chain: 'A', label: 'Phe174 (S4 Aromatic Wall)' },
+          { resn: 'TRP', resi: 215, chain: 'A', label: 'Trp215 (S4 Floor)' },
+        ],
+        reactionSummary:
+          '(5S)-oxazolidinone core makes dual Gly219 backbone H-bonds that orient the phenyl-morpholinone perpendicularly into the S4 aromatic box.',
+        clinicalRelevance:
+          'R-enantiomer is >1,000-fold less active because flipping C5 breaks the L-shaped bridge between S1 and S4; reversed by andexanet alfa.',
+      },
+    ],
+  },
+
+  vkorc1_warfarin: {
+    templateId: 'vkorc1_warfarin',
+    pdbId: '6WV3',
+    ligandCode: 'SWF',
+    ligandChain: 'A',
+    ligandMode: 'het',
+    crystallizedLigandName: 'S-Warfarin in Luminal Redox Pocket',
+    exactDrugIds: ['warfarin'],
+    targetName: 'Vitamin K Epoxide Reductase Complex Subunit 1 (VKORC1)',
+    geneSymbol: 'VKORC1',
+    pocketMechanismSummary:
+      'Mimics the vitamin K 2,3-epoxide transition state inside endoplasmic reticulum VKORC1, blocking regeneration of reduced vitamin K hydroquinone (KH2) needed for hepatic gamma-carboxylation of clotting Factors II, VII, IX, X and regulatory Proteins C and S.',
+    bindingSites: [
+      {
+        id: 'vkor_tyr139_asn80',
+        siteName: 'Tyr139 / Asn80 4-Hydroxycoumarin H-Bond Lock',
+        drugMoiety: 'Deprotonated/Tautomeric 4-Hydroxycoumarin Keto-Enol',
+        interactionType: 'hydrogen-bond',
+        colorAccent: '#f59e0b',
+        residues: [
+          { resn: 'TYR', resi: 139, chain: 'A', label: 'Tyr139 (Coumarin H-Bond & Resistance Site)' },
+          { resn: 'ASN', resi: 80, chain: 'A', label: 'Asn80 (TM2 Polar Anchor)' },
+        ],
+        reactionSummary:
+          'Two key hydrogen bonds from Tyr139 and Asn80 clamp the 2,4-dioxo coumarin tautomer directly adjacent to the Cys132-XX-Cys135 redox disulfide center.',
+        clinicalRelevance:
+          'VKORC1 promoter polymorphisms (-1639G>A) lower enzyme expression (requiring lower warfarin doses), whereas Tyr139 mutations cause hereditary warfarin resistance.',
+      },
+      {
+        id: 'vkor_phe55_stereopocket',
+        siteName: 'Phe55 / Phe83 / Phe87 Stereoselective S-Enantiomer Cage',
+        drugMoiety: '(S)-C9 Phenyl & 3-Oxobutyl Side Chain',
+        interactionType: 'pi-stacking',
+        colorAccent: '#ef4444',
+        residues: [
+          { resn: 'PHE', resi: 55, chain: 'A', label: 'Phe55 (Luminal Cap Pi-Stack)' },
+          { resn: 'PHE', resi: 83, chain: 'A', label: 'Phe83 (TM2 Hydrophobic Cage)' },
+        ],
+        reactionSummary:
+          'Aromatic pi-stacking cradles the C9 phenyl ring of S-warfarin 3–5x more tightly than R-warfarin.',
+        clinicalRelevance:
+          'More potent S-warfarin is cleared by CYP2C9: co-administering CYP2C9 inhibitors (metronidazole, TMP-SMX, amiodarone, fluconazole) spikes INR and bleeding risk! Reversed acutely by 4-factor PCC + IV vitamin K1.',
       },
     ],
   },

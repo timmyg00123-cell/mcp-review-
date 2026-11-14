@@ -231,7 +231,7 @@ export const ThreeDLabTutorialModal: React.FC<ThreeDLabTutorialModalProps> = ({
               </div>
 
               <div className="p-3 rounded-lg bg-cyan-950/30 border border-cyan-800/40 text-xs text-cyan-200">
-                <span className="font-semibold text-cyan-300">Pro-Tip:</span> If you ever lose your place or navigate off-screen, click the <strong>&quot;Recenter Camera&quot;</strong> or <strong>&quot;Isolate Ligand&quot;</strong> buttons in the top toolbar to re-align instantly.
+                <span className="font-semibold text-cyan-300">Pro-Tip:</span> Pick any drug from the <strong>1.–39. Therapeutic Classes</strong> list on the left, and click <strong>&quot;Reset View&quot;</strong> in the top toolbar anytime to re-center on the full binding pocket.
               </div>
             </div>
           )}
@@ -245,7 +245,7 @@ export const ThreeDLabTutorialModal: React.FC<ThreeDLabTutorialModalProps> = ({
                 </h3>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                By default, co-crystal complexes load in <strong>Ligand-First</strong> mode: protein ribbons, nucleic acids, and solvent (crystallization water) are hidden so you can immediately inspect the drug molecule without visual clutter.
+                Every drug chosen from the <strong>1.–39. Therapeutic Classes</strong> opens centered on the bound drug ligand (cyan carbons with CPK heteroatoms) and its surrounding receptor pocket, with crystallization water and buffer clutter hidden automatically.
               </p>
 
               <div className="space-y-2.5 pt-1">
@@ -288,7 +288,7 @@ export const ThreeDLabTutorialModal: React.FC<ThreeDLabTutorialModalProps> = ({
                 </h3>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Click <strong>&quot;Binding Pocket (5Å)&quot;</strong> and <strong>&quot;Hydrogen Bonds&quot;</strong> in the toolbar to display the surrounding amino acid residues and directional contacts. Look for four classic non-covalent interactions:
+                Click any numbered card under <strong>&quot;Relevant Binding Sites&quot;</strong> in the right-hand panel (or toggle <strong>&quot;Sub-Pocket Colors&quot;</strong>) to zoom directly onto those receptor residues and read how the drug reacts there:
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { getDrugIntelligenceProfile, DrugIntelligenceProfile } from '../data/drugIntelligenceData';
 import { findCanonicalTargetForDrug, findMedChemProfile } from '../data/canonicalPharmacophorePkData';
+import { resolveDrug3DEntry } from '../data/drug3dCatalog';
 import { fetchClinicalDossier, ClinicalDossierRecord } from '../services/clinicalDossierService';
 import { resolveClinicalPharmacology } from '../utils/clinicalPharmacologyDictionary';
 import type { PharmacophorePkPdGroup, KeyPocketResidueContact } from '../types/structure3d';
@@ -213,8 +214,10 @@ export const PubChemInspectorModal: React.FC<PubChemInspectorModalProps> = ({
   }, [currentDrugName, compoundData, initialStructure, canonical, intelProfile]);
 
   const pharmFallback = useMemo(() => resolveClinicalPharmacology(currentStructure), [currentStructure]);
+  const catalog3DEntry = useMemo(() => resolveDrug3DEntry(currentDrugName), [currentDrugName]);
 
-  const targetPdbId = canonical?.pdbId || intelProfile?.pdbId || medChemProfile?.pdbId;
+  const targetPdbId =
+    catalog3DEntry?.pdbId || canonical?.pdbId || intelProfile?.pdbId || medChemProfile?.pdbId;
   const hasPdbCoCrystal = Boolean(targetPdbId);
 
   if (!isOpen) return null;

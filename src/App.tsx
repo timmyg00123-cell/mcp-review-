@@ -45,6 +45,7 @@ import { getHydratedDrugs, HydratedDrug } from './db/medChemGraphDb';
 import { Navbar } from './components/Navbar';
 import { ThreeDLabLibrary } from './components/ThreeDLabLibrary';
 import { findCanonicalTargetForDrug } from './utils/canonicalTargets';
+import { resolveDrug3DEntry } from './data/drug3dCatalog';
 import { yieldToMainThread, runWhenIdle } from './utils/scheduler';
 import { processFileAndGenerateQuestions } from './services/lectureIngestion';
 import { evaluateWorkbenchAnswer } from './utils/workbenchEvaluator';
@@ -385,9 +386,10 @@ function AppContent() {
   const [is3DFullscreenRequested, setIs3DFullscreenRequested] = useState<boolean>(false);
 
   const handleOpenIn3DLab = (structure: ChemicalStructure, launchFullscreen: boolean = false) => {
-    setSelected3DDrug(structure.name);
-    const canonical = findCanonicalTargetForDrug(structure.name);
-    setSelected3DPdbId(canonical?.pdbId);
+    const catalogEntry = resolveDrug3DEntry(structure.name);
+    const canonical = catalogEntry ? undefined : findCanonicalTargetForDrug(structure.name);
+    setSelected3DDrug(catalogEntry?.genericName || structure.name);
+    setSelected3DPdbId(catalogEntry?.pdbId || canonical?.pdbId);
     setIs3DFullscreenRequested(launchFullscreen);
     switchTab('3d-lab');
   };
