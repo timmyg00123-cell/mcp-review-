@@ -21,6 +21,13 @@ import {
 } from '../data/topDrugsTaxonomyData';
 import { getTherapeuticCategoriesForCards } from '../utils/topDrugsTaxonomy';
 import {
+  cardMatchesTaxonomyMultiFilter,
+  loadSelectedClassNumbers,
+  saveSelectedClassNumbers,
+  ALL_THERAPEUTIC_CLASS_NUMBERS,
+} from '../utils/therapeuticClassFilter';
+import { TherapeuticClassFilterDrawer } from './TherapeuticClassFilterDrawer';
+import {
   CheckCircle2,
   X,
   Filter,
@@ -36,6 +43,7 @@ export interface StructureFlashcardDeckProps {
   onClose?: () => void;
   storageKey?: string;
   renderMode?: 'structure' | 'clinical';
+  initialFilterMode?: DeckFilterMode;
 }
 
 export interface ModuleCategory {
@@ -223,7 +231,7 @@ function buildCandidateQueue(
   cards: FlashcardItem[],
   mode: DeckFilterMode,
   moduleF: ModuleFilterState,
-  categoryNum: number | null,
+  selectedClasses: Set<number>,
   subclass: string | null,
   sort: FlashcardSortMode,
   availFilters: ModuleCategory[]
@@ -236,7 +244,7 @@ function buildCandidateQueue(
     );
   } else {
     filtered = unSuspended.filter((c) =>
-      cardMatchesTaxonomyFilter(c, categoryNum, subclass)
+      cardMatchesTaxonomyMultiFilter(c, selectedClasses, subclass)
     );
   }
   return sortFlashcards(filtered, sort);
@@ -262,6 +270,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   onClose,
   storageKey = FLASHCARD_STORAGE_KEY,
   renderMode = 'structure',
+  initialFilterMode = 'curriculum',
 }) => {
   // Master working deck initialized with persisted local storage progress
   const [deck, setDeck] = useState<FlashcardItem[]>(() =>
@@ -272,7 +281,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   const availableFilters = useMemo(() => getAvailableModuleFilters(cards), [cards]);
 
   // Filter mode toggle: 'curriculum' (default) or 'taxonomy' (Top Drugs 39 classes)
-  const [filterMode, setFilterMode] = useState<DeckFilterMode>('curriculum');
+  const [filterMode, setFilterMode] = useState<DeckFilterMode>(initialFilterMode || 'curriculum');
 
   // Module filter toggles
   const [moduleFilter, setModuleFilter] = useState<ModuleFilterState>(() => {
@@ -284,9 +293,15 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     return initial;
   });
 
-  // 2-tier cascading taxonomy filters
-  const [selectedCategoryNumber, setSelectedCategoryNumber] = useState<number | null>(null);
+  // Multi-class taxonomy filters (replaces single selectedCategoryNumber)
+  const [selectedClassNumbers, setSelectedClassNumbers] = useState<Set<number>>(() =>
+    loadSelectedClassNumbers(typeof window !== 'undefined' ? window.localStorage : undefined)
+  );
+  // Deprecated: selectedCategoryNumber state migrated to selectedClassNumbers Set<number>
   const [selectedSubclass, setSelectedSubclass] = useState<string | null>(null);
+
+  // Slide-over filter drawer open state
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false);
 
   // Sorting state: 'class-number' (default), 'subclass', 'due-date', 'alphabetical'
   const [sortBy, setSortBy] = useState<FlashcardSortMode>('class-number');
@@ -327,41 +342,27 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     return filtered.length > 0 ? filtered : THERAPEUTIC_CATEGORIES;
   }, [cards]);
 
-  // Available subclasses based on selected category
+  // Available subclasses derived exclusively from cards matching selectedClassNumbers
   const availableSubclasses = useMemo(() => {
-    if (selectedCategoryNumber !== null) {
-      const matchedCategory = availableCategories.find(
-        (c) => c.classNumber === selectedCategoryNumber
-      );
-      if (matchedCategory && matchedCategory.specificSubclasses.length > 0) {
-        return matchedCategory.specificSubclasses;
-      }
-      const cardSubs = new Set<string>();
-      for (const card of deck) {
-        if (card.structure.therapeuticClassNumber === selectedCategoryNumber) {
-          const sub =
-            card.structure.specificPharmacologicClass ||
-            card.structure.pharmacologicalClass;
-          if (sub) cardSubs.add(sub);
-        }
-      }
-      return Array.from(cardSubs).sort();
-    }
-
-    const allSubs = new Set<string>();
-    for (const cat of availableCategories) {
-      for (const sub of cat.specificSubclasses) {
-        allSubs.add(sub);
-      }
-    }
+    const subs = new Set<string>();
     for (const card of deck) {
-      const sub =
-        card.structure.specificPharmacologicClass ||
-        card.structure.pharmacologicalClass;
-      if (sub) allSubs.add(sub);
+      const classNum = card.structure?.therapeuticClassNumber;
+      if (classNum !== undefined && classNum !== null && selectedClassNumbers.has(classNum)) {
+        const sub =
+          card.structure?.specificPharmacologicClass ||
+          card.structure?.pharmacologicalClass;
+        if (sub) subs.add(sub);
+      }
     }
-    return Array.from(allSubs).sort();
-  }, [selectedCategoryNumber, availableCategories, deck]);
+    return Array.from(subs).sort();
+  }, [selectedClassNumbers, deck]);
+
+  // Safely reset selectedSubclass if no longer in availableSubclasses
+  useEffect(() => {
+    if (selectedSubclass !== null && !availableSubclasses.includes(selectedSubclass)) {
+      setSelectedSubclass(null);
+    }
+  }, [availableSubclasses, selectedSubclass]);
 
   // Active in-session queue and position index
   const [activeQueue, setActiveQueue] = useState<FlashcardItem[]>(() => {
@@ -371,11 +372,14 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     for (const f of filters) {
       initialFilterState[f.key] = true;
     }
+    const initialClasses = loadSelectedClassNumbers(
+      typeof window !== 'undefined' ? window.localStorage : undefined
+    );
     return buildCandidateQueue(
       initialized,
-      'curriculum',
+      initialFilterMode || 'curriculum',
       initialFilterState,
-      null,
+      initialClasses,
       null,
       'class-number',
       filters
@@ -393,7 +397,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       initialized,
       filterMode,
       moduleFilter,
-      selectedCategoryNumber,
+      selectedClassNumbers,
       selectedSubclass,
       sortBy,
       availableFilters
@@ -406,7 +410,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     storageKey,
     filterMode,
     moduleFilter,
-    selectedCategoryNumber,
+    selectedClassNumbers,
     selectedSubclass,
     sortBy,
     availableFilters,
@@ -426,7 +430,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       withProgress,
       filterMode,
       nextFilterState,
-      selectedCategoryNumber,
+      selectedClassNumbers,
       selectedSubclass,
       sortBy,
       filters
@@ -436,6 +440,69 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     setIsFlipped(false);
   }, [cards, storageKey]);
 
+  // Handle multi-class selection change from filter drawer or quick actions
+  const handleClassSelectionChange = useCallback(
+    (nextSet: Set<number>) => {
+      setSelectedClassNumbers(nextSet);
+      saveSelectedClassNumbers(nextSet);
+
+      // Check if selectedSubclass is still available under nextSet
+      let nextSubclass = selectedSubclass;
+      if (selectedSubclass !== null) {
+        const stillValid = deck.some((c) => {
+          const num = c.structure?.therapeuticClassNumber;
+          if (num === undefined || num === null || !nextSet.has(num)) return false;
+          const sub =
+            c.structure?.specificPharmacologicClass ||
+            c.structure?.pharmacologicalClass;
+          return sub === selectedSubclass;
+        });
+        if (!stillValid) {
+          nextSubclass = null;
+          setSelectedSubclass(null);
+        }
+      }
+
+      const nextQueue = buildCandidateQueue(
+        deck,
+        filterMode,
+        moduleFilter,
+        nextSet,
+        nextSubclass,
+        sortBy,
+        availableFilters
+      );
+
+      setActiveQueue(nextQueue);
+
+      // Preserve current card position: if present in nextQueue, set to new index; otherwise clamp
+      const activeCard = activeQueue[currentIndex];
+      if (activeCard && nextQueue.length > 0) {
+        const foundIndex = nextQueue.findIndex(
+          (c) => c.structureId === activeCard.structureId
+        );
+        if (foundIndex !== -1) {
+          setCurrentIndex(foundIndex);
+        } else {
+          setCurrentIndex(Math.min(currentIndex, Math.max(0, nextQueue.length - 1)));
+        }
+      } else {
+        setCurrentIndex(0);
+      }
+      setIsFlipped(false);
+    },
+    [
+      deck,
+      filterMode,
+      moduleFilter,
+      selectedSubclass,
+      sortBy,
+      availableFilters,
+      activeQueue,
+      currentIndex,
+    ]
+  );
+
   // Handle filter mode toggle
   const handleFilterModeChange = (newMode: DeckFilterMode) => {
     setFilterMode(newMode);
@@ -443,7 +510,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       deck,
       newMode,
       moduleFilter,
-      selectedCategoryNumber,
+      selectedClassNumbers,
       selectedSubclass,
       sortBy,
       availableFilters
@@ -453,22 +520,13 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     setIsFlipped(false);
   };
 
-  // Handle category dropdown change
+  // Deprecated: Single category change handler retained for backward compatibility
   const handleCategoryChange = (catNum: number | null) => {
-    setSelectedCategoryNumber(catNum);
-    setSelectedSubclass(null);
-    const nextQueue = buildCandidateQueue(
-      deck,
-      filterMode,
-      moduleFilter,
-      catNum,
-      null,
-      sortBy,
-      availableFilters
-    );
-    setActiveQueue(nextQueue);
-    setCurrentIndex(0);
-    setIsFlipped(false);
+    const nextSet =
+      catNum === null
+        ? new Set(ALL_THERAPEUTIC_CLASS_NUMBERS)
+        : new Set([catNum]);
+    handleClassSelectionChange(nextSet);
   };
 
   // Handle subclass dropdown change
@@ -478,7 +536,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       deck,
       filterMode,
       moduleFilter,
-      selectedCategoryNumber,
+      selectedClassNumbers,
       subclass,
       sortBy,
       availableFilters
@@ -495,7 +553,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       deck,
       filterMode,
       moduleFilter,
-      selectedCategoryNumber,
+      selectedClassNumbers,
       selectedSubclass,
       newSort,
       availableFilters
@@ -513,7 +571,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       deck,
       filterMode,
       nextFilter,
-      selectedCategoryNumber,
+      selectedClassNumbers,
       selectedSubclass,
       sortBy,
       availableFilters
@@ -525,7 +583,9 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
 
   // Handle Reset Filters action
   const handleResetFilters = () => {
-    setSelectedCategoryNumber(null);
+    const allClasses = new Set(ALL_THERAPEUTIC_CLASS_NUMBERS);
+    setSelectedClassNumbers(allClasses);
+    saveSelectedClassNumbers(allClasses);
     setSelectedSubclass(null);
     const nextModuleFilter: ModuleFilterState = {};
     for (const f of availableFilters) {
@@ -536,7 +596,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       deck,
       filterMode,
       nextModuleFilter,
-      null,
+      allClasses,
       null,
       sortBy,
       availableFilters
@@ -556,7 +616,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     const matches =
       filterMode === 'curriculum'
         ? cardMatchesModuleFilter(c, moduleFilter, availableFilters)
-        : cardMatchesTaxonomyFilter(c, selectedCategoryNumber, selectedSubclass);
+        : cardMatchesTaxonomyMultiFilter(c, selectedClassNumbers, selectedSubclass);
     return matches && (c.state === 'review' || c.state === 'mastered');
   }).length;
 
@@ -697,7 +757,9 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         </div>
         <h3 className="text-2xl font-bold mb-2">No Cards Match Current Filter</h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mb-6 leading-relaxed">
-          {renderMode === 'clinical'
+          {filterMode === 'taxonomy' && selectedClassNumbers.size === 0
+            ? 'You have deselected all 39 classes or no cards match the selected combination.'
+            : renderMode === 'clinical'
             ? 'No clinical monographs in your deck match the active filter criteria. Try adjusting your category or subclass selection, or reset your filters.'
             : 'No chemical structures in your deck match the active filter criteria. Try adjusting your category or subclass selection, or reset your filters.'}
         </p>
@@ -705,8 +767,16 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         <div className="flex items-center gap-3 flex-wrap justify-center">
           <button
             type="button"
-            onClick={handleResetFilters}
+            onClick={() => handleClassSelectionChange(new Set(ALL_THERAPEUTIC_CLASS_NUMBERS))}
             className="px-6 py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Restore All 39 Classes
+          </button>
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="px-5 py-2.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
             Reset Filters
@@ -721,6 +791,16 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             </button>
           )}
         </div>
+
+        {/* Filter Drawer accessible from empty state */}
+        <TherapeuticClassFilterDrawer
+          isOpen={isFilterDrawerOpen}
+          onClose={() => setIsFilterDrawerOpen(false)}
+          selectedClassNumbers={selectedClassNumbers}
+          onSelectionChange={handleClassSelectionChange}
+          categories={availableCategories}
+          cards={cards}
+        />
       </div>
     );
   }
@@ -1099,26 +1179,14 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             </div>
           ) : (
             <div className="flex items-center gap-2.5 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-slate-500 dark:text-slate-400">
-                  Category:
-                </span>
-                <select
-                  value={selectedCategoryNumber !== null ? String(selectedCategoryNumber) : ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    handleCategoryChange(val ? parseInt(val, 10) : null);
-                  }}
-                  className="py-1 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs focus:ring-1 focus:ring-blue-500 cursor-pointer max-w-[210px] truncate"
-                >
-                  <option value="">All Categories (1-39)</option>
-                  {availableCategories.map((cat) => (
-                    <option key={cat.classNumber} value={cat.classNumber}>
-                      {cat.categoryName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsFilterDrawerOpen(true)}
+                className="py-1 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Filter by standardized Top 200 therapeutic classes (1-39)"
+              >
+                <span>🎯 Filter Classes ({selectedClassNumbers.size}/39)</span>
+              </button>
 
               <div className="flex items-center gap-1.5">
                 <span className="font-semibold text-slate-500 dark:text-slate-400">
@@ -1141,7 +1209,8 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
                 </select>
               </div>
 
-              {(selectedCategoryNumber !== null || selectedSubclass !== null) && (
+              {(selectedClassNumbers.size < ALL_THERAPEUTIC_CLASS_NUMBERS.length ||
+                selectedSubclass !== null) && (
                 <button
                   type="button"
                   onClick={handleResetFilters}
@@ -1265,6 +1334,16 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
           </div>
         </StructureFlashcardCardFace>
       )}
+
+      {/* Slide-over Therapeutic Class Filter Drawer */}
+      <TherapeuticClassFilterDrawer
+        isOpen={isFilterDrawerOpen}
+        onClose={() => setIsFilterDrawerOpen(false)}
+        selectedClassNumbers={selectedClassNumbers}
+        onSelectionChange={handleClassSelectionChange}
+        categories={availableCategories}
+        cards={cards}
+      />
     </div>
   );
 };
