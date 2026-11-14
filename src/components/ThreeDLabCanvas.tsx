@@ -28,7 +28,10 @@ import type {
   KeyPocketResidueContact,
   TargetMedChemProfile,
 } from '../types/structure3d';
-import { findMedChemProfile } from '../data/canonicalPharmacophorePkData';
+import {
+  findMedChemProfile,
+  resolvePocketResidueColor,
+} from '../data/canonicalPharmacophorePkData';
 import {
   loadMolstarPluginScript,
   getBinaryCifUrl,
@@ -71,8 +74,22 @@ export const MOLSTAR_THEME_COLORS = {
   magentaCarbon: { r: 236, g: 72, b: 153 },
   emeraldPocket: { r: 16, g: 185, b: 129 },
   amberHBond: { r: 245, g: 158, b: 11 },
+  slateRibbon: { r: 100, g: 116, b: 139 }, // slate-500 #64748b muted receptor scaffold
   slateBg: { r: 2, g: 6, b: 23 }, // slate-950 #020617
 };
+
+function hexToRgbColor(hex?: string, fallback = MOLSTAR_THEME_COLORS.magentaCarbon) {
+  if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || hex.length < 7) {
+    return fallback;
+  }
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  if (!Number.isFinite(r) || !Number.isFinite(g) || !Number.isFinite(b)) {
+    return fallback;
+  }
+  return { r, g, b };
+}
 
 /**
  * Mol* (MolStar) WebGL Molecular Graphics Canvas with Binary mmCIF (.bcif) Streaming,
@@ -100,11 +117,12 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
   // Scene toggles & mode state
   const [is2DFallbackActive, setIs2DFallbackActive] = useState<boolean>(initial2DFallback);
   const [detectedLigand, setDetectedLigand] = useState<DetectedLigandInfo | null>(null);
-  const [showPocket, setShowPocket] = useState<boolean>(false);
+  const [showPocket, setShowPocket] = useState<boolean>(true);
   const [showPocketSurface, setShowPocketSurface] = useState<boolean>(false);
   const [showRibbon, setShowRibbon] = useState<boolean>(true);
-  const [showHBonds, setShowHBonds] = useState<boolean>(false);
+  const [showHBonds, setShowHBonds] = useState<boolean>(true);
   const [showAtomLabels, setShowAtomLabels] = useState<boolean>(false);
+  const [subPocketColorMode, setSubPocketColorMode] = useState<boolean>(true);
   const [clickedAtomInfo, setClickedAtomInfo] = useState<{
     atom: string;
     resn: string;
@@ -137,7 +155,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
       ribbonActive: boolean,
       hbondsActive: boolean,
       atomLabelsActive: boolean = false,
-      pharmacophoreGroup: PharmacophorePkPdGroup | null = null
+      pharmacophoreGroup: PharmacophorePkPdGroup | null = null,
+      subPocketZonesActive: boolean = subPocketColorMode
     ) => {
       if (!viewer) return;
 
@@ -147,12 +166,15 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           viewer.visual.clearHighlight();
         }
 
-        // 1. Protein backbone cartoon ribbon & hetero small molecule visibility
+        // 1. Suppress global HETATM clutter (lipids, detergents, glycans, duplicate chains)
+        // while keeping polymer cartoon controlled by ribbonActive
         if (typeof viewer.visual?.visibility === 'function') {
           viewer.visual.visibility({
             polymer: ribbonActive,
-            het: true,
+            het: false,
             water: false,
+            carbs: false,
+            nonStandard: false,
           });
         }
 
@@ -174,47 +196,137 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           });
         }
 
-        // 2. High-contrast Ligand Sticks & Pocket Residue Sticks
+        const singleLigandQuery = ligand
+          ? {
+              chem_comp_id: ligand.resn,
+              label_comp_id: ligand.resn,
+              ...(ligand.chain ? { auth_asym_id: ligand.chain } : {}),
+              ...(ligand.resi ? { auth_seq_id: ligand.resi } : {}),
+            }
+          : null;
+
+        // 2. Single-Ligand Isolation, True CPK Heteroatoms (color: null + type_symbol: 'C'),
+        //    and Color-Matched Binding Sub-Pocket Residues
         if (typeof viewer.visual?.select === 'function') {
           const selectData: any[] = [];
 
-          // Primary small-molecule drug ligand as cyan ball-and-stick
-          if (ligand) {
+          // A. Single bound drug ligand instance in ball-and-stick
+          if (ligand && singleLigandQuery) {
+            // Base representation with color: null so N, O, S, P, F, Cl keep native CPK element colors
             selectData.push({
-              chem_comp_id: ligand.resn,
+              ...singleLigandQuery,
               representation: 'ball-and-stick',
-              representationColor: MOLSTAR_THEME_COLORS.cyanCarbon,
-              color: MOLSTAR_THEME_COLORS.cyanCarbon,
+              color: null,
               focus: !pharmacophoreGroup,
             });
-          }
 
-          // Key pocket residues as emerald ball-and-stick when pocket sticks are toggled on
-          if (pocketActive && medChemProfile?.keyPocketResidues?.length) {
-            for (const residue of medChemProfile.keyPocketResidues) {
-              selectData.push({
-                struct_asym_id: residue.chain || 'A',
-                residue_number: residue.resi,
-                representation: 'ball-and-stick',
-                representationColor: MOLSTAR_THEME_COLORS.emeraldPocket,
-                color: MOLSTAR_THEME_COLORS.emeraldPocket,
-              });
+            // Carbon skeleton color: base cyanCarbon
+            selectData.push({
+              ...singleLigandQuery,
+              type_symbol: 'C',
+              representation: 'ball-and-stick',
+              representationColor: MOLSTAR_THEME_COLORS.cyanCarbon,
+              color: null,
+            });
+
+            // When Sub-Pocket Zone mode is active, color each pharmacophore moiety's carbons
+            // to match its corresponding binding sub-pocket zone
+            if (subPocketZonesActive && medChemProfile?.pharmacophoreGroups?.length) {
+              for (const group of medChemProfile.pharmacophoreGroups) {
+                const groupRgb = hexToRgbColor(group.colorAccent, MOLSTAR_THEME_COLORS.cyanCarbon);
+                selectData.push({
+                  ...singleLigandQuery,
+                  atoms: group.atomNames,
+                  label_atom_id: group.atomNames,
+                  type_symbol: 'C',
+                  representation: 'ball-and-stick',
+                  representationColor: groupRgb,
+                  color: null,
+                });
+              }
+            }
+
+            // Active-site catalytic metal ions (e.g. Zn2+ in ACE 1O86) within 5Å of the single ligand
+            if (ligand.catalyticMetals?.length) {
+              for (const metal of ligand.catalyticMetals) {
+                selectData.push({
+                  chem_comp_id: metal.resn,
+                  label_comp_id: metal.resn,
+                  auth_asym_id: metal.chain,
+                  auth_seq_id: metal.resi,
+                  representation: 'ball-and-stick',
+                  color: null,
+                });
+              }
             }
           }
 
-          // Active pharmacophore group accent highlighting
-          if (pharmacophoreGroup && ligand) {
-            const accentHex = pharmacophoreGroup.colorAccent || '#ec4899';
-            const r = parseInt(accentHex.slice(1, 3), 16) || 236;
-            const g = parseInt(accentHex.slice(3, 5), 16) || 72;
-            const b = parseInt(accentHex.slice(5, 7), 16) || 153;
+          // B. Key binding sub-pocket residues with CPK heteroatoms + sub-pocket carbon colors
+          if (pocketActive && medChemProfile?.keyPocketResidues?.length) {
+            for (const residue of medChemProfile.keyPocketResidues) {
+              const targetChain = residue.chain || ligand?.chain || 'A';
+              const isPairedWithActiveGroup = Boolean(
+                pharmacophoreGroup && residue.pharmacophoreGroupId === pharmacophoreGroup.id
+              );
+              const resRgb = subPocketZonesActive
+                ? hexToRgbColor(
+                    resolvePocketResidueColor(residue, medChemProfile),
+                    MOLSTAR_THEME_COLORS.emeraldPocket
+                  )
+                : MOLSTAR_THEME_COLORS.emeraldPocket;
+
+              const residueQuery = {
+                struct_asym_id: targetChain,
+                auth_asym_id: targetChain,
+                residue_number: residue.resi,
+                auth_seq_id: residue.resi,
+              };
+
+              // Base side-chain sticks with color: null so N (blue), O (red), S (yellow) stay CPK
+              selectData.push({
+                ...residueQuery,
+                representation: 'ball-and-stick',
+                color: null,
+                focus: isPairedWithActiveGroup,
+              });
+
+              // Carbon-only overpaint matching the sub-pocket zone or emeraldPocket
+              selectData.push({
+                ...residueQuery,
+                type_symbol: 'C',
+                representation: 'ball-and-stick',
+                representationColor: resRgb,
+                color: resRgb,
+              });
+
+              // Optional translucent sub-pocket cavity surface
+              if (pocketSurfaceActive) {
+                selectData.push({
+                  ...residueQuery,
+                  representation: 'gaussian-surface',
+                  representationColor: resRgb,
+                  representationOpacity: 0.28,
+                  color: null,
+                });
+              }
+            }
+          }
+
+          // C. Active pharmacophore group accent highlighting
+          if (pharmacophoreGroup && ligand && singleLigandQuery) {
+            const accentRgb = hexToRgbColor(
+              pharmacophoreGroup.colorAccent || '#ec4899',
+              MOLSTAR_THEME_COLORS.magentaCarbon
+            );
 
             selectData.push({
-              chem_comp_id: ligand.resn,
+              ...singleLigandQuery,
               atoms: pharmacophoreGroup.atomNames,
+              label_atom_id: pharmacophoreGroup.atomNames,
+              type_symbol: 'C',
               representation: 'ball-and-stick',
-              representationColor: { r, g, b },
-              color: { r, g, b },
+              representationColor: accentRgb,
+              color: accentRgb,
               focus: true,
             });
           }
@@ -222,47 +334,103 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           if (selectData.length > 0) {
             viewer.visual.select({
               data: selectData,
+              nonSelectedColor: MOLSTAR_THEME_COLORS.slateRibbon,
+              nonSelectedOpacity: ligand && pocketActive ? 0.28 : 0.85,
             });
           }
         }
 
-        // 3. Highlight active pharmacophore group if highlight API is available
-        if (pharmacophoreGroup && ligand && typeof viewer.visual?.highlight === 'function') {
-          const accentHex = pharmacophoreGroup.colorAccent || '#ec4899';
-          const r = parseInt(accentHex.slice(1, 3), 16) || 236;
-          const g = parseInt(accentHex.slice(3, 5), 16) || 72;
-          const b = parseInt(accentHex.slice(5, 7), 16) || 153;
+        // 3. Trigger Mol* native 5Å pocket surroundings & 3D dashed non-covalent interactions
+        if (
+          ligand &&
+          singleLigandQuery &&
+          (hbondsActive || pocketActive) &&
+          typeof viewer.visual?.interactivityFocus === 'function'
+        ) {
+          viewer.visual.interactivityFocus({
+            data: [singleLigandQuery],
+          });
+        }
+
+        // 4. Attach custom 3D hover tooltips for the single ligand and sub-pocket residues
+        if (typeof viewer.visual?.tooltips === 'function') {
+          const tooltipItems: any[] = [];
+          if (ligand && singleLigandQuery) {
+            tooltipItems.push({
+              ...singleLigandQuery,
+              tooltip: `Bound Drug Ligand: ${ligand.resn} (Chain ${ligand.chain || 'A'})`,
+            });
+          }
+          if (medChemProfile?.keyPocketResidues?.length) {
+            for (const residue of medChemProfile.keyPocketResidues) {
+              const targetChain = residue.chain || ligand?.chain || 'A';
+              tooltipItems.push({
+                struct_asym_id: targetChain,
+                auth_asym_id: targetChain,
+                residue_number: residue.resi,
+                auth_seq_id: residue.resi,
+                tooltip: `${residue.label} • ${residue.subPocketName || residue.interactionType} (${residue.interactionType})`,
+              });
+            }
+          }
+          if (tooltipItems.length > 0) {
+            viewer.visual.tooltips({ data: tooltipItems });
+          }
+        }
+
+        // 5. Highlight active pharmacophore group if highlight API is available
+        if (pharmacophoreGroup && ligand && singleLigandQuery && typeof viewer.visual?.highlight === 'function') {
+          const accentRgb = hexToRgbColor(
+            pharmacophoreGroup.colorAccent || '#ec4899',
+            MOLSTAR_THEME_COLORS.magentaCarbon
+          );
 
           viewer.visual.highlight({
             data: [
               {
-                chem_comp_id: ligand.resn,
+                ...singleLigandQuery,
                 atoms: pharmacophoreGroup.atomNames,
-                color: { r, g, b }, // magentaCarbon accent
+                label_atom_id: pharmacophoreGroup.atomNames,
+                color: accentRgb, // magentaCarbon accent
                 focus: true,
               },
             ],
           });
         }
 
-        // 4. Focus camera on the ligand or active pharmacophore group
-        if (ligand && typeof viewer.visual?.focus === 'function') {
+        // 6. Focus camera on the single ligand + sub-pocket or active pharmacophore + paired pocket residues
+        if (ligand && singleLigandQuery && typeof viewer.visual?.focus === 'function') {
           if (pharmacophoreGroup) {
-            viewer.visual.focus({
-              chem_comp_id: ligand.resn,
-              atoms: pharmacophoreGroup.atomNames,
-            });
+            const focusTargets: any[] = [
+              {
+                ...singleLigandQuery,
+                atoms: pharmacophoreGroup.atomNames,
+                label_atom_id: pharmacophoreGroup.atomNames,
+              },
+            ];
+            if (medChemProfile?.keyPocketResidues?.length) {
+              for (const residue of medChemProfile.keyPocketResidues) {
+                if (residue.pharmacophoreGroupId === pharmacophoreGroup.id) {
+                  const targetChain = residue.chain || ligand.chain || 'A';
+                  focusTargets.push({
+                    struct_asym_id: targetChain,
+                    auth_asym_id: targetChain,
+                    residue_number: residue.resi,
+                    auth_seq_id: residue.resi,
+                  });
+                }
+              }
+            }
+            viewer.visual.focus(focusTargets);
           } else {
-            viewer.visual.focus({
-              chem_comp_id: ligand.resn,
-            });
+            viewer.visual.focus([singleLigandQuery]);
           }
         }
       } catch (err) {
         console.warn('Mol* scene styling notification:', err);
       }
     },
-    [medChemProfile]
+    [medChemProfile, subPocketColorMode]
   );
 
   // --------------------------------------------------------------------------
@@ -307,19 +475,9 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         showRibbon,
         showHBonds,
         showAtomLabels,
-        activePharmacophoreGroup
+        activePharmacophoreGroup,
+        subPocketColorMode
       );
-
-      if (activePharmacophoreGroup) {
-        try {
-          if (typeof viewerRef.current.visual?.focus === 'function') {
-            viewerRef.current.visual.focus({
-              chem_comp_id: detectedLigand.resn,
-              atoms: activePharmacophoreGroup.atomNames,
-            });
-          }
-        } catch (_) {}
-      }
     }
   }, [
     activePharmacophoreGroup,
@@ -329,6 +487,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
     showRibbon,
     showHBonds,
     showAtomLabels,
+    subPocketColorMode,
     renderScene,
   ]);
 
@@ -350,13 +509,32 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         false,
         false,
         showAtomLabels,
-        activePharmacophoreGroup
+        activePharmacophoreGroup,
+        subPocketColorMode
       );
       if (typeof viewerRef.current.visual?.reset === 'function') {
         viewerRef.current.visual.reset({ camera: true });
       } else if (viewerRef.current.plugin?.canvas3d?.requestCameraReset) {
         viewerRef.current.plugin.canvas3d.requestCameraReset();
       }
+    }
+  };
+
+  const handleToggleSubPocketColorMode = () => {
+    const nextMode = !subPocketColorMode;
+    setSubPocketColorMode(nextMode);
+    if (viewerRef.current) {
+      renderScene(
+        viewerRef.current,
+        detectedLigand,
+        showPocket,
+        showPocketSurface,
+        showRibbon,
+        showHBonds,
+        showAtomLabels,
+        activePharmacophoreGroup,
+        nextMode
+      );
     }
   };
 
@@ -372,7 +550,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         showRibbon,
         showHBonds,
         showAtomLabels,
-        activePharmacophoreGroup
+        activePharmacophoreGroup,
+        subPocketColorMode
       );
     }
   };
@@ -389,7 +568,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         showRibbon,
         showHBonds,
         showAtomLabels,
-        activePharmacophoreGroup
+        activePharmacophoreGroup,
+        subPocketColorMode
       );
     }
   };
@@ -406,7 +586,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         nextRibbon,
         showHBonds,
         showAtomLabels,
-        activePharmacophoreGroup
+        activePharmacophoreGroup,
+        subPocketColorMode
       );
     }
   };
@@ -423,7 +604,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         showRibbon,
         nextHBonds,
         showAtomLabels,
-        activePharmacophoreGroup
+        activePharmacophoreGroup,
+        subPocketColorMode
       );
     }
   };
@@ -440,7 +622,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
         showRibbon,
         showHBonds,
         nextAtomLabels,
-        activePharmacophoreGroup
+        activePharmacophoreGroup,
+        subPocketColorMode
       );
     }
   };
@@ -529,11 +712,12 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           console.warn(`[ThreeDLabCanvas] Non-fatal: Could not pre-fetch text PDB coordinates for ${cleanPdbId}, proceeding with Mol* binary mmCIF stream:`, coordErr);
         }
 
-        // Initial representation toggles: default ribbon active so students see the receptor fold
+        // Initial representation toggles: when a ligand is present, default pocket sticks & 3D H-bonds ON
+        const hasLigand = Boolean(ligand);
         const initialRibbon = true;
-        const initialPocket = false;
+        const initialPocket = hasLigand;
         const initialPocketSurface = false;
-        const initialHBonds = false;
+        const initialHBonds = hasLigand;
 
         setShowRibbon(initialRibbon);
         setShowPocket(initialPocket);
@@ -570,6 +754,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               update: () => {},
               visibility: () => {},
               focus: () => {},
+              interactivityFocus: () => {},
+              tooltips: () => {},
             },
             plugin: {
               canvas3d: {
@@ -583,7 +769,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
 
         viewerRef.current = viewer;
 
-        // Configure Mol* viewport
+        // Configure Mol* viewport: suppress default het/water/carbs clutter so only our pinned ligand renders
         const molstarOptions = {
           moleculeId: cleanPdbId.toLowerCase(),
           customData: {
@@ -599,6 +785,7 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
             'controlToggle',
             'controlInfo',
           ],
+          hideStructure: ['het', 'water', 'carbs', 'nonStandard'],
           loadMaps: false,
           visualStyle: 'cartoon',
           lighting: 'matte',
@@ -616,7 +803,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               initialRibbon,
               initialHBonds,
               showAtomLabels,
-              activePharmacophoreGroup
+              activePharmacophoreGroup,
+              subPocketColorMode
             );
           }
         }
@@ -633,7 +821,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               initialRibbon,
               initialHBonds,
               showAtomLabels,
-              activePharmacophoreGroup
+              activePharmacophoreGroup,
+              subPocketColorMode
             );
           });
         }
@@ -676,7 +865,8 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           initialRibbon,
           initialHBonds,
           showAtomLabels,
-          activePharmacophoreGroup
+          activePharmacophoreGroup,
+          subPocketColorMode
         );
 
         setIsLoading(false);
@@ -768,7 +958,12 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
           )}
           {detectedLigand && (
             <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">
-              Ligand: {detectedLigand.resn} ({detectedLigand.atomCount} atoms)
+              Ligand: {detectedLigand.resn} ({detectedLigand.atomCount} atoms
+              {detectedLigand.chain ? ` • Chain ${detectedLigand.chain}` : ''}
+              {detectedLigand.instanceCount && detectedLigand.instanceCount > 1
+                ? ` • 1 of ${detectedLigand.instanceCount} isolated`
+                : ''}
+              )
             </span>
           )}
         </div>
@@ -876,6 +1071,25 @@ export const ThreeDLabCanvas: React.FC<ThreeDLabCanvasProps> = ({
               >
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                 <span>Isolate Ligand</span>
+              </button>
+
+              {/* Sub-Pocket Zones (Color-Matched Ligand & Pocket Pairs) */}
+              <button
+                type="button"
+                onClick={handleToggleSubPocketColorMode}
+                disabled={!detectedLigand}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-all cursor-pointer border ${
+                  !detectedLigand
+                    ? 'opacity-40 cursor-not-allowed bg-slate-800/50 border-slate-800 text-slate-500'
+                    : subPocketColorMode
+                    ? 'bg-fuchsia-950/80 border-fuchsia-500 text-fuchsia-200 shadow-xs'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                }`}
+                title="Sub-Pocket Zones: Color-match ligand pharmacophore carbons with their partner binding sub-pocket residues while preserving CPK heteroatom colors"
+                aria-pressed={subPocketColorMode}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" />
+                <span>Sub-Pocket Zones</span>
               </button>
 
               {/* Pocket Sticks (5Å) (Classic Surrounding Residues) */}
