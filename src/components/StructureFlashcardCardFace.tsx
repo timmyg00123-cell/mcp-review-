@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
-import { SmilesCanvas } from './SmilesCanvas';
+import { MultiSmilesCanvas } from './MultiSmilesCanvas';
 import {
   PharmacophoreTagList,
   ColorPaletteItem,
@@ -303,15 +303,17 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
         } bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors`}
         title="Click to zoom chemical structure"
       >
-        <SmilesCanvas
+        <MultiSmilesCanvas
+          structureRecord={structure.structureRecord}
+          isFlipped={isFlipped}
           smiles={canonicalSmiles}
           molBlock={structure.pubchemMolBlock}
           fallbackImageUrl={structure.pngUrl}
           cid={structure.cid}
+          compoundName={structure.name}
           activePharmacophores={activePharmacophoresList}
           width={isProminent ? 480 : 340}
           height={isProminent ? 260 : 220}
-          altText={`${cleanName} chemical structure`}
           className="w-full h-full flex items-center justify-center pointer-events-none"
         />
 
@@ -528,14 +530,15 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
               className="w-full max-w-xl h-72 bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
               title="Click to zoom chemical structure"
             >
-              <SmilesCanvas
+              <MultiSmilesCanvas
+                structureRecord={structure.structureRecord}
+                isFlipped={isFlipped}
                 smiles={canonicalSmiles}
                 molBlock={structure.pubchemMolBlock}
                 fallbackImageUrl={structure.pngUrl}
                 cid={structure.cid}
                 width={400}
                 height={260}
-                altText="Blinded candidate chemical structure"
                 className="w-full h-full flex items-center justify-center pointer-events-none"
               />
 
@@ -750,15 +753,17 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                 className="w-full h-56 bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
                 title="Click to zoom chemical structure"
               >
-                <SmilesCanvas
+                <MultiSmilesCanvas
+                  structureRecord={structure.structureRecord}
+                  isFlipped={isFlipped}
                   smiles={canonicalSmiles}
                   molBlock={structure.pubchemMolBlock}
                   fallbackImageUrl={structure.pngUrl}
                   cid={structure.cid}
+                  compoundName={structure.name}
                   activePharmacophores={activePharmacophoresList}
                   width={340}
                   height={210}
-                  altText={`${cleanName} chemical structure`}
                   className="w-full h-full flex items-center justify-center pointer-events-none"
                 />
 
@@ -831,15 +836,17 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
 
             {/* Modal Canvas */}
             <div className="p-6 bg-[var(--structure-canvas-bg)] flex items-center justify-center min-h-[380px]">
-              <SmilesCanvas
+              <MultiSmilesCanvas
+                structureRecord={structure.structureRecord}
+                isFlipped={isFlipped}
                 smiles={canonicalSmiles}
                 molBlock={structure.pubchemMolBlock}
                 fallbackImageUrl={structure.pngUrl}
                 cid={structure.cid}
+                compoundName={structure.name}
                 activePharmacophores={isFlipped ? activePharmacophoresList : undefined}
                 width={560}
                 height={360}
-                altText={`${isFlipped ? cleanName : 'Blinded'} chemical structure enlarged`}
                 className="w-full h-full flex items-center justify-center"
               />
             </div>

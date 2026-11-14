@@ -6,12 +6,15 @@ import {
   reQueueActiveSession,
   toggleCardSuspension,
   applyProgressToCards,
+  FLASHCARD_STORAGE_KEY,
 } from '../utils/spacedRepetitionService';
 import {
   StructureFlashcardCardFace,
   type FlashcardDisplaySettings,
   DEFAULT_FLASHCARD_DISPLAY_SETTINGS,
 } from './StructureFlashcardCardFace';
+import { TopDrugClinicalCard } from './TopDrugClinicalCard';
+import { resolveTopDrugClinicalMonograph } from '../data/topDrugsClinicalData';
 import {
   THERAPEUTIC_CATEGORIES,
   type TherapeuticClassCategory,
@@ -31,6 +34,8 @@ export interface StructureFlashcardDeckProps {
   cards: FlashcardItem[];
   onSessionComplete: (struggledCards: FlashcardItem[], fullDeck: FlashcardItem[]) => void;
   onClose?: () => void;
+  storageKey?: string;
+  renderMode?: 'structure' | 'clinical';
 }
 
 export interface ModuleCategory {
@@ -255,9 +260,13 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   cards,
   onSessionComplete,
   onClose,
+  storageKey = FLASHCARD_STORAGE_KEY,
+  renderMode = 'structure',
 }) => {
   // Master working deck initialized with persisted local storage progress
-  const [deck, setDeck] = useState<FlashcardItem[]>(() => applyProgressToCards(cards));
+  const [deck, setDeck] = useState<FlashcardItem[]>(() =>
+    applyProgressToCards(cards, undefined, storageKey)
+  );
 
   // Dynamic available module categories derived from cards
   const availableFilters = useMemo(() => getAvailableModuleFilters(cards), [cards]);
@@ -356,7 +365,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
 
   // Active in-session queue and position index
   const [activeQueue, setActiveQueue] = useState<FlashcardItem[]>(() => {
-    const initialized = applyProgressToCards(cards);
+    const initialized = applyProgressToCards(cards, undefined, storageKey);
     const filters = getAvailableModuleFilters(cards);
     const initialFilterState: ModuleFilterState = {};
     for (const f of filters) {
@@ -378,7 +387,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
 
   // Restart deck handler (resets active queue to full filtered deck, currentIndex to 0, isFlipped to false)
   const handleRestartDeck = useCallback(() => {
-    const initialized = applyProgressToCards(cards);
+    const initialized = applyProgressToCards(cards, undefined, storageKey);
     setDeck(initialized);
     const filtered = buildCandidateQueue(
       initialized,
@@ -394,6 +403,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     setIsFlipped(false);
   }, [
     cards,
+    storageKey,
     filterMode,
     moduleFilter,
     selectedCategoryNumber,
@@ -402,9 +412,9 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     availableFilters,
   ]);
 
-  // Sync state if cards prop identity updates
+  // Sync state if cards prop identity or storageKey updates
   useEffect(() => {
-    const withProgress = applyProgressToCards(cards);
+    const withProgress = applyProgressToCards(cards, undefined, storageKey);
     setDeck(withProgress);
     const filters = getAvailableModuleFilters(cards);
     const nextFilterState: ModuleFilterState = {};
@@ -424,7 +434,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     setActiveQueue(nextQueue);
     setCurrentIndex(0);
     setIsFlipped(false);
-  }, [cards]);
+  }, [cards, storageKey]);
 
   // Handle filter mode toggle
   const handleFilterModeChange = (newMode: DeckFilterMode) => {
@@ -559,7 +569,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       const nextCard = result.nextCardState;
 
       // Persist progress to local storage
-      recordCardProgress(nextCard);
+      recordCardProgress(nextCard, undefined, storageKey);
 
       // Update master deck
       setDeck((prevDeck) =>
@@ -579,7 +589,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
       setIsFlipped(false);
       setCurrentIndex((prev) => prev + 1);
     },
-    [currentCard, activeQueue, currentIndex]
+    [currentCard, activeQueue, currentIndex, storageKey]
   );
 
   // Suspend card toggle
@@ -587,7 +597,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     if (!currentCard) return;
 
     const updated = toggleCardSuspension(currentCard);
-    recordCardProgress(updated);
+    recordCardProgress(updated, undefined, storageKey);
 
     setDeck((prevDeck) =>
       prevDeck.map((c) => (c.structureId === updated.structureId ? updated : c))
@@ -606,7 +616,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         prev.map((c, idx) => (idx === currentIndex ? updated : c))
       );
     }
-  }, [currentCard, activeQueue, currentIndex]);
+  }, [currentCard, activeQueue, currentIndex, storageKey]);
 
   // Finish session early
   const handleFinishEarly = useCallback(() => {
@@ -615,6 +625,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   }, [deck, onSessionComplete]);
 
   // Keyboard shortcut listener: Space (flip), 1 (Again), 2 (Hard), 3 (Good), 4 (Easy)
+  // In clinical mode, keys 1, 2, 3 switch tabs on the card face, so grading uses Alt+1..4 or 4 (Easy)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Guard against typing in form inputs, textareas, selects, or contenteditable elements
@@ -634,18 +645,39 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         e.preventDefault();
         setIsFlipped((prev) => !prev);
       } else if (isFlipped) {
-        if (e.key === '1') {
-          e.preventDefault();
-          handleGrade('again');
-        } else if (e.key === '2') {
-          e.preventDefault();
-          handleGrade('hard');
-        } else if (e.key === '3') {
-          e.preventDefault();
-          handleGrade('good');
-        } else if (e.key === '4') {
-          e.preventDefault();
-          handleGrade('easy');
+        if (renderMode === 'clinical') {
+          if (e.altKey) {
+            if (e.key === '1') {
+              e.preventDefault();
+              handleGrade('again');
+            } else if (e.key === '2') {
+              e.preventDefault();
+              handleGrade('hard');
+            } else if (e.key === '3') {
+              e.preventDefault();
+              handleGrade('good');
+            } else if (e.key === '4') {
+              e.preventDefault();
+              handleGrade('easy');
+            }
+          } else if (e.key === '4') {
+            e.preventDefault();
+            handleGrade('easy');
+          }
+        } else {
+          if (e.key === '1') {
+            e.preventDefault();
+            handleGrade('again');
+          } else if (e.key === '2') {
+            e.preventDefault();
+            handleGrade('hard');
+          } else if (e.key === '3') {
+            e.preventDefault();
+            handleGrade('good');
+          } else if (e.key === '4') {
+            e.preventDefault();
+            handleGrade('easy');
+          }
         }
       }
     };
@@ -654,7 +686,7 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isFlipped, handleGrade]);
+  }, [isFlipped, handleGrade, renderMode]);
 
   // Dedicated Empty Filter view when active filters yield 0 matching cards
   if (activeQueue.length === 0) {
@@ -665,7 +697,9 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         </div>
         <h3 className="text-2xl font-bold mb-2">No Cards Match Current Filter</h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mb-6 leading-relaxed">
-          No chemical structures in your deck match the active filter criteria. Try adjusting your category or subclass selection, or reset your filters.
+          {renderMode === 'clinical'
+            ? 'No clinical monographs in your deck match the active filter criteria. Try adjusting your category or subclass selection, or reset your filters.'
+            : 'No chemical structures in your deck match the active filter criteria. Try adjusting your category or subclass selection, or reset your filters.'}
         </p>
 
         <div className="flex items-center gap-3 flex-wrap justify-center">
@@ -699,9 +733,13 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         <div className="w-16 h-16 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
           <CheckCircle2 className="w-10 h-10" />
         </div>
-        <h3 className="text-2xl font-bold mb-2">Flashcard Session Complete!</h3>
+        <h3 className="text-2xl font-bold mb-2">
+          {renderMode === 'clinical' ? 'Clinical Monograph Session Complete!' : 'Flashcard Session Complete!'}
+        </h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mb-6 leading-relaxed">
-          All chemical structures in this active session queue have graduated or been scheduled for future review.
+          {renderMode === 'clinical'
+            ? 'All clinical monographs in this active session queue have graduated or been scheduled for future review.'
+            : 'All chemical structures in this active session queue have graduated or been scheduled for future review.'}
         </p>
 
         <div className="w-full max-w-sm grid grid-cols-2 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 mb-6 text-sm">
@@ -712,7 +750,9 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             </div>
           </div>
           <div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Struggled Structures</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              {renderMode === 'clinical' ? 'Struggled Monographs' : 'Struggled Structures'}
+            </div>
             <div className="text-lg font-bold text-rose-600 dark:text-rose-400">
               {struggled.length}
             </div>
@@ -720,6 +760,20 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         </div>
 
         <div className="flex items-center gap-3 flex-wrap justify-center">
+          {struggled.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveQueue(struggled);
+                setCurrentIndex(0);
+                setIsFlipped(false);
+              }}
+              className="px-6 py-2.5 rounded-xl font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-500/20 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Re-drill Struggled Cards ({struggled.length})
+            </button>
+          )}
           <button
             type="button"
             onClick={handleRestartDeck}
@@ -728,13 +782,15 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             <RotateCcw className="w-4 h-4" />
             Retry Full Deck
           </button>
-          <button
-            type="button"
-            onClick={() => onSessionComplete(struggled, deck)}
-            className="px-6 py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all cursor-pointer"
-          >
-            View Struggle Diagnostics
-          </button>
+          {renderMode !== 'clinical' && (
+            <button
+              type="button"
+              onClick={() => onSessionComplete(struggled, deck)}
+              className="px-6 py-2.5 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+            >
+              View Struggle Diagnostics
+            </button>
+          )}
           {onClose && (
             <button
               type="button"
@@ -762,15 +818,31 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                Rapid Structure Recall Deck
+                {renderMode === 'clinical'
+                  ? 'Top 200 Clinical Monograph Deck'
+                  : 'Rapid Structure Recall Deck'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Spaced repetition chemical structure recognition &amp; pharmacophore identification
+                {renderMode === 'clinical'
+                  ? 'Clinical pharmacology, dosing regimens, clinical pearls, and boxed safety warnings'
+                  : 'Spaced repetition chemical structure recognition & pharmacophore identification'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleToggleSuspend}
+              className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+                currentCard.isSuspended
+                  ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200'
+                  : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+              title={currentCard.isSuspended ? 'Unsuspend Card' : 'Suspend Card from Deck'}
+            >
+              {currentCard.isSuspended ? 'Suspended' : 'Suspend Card'}
+            </button>
             <button
               type="button"
               onClick={handleFinishEarly}
@@ -837,164 +909,166 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
               </select>
             </label>
 
-            {/* Display Settings Popover Button */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsDisplayPopoverOpen((prev) => !prev)}
-                className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Card Display Settings"
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>⚙️ Display</span>
-              </button>
+            {/* Display Settings Popover Button (Structure Mode Only) */}
+            {renderMode === 'structure' && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsDisplayPopoverOpen((prev) => !prev)}
+                  className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Card Display Settings"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span>⚙️ Display</span>
+                </button>
 
-              {isDisplayPopoverOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 text-slate-900 dark:text-slate-100 flex flex-col gap-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                      Display Settings
-                    </h4>
-                    <button
-                      type="button"
-                      onClick={() => setIsDisplayPopoverOpen(false)}
-                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded cursor-pointer"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Density Mode */}
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-                      Layout Density
-                    </span>
-                    <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs">
+                {isDisplayPopoverOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-72 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 text-slate-900 dark:text-slate-100 flex flex-col gap-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Display Settings
+                      </h4>
                       <button
                         type="button"
-                        onClick={() =>
-                          setDisplaySettings((prev) => ({ ...prev, density: 'split' }))
-                        }
-                        className={`py-1 rounded font-medium transition-colors cursor-pointer ${
-                          displaySettings.density === 'split'
-                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                        }`}
+                        onClick={() => setIsDisplayPopoverOpen(false)}
+                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded cursor-pointer"
                       >
-                        Split
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setDisplaySettings((prev) => ({
-                            ...prev,
-                            density: 'structure-focus',
-                          }))
-                        }
-                        className={`py-1 rounded font-medium transition-colors cursor-pointer ${
-                          displaySettings.density === 'structure-focus'
-                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                        }`}
-                      >
-                        Focus
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setDisplaySettings((prev) => ({
-                            ...prev,
-                            density: 'minimalist',
-                          }))
-                        }
-                        className={`py-1 rounded font-medium transition-colors cursor-pointer ${
-                          displaySettings.density === 'minimalist'
-                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                        }`}
-                      >
-                        Minimal
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
+
+                    {/* Density Mode */}
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                        Layout Density
+                      </span>
+                      <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDisplaySettings((prev) => ({ ...prev, density: 'split' }))
+                          }
+                          className={`py-1 rounded font-medium transition-colors cursor-pointer ${
+                            displaySettings.density === 'split'
+                              ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                          }`}
+                        >
+                          Split
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDisplaySettings((prev) => ({
+                              ...prev,
+                              density: 'structure-focus',
+                            }))
+                          }
+                          className={`py-1 rounded font-medium transition-colors cursor-pointer ${
+                            displaySettings.density === 'structure-focus'
+                              ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                          }`}
+                        >
+                          Focus
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDisplaySettings((prev) => ({
+                              ...prev,
+                              density: 'minimalist',
+                            }))
+                          }
+                          className={`py-1 rounded font-medium transition-colors cursor-pointer ${
+                            displaySettings.density === 'minimalist'
+                              ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs'
+                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                          }`}
+                        >
+                          Minimal
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Section Visibility Toggles */}
+                    <div className="flex flex-col gap-2 pt-1">
+                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                        Visible Sections
+                      </span>
+
+                      <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={displaySettings.showBrandNames}
+                          onChange={(e) =>
+                            setDisplaySettings((prev) => ({
+                              ...prev,
+                              showBrandNames: e.target.checked,
+                            }))
+                          }
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>Brand Names</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(
+                            displaySettings.showHierarchyBreadcrumb ??
+                              displaySettings.showTaxonomyBreadcrumbs
+                          )}
+                          onChange={(e) =>
+                            setDisplaySettings((prev) => ({
+                              ...prev,
+                              showHierarchyBreadcrumb: e.target.checked,
+                              showTaxonomyBreadcrumbs: e.target.checked,
+                            }))
+                          }
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>Hierarchy Breadcrumbs</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(
+                            displaySettings.showPharmacophoreTagStrip ??
+                              displaySettings.showPharmacophoreTags
+                          )}
+                          onChange={(e) =>
+                            setDisplaySettings((prev) => ({
+                              ...prev,
+                              showPharmacophoreTagStrip: e.target.checked,
+                              showPharmacophoreTags: e.target.checked,
+                            }))
+                          }
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>Pharmacophore Tags</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={displaySettings.showClinicalPearls}
+                          onChange={(e) =>
+                            setDisplaySettings((prev) => ({
+                              ...prev,
+                              showClinicalPearls: e.target.checked,
+                            }))
+                          }
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>Clinical Pearls &amp; MOA</span>
+                      </label>
+                    </div>
                   </div>
-
-                  {/* Section Visibility Toggles */}
-                  <div className="flex flex-col gap-2 pt-1">
-                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-                      Visible Sections
-                    </span>
-
-                    <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={displaySettings.showBrandNames}
-                        onChange={(e) =>
-                          setDisplaySettings((prev) => ({
-                            ...prev,
-                            showBrandNames: e.target.checked,
-                          }))
-                        }
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span>Brand Names</span>
-                    </label>
-
-                    <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(
-                          displaySettings.showHierarchyBreadcrumb ??
-                            displaySettings.showTaxonomyBreadcrumbs
-                        )}
-                        onChange={(e) =>
-                          setDisplaySettings((prev) => ({
-                            ...prev,
-                            showHierarchyBreadcrumb: e.target.checked,
-                            showTaxonomyBreadcrumbs: e.target.checked,
-                          }))
-                        }
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span>Hierarchy Breadcrumbs</span>
-                    </label>
-
-                    <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(
-                          displaySettings.showPharmacophoreTagStrip ??
-                            displaySettings.showPharmacophoreTags
-                        )}
-                        onChange={(e) =>
-                          setDisplaySettings((prev) => ({
-                            ...prev,
-                            showPharmacophoreTagStrip: e.target.checked,
-                            showPharmacophoreTags: e.target.checked,
-                          }))
-                        }
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span>Pharmacophore Tags</span>
-                    </label>
-
-                    <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={displaySettings.showClinicalPearls}
-                        onChange={(e) =>
-                          setDisplaySettings((prev) => ({
-                            ...prev,
-                            showClinicalPearls: e.target.checked,
-                          }))
-                        }
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span>Clinical Pearls &amp; MOA</span>
-                    </label>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -1093,56 +1167,104 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         </div>
       </div>
 
-      {/* Upgraded Card Body with Blinded Front Face & Option B Split Back Face */}
-      <StructureFlashcardCardFace
-        structure={structure}
-        drugName={currentCard.drugName}
-        isFlipped={isFlipped}
-        isSuspended={Boolean(currentCard.isSuspended)}
-        onToggleSuspend={handleToggleSuspend}
-        onFlip={() => setIsFlipped(true)}
-        displaySettings={displaySettings}
-      >
-        {/* 4-Interval Anki Rating Bar */}
-        <div className="grid grid-cols-4 gap-2">
-          <button
-            type="button"
-            onClick={() => handleGrade('again')}
-            className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:border-rose-300 dark:hover:border-rose-700 transition-all shadow-xs cursor-pointer"
-          >
-            <span className="text-[11px] font-semibold text-rose-500 dark:text-rose-400">&lt; 1 min</span>
-            <span className="text-base font-extrabold mt-0.5">Again</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[1]</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleGrade('hard')}
-            className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-700 transition-all shadow-xs cursor-pointer"
-          >
-            <span className="text-[11px] font-semibold text-amber-500 dark:text-amber-400">4 min</span>
-            <span className="text-base font-extrabold mt-0.5">Hard</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[2]</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleGrade('good')}
-            className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all shadow-xs cursor-pointer"
-          >
-            <span className="text-[11px] font-semibold text-blue-500 dark:text-blue-400">10 min</span>
-            <span className="text-base font-extrabold mt-0.5">Good</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[3]</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleGrade('easy')}
-            className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all shadow-xs cursor-pointer"
-          >
-            <span className="text-[11px] font-semibold text-emerald-500 dark:text-emerald-400">1 day</span>
-            <span className="text-base font-extrabold mt-0.5">Easy</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[4]</span>
-          </button>
-        </div>
-      </StructureFlashcardCardFace>
+      {/* Card Body: Clinical Monograph or Chemical Structure Card Face */}
+      {renderMode === 'clinical' ? (
+        <TopDrugClinicalCard
+          monograph={resolveTopDrugClinicalMonograph(currentCard.drugName || currentCard.structure.name)}
+          isFlipped={isFlipped}
+          onFlip={() => setIsFlipped(true)}
+        >
+          {/* 4-Interval Rating Bar for Clinical Mode */}
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              type="button"
+              onClick={() => handleGrade('again')}
+              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:border-rose-300 dark:hover:border-rose-700 transition-all shadow-xs cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold text-rose-500 dark:text-rose-400">&lt; 1 min</span>
+              <span className="text-base font-extrabold mt-0.5">Again</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[Alt+1]</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGrade('hard')}
+              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-700 transition-all shadow-xs cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold text-amber-500 dark:text-amber-400">4 min</span>
+              <span className="text-base font-extrabold mt-0.5">Hard</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[Alt+2]</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGrade('good')}
+              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all shadow-xs cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold text-blue-500 dark:text-blue-400">10 min</span>
+              <span className="text-base font-extrabold mt-0.5">Good</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[Alt+3]</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGrade('easy')}
+              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all shadow-xs cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold text-emerald-500 dark:text-emerald-400">1 day</span>
+              <span className="text-base font-extrabold mt-0.5">Easy</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[4]</span>
+            </button>
+          </div>
+        </TopDrugClinicalCard>
+      ) : (
+        <StructureFlashcardCardFace
+          structure={structure}
+          drugName={currentCard.drugName}
+          isFlipped={isFlipped}
+          isSuspended={Boolean(currentCard.isSuspended)}
+          onToggleSuspend={handleToggleSuspend}
+          onFlip={() => setIsFlipped(true)}
+          displaySettings={displaySettings}
+        >
+          {/* 4-Interval Anki Rating Bar */}
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              type="button"
+              onClick={() => handleGrade('again')}
+              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 hover:border-rose-300 dark:hover:border-rose-700 transition-all shadow-xs cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold text-rose-500 dark:text-rose-400">&lt; 1 min</span>
+              <span className="text-base font-extrabold mt-0.5">Again</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[1]</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGrade('hard')}
+              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-700 transition-all shadow-xs cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold text-amber-500 dark:text-amber-400">4 min</span>
+              <span className="text-base font-extrabold mt-0.5">Hard</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[2]</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGrade('good')}
+              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all shadow-xs cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold text-blue-500 dark:text-blue-400">10 min</span>
+              <span className="text-base font-extrabold mt-0.5">Good</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[3]</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGrade('easy')}
+              className="group relative flex flex-col items-center justify-center p-3 rounded-xl border bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all shadow-xs cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold text-emerald-500 dark:text-emerald-400">1 day</span>
+              <span className="text-base font-extrabold mt-0.5">Easy</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">[4]</span>
+            </button>
+          </div>
+        </StructureFlashcardCardFace>
+      )}
     </div>
   );
 };

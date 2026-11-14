@@ -92,10 +92,10 @@ assert.ok(fileContent.includes('onClearAllHighlights'), 'Must provide onClearAll
 assert.ok(fileContent.includes('containerClassName="mt-2.5"'), 'Must pass containerClassName to PharmacophoreTagList');
 
 // Both inline canvas and modal canvas must receive activePharmacophores
-const canvasMatches = fileContent.match(/<SmilesCanvas[\s\S]*?\/>/g) || [];
-assert.ok(canvasMatches.length >= 2, 'Must render at least two SmilesCanvas instances (inline and modal)');
+const canvasMatches = fileContent.match(/<(?:Multi)?SmilesCanvas[\s\S]*?\/>/g) || [];
+assert.ok(canvasMatches.length >= 2, 'Must render at least two canvas instances (inline and modal)');
 const inlineCanvas = canvasMatches.find(c => c.includes('activePharmacophores={activePharmacophoresList}'));
-assert.ok(inlineCanvas, 'Inline SmilesCanvas must receive activePharmacophores={activePharmacophoresList}');
+assert.ok(inlineCanvas, 'Inline canvas must receive activePharmacophores={activePharmacophoresList}');
 
 // State reset on flip or structure id change
 assert.ok(

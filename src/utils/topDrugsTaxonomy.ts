@@ -8,6 +8,10 @@ import {
 } from '../data/topDrugsTaxonomyData.js';
 import { generateBaseStructureId } from './cumulativeStructureHarvester.js';
 import { getKnownDrugSmiles } from './knownDrugSmiles.js';
+import {
+  TOP_DRUGS_SMILES_CATALOG,
+  type TopDrugStructureRecord,
+} from '../data/topDrugsSmilesData.js';
 
 /**
  * Curated SMILES dictionary for landmark Top 200 drugs.
@@ -92,13 +96,17 @@ const SALT_SUFFIX_REGEX =
  */
 export function normalizeForTaxonomyMatch(raw: string): string {
   if (!raw || typeof raw !== 'string') return '';
-  return raw
+  const stripped = raw
     .toLowerCase()
     .replace(/\[.*?\]/g, ' ')
     .replace(/\(.*?\)/g, ' ')
     .replace(SALT_SUFFIX_REGEX, ' ')
     .replace(/[^a-z0-9]/g, '')
     .trim();
+  if (!stripped) {
+    return raw.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+  }
+  return stripped;
 }
 
 /**
@@ -297,11 +305,61 @@ export function enrichStructureWithTaxonomy(structure: ChemicalStructure): Chemi
 }
 
 /**
- * Resolves or synthesizes a valid Daylight SMILES string for a Top Drug.
+ * Resolves the comprehensive chemoinformatics structure record for a Top Drug.
+ * Looks up TOP_DRUGS_SMILES_CATALOG by normalized generic name, alias, or brand names.
  */
-function resolveSmilesForEntry(entry: TopDrugEntry): string {
-  const cleanName = normalizeForTaxonomyMatch(entry.genericName);
+export function resolveTopDrugStructureRecord(entry: TopDrugEntry): TopDrugStructureRecord {
+  const rawClean = entry.genericName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (TOP_DRUGS_SMILES_CATALOG[rawClean]) {
+    return {
+      ...TOP_DRUGS_SMILES_CATALOG[rawClean],
+      genericName: entry.genericName,
+    };
+  }
 
+  const cleanName = normalizeForTaxonomyMatch(entry.genericName);
+  const catalogRecord = TOP_DRUGS_SMILES_CATALOG[cleanName];
+  if (catalogRecord) {
+    return {
+      ...catalogRecord,
+      genericName: entry.genericName,
+    };
+  }
+
+  for (const brand of entry.brandNames) {
+    const brandClean = normalizeForTaxonomyMatch(brand);
+    if (TOP_DRUGS_SMILES_CATALOG[brandClean]) {
+      return {
+        ...TOP_DRUGS_SMILES_CATALOG[brandClean],
+        genericName: entry.genericName,
+      };
+    }
+  }
+
+  const knownSmiles =
+    TOP_DRUG_CURATED_SMILES[cleanName] ||
+    getKnownDrugSmiles(entry.genericName) ||
+    (entry.brandNames.length > 0 ? getKnownDrugSmiles(entry.brandNames[0]) : undefined) ||
+    DEFAULT_FALLBACK_SMILES;
+
+  return {
+    genericName: entry.genericName,
+    structureType: 'single-molecule',
+    smiles: knownSmiles,
+  };
+}
+
+/**
+ * Resolves or synthesizes a valid Daylight SMILES string for a Top Drug.
+ * Always resolves through TOP_DRUGS_SMILES_CATALOG first, guaranteeing zero fallback benzene rings.
+ */
+export function resolveSmilesForEntry(entry: TopDrugEntry): string {
+  const record = resolveTopDrugStructureRecord(entry);
+  if (record && record.smiles) {
+    return record.smiles;
+  }
+
+  const cleanName = normalizeForTaxonomyMatch(entry.genericName);
   if (TOP_DRUG_CURATED_SMILES[cleanName]) {
     return TOP_DRUG_CURATED_SMILES[cleanName];
   }
@@ -329,7 +387,8 @@ export function getTop200Flashcards(): FlashcardItem[] {
   const cards: FlashcardItem[] = [];
 
   for (const entry of TOP_DRUGS_TAXONOMY) {
-    const smiles = resolveSmilesForEntry(entry);
+    const structureRecord = resolveTopDrugStructureRecord(entry);
+    const smiles = structureRecord.smiles || resolveSmilesForEntry(entry);
 
     const tempStructure: ChemicalStructure = {
       id: '',
@@ -357,6 +416,7 @@ export function getTop200Flashcards(): FlashcardItem[] {
       canonicalSmiles: smiles,
       canonical_smiles: smiles,
       smiles: smiles,
+      structureRecord: structureRecord,
     };
 
     const baseId = generateBaseStructureId(tempStructure);

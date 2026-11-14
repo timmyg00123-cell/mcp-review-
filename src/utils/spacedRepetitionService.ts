@@ -19,6 +19,16 @@ import {
 export const FLASHCARD_STORAGE_KEY = 'mcp_flashcard_progress_v1';
 
 /**
+ * LocalStorage key for persisting Top 200 clinical monograph flashcard progress.
+ */
+export const TOP200_CLINICAL_STORAGE_KEY = 'mcp_top200_clinical_progress_v1';
+
+/**
+ * LocalStorage key for persisting the active Top 200 study mode ('structure' | 'clinical').
+ */
+export const TOP200_ACTIVE_MODE_STORAGE_KEY = 'mcp_top200_active_mode';
+
+/**
  * Result of rating a flashcard via spaced repetition.
  */
 export interface SpacedRepetitionRatingResult {
@@ -27,9 +37,10 @@ export interface SpacedRepetitionRatingResult {
 }
 
 /**
- * In-memory fallback cache when window.localStorage is unavailable (Node, SSR, private browsing).
+ * In-memory fallback cache when window.localStorage is unavailable (Node, SSR, private browsing),
+ * keyed by storageKey to ensure zero leakage across storage keys in SSR/Node/test environments.
  */
-let inMemoryFlashcardProgress: Record<string, Partial<FlashcardItem>> | null = null;
+let inMemoryFlashcardProgressByStorageKey: Record<string, Record<string, Partial<FlashcardItem>>> = {};
 
 /**
  * Safely accesses the storage object across browser window, globalThis, and SSR environments.
@@ -217,18 +228,20 @@ export function reQueueActiveSession(
 }
 
 /**
- * Loads saved flashcard progress from LocalStorage or in-memory cache.
+ * Loads saved flashcard progress from LocalStorage or in-memory cache for a specific storageKey.
  * Returns a map of structureId -> Partial<FlashcardItem>.
  */
-export function loadFlashcardProgress(): Record<string, Partial<FlashcardItem>> {
+export function loadFlashcardProgress(
+  storageKey: string = FLASHCARD_STORAGE_KEY
+): Record<string, Partial<FlashcardItem>> {
   const storage = getLocalStorage();
   if (storage) {
     try {
-      const raw = storage.getItem(FLASHCARD_STORAGE_KEY);
+      const raw = storage.getItem(storageKey);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-          inMemoryFlashcardProgress = parsed;
+          inMemoryFlashcardProgressByStorageKey[storageKey] = parsed;
           return { ...parsed };
         }
       }
@@ -237,24 +250,25 @@ export function loadFlashcardProgress(): Record<string, Partial<FlashcardItem>> 
     }
   }
 
-  if (inMemoryFlashcardProgress !== null) {
-    return { ...inMemoryFlashcardProgress };
+  if (inMemoryFlashcardProgressByStorageKey[storageKey] !== undefined) {
+    return { ...inMemoryFlashcardProgressByStorageKey[storageKey] };
   }
 
   return {};
 }
 
 /**
- * Persists flashcard progress map to LocalStorage and in-memory cache.
+ * Persists flashcard progress map to LocalStorage and in-memory cache for a specific storageKey.
  */
 export function saveFlashcardProgress(
-  cardStates: Record<string, Partial<FlashcardItem>>
+  cardStates: Record<string, Partial<FlashcardItem>>,
+  storageKey: string = FLASHCARD_STORAGE_KEY
 ): void {
-  inMemoryFlashcardProgress = { ...cardStates };
+  inMemoryFlashcardProgressByStorageKey[storageKey] = { ...cardStates };
   const storage = getLocalStorage();
   if (storage) {
     try {
-      storage.setItem(FLASHCARD_STORAGE_KEY, JSON.stringify(cardStates));
+      storage.setItem(storageKey, JSON.stringify(cardStates));
     } catch (e) {
       console.warn('Failed to save flashcard progress to storage:', e);
     }
@@ -262,14 +276,16 @@ export function saveFlashcardProgress(
 }
 
 /**
- * Clears saved flashcard progress from both LocalStorage and in-memory cache.
+ * Clears saved flashcard progress from both LocalStorage and in-memory cache for a specific storageKey.
  */
-export function clearFlashcardProgress(): void {
-  inMemoryFlashcardProgress = {};
+export function clearFlashcardProgress(
+  storageKey: string = FLASHCARD_STORAGE_KEY
+): void {
+  inMemoryFlashcardProgressByStorageKey[storageKey] = {};
   const storage = getLocalStorage();
   if (storage) {
     try {
-      storage.removeItem(FLASHCARD_STORAGE_KEY);
+      storage.removeItem(storageKey);
     } catch {}
   }
 }
@@ -281,9 +297,18 @@ export function clearFlashcardProgress(): void {
  */
 export function applyProgressToCards(
   cards: FlashcardItem[],
-  savedProgress?: Record<string, Partial<FlashcardItem>>
+  savedProgressOrStorageKey?: Record<string, Partial<FlashcardItem>> | string,
+  storageKey?: string
 ): FlashcardItem[] {
-  const progress = savedProgress ?? loadFlashcardProgress();
+  let progress: Record<string, Partial<FlashcardItem>>;
+  if (typeof savedProgressOrStorageKey === 'string') {
+    progress = loadFlashcardProgress(savedProgressOrStorageKey);
+  } else if (savedProgressOrStorageKey) {
+    progress = savedProgressOrStorageKey;
+  } else {
+    progress = loadFlashcardProgress(storageKey ?? FLASHCARD_STORAGE_KEY);
+  }
+
   return cards.map((card) => {
     const saved = progress[card.structureId];
     if (!saved) return card;
@@ -304,9 +329,24 @@ export function applyProgressToCards(
  */
 export function recordCardProgress(
   card: FlashcardItem,
-  existingProgress?: Record<string, Partial<FlashcardItem>>
+  existingProgressOrStorageKey?: Record<string, Partial<FlashcardItem>> | string,
+  storageKey?: string
 ): Record<string, Partial<FlashcardItem>> {
-  const progress = existingProgress ? { ...existingProgress } : loadFlashcardProgress();
+  let effectiveKey = FLASHCARD_STORAGE_KEY;
+  let progress: Record<string, Partial<FlashcardItem>>;
+
+  if (typeof existingProgressOrStorageKey === 'string') {
+    effectiveKey = existingProgressOrStorageKey;
+    progress = loadFlashcardProgress(effectiveKey);
+  } else {
+    if (storageKey) {
+      effectiveKey = storageKey;
+    }
+    progress = existingProgressOrStorageKey
+      ? { ...existingProgressOrStorageKey }
+      : loadFlashcardProgress(effectiveKey);
+  }
+
   progress[card.structureId] = {
     intervalMinutes: card.intervalMinutes,
     dueTimestamp: card.dueTimestamp,
@@ -315,7 +355,7 @@ export function recordCardProgress(
     isSuspended: card.isSuspended,
     struggleCount: card.struggleCount,
   };
-  saveFlashcardProgress(progress);
+  saveFlashcardProgress(progress, effectiveKey);
   return progress;
 }
 
