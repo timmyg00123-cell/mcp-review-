@@ -311,7 +311,7 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
           fallbackImageUrl={structure.pngUrl}
           cid={structure.cid}
           compoundName={structure.name}
-          activePharmacophores={isFlipped ? activePharmacophoresList : undefined}
+          activePharmacophores={activePharmacophoresList}
           width={isProminent ? 480 : 340}
           height={isProminent ? 260 : 220}
           className="w-full h-full flex items-center justify-center pointer-events-none"
@@ -537,8 +537,6 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                 molBlock={structure.pubchemMolBlock}
                 fallbackImageUrl={structure.pngUrl}
                 cid={structure.cid}
-                compoundName={structure.name}
-                activePharmacophores={isFlipped ? activePharmacophoresList : undefined}
                 width={400}
                 height={260}
                 className="w-full h-full flex items-center justify-center pointer-events-none"
@@ -763,7 +761,7 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                   fallbackImageUrl={structure.pngUrl}
                   cid={structure.cid}
                   compoundName={structure.name}
-                  activePharmacophores={isFlipped ? activePharmacophoresList : undefined}
+                  activePharmacophores={activePharmacophoresList}
                   width={340}
                   height={210}
                   className="w-full h-full flex items-center justify-center pointer-events-none"
