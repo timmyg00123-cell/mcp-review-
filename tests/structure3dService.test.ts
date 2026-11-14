@@ -178,6 +178,31 @@ async function runTests() {
     globalThis.fetch = originalFetch;
   }
 
+  // 7. Test multimeric PDB with multiple copies of the same ligand across chains A and B
+  console.log('7. Testing single-instance ligand pinning across multimeric chains...');
+  const multimerPdb = [
+    'HETATM 3001  C1  117 B 501      50.000  50.000  50.000  1.00 20.00           C',
+    'HETATM 3002  C2  117 B 501      51.000  50.000  50.000  1.00 20.00           C',
+    'HETATM 3003  O1  117 B 501      52.000  50.000  50.000  1.00 20.00           O',
+    'HETATM 3004  C1  117 A 401      10.000  10.000  10.000  1.00 20.00           C',
+    'HETATM 3005  C2  117 A 401      11.000  10.000  10.000  1.00 20.00           C',
+    'HETATM 3006  O1  117 A 401      12.000  10.000  10.000  1.00 20.00           O',
+    'HETATM 3007  ZN   ZN A 701      12.500  10.500  10.500  1.00 20.00          ZN',
+    'HETATM 3008  ZN   ZN B 702      90.000  90.000  90.000  1.00 20.00          ZN',
+  ].join('\n');
+
+  const pinned = identifyLigandResidue(multimerPdb, '1HW');
+  assert.ok(pinned !== null, 'Should resolve aliased 1HW -> 117');
+  assert.strictEqual(pinned.resn, '117');
+  assert.strictEqual(pinned.chain, 'A', 'Should prefer Chain A instance');
+  assert.strictEqual(pinned.resi, 401, 'Should extract residue sequence number 401');
+  assert.strictEqual(pinned.atomCount, 3, 'Should count atoms of single instance (3), not sum of all copies (6)');
+  assert.strictEqual(pinned.instanceCount, 2, 'Should report 2 total instances across chains');
+  assert.ok(Array.isArray(pinned.catalyticMetals) && pinned.catalyticMetals.length === 1, 'Should detect 1 nearby catalytic ZN within 5Å');
+  assert.strictEqual(pinned.catalyticMetals![0].resn, 'ZN');
+  assert.strictEqual(pinned.catalyticMetals![0].chain, 'A');
+  assert.strictEqual(pinned.catalyticMetals![0].resi, 701);
+
   console.log('✅ All structure3dService and canonicalTargets tests passed successfully!');
 }
 

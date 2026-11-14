@@ -5,9 +5,19 @@
  * exclusion of crystallographic additives/solvents, and apo protein fallback logic.
  */
 
+export interface CatalyticMetalInfo {
+  resn: string;
+  chain: string;
+  resi: number;
+}
+
 export interface DetectedLigandInfo {
   resn: string;
   atomCount: number;
+  chain?: string;
+  resi?: number;
+  instanceCount?: number;
+  catalyticMetals?: CatalyticMetalInfo[];
   description?: string;
 }
 
@@ -42,10 +52,15 @@ export const EXCLUDED_HETERO_RESIDUES: readonly string[] = [
   'CLR', // Cholesterol / membrane lipid additive
   'OLC', // (2R)-2,3-dihydroxypropyl (9Z)-octadec-9-enoate (monoolein lipid)
   'OLA', // Oleic acid lipid
+  'LFA', // Eicosane / lipid fragment
   'BOG', // Octyl beta-D-glucopyranoside detergent
   'OG',  // Octyl glucoside
   'PLM', // Palmitic acid
   '12P', // Polyethylene glycol derivative
+  'PGE', // Triethylene glycol
+  'PG4', // Tetraethylene glycol
+  'P6G', // Hexaethylene glycol
+  'PE4', // Polyethylene glycol
   'BU1', // 1,4-butanediol
   'ACM', // Acetamide
   'HEM', // Heme cofactor
@@ -55,10 +70,14 @@ export const EXCLUDED_HETERO_RESIDUES: readonly string[] = [
   'CD',  // Cadmium ion
   'SO4', // Sulfate ion
   'PO4', // Phosphate ion
+  'CIT', // Citrate buffer
+  'TAR', // Tartrate buffer
   'MG',  // Magnesium
   'ZN',  // Zinc
   'NA',  // Sodium
   'CL',  // Chloride
+  'IOD', // Iodide
+  'BR',  // Bromide
   'CA',  // Calcium
   'K',   // Potassium
   'GOL', // Glycerol
@@ -68,6 +87,11 @@ export const EXCLUDED_HETERO_RESIDUES: readonly string[] = [
   'ACT', // Acetate
   'BMA', // Beta-D-mannose
   'NAG', // N-acetylglucosamine
+  'MAN', // Alpha-D-mannose
+  'FUC', // Alpha-L-fucose
+  'GAL', // Beta-D-galactose
+  'SUC', // Sucrose
+  'MAL', // Maltose
   'FMT', // Formate
   'TRS', // Tris buffer
   'BME', // Beta-mercaptoethanol
@@ -75,14 +99,20 @@ export const EXCLUDED_HETERO_RESIDUES: readonly string[] = [
   'MPD', // 2-methyl-2,4-pentanediol
 ];
 
+const CATALYTIC_METAL_CODES = new Set(['ZN', 'MG', 'FE', 'MN']);
+
+interface LigandInstanceRecord {
+  resn: string;
+  chain: string;
+  resi: number;
+  atomCount: number;
+  coords: { x: number; y: number; z: number }[];
+}
+
 /**
- * Identifies the primary small-molecule ligand in a PDB coordinate text string.
- *
- * 1. Filters out solvent and crystallization additives in EXCLUDED_HETERO_RESIDUES.
- * 2. If preferredLigandCode is provided and found, returns that ligand.
- * 3. Otherwise, groups HETATM records by residue name and selects the residue with
- *    the largest atom count (representing the primary drug ligand).
- * 4. Returns null if no non-excluded hetero residue exists (e.g. apo protein).
+ * Identifies the primary small-molecule ligand in a PDB coordinate text string,
+ * pinning to a single active-site instance (preferring Chain A) and detecting
+ * any nearby catalytic metal cofactors within 5.0 Å.
  */
 export function identifyLigandResidue(
   pdbData: string,
@@ -94,56 +124,128 @@ export function identifyLigandResidue(
   const normalizedPreferred = preferredLigandCode ? preferredLigandCode.trim().toUpperCase() : undefined;
 
   const lines = pdbData.split(/\r?\n/);
-  const residueAtomCounts = new Map<string, number>();
+  const instancesByKey = new Map<string, LigandInstanceRecord>();
+  const metalCandidates: { resn: string; chain: string; resi: number; x: number; y: number; z: number }[] = [];
 
   for (const line of lines) {
     if (line.startsWith('HETATM') && line.length >= 20) {
       const resn = line.substring(17, 20).trim().toUpperCase();
-      if (!resn || excludedSet.has(resn)) {
+      if (!resn) continue;
+
+      const rawChain = line.length >= 22 ? line.substring(21, 22).trim() : '';
+      const chain = rawChain || 'A';
+      const rawResi = line.length >= 26 ? parseInt(line.substring(22, 26).trim(), 10) : 1;
+      const resi = Number.isFinite(rawResi) ? rawResi : 1;
+
+      const x = line.length >= 38 ? parseFloat(line.substring(30, 38).trim()) : NaN;
+      const y = line.length >= 46 ? parseFloat(line.substring(38, 46).trim()) : NaN;
+      const z = line.length >= 54 ? parseFloat(line.substring(46, 54).trim()) : NaN;
+      const hasCoords = Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z);
+
+      if (CATALYTIC_METAL_CODES.has(resn) && hasCoords) {
+        metalCandidates.push({ resn, chain, resi, x, y, z });
+      }
+
+      if (excludedSet.has(resn)) {
         continue;
       }
-      residueAtomCounts.set(resn, (residueAtomCounts.get(resn) || 0) + 1);
+
+      const key = `${resn}:${chain}:${resi}`;
+      let rec = instancesByKey.get(key);
+      if (!rec) {
+        rec = { resn, chain, resi, atomCount: 0, coords: [] };
+        instancesByKey.set(key, rec);
+      }
+      rec.atomCount += 1;
+      if (hasCoords) {
+        rec.coords.push({ x, y, z });
+      }
     }
   }
 
-  if (residueAtomCounts.size === 0) {
+  if (instancesByKey.size === 0) {
     return null;
   }
 
-  // If preferred ligand code is supplied and present, select it (or its PDB component alias)
+  // Group instances by resn
+  const instancesByResn = new Map<string, LigandInstanceRecord[]>();
+  for (const rec of instancesByKey.values()) {
+    const list = instancesByResn.get(rec.resn) || [];
+    list.push(rec);
+    instancesByResn.set(rec.resn, list);
+  }
+
+  let targetResn = '';
+
+  // 1. Check preferredLigandCode (and its PDB component alias)
   if (normalizedPreferred) {
     const candidateCodes = [normalizedPreferred];
     if (LIGAND_CODE_ALIASES[normalizedPreferred]) {
       candidateCodes.push(LIGAND_CODE_ALIASES[normalizedPreferred]);
     }
     for (const code of candidateCodes) {
-      if (residueAtomCounts.has(code)) {
-        return {
-          resn: code,
-          atomCount: residueAtomCounts.get(code)!,
-        };
+      if (instancesByResn.has(code)) {
+        targetResn = code;
+        break;
       }
     }
   }
 
-  // Otherwise, select the residue with the largest atom count
-  let bestResn = '';
-  let maxCount = -1;
-
-  for (const [resn, count] of residueAtomCounts.entries()) {
-    if (count > maxCount) {
-      maxCount = count;
-      bestResn = resn;
+  // 2. Otherwise select the residue type whose largest single instance has the most atoms
+  if (!targetResn) {
+    let maxSingleAtomCount = -1;
+    for (const [resn, list] of instancesByResn.entries()) {
+      const largestInResn = Math.max(...list.map((inst) => inst.atomCount));
+      if (largestInResn > maxSingleAtomCount) {
+        maxSingleAtomCount = largestInResn;
+        targetResn = resn;
+      }
     }
   }
 
-  if (!bestResn) {
+  if (!targetResn) {
     return null;
   }
 
+  const candidateInstances = instancesByResn.get(targetResn)!;
+
+  // Prefer Chain A (with largest atomCount), otherwise highest atomCount in file order
+  const selectedInstance = [...candidateInstances].sort((a, b) => {
+    const aIsChainA = a.chain.toUpperCase() === 'A' ? 1 : 0;
+    const bIsChainA = b.chain.toUpperCase() === 'A' ? 1 : 0;
+    if (aIsChainA !== bIsChainA) return bIsChainA - aIsChainA;
+    return b.atomCount - a.atomCount;
+  })[0];
+
+  // Detect any catalytic metal within 5.0 Å of the selected ligand instance
+  const nearbyMetals: CatalyticMetalInfo[] = [];
+  const seenMetals = new Set<string>();
+  const cutoffSq = 5.0 * 5.0;
+
+  if (selectedInstance.coords.length > 0 && metalCandidates.length > 0) {
+    for (const metal of metalCandidates) {
+      const metalKey = `${metal.resn}:${metal.chain}:${metal.resi}`;
+      if (seenMetals.has(metalKey)) continue;
+      const isClose = selectedInstance.coords.some((c) => {
+        const dx = c.x - metal.x;
+        const dy = c.y - metal.y;
+        const dz = c.z - metal.z;
+        return dx * dx + dy * dy + dz * dz <= cutoffSq;
+      });
+      if (isClose) {
+        seenMetals.add(metalKey);
+        nearbyMetals.push({ resn: metal.resn, chain: metal.chain, resi: metal.resi });
+      }
+    }
+  }
+
   return {
-    resn: bestResn,
-    atomCount: maxCount,
+    resn: selectedInstance.resn,
+    atomCount: selectedInstance.atomCount,
+    chain: selectedInstance.chain,
+    resi: selectedInstance.resi,
+    instanceCount: candidateInstances.length,
+    ...(nearbyMetals.length > 0 ? { catalyticMetals: nearbyMetals } : {}),
   };
 }
 
