@@ -497,6 +497,7 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
                   : FLASHCARD_STORAGE_KEY
               }
               renderMode={deckMode === 'top200' ? top200SubMode : 'structure'}
+              initialFilterMode={deckMode === 'top200' ? 'taxonomy' : 'curriculum'}
               onSessionComplete={handleFlashcardSessionComplete}
               onClose={onClose}
             />
