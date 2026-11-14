@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import {
   findMedChemProfile,
   CANONICAL_MEDCHEM_PROFILES,
+  resolvePocketResidueColor,
 } from '../src/data/canonicalPharmacophorePkData';
 import type {
   TargetMedChemProfile,
@@ -139,6 +140,27 @@ async function runTests() {
   assert.strictEqual(findMedChemProfile(''), undefined);
   assert.strictEqual(findMedChemProfile('   '), undefined);
   assert.strictEqual(findMedChemProfile('XXXX'), undefined);
+
+  // 6. Verify sub-pocket pairing and colorAccent resolution on all keyPocketResidues
+  console.log('6. Testing sub-pocket pairing and resolvePocketResidueColor...');
+  for (const profile of CANONICAL_MEDCHEM_PROFILES) {
+    const groupIds = new Set(profile.pharmacophoreGroups.map((g) => g.id));
+    for (const residue of profile.keyPocketResidues) {
+      assert.ok(
+        typeof residue.subPocketName === 'string' && residue.subPocketName.length > 0,
+        `Residue ${residue.label} in ${profile.targetGeneSymbol} must define subPocketName`
+      );
+      assert.ok(
+        residue.pharmacophoreGroupId && groupIds.has(residue.pharmacophoreGroupId),
+        `Residue ${residue.label} in ${profile.targetGeneSymbol} must link to a valid pharmacophoreGroupId`
+      );
+      const color = resolvePocketResidueColor(residue, profile);
+      assert.ok(
+        /^#[0-9a-fA-F]{6}$/.test(color),
+        `Resolved color '${color}' for ${residue.label} must be a 6-digit hex color`
+      );
+    }
+  }
 
   console.log('All tests passed successfully!');
 }

@@ -1,4 +1,8 @@
-import type { TargetMedChemProfile } from '../types/structure3d';
+import type {
+  TargetMedChemProfile,
+  KeyPocketResidueContact,
+  InteractionType,
+} from '../types/structure3d';
 
 /**
  * Curated medicinal chemistry profiles for curricular drug targets.
@@ -74,6 +78,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Cys97 (TM3)',
         interactionType: 'covalent',
+        subPocketName: 'TM3 Covalent Disulfide Sub-pocket',
+        pharmacophoreGroupId: 'p2ry12_thiol_warhead',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Forms permanent covalent disulfide bond with clopidogrel active metabolite thiol, resulting in irreversible platelet inhibition for the 7-10 day platelet lifespan.',
       },
       {
@@ -82,6 +89,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Arg256 (TM6)',
         interactionType: 'ionic',
+        subPocketName: 'TM6/TM7 Lipophilic & Cationic Sub-pocket',
+        pharmacophoreGroupId: 'p2ry12_chlorophenyl',
+        colorAccent: '#3b82f6',
         clinicalImpact: 'Positively charged arginine interacts with negative electrostatic surface of nucleotide/antagonist ligands, critical for high-affinity receptor locking.',
       },
       {
@@ -90,6 +100,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Lys280 (TM7)',
         interactionType: 'hydrogen-bond',
+        subPocketName: 'Extracellular Vestibule Entrance Pocket',
+        pharmacophoreGroupId: 'p2ry12_ester_esterase',
+        colorAccent: '#10b981',
         clinicalImpact: 'Stabilizes the antagonist backbone in the extracellular vestibule, preventing endogenous ADP from inducing receptor conformational collapse.',
       },
     ],
@@ -162,6 +175,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Glu384 (Catalytic Base)',
         interactionType: 'hydrogen-bond',
+        subPocketName: 'Catalytic Zn²⁺ & Transition-State Pocket',
+        pharmacophoreGroupId: 'ace_zinc_carboxylate',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Acts as general acid-base catalytic residue; directly H-bonds with the enalaprilat secondary amine, locking the transition state mimic.',
       },
       {
@@ -170,6 +186,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Lys511 (S2\' Anchor)',
         interactionType: 'ionic',
+        subPocketName: 'S2\' Cationic Proline Sub-pocket',
+        pharmacophoreGroupId: 'ace_proline_p2_prime',
+        colorAccent: '#8b5cf6',
         clinicalImpact: 'Forms a critical salt bridge with the terminal carboxylate of the proline ring, providing sub-nanomolar binding affinity.',
       },
       {
@@ -178,6 +197,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Tyr520 (S2\' Pocket)',
         interactionType: 'hydrogen-bond',
+        subPocketName: 'S1/S2\' Recognition Sub-pocket',
+        pharmacophoreGroupId: 'ace_phenethyl_p1',
+        colorAccent: '#3b82f6',
         clinicalImpact: 'H-bonds with C-terminal carboxylate, stabilizing the inhibitor in the substrate recognition subsite.',
       },
     ],
@@ -250,6 +272,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Arg167 (TM4 Anchor)',
         interactionType: 'ionic',
+        subPocketName: 'TM4/TM5 Diacid Salt-Bridge Sub-pocket',
+        pharmacophoreGroupId: 'agtr1_biphenyl_tetrazole',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Forms strong salt bridge with the acidic tetrazole and carboxylate groups of sartans; mutation abolishes ARB therapeutic binding.',
       },
       {
@@ -258,6 +283,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Lys199 (TM5)',
         interactionType: 'hydrogen-bond',
+        subPocketName: 'Orthosteric Tetrazole H-Bond Sub-pocket',
+        pharmacophoreGroupId: 'agtr1_biphenyl_tetrazole',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Coordinates the tetrazole nitrogen atoms via direct hydrogen bonds, stabilizing the antagonist in the orthosteric binding site.',
       },
       {
@@ -266,6 +294,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Phe182 (ECL2)',
         interactionType: 'pi-stacking',
+        subPocketName: 'ECL2/TM6 Aromatic Imidazole Sub-pocket',
+        pharmacophoreGroupId: 'agtr1_imidazole_core',
+        colorAccent: '#3b82f6',
         clinicalImpact: 'Provides aromatic pi-pi stacking with the biphenyl core, restricting extracellular receptor loop mobility.',
       },
     ],
@@ -338,6 +369,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Lys735 (Catalytic Residue)',
         interactionType: 'ionic',
+        subPocketName: 'HMG Transition-State Catalytic Pocket',
+        pharmacophoreGroupId: 'hmgcr_dihydroxyheptanoate',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Forms bidentate salt bridge and hydrogen bond with the terminal C1 carboxylate of the statin, directly competing with the natural HMG substrate.',
       },
       {
@@ -346,6 +380,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Arg590 (Substrate Channel)',
         interactionType: 'ionic',
+        subPocketName: 'Fluorophenyl Hydrophobic Cleft',
+        pharmacophoreGroupId: 'hmgcr_fluorophenyl',
+        colorAccent: '#3b82f6',
         clinicalImpact: 'Interacts with the dihydroxy acid C5-hydroxyl and carboxylate, essential for picomolar to nanomolar competitive enzyme inhibition.',
       },
       {
@@ -354,6 +391,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Ser684 (Hydroxyl Network)',
         interactionType: 'hydrogen-bond',
+        subPocketName: 'Central Pyrrole Carboxamide Pocket',
+        pharmacophoreGroupId: 'hmgcr_central_pyrrole',
+        colorAccent: '#10b981',
         clinicalImpact: 'Forms stereospecific hydrogen bond with the C3-hydroxyl group of the heptanoic acid moiety; loss of this stereocenter drops potency 100-fold.',
       },
     ],
@@ -426,6 +466,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Asp121 (Asp3.32 conserved)',
         interactionType: 'ionic',
+        subPocketName: 'TM3 Orthosteric Amine Salt-Bridge Pocket',
+        pharmacophoreGroupId: 'adrb1_aryloxypropanolamine',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Forms mandatory ionic salt bridge with protonated basic amine; point mutation completely ablates adrenergic ligand binding and signaling.',
       },
       {
@@ -434,6 +477,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Asn329 (Asn7.39 TM7)',
         interactionType: 'hydrogen-bond',
+        subPocketName: 'TM7 Stereoselective Beta-Hydroxyl Pocket',
+        pharmacophoreGroupId: 'adrb1_beta_hydroxyl',
+        colorAccent: '#3b82f6',
         clinicalImpact: 'Forms critical stereoselective hydrogen bond with the (S)-enantiomer beta-hydroxyl group, accounting for enantiomer-specific potency.',
       },
       {
@@ -442,6 +488,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Tyr307 (Tyr7.17)',
         interactionType: 'pi-stacking',
+        subPocketName: 'TM2/TM7 Cardioselective Vestibule Pocket',
+        pharmacophoreGroupId: 'adrb1_methoxyethyl_tail',
+        colorAccent: '#10b981',
         clinicalImpact: 'Stabilizes the aromatic ring of the antagonist in the orthosteric binding pocket via edge-to-face pi interactions.',
       },
     ],
@@ -514,6 +563,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Val523 (Gatekeeper Residue)',
         interactionType: 'hydrophobic',
+        subPocketName: 'COX-2 Selective Hydrophilic Side-Pocket Gate',
+        pharmacophoreGroupId: 'ptgs2_sulfonamide_warhead',
+        colorAccent: '#ef4444',
         clinicalImpact: 'The single-methyl difference (Val523 in COX-2 vs bulkier Ile523 in COX-1) creates an accessible side pocket that enables selective COX-2 inhibition while sparing gastric COX-1.',
       },
       {
@@ -522,6 +574,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Arg513 (Side Pocket Basic Residue)',
         interactionType: 'ionic',
+        subPocketName: 'COX-2 Selective Sulfonamide Side Pocket',
+        pharmacophoreGroupId: 'ptgs2_sulfonamide_warhead',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Forms ionic/H-bond interactions with the sulfonamide oxygens inside the COX-2 specific side pocket; absent in COX-1 (His513).',
       },
       {
@@ -530,6 +585,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Tyr385 (Catalytic Radical)',
         interactionType: 'hydrogen-bond',
+        subPocketName: 'Cyclooxygenase Catalytic Apex Channel',
+        pharmacophoreGroupId: 'ptgs2_pyrazole_core',
+        colorAccent: '#3b82f6',
         clinicalImpact: 'Catalytic site where tyrosyl radical initiates arachidonate cyclooxygenation; blocked stereochemically by diarylpyrazole insertion.',
       },
     ],
@@ -602,6 +660,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Asp27 (Conserved Catalytic Acid)',
         interactionType: 'ionic',
+        subPocketName: 'Deep Pteridine Catalytic Pocket',
+        pharmacophoreGroupId: 'dhfr_pteridine_ring',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Forms critical bidentate salt bridge and hydrogen bond with protonated N1 and 2-amino group of methotrexate; essential for picomolar inhibitor affinity.',
       },
       {
@@ -610,6 +671,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Arg70 (Solvent Groove)',
         interactionType: 'ionic',
+        subPocketName: 'Basic Glutamate Solvent Groove Pocket',
+        pharmacophoreGroupId: 'dhfr_glutamate_tail',
+        colorAccent: '#3b82f6',
         clinicalImpact: 'Forms ionic salt bridges with the gamma-carboxylate of the glutamate tail; required for initial drug alignment and folylpolyglutamate retention.',
       },
       {
@@ -618,6 +682,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Phe31 (Substrate Channel)',
         interactionType: 'pi-stacking',
+        subPocketName: 'Central PABA Hydrophobic Channel',
+        pharmacophoreGroupId: 'dhfr_paba_linker',
+        colorAccent: '#10b981',
         clinicalImpact: 'Provides pi-pi stacking interactions with the central benzoyl ring, stabilizing the flipped orientation unique to antifolates.',
       },
     ],
@@ -690,6 +757,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Met793 (Kinase Hinge Backbone)',
         interactionType: 'hydrogen-bond',
+        subPocketName: 'Kinase Hinge Adenine-Mimetic Sub-pocket',
+        pharmacophoreGroupId: 'egfr_quinazoline_core',
+        colorAccent: '#ef4444',
         clinicalImpact: 'Backbone amide NH provides key hydrogen bond to N1 of quinazoline ring, mimicking the natural adenine ring interaction of ATP.',
       },
       {
@@ -698,6 +768,9 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Thr790 (Gatekeeper Residue)',
         interactionType: 'hydrophobic',
+        subPocketName: 'Gatekeeper Hydrophobic Back Pocket',
+        pharmacophoreGroupId: 'egfr_aniline_ethynyl',
+        colorAccent: '#3b82f6',
         clinicalImpact: 'Gatekeeper residue controlling access to back hydrophobic pocket; T790M mutation introduces bulky methionine side chain causing steric resistance to 1st-gen inhibitors.',
       },
       {
@@ -706,11 +779,45 @@ export const CANONICAL_MEDCHEM_PROFILES: TargetMedChemProfile[] = [
         chain: 'A',
         label: 'Cys797 (Solvent Boundary & Covalent Target)',
         interactionType: 'hydrophobic',
+        subPocketName: 'Solvent Front Cleft & Covalent Anchor',
+        pharmacophoreGroupId: 'egfr_bis_methoxyethoxy',
+        colorAccent: '#10b981',
         clinicalImpact: 'Located at edge of ATP cleft; non-covalent van der Waals contact for erlotinib, but forms irreversible covalent bond with 3rd-generation inhibitors (osimertinib).',
       },
     ],
   },
 ];
+
+const INTERACTION_COLOR_FALLBACKS: Record<InteractionType, string> = {
+  covalent: '#ef4444',
+  coordination: '#ef4444',
+  ionic: '#8b5cf6',
+  'hydrogen-bond': '#f59e0b',
+  'pi-stacking': '#3b82f6',
+  hydrophobic: '#10b981',
+};
+
+/**
+ * Resolves the sub-pocket accent hex color for a pocket residue contact,
+ * matching its paired pharmacophore group's colorAccent or falling back to its interactionType role color.
+ */
+export function resolvePocketResidueColor(
+  residue: KeyPocketResidueContact,
+  profile?: TargetMedChemProfile
+): string {
+  if (residue.colorAccent && /^#[0-9a-fA-F]{6}$/.test(residue.colorAccent)) {
+    return residue.colorAccent;
+  }
+  if (residue.pharmacophoreGroupId && profile?.pharmacophoreGroups) {
+    const matchedGroup = profile.pharmacophoreGroups.find(
+      (g) => g.id === residue.pharmacophoreGroupId
+    );
+    if (matchedGroup?.colorAccent && /^#[0-9a-fA-F]{6}$/.test(matchedGroup.colorAccent)) {
+      return matchedGroup.colorAccent;
+    }
+  }
+  return INTERACTION_COLOR_FALLBACKS[residue.interactionType] || '#10b981';
+}
 
 /**
  * Fast lookup helper for canonical medicinal chemistry targets.

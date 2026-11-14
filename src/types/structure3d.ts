@@ -40,6 +40,9 @@ export interface KeyPocketResidueContact {
   label: string;
   interactionType: InteractionType;
   clinicalImpact: string;
+  subPocketName?: string;
+  pharmacophoreGroupId?: string;
+  colorAccent?: string;
 }
 
 export interface TargetMedChemProfile {
