@@ -59,12 +59,32 @@ for (const monograph of Object.values(TOP_DRUGS_CLINICAL_CATALOG)) {
 }
 
 /**
- * Resolves a clinical monograph for a TopDrugEntry.
+ * Resolves a clinical monograph for a TopDrugEntry or drug generic/brand name.
  * If cataloged, returns the verified monograph.
  * If uncataloged (e.g. synthetic or novel experimental compound), synthesizes
  * a structurally sound, complete 12-domain clinical monograph.
  */
-export function resolveTopDrugClinicalMonograph(entry: TopDrugEntry): TopDrugClinicalMonograph {
+export function resolveTopDrugClinicalMonograph(
+  entryOrDrugName: TopDrugEntry | string
+): TopDrugClinicalMonograph {
+  if (typeof entryOrDrugName === 'string') {
+    const trimmed = entryOrDrugName.trim();
+    const directLookup = getTopDrugClinicalMonograph(trimmed);
+    if (directLookup) {
+      return directLookup;
+    }
+    const syntheticEntry: TopDrugEntry = {
+      therapeuticClassNumber: 99,
+      genericName: trimmed,
+      brandNames: [trimmed],
+      broadPharmacologicClass: 'Pharmacotherapeutic Agent',
+      specificPharmacologicClass: 'Pharmacotherapeutic Agent',
+      therapeuticCategory: 'Clinical Therapeutic Agent',
+    };
+    return resolveTopDrugClinicalMonograph(syntheticEntry);
+  }
+
+  const entry = entryOrDrugName;
   // 1. Direct match by exact generic name
   const directMatch = TOP_DRUGS_CLINICAL_CATALOG[entry.genericName];
   if (directMatch) {

@@ -9,6 +9,11 @@ import { getCumulativeQuestionBank } from '../data/cumulativeQuizData';
 import { harvestCumulativeFlashcards } from '../utils/cumulativeStructureHarvester';
 import { getTop200Flashcards } from '../utils/topDrugsTaxonomy';
 import { generateStruggleReport } from '../utils/struggleDiagnosticService';
+import {
+  FLASHCARD_STORAGE_KEY,
+  TOP200_CLINICAL_STORAGE_KEY,
+  TOP200_ACTIVE_MODE_STORAGE_KEY,
+} from '../utils/spacedRepetitionService';
 import { CumulativePracticeTestView } from './CumulativePracticeTestView';
 import { StructureFlashcardDeck } from './StructureFlashcardDeck';
 import { StruggleDiagnosticOverview } from './StruggleDiagnosticOverview';
@@ -26,6 +31,8 @@ import {
 
 export type PracticeLabTab = 'practice-test' | 'flashcards' | 'diagnostics';
 export type FlashcardDeckMode = 'curriculum' | 'top200';
+export type Top200CardSubMode = 'structure' | 'clinical';
+export { TOP200_ACTIVE_MODE_STORAGE_KEY };
 
 export interface PracticeLabViewProps {
   initialTab?: PracticeLabTab;
@@ -56,6 +63,32 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
   const [activeReport, setActiveReport] = useState<StruggleDiagnosticReport | null>(null);
   const [drillCandidateIds, setDrillCandidateIds] = useState<string[]>([]);
   const [deckMode, setDeckMode] = useState<FlashcardDeckMode>(initialDeckMode);
+  // Active sub-mode when deckMode === 'top200': 'structure' | 'clinical'
+  // Persisted to localStorage: 'mcp_top200_active_mode' (via TOP200_ACTIVE_MODE_STORAGE_KEY)
+  const [top200SubMode, setTop200SubMode] = useState<Top200CardSubMode>(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const saved = window.localStorage.getItem(TOP200_ACTIVE_MODE_STORAGE_KEY);
+        if (saved === 'clinical' || saved === 'structure') {
+          return saved;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return 'structure';
+  });
+
+  const handleTop200SubModeChange = (mode: Top200CardSubMode) => {
+    setTop200SubMode(mode);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        window.localStorage.setItem(TOP200_ACTIVE_MODE_STORAGE_KEY, mode);
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  };
 
   const currentExam = useMemo(() => {
     return activeExam || getExamDefinition(activeExamId);
@@ -157,6 +190,11 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
 
   // Handle drilling struggled structures from diagnostics overview
   const handleDrillStruggled = (remediationIds: string[]) => {
+    // If in Top 200 clinical mode, maintain clinical study focus in flashcard deck rather than directing to chemistry SAR practice questions
+    if (deckMode === 'top200' && top200SubMode === 'clinical') {
+      setActiveTab('flashcards');
+      return;
+    }
     setDrillCandidateIds(remediationIds);
     setActiveTab('practice-test');
   };
@@ -329,77 +367,136 @@ export const PracticeLabView: React.FC<PracticeLabViewProps> = ({
         {/* TAB 2: RAPID STRUCTURE FLASHCARDS */}
         {activeTab === 'flashcards' && (
           <div className="p-3 sm:p-6 space-y-4">
-            {/* Deck Preset Selector */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl shadow-xs">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Deck Preset:
-                </span>
-                <div
-                  className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700/60"
-                  role="tablist"
-                  aria-label="Flashcard Deck Preset"
-                >
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={deckMode === 'curriculum'}
-                    onClick={() => setDeckMode('curriculum')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-                      deckMode === 'curriculum'
-                        ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 font-semibold shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
+            {/* Deck Preset & Top 200 Mode Switcher Bar */}
+            <div className="flex flex-col gap-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl shadow-xs">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    Deck Preset:
+                  </span>
+                  <div
+                    className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700/60"
+                    role="tablist"
+                    aria-label="Flashcard Deck Preset"
                   >
-                    <span>Curriculum Structures</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={deckMode === 'curriculum'}
+                      onClick={() => setDeckMode('curriculum')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
                         deckMode === 'curriculum'
-                          ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
-                          : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                          ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 font-semibold shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                       }`}
                     >
-                      {harvestedCards.length}
-                    </span>
-                  </button>
+                      <span>Curriculum Structures</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                          deckMode === 'curriculum'
+                            ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
+                            : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                        }`}
+                      >
+                        {harvestedCards.length}
+                      </span>
+                    </button>
 
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={deckMode === 'top200'}
-                    onClick={() => setDeckMode('top200')}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-                      deckMode === 'top200'
-                        ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 font-semibold shadow-xs'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    <span>Top 200 Drugs Catalog</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={deckMode === 'top200'}
+                      onClick={() => setDeckMode('top200')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
                         deckMode === 'top200'
-                          ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
-                          : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                          ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 font-semibold shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                       }`}
                     >
-                      {top200Cards.length}
-                    </span>
-                  </button>
+                      <span>Top 200 Drugs Catalog</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                          deckMode === 'top200'
+                            ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
+                            : 'bg-slate-200/60 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'
+                        }`}
+                      >
+                        {top200Cards.length}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  {deckMode === 'curriculum' ? (
+                    <span>Exam-aligned chemical structures harvested across review modules</span>
+                  ) : (
+                    <span>Standalone 39-class national outpatient pharmacy catalog (250 drugs)</span>
+                  )}
                 </div>
               </div>
 
-              <div className="text-xs text-slate-500 dark:text-slate-400">
-                {deckMode === 'curriculum' ? (
-                  <span>Exam-aligned chemical structures harvested across review modules</span>
-                ) : (
-                  <span>Standalone 39-class national outpatient pharmacy catalog (250 drugs)</span>
-                )}
-              </div>
+              {/* Segmented Mode Switcher for Top 200 Drugs */}
+              {deckMode === 'top200' && (
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                      Study Mode:
+                    </span>
+                    <div
+                      className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700/60"
+                      role="tablist"
+                      aria-label="Top 200 Study Mode"
+                    >
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={top200SubMode === 'structure'}
+                        onClick={() => handleTop200SubModeChange('structure')}
+                        className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                          top200SubMode === 'structure'
+                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 font-semibold shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        <span>🧪 Chemical Structure Mode</span>
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={top200SubMode === 'clinical'}
+                        onClick={() => handleTop200SubModeChange('clinical')}
+                        className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                          top200SubMode === 'clinical'
+                            ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 font-semibold shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        <span>📋 Clinical Monograph Mode</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {top200SubMode === 'structure' ? (
+                      <span>Blinded 2D chemical structure recognition &amp; pharmacophore tags</span>
+                    ) : (
+                      <span>Comprehensive clinical monographs, dosing, pearls &amp; black box warnings</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <StructureFlashcardDeck
-              key={deckMode}
+              key={`${deckMode}-${deckMode === 'top200' ? top200SubMode : 'structure'}`}
               cards={activeFlashcards}
+              storageKey={
+                deckMode === 'top200' && top200SubMode === 'clinical'
+                  ? TOP200_CLINICAL_STORAGE_KEY
+                  : FLASHCARD_STORAGE_KEY
+              }
+              renderMode={deckMode === 'top200' ? top200SubMode : 'structure'}
               onSessionComplete={handleFlashcardSessionComplete}
               onClose={onClose}
             />
