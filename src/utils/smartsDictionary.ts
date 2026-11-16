@@ -53,7 +53,7 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'tetrazole': 'c1nnnn1',
 
   // Fused Nitrogen Bicycles & Polycycles
-  'indole': 'c1ccc2[nH]ccc2c1',
+  'indole': 'c1ccc2c(c1)cc[nX3]2',
   'indoline': 'C1Cc2ccccc2N1',
   'isoindole': 'c1ccc2c[nH]cc2c1',
   'indolizine': 'c1ccn2cccc2c1',
@@ -79,7 +79,10 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'purine': 'c1ncnc2nc[nH]c12',
   'adenine': 'c1ncnc2ncnc12',
   'guanine': 'Nc1nc2nc[nH]c2c(=O)[nH]1',
-  'xanthine': 'O=c1[nH]c2nc[nH]c2c(=O)[nH]1',
+  'xanthine': 'O=c1[#7]c(=O)[#7]c2[#7]c[#7]c12',
+  'purine dione': 'O=c1[#7]c(=O)[#7]c2[#7]c[#7]c12',
+  'purinedione': 'O=c1[#7]c(=O)[#7]c2[#7]c[#7]c12',
+  'unsubstituted n7': '[#7;H1]',
   'hypoxanthine': 'O=c1[nH]cnc2nc[nH]c12',
   'theophylline': 'Cn1c(=O)c2nc[nH]c2n(C)c1=O',
   'benzimidazole': '[#6]1~[#6]~[#6]~[#6]~[#6]2~[#6]~1~[#7]~[#6]~[#7]~2',
@@ -94,7 +97,8 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'benzazepine': 'c1ccc2c(c1)CCCCN2',
   'benzodiazepine': 'c1ccc2c(c1)NCC(=O)Nc3ccccc23',
   'thienopyridine': 'C1NCCc2sccc12',
-  'pyrazolopyridine': 'c1cc2c(cn1)cnn2',
+  'pyrazolopyridine': 'c1c2CC[#7]C(=O)c2nn1',
+  'pyrazolopyridinone': 'c1c2CC[#7]C(=O)c2nn1',
   'triazolopyrimidine': 'c1ncnc2nnnc12',
   'pyrimidopyrimidine': 'c1nc2ncncc2nc1',
   'quinuclidine': 'C1CN2CCC1CC2',
@@ -109,7 +113,8 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'pyran': 'C1C=CCO1',
   'tetrahydropyran': 'C1CCOCC1',
   'pyrone': 'O=C1C=CC=CO1',
-  'coumarin': 'O=C1OC(=CC=C2)c2cc1',
+  'coumarin': 'O=c1oc2ccccc2cc1',
+  '4-hydroxycoumarin': 'O=c1oc2ccccc2c(O)c1',
   'chromone': 'O=C1Cc2ccccc2O1',
   'chroman': 'C1Cc2ccccc2OC1',
   'flavone': 'O=C1Cc2ccccc2OC1c3ccccc3',
@@ -154,21 +159,27 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'isothiazole': 'c1sncc1',
   'oxadiazole': 'c1nonc1',
   '1,3,4-oxadiazole': 'c1nocn1',
-  'thiadiazole': 'c1nsnc1',
-  '1,3,4-thiadiazole': 'c1nscn1',
+  'thiadiazole': 's1cnnc1',
+  '1,3,4-thiadiazole': 's1cnnc1',
   'dithiole': 'C1C=SS1',
   'dithiolane': 'C1CSSC1',
   'morpholine': 'C1COCCN1',
-  'morpholinone': '[#6]1~[#6]~[#7]~[#6](=[OX1])~[#8]~[#6]~1',
+  'morpholinone': 'O=C1COCC[#7]1',
+  'morpholin-3-one': 'O=C1COCC[#7]1',
   'thiomorpholine': 'C1CSCCN1',
   'benzoxazole': 'c1ccc2ocnc2c1',
   'benzothiazole': 'c1ccc2scnc2c1',
   'benzoxazoline': 'O1CNc2ccccc12',
+  'benzoxazinone': 'O=C1COc2ccccc2N1',
+  'benzoxazine': 'O=C1COc2ccccc2N1',
+  '6-hydroxy-2h-1,4-benzoxazin-3(4h)-one': 'O=C1COc2c(cc(O)cc2)N1',
   'phenothiazine': 'c1ccc2c(c1)Nc3ccccc3S2',
   'phenoxazine': 'c1ccc2c(c1)Nc3ccccc3O2',
   'benzothiadiazine': '[#6]1~[#6]~[#6]~[#6]2~[#6]~1~[SX4](=[OX1])(=[OX1])~[NX3,nx3]~[#6]~[NX3,nx3,nx2]~2',
   'dihydrobenzothiadiazine': 'c1ccc2c(c1)S(=O)(=O)NCN2',
-  'benzothiazepine': 'c1ccc2c(c1)SCCN=C2',
+  'benzothiazepine': 'O=C1CCSc2ccccc2N1',
+  '1,5-benzothiazepin-4-one': 'O=C1CCSc2ccccc2N1',
+  'benzothiazepinone': 'O=C1CCSc2ccccc2N1',
   'sultam': 'O=S1(=O)CCCCN1',
   'sultone': 'O=S1(=O)CCCCO1',
 
@@ -212,13 +223,16 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'beta-lactam': 'C1(=O)NCC1',
   'gamma-lactam': 'C1(=O)NCCC1',
   'delta-lactam': 'C1(=O)NCCCC1',
-  'formamide': '[NX3][CX3](=[OX1])[#1,#6]',
-  'formamido': '[NX3][CX3](=[OX1])[#1,#6]',
+  'formamide': '[CX3H1](=[OX1])[NX3]',
+  'formamido': '[CX3H1](=[OX1])[NX3]',
+  'formanilide': '[CX3H1](=[OX1])[NX3]',
   'acetamide': '[NX3][CX3](=[OX1])C',
   'acetamido': '[NX3][CX3](=[OX1])C',
   'benzamide': 'c1ccccc1[CX3](=[OX1])[NX3]',
   'imide': '[CX3](=[OX1])[NX3][CX3](=[OX1])',
   'carbamate': '[NX3][CX3](=[OX1])[OX2][#6]',
+  'hexyl carbamate': 'CCCCCC[OX2][CX3](=[OX1])[NX3]',
+  'hexylcarbamate': 'CCCCCC[OX2][CX3](=[OX1])[NX3]',
   'urethane': '[NX3][CX3](=[OX1])[OX2][#6]',
   'urea': '[NX3][CX3](=[OX1])[NX3]',
   'thiourea': '[NX3][CX3](=[SX1])[NX3]',
@@ -239,7 +253,8 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   // Amines
   'primary amine': '[NX3H2;!$(N-[!#6])]',
   'secondary amine': '[NX3H1;!$(N-[!#6])]',
-  'tertiary amine': '[NX3H0;!$(N-[!#6])]',
+  'tertiary amine': '[#7X3H0]',
+  'tertiary amines': '[#7X3H0]',
   'quaternary ammonium': '[N+;X4]',
   'aromatic amine': 'c[NX3H2]',
   'aniline': 'c1ccccc1[NX3H2]',
@@ -275,7 +290,14 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'ketoxime': '[#6][CX3](=[NX2][OX2H])[#6]',
   'nitrone': '[CX3]=[N+]([OX1-])[#6]',
   'n-oxide': '[$([n+][o-]),$([N+](=O)[O-]),$([N+][O-])]',
-  'nitrosyl': '[N+]#[O]',
+  'nitrosyl': '[N+]=O',
+  'nitrosyl ligand': '[N+]=O',
+  'cyanide': '[C]#[N]',
+  'cyanide ligand': '[C]#[N]',
+  'cyanide coordination cage': '[C]#[N]',
+  'iron': '[Fe]',
+  'octahedral iron': '[Fe]',
+  'octahedral iron center': '[Fe]',
 
   // =========================================================================
   // 5. SULFUR & PHOSPHORUS FUNCTIONAL GROUPS
@@ -283,8 +305,10 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   // Sulfur
   'sulfonamide': 'S(=O)(=O)N',
   'sulfamoyl': 'S(=O)(=O)N',
-  'sulfamido': 'NS(=O)(=O)N',
+  'sulfamido': '[NX3][SX4](=[OX1])(=[OX1])[OX2]',
+  'sulfamido groups': '[NX3][SX4](=[OX1])(=[OX1])[OX2]',
   'sulfamide': 'NS(=O)(=O)N',
+  'sulfamate': '[NX3][SX4](=[OX1])(=[OX1])[OX2]',
   'methanesulfonamido': 'NS(=O)(=O)C',
   'butylsulfonamide': 'CCCCS(=O)(=O)N',
   'sulfone': '[#6][SX4](=[OX1])(=[OX1])[#6]',
@@ -297,7 +321,6 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'sulfate': '[OX2][SX4](=[OX1])(=[OX1])[OX2]',
   'sulfonate': '[#6][SX4](=[OX1])(=[OX1])[OX2]',
   'sulfonic acid': '[SX4](=[OX1])(=[OX1])[OX2H]',
-  'sulfamate': '[OX2][SX4](=[OX1])(=[OX1])[NX3]',
   'thiosulfate': '[SX4](=[OX1])(=[OX1])([OX2])[SX1-]',
   'dithiocarbamate': '[NX3][CX3](=[SX1])[SX2]',
 
@@ -377,7 +400,6 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'anisole': 'c1ccccc1OC',
   'methoxy': 'OC',
   'ethoxy': 'OCC',
-  'phenoxy': 'c1ccc(O)cc1',
   'chlorophenyl': 'c1ccccc1Cl',
   'fluorophenyl': 'c1ccccc1F',
   'xylyl': 'c1c(C)cccc1C',
@@ -433,10 +455,10 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'warhead': 'CC(=O)O',
 
   // Steroid Core & Motifs
-  'delta-1,4-diene-3-one': 'O=C1C=CC2C(=C1)',
-  'dieneone': 'O=C1C=CC2C(=C1)',
-  'dienone': 'O=C1C=CC2C(=C1)',
-  'diene-3-one': 'O=C1C=CC2C(=C1)',
+  'delta-1,4-diene-3-one': 'O=C1[#6]=[#6][#6]~[#6](=[#6]1)',
+  'dieneone': 'O=C1[#6]=[#6][#6]~[#6](=[#6]1)',
+  'dienone': 'O=C1[#6]=[#6][#6]~[#6](=[#6]1)',
+  'diene-3-one': 'O=C1[#6]=[#6][#6]~[#6](=[#6]1)',
   'c1-c2 double bond': 'C=C',
   '11beta-oh': '[OX2H]',
   '11beta': '[OX2H]',
@@ -444,6 +466,26 @@ export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   'epoxide bridge': 'C1OC1',
   '9,11-alpha-epoxide': 'C1OC1',
   'spiro': '[C;R2](1)(CC1)CC',
+
+  // Respiratory / Other Pharmacophores
+  'gem-dimethyl': 'CC(C)(C)',
+  'gemdimethyl': 'CC(C)(C)',
+  'gem-dimethyl substituted aralkyl tail': 'CC(C)(C)',
+  'phenoxy': 'c1ccccc1O[#6]',
+  'phenoxypropyl': 'c1ccccc1OCCC',
+  'phenoxyethyl': 'c1ccccc1[OX2,CX4][CX4][CX4]',
+  '2-(phenoxy)ethyl': 'c1ccccc1[OX2,CX4][CX4][CX4]',
+  'amide carbonyl in heterocyclic ring': '[#6](=[OX1])[#7]',
+  '(e)-styryl': 'c1ccccc1C=C',
+  'styryl': 'c1ccccc1C=C',
+  '18-aldehyde (hemiacetal with 11-beta-oh)': '[CX3H1]=O',
+  '18-aldehyde': '[CX3H1]=O',
+  'dimethoxy-substituted pyrimido-isoquinoline core': 'c1c(OC)c(OC)ccc1',
+  'dimethoxysubstituted pyrimidoisoquinoline': 'c1c(OC)c(OC)ccc1',
+  'pyrimido-isoquinoline': 'c1c(OC)c(OC)ccc1',
+  'pyrimidoisoquinoline': 'c1c(OC)c(OC)ccc1',
+  'diketopiperazine / urea ring system': '[#7]C(=O)[#7]',
+  'diketopiperazine / urea': '[#7]C(=O)[#7]',
 };
 
 /**
@@ -461,10 +503,18 @@ const BIOLOGIC_PATTERNS = [
   /deglycosyl/i,
   /tetra-alanine/i,
   /plasminogen\s+binding/i,
-  /octahedral\s+fe/i,
-  /cyanide\s+ligand/i,
   /chemical\s+scaffold\s+core/i,
   /chiral\s+center/i,
+  /neutral\s+non-ionizable/i,
+  /stereocenter/i,
+  /single\s+enantiomer/i,
+  /eutomer/i,
+  /disodium\s+salt/i,
+  /position\s+\d+/i,
+  /triglycine/i,
+  /8-d-arginine/i,
+  /phe3/i,
+  /tryptophan\s+sidechain/i,
 ];
 
 export function isBiologicOrMacromolecule(name: string): boolean {
@@ -575,7 +625,7 @@ export function getCorrectedSmarts(name: string = '', aiSmarts: string = ''): st
   // 1. Exact or substring key match against dictionary (prefer longest key for specificity)
   let bestMatch: { len: number; smarts: string } | null = null;
   for (const [key, smarts] of Object.entries(SMARTS_OVERRIDE_DICT)) {
-    const cleanKey = key.replace(/[\s\-_]/g, '');
+    const cleanKey = key.toLowerCase().replace(/[\s\-_,()]/g, '');
     if (rawClean === cleanKey || rawClean.includes(cleanKey)) {
       if (!bestMatch || cleanKey.length > bestMatch.len) {
         bestMatch = { len: cleanKey.length, smarts };
@@ -591,7 +641,7 @@ export function getCorrectedSmarts(name: string = '', aiSmarts: string = ''): st
   const candidates = normalizeDescriptor(name);
   for (const cand of candidates) {
     for (const [key, smarts] of Object.entries(SMARTS_OVERRIDE_DICT)) {
-      const cleanKey = key.replace(/[\s\-_]/g, '');
+      const cleanKey = key.toLowerCase().replace(/[\s\-_,()]/g, '');
       if (cand === cleanKey || cand.includes(cleanKey) || cleanKey.includes(cand)) {
         if (!bestMatch || cleanKey.length > bestMatch.len) {
           bestMatch = { len: cleanKey.length, smarts };
