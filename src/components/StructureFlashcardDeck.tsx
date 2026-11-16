@@ -26,6 +26,7 @@ import {
   saveSelectedClassNumbers,
   ALL_THERAPEUTIC_CLASS_NUMBERS,
 } from '../utils/therapeuticClassFilter';
+import { shuffleRemainingCards } from '../utils/flashcardQueueUtils';
 import { TherapeuticClassFilterDrawer } from './TherapeuticClassFilterDrawer';
 import {
   CheckCircle2,
@@ -35,6 +36,8 @@ import {
   RotateCcw,
   ArrowUpDown,
   SlidersHorizontal,
+  Shuffle,
+  Check,
 } from 'lucide-react';
 
 export interface StructureFlashcardDeckProps {
@@ -563,6 +566,23 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
     setIsFlipped(false);
   };
 
+  // Feedback state for recently clicked shuffle action
+  const [isRecentlyShuffled, setIsRecentlyShuffled] = useState<boolean>(false);
+
+  // Can shuffle if at least 2 unseen cards remain (i.e. remaining cards exist after currentIndex)
+  const canShuffle = activeQueue.length - currentIndex > 1;
+
+  // Handle Shuffle action: randomizes only remaining unseen cards (currentIndex + 1 .. end)
+  const handleShuffleRemaining = useCallback(() => {
+    if (!canShuffle) return;
+    const nextQueue = shuffleRemainingCards(activeQueue, currentIndex);
+    setActiveQueue(nextQueue);
+    setIsRecentlyShuffled(true);
+    setTimeout(() => {
+      setIsRecentlyShuffled(false);
+    }, 1200);
+  }, [activeQueue, currentIndex, canShuffle]);
+
   // Handle module filter toggle
   const handleToggleModule = (moduleKey: string, checked: boolean) => {
     const nextFilter = { ...moduleFilter, [moduleKey]: checked };
@@ -998,6 +1018,32 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
                 <option value="alphabetical">Alphabetical</option>
               </select>
             </label>
+
+            {/* Shuffle Button (randomizes remaining unseen cards in this active session) */}
+            <button
+              type="button"
+              onClick={handleShuffleRemaining}
+              disabled={!canShuffle}
+              className={`py-1 px-2.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                !canShuffle
+                  ? 'opacity-40 cursor-not-allowed border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 bg-slate-50 dark:bg-slate-900'
+                  : isRecentlyShuffled
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200'
+              }`}
+              title={
+                canShuffle
+                  ? `Shuffle ${activeQueue.length - currentIndex - 1} remaining unseen cards in this session`
+                  : 'No remaining cards to shuffle'
+              }
+            >
+              {isRecentlyShuffled ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <Shuffle className="w-3.5 h-3.5" />
+              )}
+              <span>{isRecentlyShuffled ? 'Shuffled' : 'Shuffle'}</span>
+            </button>
 
             {/* Display Settings Popover Button (Structure Mode Only) */}
             {renderMode === 'structure' && (
