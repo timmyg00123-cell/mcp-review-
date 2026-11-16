@@ -45,6 +45,7 @@ export interface ChemicalStructure {
   chemicalClass: string; // e.g., 'N-sulfonyl tyrosine-based peptidomimetic'
   pharmacologicalClass: string; // e.g., 'Glycoprotein IIb/IIIa inhibitor'
   cid?: number;
+  isBiologic?: boolean; // Macromolecular enzyme or biologic (e.g. t-PA, streptokinase, urokinase)
 
   // Top Drugs Taxonomy Additions:
   structureRecord?: TopDrugStructureRecord;

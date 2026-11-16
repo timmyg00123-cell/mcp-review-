@@ -6,6 +6,8 @@
  * motifs (derived from Ertl/Novartis and RDKit canonical collections).
  */
 
+import type { ChemicalStructure } from '../types/reviewModule';
+
 export const SMARTS_OVERRIDE_DICT: Record<string, string> = {
   // =========================================================================
   // 1. NITROGEN HETEROCYCLES (Mono-, Bi-, and Poly-cyclic)
@@ -517,8 +519,31 @@ const BIOLOGIC_PATTERNS = [
   /tryptophan\s+sidechain/i,
 ];
 
-export function isBiologicOrMacromolecule(name: string): boolean {
-  return BIOLOGIC_PATTERNS.some((pat) => pat.test(name));
+export function isBiologicOrMacromolecule(
+  target: string | ChemicalStructure | null | undefined
+): boolean {
+  if (!target) return false;
+  if (typeof target === 'object') {
+    if (target.isBiologic) return true;
+    const name = target.name || '';
+    const chemClass = target.chemicalClass || '';
+    const pharmClass = target.pharmacologicalClass || '';
+    const combined = `${name} ${chemClass} ${pharmClass}`.toLowerCase();
+    if (
+      /alteplase|reteplase|tenecteplase|streptokinase|urokinase|fibrinolytic|thrombolytic|plasminogen\s+activator/i.test(
+        combined
+      )
+    ) {
+      return true;
+    }
+    return BIOLOGIC_PATTERNS.some(
+      (pat) =>
+        pat.test(name) ||
+        pat.test(chemClass) ||
+        Boolean(target.pharmacophores?.some((p) => pat.test(p.name)))
+    );
+  }
+  return BIOLOGIC_PATTERNS.some((pat) => pat.test(target));
 }
 
 const NOISE_WORDS = new Set([

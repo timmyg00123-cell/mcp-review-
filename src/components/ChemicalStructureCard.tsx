@@ -24,6 +24,7 @@ import {
 } from '../utils/pharmacophoreData';
 import { resolveActivePharmacophoresForStructure } from '../utils/globalPharmacophores';
 import { resolveChemicalClass } from '../utils/chemicalClassDictionary';
+import { isBiologicOrMacromolecule } from '../utils/smartsDictionary';
 import {
   ExternalLink,
   ZoomIn,
@@ -232,6 +233,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
   };
 
   const isCardHighlighted = highlight || matchedGlobalPharmacophores.length > 0;
+  const isBiologic = Boolean(structure.isBiologic || isBiologicOrMacromolecule(structure));
 
   return (
     <>
@@ -312,11 +314,15 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
               type="button"
               onClick={() => {
                 setOpenInCompareMode(false);
-                setInitialLightboxTab('3d');
+                setInitialLightboxTab(isBiologic ? '2d' : '3d');
                 setIsZoomed(true);
               }}
               className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
-              title="Open 3D Macromolecular Target Pocket & Residues (PDB / AlphaFold)"
+              title={
+                isBiologic
+                  ? 'Open Fibrinolysis Mechanism Cascade Studio'
+                  : 'Open 3D Macromolecular Target Pocket & Residues (PDB / AlphaFold)'
+              }
             >
               <Dna className="w-3.5 h-3.5" />
             </button>
@@ -346,7 +352,11 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
                 setIsZoomed(true);
               }}
               className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded hover:bg-slate-100 dark:hover:bg-slate-800"
-              title="Click to Zoom Chemical Structure (100% - 250%)"
+              title={
+                isBiologic
+                  ? 'Click to Expand Fibrinolysis Cascade Mechanism Studio'
+                  : 'Click to Zoom Chemical Structure (100% - 250%)'
+              }
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
@@ -382,14 +392,18 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
         )}
 
         {/* Chemical Structure Image with Interactive Pharmacophore Overlays */}
-        <div className="relative p-3 bg-[var(--structure-canvas-bg)] flex items-center justify-center min-h-[170px] group">
+        <div
+          className={`relative p-3 bg-[var(--structure-canvas-bg)] flex items-center justify-center ${
+            isBiologic ? 'min-h-[260px]' : 'min-h-[170px]'
+          } group`}
+        >
           <InteractiveStructureViewer
             structure={structure}
             activePharmacophoreIds={mergedActive}
             hoveredPharmacophoreId={mergedHovered}
             onTogglePharmacophore={handleTogglePharmacophore}
             onHoverPharmacophore={setHoveredPharmacophoreId}
-            maxHeightClass="max-h-40"
+            maxHeightClass={isBiologic ? '' : 'max-h-40'}
             altText={`${displayName} 2D chemical structure`}
             isExpanded={showDetails}
           />
@@ -404,7 +418,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
             className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/80 text-white text-[10px] px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer"
           >
             <ZoomIn className="w-2.5 h-2.5" />
-            <span>Zoom</span>
+            <span>{isBiologic ? 'Expand Cascade' : 'Zoom'}</span>
           </button>
         </div>
 

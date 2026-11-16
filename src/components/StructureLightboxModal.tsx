@@ -20,6 +20,7 @@ import {
   getMoaOrSar,
   resolveTargetAndReversibility,
 } from '../utils/structureDataUtils';
+import { isBiologicOrMacromolecule } from '../utils/smartsDictionary';
 import {
   ZoomIn,
   ZoomOut,
@@ -188,6 +189,13 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
   const primaryStructure = pool[primaryIdx] || initialStructure;
   const secondaryStructure = pool[secondaryIdx] || pool[(primaryIdx + 1) % pool.length];
 
+  const isPrimaryBiologic = Boolean(
+    primaryStructure?.isBiologic || isBiologicOrMacromolecule(primaryStructure)
+  );
+  const isSecondaryBiologic = Boolean(
+    secondaryStructure?.isBiologic || isBiologicOrMacromolecule(secondaryStructure)
+  );
+
   const shouldMask = (hideDrugName || examModeActive) && !peekNames;
   const getDisplayTitle = (s: ChemicalStructure) =>
     shouldMask ? `Structure ${s.id}` : s.name;
@@ -297,6 +305,8 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 {isCompareMode
                   ? 'Dual-Drug Chemical Structure & Pharmacophore Comparator'
+                  : isPrimaryBiologic
+                  ? 'Fibrinolysis Cascade Mechanism & Protein Bioengineering Studio'
                   : 'High-Resolution Chemical Structure & Pharmacophore Studio'}
               </p>
             </div>
@@ -314,10 +324,14 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
-                title="View 2D Chemical Structure, Pharmacophores, and SAR Classification"
+                title={
+                  isPrimaryBiologic
+                    ? 'View Fibrinolysis Cascade Mechanism and Domain Roles'
+                    : 'View 2D Chemical Structure, Pharmacophores, and SAR Classification'
+                }
               >
                 <FlaskConical className="w-3.5 h-3.5" />
-                <span>2D SAR</span>
+                <span>{isPrimaryBiologic ? 'Cascade Mechanism' : '2D SAR'}</span>
               </button>
               <button
                 type="button"
@@ -511,7 +525,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                       onHoverPharmacophore={setPrimaryHoveredPharma}
                       zoomLevel={zoomLevel}
                       pan={panA}
-                      maxHeightClass="max-h-52"
+                      maxHeightClass={isPrimaryBiologic ? '' : 'max-h-52'}
                       altText={getDisplayTitle(primaryStructure)}
                       isExpanded={true}
                     />
@@ -624,7 +638,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                       onHoverPharmacophore={setSecondaryHoveredPharma}
                       zoomLevel={zoomLevel}
                       pan={panB}
-                      maxHeightClass="max-h-52"
+                      maxHeightClass={isSecondaryBiologic ? '' : 'max-h-52'}
                       altText={getDisplayTitle(secondaryStructure)}
                       isExpanded={true}
                     />
@@ -739,7 +753,11 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
               )}
 
               {/* Large Image Surface */}
-              <div className="bg-[var(--structure-canvas-bg)] rounded-2xl border-2 border-slate-200 dark:border-slate-700 min-h-[340px] sm:min-h-[400px] flex items-center justify-center p-6 shadow-inner">
+              <div
+                className={`bg-[var(--structure-canvas-bg)] rounded-2xl border-2 border-slate-200 dark:border-slate-700 ${
+                  isPrimaryBiologic ? 'min-h-[380px] sm:min-h-[440px]' : 'min-h-[340px] sm:min-h-[400px]'
+                } flex items-center justify-center p-3 sm:p-6 shadow-inner`}
+              >
                 <InteractiveStructureViewer
                   structure={primaryStructure}
                   activePharmacophoreIds={primaryActivePharma}
@@ -748,7 +766,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                   onHoverPharmacophore={setPrimaryHoveredPharma}
                   zoomLevel={zoomLevel}
                   pan={panA}
-                  maxHeightClass="max-h-96"
+                  maxHeightClass={isPrimaryBiologic ? '' : 'max-h-96'}
                   altText={getDisplayTitle(primaryStructure)}
                   isExpanded={true}
                 />

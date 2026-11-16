@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import { ColorPaletteItem, getPharmacophoresForStructure } from '../utils/pharmacophoreData';
-import { Shield, Sparkles, Activity, Scissors, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
+import { Activity, Info } from 'lucide-react';
 
 export interface FibrinolysisCascadeViewerProps {
   structure: ChemicalStructure;
@@ -108,17 +108,6 @@ const DOMAIN_MECHANISM_RULES: DomainMechanismConfig[] = [
     defaultColor: '#EC4899', // Pink
     getExplanation: (_drug) =>
       'Binds plasminogen non-enzymatically in 1:1 stoichiometry, inducing an allosteric conformational shift exposing the catalytic site without peptide cleavage.',
-  },
-  {
-    key: 'twoChain',
-    matches: (id, name) =>
-      /two-chain|disulfide-linked/i.test(name) ||
-      /two_chain|disulfide/i.test(id),
-    targetId: 'direct_cleavage',
-    title: 'Direct Cleavage without Fibrin Specificity',
-    defaultColor: '#F97316', // Orange
-    getExplanation: (_drug) =>
-      'Directly cleaves circulating and clot-bound plasminogen indiscriminately, inducing systemic fibrinogenolysis.',
   },
 ];
 
@@ -656,13 +645,23 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               rx="10"
               fill="url(#zymogen-grad)"
               stroke={
-                isTargetActive('allosteric_complex') ||
-                isTargetActive('direct_cleavage') ||
-                isTargetActive('cleavage_arrow')
+                isTargetHovered('allosteric_complex') ||
+                isTargetHovered('direct_cleavage') ||
+                isTargetHovered('cleavage_arrow')
+                  ? '#F59E0B'
+                  : isTargetActive('allosteric_complex') ||
+                    isTargetActive('direct_cleavage') ||
+                    isTargetActive('cleavage_arrow')
                   ? '#10B981'
                   : '#3B82F6'
               }
-              strokeWidth="2"
+              strokeWidth={
+                isTargetHovered('allosteric_complex') ||
+                isTargetHovered('direct_cleavage') ||
+                isTargetHovered('cleavage_arrow')
+                  ? '3'
+                  : '2'
+              }
               filter="url(#cascade-glow)"
             />
             {/* Header pill */}
@@ -686,13 +685,23 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             d="M 300 174 L 335 174"
             fill="none"
             stroke={
-              isTargetActive('cleavage_arrow') ||
-              isTargetActive('allosteric_complex') ||
-              isTargetActive('direct_cleavage')
+              isTargetHovered('cleavage_arrow') ||
+              isTargetHovered('allosteric_complex') ||
+              isTargetHovered('direct_cleavage')
+                ? '#F59E0B'
+                : isTargetActive('cleavage_arrow') ||
+                  isTargetActive('allosteric_complex') ||
+                  isTargetActive('direct_cleavage')
                 ? '#10B981'
                 : '#38BDF8'
             }
-            strokeWidth="2.5"
+            strokeWidth={
+              isTargetHovered('cleavage_arrow') ||
+              isTargetHovered('allosteric_complex') ||
+              isTargetHovered('direct_cleavage')
+                ? '3.5'
+                : '2.5'
+            }
             markerEnd="url(#arrow-active-pulse)"
           />
 

@@ -5,6 +5,8 @@ import {
   resolvePharmacophoreRegion,
   ColorPaletteItem,
 } from '../utils/pharmacophoreData';
+import { isBiologicOrMacromolecule } from '../utils/smartsDictionary';
+import { FibrinolysisCascadeViewer } from './FibrinolysisCascadeViewer';
 import { SmilesCanvas } from './SmilesCanvas';
 
 interface InteractiveStructureViewerProps {
@@ -34,6 +36,8 @@ export const InteractiveStructureViewer: React.FC<InteractiveStructureViewerProp
   altText,
   isExpanded = false,
 }) => {
+  const isBiologic = Boolean(structure.isBiologic || isBiologicOrMacromolecule(structure));
+
   const pharmacophores = useMemo(
     () => getPharmacophoresForStructure(structure),
     [structure]
@@ -83,6 +87,29 @@ export const InteractiveStructureViewer: React.FC<InteractiveStructureViewerProp
     : {
         transform: 'none',
       };
+
+  if (isBiologic) {
+    return (
+      <div
+        className={`relative w-full flex items-center justify-center overflow-hidden select-none bg-transparent rounded-xl ${className}`}
+      >
+        <div
+          className="relative w-full flex items-center justify-center"
+          style={transformStyle}
+        >
+          <FibrinolysisCascadeViewer
+            structure={structure}
+            activePharmacophoreIds={activePharmacophoreIds}
+            hoveredPharmacophoreId={hoveredPharmacophoreId}
+            onTogglePharmacophore={onTogglePharmacophore}
+            onHoverPharmacophore={onHoverPharmacophore}
+            height={isExpanded ? 320 : 250}
+            className="w-full"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
