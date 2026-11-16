@@ -1302,7 +1302,20 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
   // Define active compounds & inject exact requested Dexie schema debugger log
   const compoundA = currentStructureA;
   const compoundB = currentStructureB;
+  const selectedStructureA = compoundA;
+  const selectedStructureB = compoundB;
   console.log('--- DEXIE DRUG SCHEMA ---', compoundA);
+
+  // Reset active pharmacophore tags when switching structures
+  useEffect(() => {
+    setActiveTagsA([]);
+    setHoveredTagA(null);
+  }, [selectedStructureA?.id]);
+
+  useEffect(() => {
+    setActiveTagsB([]);
+    setHoveredTagB(null);
+  }, [selectedStructureB?.id]);
 
   // Reset peeked cards when active compound selections change
   useEffect(() => {
