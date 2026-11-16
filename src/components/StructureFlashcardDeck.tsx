@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { FlashcardItem, SpacedRepetitionRating } from '../types/cumulativeStudy';
 import {
   applySpacedRepetitionGrade,
@@ -568,17 +568,32 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
 
   // Feedback state for recently clicked shuffle action
   const [isRecentlyShuffled, setIsRecentlyShuffled] = useState<boolean>(false);
+  const shuffleFeedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Can shuffle if at least 2 unseen cards remain (i.e. remaining cards exist after currentIndex)
-  const canShuffle = activeQueue.length - currentIndex > 1;
+  // Clean up feedback timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (shuffleFeedbackTimeoutRef.current) {
+        clearTimeout(shuffleFeedbackTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Can shuffle if at least 2 unseen cards remain after the currently displayed card
+  const remainingUnseenCount = Math.max(0, activeQueue.length - currentIndex - 1);
+  const canShuffle = remainingUnseenCount >= 2;
 
   // Handle Shuffle action: randomizes only remaining unseen cards (currentIndex + 1 .. end)
   const handleShuffleRemaining = useCallback(() => {
     if (!canShuffle) return;
     const nextQueue = shuffleRemainingCards(activeQueue, currentIndex);
     setActiveQueue(nextQueue);
+
+    if (shuffleFeedbackTimeoutRef.current) {
+      clearTimeout(shuffleFeedbackTimeoutRef.current);
+    }
     setIsRecentlyShuffled(true);
-    setTimeout(() => {
+    shuffleFeedbackTimeoutRef.current = setTimeout(() => {
       setIsRecentlyShuffled(false);
     }, 1200);
   }, [activeQueue, currentIndex, canShuffle]);
@@ -1033,8 +1048,8 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
               }`}
               title={
                 canShuffle
-                  ? `Shuffle ${activeQueue.length - currentIndex - 1} remaining unseen cards in this session`
-                  : 'No remaining cards to shuffle'
+                  ? `Shuffle ${remainingUnseenCount} remaining unseen cards in this session`
+                  : 'Fewer than 2 remaining cards to shuffle'
               }
             >
               {isRecentlyShuffled ? (

@@ -27,22 +27,33 @@ function runTests() {
     'StructureFlashcardDeck must define handleShuffleRemaining callback'
   );
 
-  // Test 4: Contains disabled logic based on remaining cards
+  // Test 4: Contains disabled logic based on remaining cards (strictly requires >= 2 unseen cards)
   assert.ok(
-    content.includes('activeQueue.length - currentIndex') ||
-      content.includes('canShuffle') ||
-      content.includes('remainingCount'),
-    'StructureFlashcardDeck must guard shuffle when fewer than 2 remaining cards exist'
+    content.includes('remainingUnseenCount') &&
+      content.includes('canShuffle = remainingUnseenCount >= 2'),
+    'StructureFlashcardDeck must guard shuffle when fewer than 2 remaining unseen cards exist'
   );
 
-  // Test 5: Renders Shuffle button in JSX
+  // Test 5: Renders Shuffle button in JSX with timeout cleanup
   assert.ok(
     content.includes('onClick={handleShuffleRemaining}') &&
-      content.includes('<Shuffle className='),
-    'StructureFlashcardDeck must render Shuffle button with handleShuffleRemaining trigger'
+      content.includes('<Shuffle className=') &&
+      content.includes('shuffleFeedbackTimeoutRef'),
+    'StructureFlashcardDeck must render Shuffle button with handleShuffleRemaining trigger and timeout cleanup'
   );
 
-  // Test 6: Behavioral Invariants on simulated deck queue
+  // Test 6: Boundary Gating Formula Verification
+  const queueLength = 5;
+  const canShuffleAtBoundary = (currIdx: number) => {
+    const remaining = Math.max(0, queueLength - currIdx - 1);
+    return remaining >= 2;
+  };
+  assert.equal(canShuffleAtBoundary(0), true, 'Can shuffle at index 0 (4 remaining)');
+  assert.equal(canShuffleAtBoundary(2), true, 'Can shuffle at index 2 (2 remaining)');
+  assert.equal(canShuffleAtBoundary(3), false, 'Must NOT shuffle at second-to-last card (1 remaining)');
+  assert.equal(canShuffleAtBoundary(4), false, 'Must NOT shuffle at last card (0 remaining)');
+
+  // Test 7: Behavioral Invariants on simulated deck queue
   const mockQueue = [
     { structureId: '1', drugName: 'Aspirin' },
     { structureId: '2', drugName: 'Ibuprofen' },
