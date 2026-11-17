@@ -38,6 +38,13 @@ import {
   DEFAULT_BOND_LIGHT_COLOR,
   DEFAULT_BOND_DARK_COLOR,
 } from '../utils/storage';
+import {
+  loadLaunchpadConfig,
+  saveLaunchpadConfig,
+  DEFAULT_LAUNCHPAD_CONFIG,
+  type LaunchpadConfig,
+  type LaunchpadAuthType,
+} from '../utils/launchpadUrls';
 import { StructureStylePanel } from './StructureStylePanel';
 
 interface SettingsModalProps {
@@ -105,8 +112,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     message: string;
   }>({ type: 'idle', message: '' });
   const [isExporting, setIsExporting] = useState(false);
+  const [launchpadConfig, setLaunchpadConfig] = useState<LaunchpadConfig>(() => loadLaunchpadConfig());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  const handleUpdateLaunchpad = (updates: Partial<LaunchpadConfig>) => {
+    setLaunchpadConfig((prev) => {
+      const next: LaunchpadConfig = { ...prev, ...updates };
+      saveLaunchpadConfig(next);
+      return next;
+    });
+  };
+
+  const handleResetLaunchpad = () => {
+    setLaunchpadConfig({ ...DEFAULT_LAUNCHPAD_CONFIG });
+    saveLaunchpadConfig(DEFAULT_LAUNCHPAD_CONFIG);
+  };
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -458,7 +479,202 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           <hr className="border-slate-150 dark:border-slate-800" />
 
-          {/* Section 3: Advanced Module & Question Authoring */}
+          {/* Section 3: Institutional Launchpad & Library Portal */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>Institutional Launchpad &amp; Library Portal</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Configure your school or library authentication (OpenAthens, EZProxy, or Direct) for clinical references (Lexicomp, AccessPharmacy)
+              </p>
+            </div>
+
+            {/* Institution Name */}
+            <div className="space-y-1">
+              <label
+                htmlFor="launchpad-institution-name"
+                className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
+              >
+                Institution Name
+              </label>
+              <input
+                id="launchpad-institution-name"
+                type="text"
+                value={launchpadConfig.institutionName}
+                onChange={(e) => handleUpdateLaunchpad({ institutionName: e.target.value })}
+                placeholder="e.g. Xavier University of Louisiana (XULA)"
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Authentication Mode Selection */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Authentication Mode
+              </label>
+              <div
+                className="grid grid-cols-1 sm:grid-cols-3 gap-2"
+                role="radiogroup"
+                aria-label="Authentication Mode"
+              >
+                {(
+                  [
+                    {
+                      id: 'openathens',
+                      label: 'OpenAthens / Portal SSO',
+                      desc: 'Institutional SSO portal redirect',
+                    },
+                    {
+                      id: 'ezproxy',
+                      label: 'EZProxy Prefix',
+                      desc: 'Prefix with auto-encoded URL',
+                    },
+                    {
+                      id: 'direct',
+                      label: 'Direct Access (No Proxy)',
+                      desc: 'Unproxied direct access',
+                    },
+                  ] as const
+                ).map((option) => {
+                  const isSelected = (launchpadConfig.authType || 'openathens') === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() =>
+                        handleUpdateLaunchpad({ authType: option.id as LaunchpadAuthType })
+                      }
+                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500 font-semibold'
+                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <div className="text-xs font-bold flex items-center justify-between">
+                        <span>{option.label}</span>
+                        {isSelected && (
+                          <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0" />
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-normal leading-tight">
+                        {option.desc}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Conditional Fields based on authType */}
+            {launchpadConfig.authType === 'openathens' && (
+              <div className="space-y-1 p-3 rounded-xl border border-blue-200/60 dark:border-blue-900/40 bg-blue-50/30 dark:bg-blue-950/20">
+                <label
+                  htmlFor="launchpad-openathens-url"
+                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
+                  OpenAthens Auth / Portal URL
+                </label>
+                <input
+                  id="launchpad-openathens-url"
+                  type="url"
+                  value={launchpadConfig.openAthensAuthUrl}
+                  onChange={(e) => handleUpdateLaunchpad({ openAthensAuthUrl: e.target.value })}
+                  placeholder="https://login.openathens.net/auth/xula.edu/o/71625811"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-[11px]"
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Directs students and faculty through your institutional OpenAthens login portal or campus SSO before accessing clinical databases.
+                </p>
+              </div>
+            )}
+
+            {launchpadConfig.authType === 'ezproxy' && (
+              <div className="space-y-1 p-3 rounded-xl border border-blue-200/60 dark:border-blue-900/40 bg-blue-50/30 dark:bg-blue-950/20">
+                <label
+                  htmlFor="launchpad-ezproxy-prefix"
+                  className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
+                  EZProxy Prefix
+                </label>
+                <input
+                  id="launchpad-ezproxy-prefix"
+                  type="text"
+                  value={launchpadConfig.ezproxyPrefix || ''}
+                  onChange={(e) => handleUpdateLaunchpad({ ezproxyPrefix: e.target.value })}
+                  placeholder="https://proxy.lib.state.edu/login?url="
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-[11px]"
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Sample prefix: <code className="bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded text-[10px]">https://proxy.lib.state.edu/login?url=</code>. Clinical database links will be prefixed with this proxy URL with automatic destination encoding.
+                </p>
+              </div>
+            )}
+
+            {launchpadConfig.authType === 'direct' && (
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 text-[11px] text-slate-600 dark:text-slate-400">
+                Direct mode opens clinical reference URLs without proxy prefixes. Recommended for on-campus networks with direct IP range access.
+              </div>
+            )}
+
+            {/* Display Option: Show launchpad badges on cards */}
+            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <span>Show launchpad badges on cards</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Display Lexicomp and AccessPharmacy quick launch badges on drug review cards and clinical dossiers
+                </p>
+              </div>
+
+              <button
+                type="button"
+                id="toggle-launchpad-badges-setting"
+                name="toggleLaunchpadBadges"
+                role="switch"
+                aria-checked={launchpadConfig.showBadges !== false}
+                onClick={() =>
+                  handleUpdateLaunchpad({
+                    showBadges: launchpadConfig.showBadges === false,
+                  })
+                }
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                  launchpadConfig.showBadges !== false
+                    ? 'bg-blue-600'
+                    : 'bg-slate-300 dark:bg-slate-700'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    launchpadConfig.showBadges !== false ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Restore Institutional Defaults */}
+            <div className="flex items-center justify-between pt-1">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Reset portal &amp; proxy configuration to Xavier University (XULA) default
+              </p>
+              <button
+                type="button"
+                onClick={handleResetLaunchpad}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Restore Institutional Defaults</span>
+              </button>
+            </div>
+          </div>
+
+          <hr className="border-slate-150 dark:border-slate-800" />
+
+          {/* Section 4: Advanced Module & Question Authoring */}
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
@@ -491,7 +707,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           <hr className="border-slate-150 dark:border-slate-800" />
 
-          {/* Section 4: Data Backup & Portability */}
+          {/* Section 5: Data Backup & Portability */}
           <div className="space-y-3">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
