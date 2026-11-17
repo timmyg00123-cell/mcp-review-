@@ -1,10 +1,14 @@
 import assert from 'node:assert';
+import { createRequire } from 'node:module';
 import {
   getCorrectedSmarts,
   isBiologicOrMacromolecule,
   isFibrinolyticBiologic,
   SMARTS_OVERRIDE_DICT,
 } from '../src/utils/smartsDictionary.js';
+import { KNOWN_DRUG_SMILES } from '../src/utils/knownDrugSmiles.js';
+
+const require = createRequire(import.meta.url);
 
 // 1. Furfurylamino on Furosemide
 const furosemideTag = 'Furfurylamino substituent at C2';
@@ -60,4 +64,43 @@ for (const bioName of ['Alteplase (t-PA)', 'Reteplase', 'Tenecteplase', 'Strepto
   );
 }
 
-console.log('✓ All SMARTS dictionary tests passed');
+// 7. RDKit WASM validation of every KNOWN_DRUG_SMILES entry + Dabigatran Etexilate hexyl carbamate SMARTS
+const initRDKit = require('@rdkit/rdkit');
+const rdkit = await initRDKit();
+
+const knownEntries = Object.entries(KNOWN_DRUG_SMILES);
+assert.ok(knownEntries.length >= 35, 'KNOWN_DRUG_SMILES must contain the offline fallback drug dictionary');
+
+for (const [drugKey, smiles] of knownEntries) {
+  let mol: any = null;
+  try {
+    mol = rdkit.get_mol(smiles);
+    assert.ok(
+      mol && (!mol.is_valid || mol.is_valid()),
+      `KNOWN_DRUG_SMILES["${drugKey}"] failed RDKit parsing: ${smiles}`
+    );
+  } finally {
+    if (mol) mol.delete();
+  }
+}
+
+const dabigatranEtexSmiles = KNOWN_DRUG_SMILES.dabigatran_etexilate;
+const hexylCarbamateSmarts = getCorrectedSmarts('Hexyl carbamate', '');
+assert.ok(hexylCarbamateSmarts.length > 0, 'Hexyl carbamate must resolve to a non-empty SMARTS');
+{
+  const mol = rdkit.get_mol(dabigatranEtexSmiles);
+  const qmol = rdkit.get_qmol(hexylCarbamateSmarts);
+  try {
+    assert.ok(mol && qmol, 'Dabigatran etexilate mol and Hexyl carbamate qmol must initialize');
+    const matches = JSON.parse(mol.get_substruct_matches(qmol));
+    assert.ok(
+      Array.isArray(matches) && matches.length > 0,
+      `KNOWN_DRUG_SMILES.dabigatran_etexilate must match Hexyl carbamate SMARTS (${hexylCarbamateSmarts})`
+    );
+  } finally {
+    if (mol) mol.delete();
+    if (qmol) qmol.delete();
+  }
+}
+
+console.log(`✓ All SMARTS dictionary & ${knownEntries.length}/${knownEntries.length} KNOWN_DRUG_SMILES RDKit validation tests passed`);

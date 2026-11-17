@@ -2,6 +2,8 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import {
   getBlindedComponentLabel,
   resolveStructureRenderMode,
@@ -11,6 +13,11 @@ import {
   TOP_DRUGS_SMILES_CATALOG,
   type TopDrugStructureRecord,
 } from '../src/data/topDrugsSmilesData.js';
+import { FibrinolysisCascadeViewer } from '../src/components/FibrinolysisCascadeViewer.js';
+import {
+  BiologicMechanismModel,
+  hasDedicatedBiologicModel,
+} from '../src/components/BiologicMechanismModel.js';
 
 console.log('Running MultiSmilesCanvas component & multi-structure rendering tests...');
 
@@ -231,4 +238,163 @@ for (const family of ['fibrinolytic', 'insulin', 'incretin', 'pcsk9', 'tnf', 'ra
   );
 }
 
-console.log('All MultiSmilesCanvas component and rendering contract checks passed successfully!');
+// =========================================================
+// Test 8: Strict Zero-Leak Blinded Rendering & Unique SVG <defs> IDs
+// =========================================================
+const FIBRINOLYTIC_SPOILER_RE =
+  /\b(Alteplase|Reteplase|Tenecteplase|TNK-tPA|TNKase|Activase|Retavase|Streptokinase|Streptase|Urokinase|Kinlytic)\b/i;
+
+const FIBRINOLYTIC_TEST_AGENTS = [
+  {
+    name: 'Alteplase (t-PA)',
+    tags: ['Finger (F) & EGF domains', 'Kringle-2 (K2) lysine-binding pocket', 'Serine protease catalytic triad'],
+  },
+  {
+    name: 'Reteplase',
+    tags: ['Deletion of Finger, EGF, and Kringle-1 domains', 'Kringle-2 + Serine Protease (K2-P)'],
+  },
+  {
+    name: 'Tenecteplase (TNK-tPA)',
+    tags: [
+      'T103N & N117Q glycosylation mutations',
+      'Tetra-alanine substitution (KHRR296-299AAAA) PAI-1 resistance',
+      'Serine protease catalytic domain',
+    ],
+  },
+  {
+    name: 'Streptokinase',
+    tags: ['1:1 Non-enzymatic plasminogen activator complex', 'Bacterial polypeptide (antigenic)'],
+  },
+  {
+    name: 'Urokinase',
+    tags: ['Direct Arg561-Val562 serine protease cleavage'],
+  },
+];
+
+for (const agent of FIBRINOLYTIC_TEST_AGENTS) {
+  const mockStructure: any = {
+    id: agent.name.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+    name: agent.name,
+    isBiologic: true,
+    document_label: `${agent.name} (Activase / TNKase)`,
+    smiles: 'CC(=O)NCC(=O)NCC(=O)NCC(=O)O',
+    chemicalClass: 'Recombinant Thrombolytic Biologic',
+    pharmacologicalClass: 'Fibrinolytic Agent',
+    target: 'Plasminogen (Arg561-Val562)',
+    reversibility: 'Enzymatic cleavage',
+    route: 'IV',
+    keyFunctionalGroups: agent.tags,
+    pharmacophores: agent.tags.map((t, idx) => ({
+      id: `tag_${idx}`,
+      name: t,
+      purpose: `${agent.name} mechanism domain`,
+    })),
+    pkPdHighlights: { onset: 'Immediate', duration: 'Short', halfLife: 'Minutes', elimination: 'Hepatic' },
+  };
+
+  // 8a. Blinded idle FibrinolysisCascadeViewer
+  const idleBlindedHtml = renderToStaticMarkup(
+    React.createElement(FibrinolysisCascadeViewer, {
+      structure: mockStructure,
+      isBlinded: true,
+    })
+  );
+  assert.strictEqual(
+    FIBRINOLYTIC_SPOILER_RE.test(idleBlindedHtml),
+    false,
+    `Blinded idle FibrinolysisCascadeViewer leaked spoiler name for ${agent.name}: ${idleBlindedHtml.match(FIBRINOLYTIC_SPOILER_RE)?.[0]}`
+  );
+
+  // 8b. Blinded FibrinolysisCascadeViewer with EVERY domain tag active (including Tenecteplase PAI-1 rule)
+  for (let idx = 0; idx < agent.tags.length; idx++) {
+    const tagName = agent.tags[idx];
+    const tagId = `tag_${idx}`;
+    const activeBlindedHtml = renderToStaticMarkup(
+      React.createElement(FibrinolysisCascadeViewer, {
+        structure: mockStructure,
+        isBlinded: true,
+        activePharmacophoreIds: { [tagId]: { hex: '#10B981' } },
+        hoveredPharmacophoreId: tagId,
+        activePharmacophores: [{ id: tagId, name: tagName, color: '#10B981' }],
+        hoveredPharmacophore: { id: tagId, name: tagName, color: '#10B981' },
+      })
+    );
+    assert.strictEqual(
+      FIBRINOLYTIC_SPOILER_RE.test(activeBlindedHtml),
+      false,
+      `Blinded active-tag FibrinolysisCascadeViewer (${tagName}) leaked spoiler for ${agent.name}: ${activeBlindedHtml.match(FIBRINOLYTIC_SPOILER_RE)?.[0]}`
+    );
+    if (/KHRR296-299AAAA/i.test(tagName)) {
+      assert.ok(
+        activeBlindedHtml.includes('80-fold more resistant to PAI-1 inhibition'),
+        'PAI-1 domain banner must render its mechanistic explanation while scrubbing Tenecteplase'
+      );
+    }
+  }
+
+  // 8c. Blinded BiologicMechanismModel (isFlipped = false)
+  const bioModelBlindedHtml = renderToStaticMarkup(
+    React.createElement(BiologicMechanismModel, {
+      compoundName: agent.name,
+      isFlipped: false,
+    })
+  );
+  assert.strictEqual(
+    FIBRINOLYTIC_SPOILER_RE.test(bioModelBlindedHtml),
+    false,
+    `Blinded BiologicMechanismModel leaked spoiler for ${agent.name}`
+  );
+
+  // 8d. Review-module flashcard path (!structureRecord && hasDedicatedBiologicModel(compoundName))
+  assert.strictEqual(
+    hasDedicatedBiologicModel(agent.name),
+    true,
+    `hasDedicatedBiologicModel("${agent.name}") must return true for review-module flashcards without structureRecord`
+  );
+}
+
+assert.ok(
+  fileContent.includes('!structureRecord && hasDedicatedBiologicModel(compoundName)'),
+  'MultiSmilesCanvas must delegate review-module biologics without structureRecord to BiologicMechanismModel'
+);
+
+// 8e. Side-by-side Comparator instances must emit strictly unique SVG <defs> IDs
+const sideBySideCascadeHtml = renderToStaticMarkup(
+  React.createElement(
+    'div',
+    null,
+    React.createElement(FibrinolysisCascadeViewer, {
+      structure: { id: 'a', name: 'Alteplase', isBiologic: true } as any,
+      isBlinded: false,
+    }),
+    React.createElement(FibrinolysisCascadeViewer, {
+      structure: { id: 'b', name: 'Tenecteplase', isBiologic: true } as any,
+      isBlinded: false,
+    })
+  )
+);
+const cascadeDefIds = Array.from(sideBySideCascadeHtml.matchAll(/\bid="([^"]+)"/g)).map((m) => m[1]);
+assert.ok(cascadeDefIds.length >= 10, 'Expected multiple SVG <defs> IDs across two FibrinolysisCascadeViewer instances');
+assert.strictEqual(
+  new Set(cascadeDefIds).size,
+  cascadeDefIds.length,
+  `Duplicate SVG <defs> IDs found across side-by-side FibrinolysisCascadeViewer instances: ${cascadeDefIds.join(', ')}`
+);
+
+const sideBySideBioHtml = renderToStaticMarkup(
+  React.createElement(
+    'div',
+    null,
+    React.createElement(BiologicMechanismModel, { compoundName: 'Insulin Glargine', isFlipped: true }),
+    React.createElement(BiologicMechanismModel, { compoundName: 'Evolocumab', isFlipped: true })
+  )
+);
+const bioDefIds = Array.from(sideBySideBioHtml.matchAll(/\bid="([^"]+)"/g)).map((m) => m[1]);
+assert.ok(bioDefIds.length >= 8, 'Expected multiple SVG <defs> IDs across two BiologicMechanismModel instances');
+assert.strictEqual(
+  new Set(bioDefIds).size,
+  bioDefIds.length,
+  `Duplicate SVG <defs> IDs found across side-by-side BiologicMechanismModel instances: ${bioDefIds.join(', ')}`
+);
+
+console.log('All MultiSmilesCanvas component, zero-leak blinding, and unique SVG <defs> ID checks passed successfully!');

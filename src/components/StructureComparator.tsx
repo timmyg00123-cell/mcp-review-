@@ -765,6 +765,7 @@ function mergeDrugStructures(
     ...existing,
     id: existing.id || incoming.id,
     name: canonicalName,
+    isBiologic: Boolean(existing.isBiologic || incoming.isBiologic),
     document_label: docLabel,
     tradeName: existing.tradeName || incoming.tradeName,
     canonicalSmiles: resolvedSmiles,
@@ -1307,16 +1308,18 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
   const selectedStructureB = compoundB;
   console.log('--- DEXIE DRUG SCHEMA ---', compoundA);
 
-  // Reset active pharmacophore tags when switching structures
+  // Reset active pharmacophore tags and tooltip when switching structures
   useEffect(() => {
     setActiveTagsA([]);
     setHoveredTagA(null);
-  }, [selectedStructureA?.id]);
+    setActiveTooltip(null);
+  }, [selectedStructureA?.id, compoundA?.name]);
 
   useEffect(() => {
     setActiveTagsB([]);
     setHoveredTagB(null);
-  }, [selectedStructureB?.id]);
+    setActiveTooltip(null);
+  }, [selectedStructureB?.id, compoundB?.name]);
 
   // Reset peeked cards when active compound selections change
   useEffect(() => {
@@ -1954,11 +1957,16 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
                     </div>
                   </div>
                   <p className="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
-                    {targetTag.description || targetTag.purpose}
+                    {shouldMask && !isPeeked
+                      ? sanitizeText(targetTag.description || targetTag.purpose || '')
+                      : targetTag.description || targetTag.purpose}
                   </p>
                   {targetTag.casual_sar_explanation && (
                     <div className="mt-1.5 text-[10px] text-amber-900 dark:text-amber-200 bg-amber-500/10 border border-amber-500/20 rounded-lg p-1.5 italic leading-snug">
-                      💡 {targetTag.casual_sar_explanation}
+                      💡{' '}
+                      {shouldMask && !isPeeked
+                        ? sanitizeText(targetTag.casual_sar_explanation)
+                        : targetTag.casual_sar_explanation}
                     </div>
                   )}
                 </div>
@@ -2046,7 +2054,7 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
           </div>
 
           {/* 3. COLLAPSE SMILES */}
-          {canonicalSmiles ? (
+          {canonicalSmiles && !isFibrinolyticBiologic(structure) ? (
             <details className="text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-2 group/smiles">
               <summary className="text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none hover:text-slate-900 dark:hover:text-slate-200 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">

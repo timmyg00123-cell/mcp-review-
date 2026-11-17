@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getHydratedDrugs, HydratedDrug } from '../db/medChemGraphDb';
 import { StructureComparator } from './StructureComparator';
 import { SmilesCanvas } from './SmilesCanvas';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import { DocumentQuestionItem } from './DocumentQuestionItem';
 import { AntiplateletQuestion } from '../types/reviewModule';
 import {
@@ -10,6 +11,7 @@ import {
   FlaskConical,
   Search,
   ChevronDown,
+  Activity,
 } from 'lucide-react';
 
 /**
@@ -285,14 +287,43 @@ export const ReviewDeck: React.FC<ReviewDeckProps> = ({
                   {drug.name}
                 </span>
                 <div className="w-[160px] h-[160px] bg-[var(--structure-canvas-bg)] dark:bg-slate-900 rounded-md flex items-center justify-center overflow-hidden border border-slate-200/60 dark:border-slate-700/50">
-                  <SmilesCanvas
-                    smiles={drug.smiles || drug.canonicalSmiles || drug.structure?.canonicalSmiles || drug.structure?.smiles}
-                    molBlock={drug.structure?.pubchemMolBlock}
-                    fallbackImageUrl={drug.structure?.pngUrl}
-                    width={160}
-                    height={160}
-                    altText={drug.name}
-                  />
+                  {isFibrinolyticBiologic(
+                    drug.structure || ({ id: drug.id, name: drug.name, smiles: drug.smiles } as any)
+                  ) ? (
+                    <div
+                      className="w-full h-full flex flex-col items-center justify-between p-2.5 bg-gradient-to-b from-cyan-50/80 to-slate-50 dark:from-slate-900 dark:to-slate-950 text-center"
+                      role="img"
+                      aria-label={`${drug.name}: Fibrinolytic Cascade Model — Macromolecular Biologic`}
+                    >
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-cyan-100/90 text-cyan-800 border border-cyan-200 dark:bg-cyan-950/70 dark:text-cyan-300 dark:border-cyan-800/60">
+                        <Activity className="w-2.5 h-2.5 shrink-0" aria-hidden="true" />
+                        <span>Biologic Model</span>
+                      </span>
+                      <div className="w-full space-y-1 my-auto">
+                        <div className="px-1.5 py-1 rounded bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-800 dark:text-slate-100 leading-tight">
+                          Plasminogen
+                        </div>
+                        <div className="text-[9px] font-mono font-bold text-cyan-700 dark:text-cyan-400 leading-none">
+                          ↓ Arg561–Val562
+                        </div>
+                        <div className="px-1.5 py-1 rounded bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 leading-tight">
+                          Plasmin → FDPs
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
+                        Fibrinolytic Cascade
+                      </span>
+                    </div>
+                  ) : (
+                    <SmilesCanvas
+                      smiles={drug.smiles || drug.canonicalSmiles || drug.structure?.canonicalSmiles || drug.structure?.smiles}
+                      molBlock={drug.structure?.pubchemMolBlock}
+                      fallbackImageUrl={drug.structure?.pngUrl}
+                      width={160}
+                      height={160}
+                      altText={drug.name}
+                    />
+                  )}
                 </div>
 
                 {/* [A] and [B] Selector Squares */}

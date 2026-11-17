@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import type { StruggleDiagnosticReport, StruggleItem, ClassRecallBreakdown } from '../types/cumulativeStudy';
 import { SmilesCanvas } from './SmilesCanvas';
+import { FibrinolysisCascadeViewer } from './FibrinolysisCascadeViewer';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import {
   Award,
   CheckCircle2,
@@ -388,7 +390,38 @@ export const StruggleDiagnosticOverview: React.FC<StruggleDiagnosticOverviewProp
 
                     {/* 2D Structure Canvas */}
                     <div className="my-1 flex justify-center bg-slate-50 dark:bg-slate-950/60 rounded-lg p-2 border border-slate-100 dark:border-slate-800/60">
-                      {smiles || pngUrl ? (
+                      {isFibrinolyticBiologic(
+                        item.structure ||
+                          ({ id: item.structureId, name: item.drugName, smiles: smiles || '' } as any)
+                      ) ? (
+                        <FibrinolysisCascadeViewer
+                          structure={
+                            item.structure ||
+                            ({
+                              id: item.structureId,
+                              name: item.drugName,
+                              isBiologic: true,
+                              smiles: '',
+                              chemicalClass: item.chemicalClass || 'Recombinant Protein Biologic',
+                              pharmacologicalClass:
+                                item.pharmacologicalClass || 'Fibrinolytic / Plasminogen Activator',
+                              target: 'Plasminogen (Arg561-Val562 peptide bond)',
+                              reversibility: 'Enzymatic catalytic cleavage',
+                              route: 'IV',
+                              keyFunctionalGroups: [],
+                              pkPdHighlights: {
+                                onset: 'Immediate (IV)',
+                                duration: 'Fibrinolytic window',
+                                halfLife: 'Agent-specific',
+                                elimination: 'Hepatic clearance',
+                              },
+                            } as any)
+                          }
+                          height={210}
+                          isBlinded={false}
+                          className="w-full"
+                        />
+                      ) : smiles || pngUrl ? (
                         <SmilesCanvas
                           smiles={smiles}
                           fallbackImageUrl={pngUrl}

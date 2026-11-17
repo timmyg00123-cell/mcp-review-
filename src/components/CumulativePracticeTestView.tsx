@@ -13,6 +13,8 @@ import {
 } from '../utils/struggleDiagnosticService';
 import { CUMULATIVE_QUESTIONS as defaultQuestionBank } from '../data/cumulativeQuizData';
 import { SmilesCanvas } from './SmilesCanvas';
+import { FibrinolysisCascadeViewer } from './FibrinolysisCascadeViewer';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import {
   CheckCircle2,
   XCircle,
@@ -423,17 +425,26 @@ export const CumulativePracticeTestView: React.FC<CumulativePracticeTestViewProp
             </div>
 
             <div className="w-full p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center">
-              <SmilesCanvas
-                smiles={
-                  currentQuestion.singleStructure.canonical_smiles ||
-                  currentQuestion.singleStructure.smiles
-                }
-                fallbackImageUrl={currentQuestion.singleStructure.pngUrl}
-                altText="Blinded chemical structure under evaluation"
-                width={440}
-                height={260}
-                className="max-h-64 w-auto object-contain mx-auto"
-              />
+              {isFibrinolyticBiologic(currentQuestion.singleStructure) ? (
+                <FibrinolysisCascadeViewer
+                  structure={currentQuestion.singleStructure}
+                  height={240}
+                  isBlinded={!isSubmitted}
+                  className="w-full"
+                />
+              ) : (
+                <SmilesCanvas
+                  smiles={
+                    currentQuestion.singleStructure.canonical_smiles ||
+                    currentQuestion.singleStructure.smiles
+                  }
+                  fallbackImageUrl={currentQuestion.singleStructure.pngUrl}
+                  altText="Blinded chemical structure under evaluation"
+                  width={440}
+                  height={260}
+                  className="max-h-64 w-auto object-contain mx-auto"
+                />
+              )}
             </div>
 
             {isSubmitted && currentQuestion.rationales[currentQuestion.singleStructure.id] && (
@@ -629,14 +640,23 @@ export const CumulativePracticeTestView: React.FC<CumulativePracticeTestViewProp
 
                     {/* 2D Chemical Structure Canvas */}
                     <div className="w-full p-2.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center">
-                      <SmilesCanvas
-                        smiles={candidate.canonical_smiles || candidate.smiles}
-                        fallbackImageUrl={candidate.pngUrl}
-                        altText={isSubmitted ? candidate.name : romanLabel}
-                        width={280}
-                        height={170}
-                        className="max-h-40 w-auto object-contain mx-auto"
-                      />
+                      {isFibrinolyticBiologic(candidate) ? (
+                        <FibrinolysisCascadeViewer
+                          structure={candidate}
+                          height={210}
+                          isBlinded={!isSubmitted}
+                          className="w-full pointer-events-none"
+                        />
+                      ) : (
+                        <SmilesCanvas
+                          smiles={candidate.canonical_smiles || candidate.smiles}
+                          fallbackImageUrl={candidate.pngUrl}
+                          altText={isSubmitted ? candidate.name : romanLabel}
+                          width={280}
+                          height={170}
+                          className="max-h-40 w-auto object-contain mx-auto"
+                        />
+                      )}
                     </div>
                   </div>
 

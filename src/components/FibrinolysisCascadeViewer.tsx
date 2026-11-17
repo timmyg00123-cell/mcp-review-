@@ -7,6 +7,8 @@ export interface FibrinolysisCascadeViewerProps {
   structure: ChemicalStructure;
   activePharmacophoreIds?: Record<string, Partial<ColorPaletteItem> | { hex?: string; color?: string; [key: string]: any }>;
   hoveredPharmacophoreId?: string | null;
+  activePharmacophores?: Array<{ id?: string; name?: string; smarts?: string; color?: string }>;
+  hoveredPharmacophore?: { id?: string; name?: string; smarts?: string; color?: string } | null;
   className?: string;
   height?: number; // default e.g. 260
   isBlinded?: boolean;
@@ -126,6 +128,8 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
   structure,
   activePharmacophoreIds = {},
   hoveredPharmacophoreId = null,
+  activePharmacophores = [],
+  hoveredPharmacophore = null,
   className = '',
   height = 260,
   isBlinded = false,
@@ -176,12 +180,83 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
       }
     });
 
+    // Support synthetic structures (e.g., flashcard back face via BiologicMechanismModel)
+    Object.entries(activePharmacophoreIds).forEach(([id, entry]) => {
+      const entryName = (entry as { name?: string })?.name || '';
+      if (!entryName) return;
+      const rule = DOMAIN_MECHANISM_RULES.find((r) => r.matches(id, entryName));
+      if (rule && !activeMap[rule.targetId]) {
+        const rawColor = entry?.hex || (entry as { color?: string })?.color;
+        activeMap[rule.targetId] = {
+          rule,
+          color: rawColor || rule.defaultColor,
+          isHovered: hoveredPharmacophoreId === id,
+          tagName: entryName,
+          tagGroup: { id, name: entryName, purpose: '' } as PharmacophoreGroup,
+        };
+      }
+    });
+
+    if (Array.isArray(activePharmacophores)) {
+      activePharmacophores.forEach((ap, idx) => {
+        const id = ap.id || `ap_${idx}`;
+        const name = ap.name || id;
+        const rule = DOMAIN_MECHANISM_RULES.find((r) => r.matches(id, name));
+        if (rule) {
+          activeMap[rule.targetId] = {
+            rule,
+            color: ap.color || rule.defaultColor,
+            isHovered: Boolean(
+              hoveredPharmacophore &&
+                ((hoveredPharmacophore.id && hoveredPharmacophore.id === ap.id) ||
+                  (hoveredPharmacophore.name && hoveredPharmacophore.name === ap.name))
+            ),
+            tagName: name,
+            tagGroup: { id, name, purpose: '' } as PharmacophoreGroup,
+          };
+        }
+      });
+    }
+
+    if (hoveredPharmacophore) {
+      const hId = hoveredPharmacophore.id || 'hovered';
+      const hName = hoveredPharmacophore.name || hId;
+      const rule = DOMAIN_MECHANISM_RULES.find((r) => r.matches(hId, hName));
+      if (rule) {
+        activeMap[rule.targetId] = {
+          rule,
+          color: hoveredPharmacophore.color || activeMap[rule.targetId]?.color || rule.defaultColor,
+          isHovered: true,
+          tagName: hName,
+          tagGroup: { id: hId, name: hName, purpose: '' } as PharmacophoreGroup,
+        };
+      }
+    }
+
     return activeMap;
-  }, [pharmacophores, activePharmacophoreIds, hoveredPharmacophoreId]);
+  }, [pharmacophores, activePharmacophoreIds, hoveredPharmacophoreId, activePharmacophores, hoveredPharmacophore]);
 
   // Priority item for tooltip/callout banner (hovered > active > internal hovered > null)
   const priorityBannerInfo = useMemo(() => {
     // 1. Check direct prop hover
+    if (hoveredPharmacophore) {
+      const hId = hoveredPharmacophore.id || 'hovered';
+      const hName = hoveredPharmacophore.name || hId;
+      const rule = DOMAIN_MECHANISM_RULES.find((r) => r.matches(hId, hName));
+      if (rule) {
+        return {
+          tagName: scrubFibrinolyticSpoilers(hName, isBlinded),
+          title: scrubFibrinolyticSpoilers(rule.title, isBlinded),
+          explanation: scrubFibrinolyticSpoilers(
+            rule.getExplanation(structure.name, isBlinded),
+            isBlinded
+          ),
+          color: hoveredPharmacophore.color || rule.defaultColor,
+          isHovered: true,
+        };
+      }
+    }
+
     if (hoveredPharmacophoreId) {
       const p = pharmacophores.find((item) => item.id === hoveredPharmacophoreId);
       if (p) {
@@ -237,6 +312,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
 
     return null;
   }, [
+    hoveredPharmacophore,
     hoveredPharmacophoreId,
     internalHoveredNode,
     pharmacophores,
