@@ -24,6 +24,7 @@ import {
 import { ColorPaletteItem } from '../utils/pharmacophoreData';
 import { formatClinicalWarnings } from '../utils/clinicalWarningFormatter';
 import { resolveChemicalClass } from '../utils/chemicalClassDictionary';
+import { ClinicalReferenceToolbar } from './ClinicalReferenceToolbar';
 
 export interface MedChemMatrixProps {
   moduleStructures?: ChemicalStructure[];
@@ -34,6 +35,7 @@ export interface MedChemMatrixProps {
   focusMatchingOnly?: boolean;
   onOpenPharmacophoreExplorer?: () => void;
   pharmacophoreCount?: number;
+  onSelectStructureFor3D?: (structure: ChemicalStructure) => void;
 }
 
 export type AntiplateletMatrixViewProps = MedChemMatrixProps;
@@ -351,6 +353,7 @@ export const MedChemMatrix: React.FC<MedChemMatrixProps> = ({
   focusMatchingOnly = false,
   onOpenPharmacophoreExplorer,
   pharmacophoreCount,
+  onSelectStructureFor3D,
 }) => {
   // TanStack Query: Fetch deduplicated, fully hydrated drugs from graph database
   const { data: hydratedDrugs = [] } = useQuery<HydratedDrug[]>({
@@ -833,6 +836,13 @@ export const MedChemMatrix: React.FC<MedChemMatrixProps> = ({
                               </span>
                             )}
                           </div>
+                          <ClinicalReferenceToolbar
+                            drugName={row.drug}
+                            structure={row.structure}
+                            onSelectStructureFor3D={onSelectStructureFor3D}
+                            variant="compact"
+                            className="mt-1"
+                          />
                         </div>
                       </div>
                     </td>
