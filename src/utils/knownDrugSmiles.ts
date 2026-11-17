@@ -68,8 +68,10 @@ export function getKnownDrugSmiles(rawNameOrId?: string): string | undefined {
     return KNOWN_DRUG_SMILES[clean];
   }
 
-  // Partial match check for salt names (e.g. rosuvastatin_calcium -> rosuvastatin)
-  for (const [key, smiles] of Object.entries(KNOWN_DRUG_SMILES)) {
+  // Partial match check for salt names (e.g. rosuvastatin_calcium -> rosuvastatin,
+  // dabigatran_etexilate_mesylate -> dabigatran_etexilate before dabigatran)
+  const sortedEntries = Object.entries(KNOWN_DRUG_SMILES).sort((a, b) => b[0].length - a[0].length);
+  for (const [key, smiles] of sortedEntries) {
     if (clean.startsWith(key) || clean.endsWith(key) || clean.includes(key)) {
       return smiles;
     }

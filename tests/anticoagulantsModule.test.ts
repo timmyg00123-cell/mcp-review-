@@ -3,7 +3,7 @@ import { getDefaultAnticoagulantsModule } from '../src/data/anticoagulantsQuizDa
 
 const mod = getDefaultAnticoagulantsModule();
 assert.strictEqual(mod.id, 'anticoagulants_mcp2');
-assert.strictEqual(mod.version, '2.1.0', 'Expected module version 2.1.0');
+assert.strictEqual(mod.version, '2.3.0', 'Expected module version 2.3.0');
 assert.strictEqual(mod.pages.length, 8, 'Anticoagulants module must contain all 8 lecture pages');
 
 let totalQuestions = 0;
@@ -58,7 +58,7 @@ resetBuiltInModule('nonexistent'); // Reset inMemoryModules cache
 const loaded = loadAllReviewModules();
 const anticoag = loaded.find(m => m.id === 'anticoagulants_mcp2');
 assert(anticoag, 'Anticoagulants module must be loaded');
-assert.strictEqual(anticoag.version, '2.1.0', 'Stale override must be migrated to 2.1.0');
+assert.strictEqual(anticoag.version, '2.3.0', 'Stale override must be migrated to 2.3.0');
 assert.strictEqual(anticoag.pages.length, 8, 'Migrated module must have all 8 pages');
 
 console.log('Task 4 anticoagulantsModule tests passed!');

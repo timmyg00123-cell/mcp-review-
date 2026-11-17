@@ -6,7 +6,7 @@ import {
   isFibrinolyticBiologic,
   SMARTS_OVERRIDE_DICT,
 } from '../src/utils/smartsDictionary.js';
-import { KNOWN_DRUG_SMILES } from '../src/utils/knownDrugSmiles.js';
+import { KNOWN_DRUG_SMILES, getKnownDrugSmiles } from '../src/utils/knownDrugSmiles.js';
 
 const require = createRequire(import.meta.url);
 
@@ -102,5 +102,11 @@ assert.ok(hexylCarbamateSmarts.length > 0, 'Hexyl carbamate must resolve to a no
     if (qmol) qmol.delete();
   }
 }
+
+assert.strictEqual(
+  getKnownDrugSmiles('dabigatran_etexilate_mesylate'),
+  KNOWN_DRUG_SMILES.dabigatran_etexilate,
+  'Longest-key partial match must resolve dabigatran_etexilate_mesylate to dabigatran_etexilate rather than dabigatran'
+);
 
 console.log(`✓ All SMARTS dictionary & ${knownEntries.length}/${knownEntries.length} KNOWN_DRUG_SMILES RDKit validation tests passed`);

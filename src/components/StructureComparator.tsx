@@ -746,12 +746,14 @@ function mergeDrugStructures(
 
   const resolvedSmiles =
     existing.canonicalSmiles ||
-    incoming.canonicalSmiles ||
+    (existing as any).canonical_smiles ||
     existing.smiles ||
-    incoming.smiles ||
     existing.pubchemAudit?.canonicalSmiles ||
-    incoming.pubchemAudit?.canonicalSmiles ||
     (existing as any).chemData?.canonicalSmiles ||
+    incoming.canonicalSmiles ||
+    (incoming as any).canonical_smiles ||
+    incoming.smiles ||
+    incoming.pubchemAudit?.canonicalSmiles ||
     (incoming as any).chemData?.canonicalSmiles;
 
   const resolvedMolBlock =

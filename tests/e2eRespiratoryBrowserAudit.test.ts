@@ -8,10 +8,10 @@ console.log('Running End-to-End Respiratory Browser & UI Verification Audit...')
 const allModules = loadAllReviewModules();
 const respMod = allModules.find((m) => m.id === 'respiratory_review_mcp2');
 assert.ok(respMod, 'respiratory_review_mcp2 must be present in loadAllReviewModules()');
-assert.equal(respMod.version, '2.2.0', 'Module version in moduleStorage must be 2.2.0');
+assert.equal(respMod.version, '2.3.0', 'Module version in moduleStorage must be 2.3.0');
 
 const directMod = getDefaultRespiratoryReviewModule();
-assert.equal(directMod.version, '2.2.0', 'Direct module version must be 2.2.0');
+assert.equal(directMod.version, '2.3.0', 'Direct module version must be 2.3.0');
 
 // 2. Verify all 9 pages are Review Pages and have zero "Slide" references
 assert.equal(respMod.pages.length, 9, 'Must have exactly 9 Review Pages');

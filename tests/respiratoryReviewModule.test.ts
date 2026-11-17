@@ -63,7 +63,7 @@ assert.equal(mod.code, 'Exam 1', 'Code must be Exam 1');
 assert.equal(mod.examId, 'exam_1', 'Exam ID must be exam_1');
 assert.equal(mod.examTitle, 'Exam 1: Renal & Respiratory Medicinal Chemistry');
 assert.equal(mod.isBuiltIn, true, 'isBuiltIn must be true');
-assert.equal(mod.version, '2.2.0', 'Module version must be 2.2.0');
+assert.equal(mod.version, '2.3.0', 'Module version must be 2.3.0');
 
 // 2. Pages structure
 const pages = getRespiratoryReviewPages();

@@ -1,6 +1,6 @@
 import Dexie, { Table } from 'dexie';
 import { ReviewModule, QuizSessionProgress } from '../types/reviewModule';
-import { getKnownDrugSmiles } from '../utils/knownDrugSmiles';
+import { KNOWN_DRUG_SMILES, getKnownDrugSmiles } from '../utils/knownDrugSmiles';
 import { getCorrectedSmarts } from '../utils/smartsDictionary';
 import { antiplateletMolBlocks } from '../data/antiplateletMolBlocks';
 import type { OpenFdaClinicalData, ClinicalData, EliminationHalfLifeObj } from '../services/openFdaService';
@@ -596,83 +596,142 @@ export async function ensureStoragePersistence(): Promise<boolean> {
   return false;
 }
 
+const REMEDIATED_ENTITY_SMILES: Record<string, { canonicalSmiles: string; isomericSmiles?: string }> = {
+  clopidogrel: {
+    canonicalSmiles: 'COC(=O)C(C1=CC=CC=C1Cl)N2CCC3=C(C2)C=CS3',
+    isomericSmiles: 'COC(=O)[C@@H](C1=CC=CC=C1Cl)N2CCC3=C(C2)C=CS3',
+  },
+  prasugrel: {
+    canonicalSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
+    isomericSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)[C@@H](C(=O)C3CC3)C4=CC=CC=C4F',
+  },
+  ticagrelor: {
+    canonicalSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
+    isomericSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
+  },
+  ticlopidine: {
+    canonicalSmiles: 'C1CN(CC2=C1C=CS2)CC3=CC=CC=C3Cl',
+  },
+  cangrelor: {
+    canonicalSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
+    isomericSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
+  },
+  aspirin: {
+    canonicalSmiles: 'CC(=O)OC1=CC=CC=C1C(=O)O',
+  },
+  tirofiban: {
+    canonicalSmiles: 'CCCCCS(=O)(=O)NC(CC1=CC=C(C=C1)OCCCC2CCNCC2)C(=O)O',
+  },
+  eptifibatide: {
+    canonicalSmiles: 'CC1C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(CSSCCC(=O)N1)C(=O)NC(CC2=CNC3=CC=CC=C32)C(=O)N)CCCCN=C(N)N)CC(=O)O)C',
+  },
+  vorapaxar: {
+    canonicalSmiles: 'CCOC(=O)NC1CC2C(C1)C(C3=C2C=CC(=C3)C4=CN=CC=C4)(C)C5=CC=C(C=C5)F',
+  },
+  cilostazol: {
+    canonicalSmiles: 'C1CCC(CC1)N2C(=NN=N2)CCCCCOC3=CC4=C(C=C3)CCC(=O)N4',
+  },
+  dipyridamole: {
+    canonicalSmiles: 'C1CCN(CC1)C2=NC(=NC3=C2N=C(N=C3N4CCCCC4)N(CCO)CCO)N(CCO)CCO',
+  },
+};
+
+function normalizeEntityKey(raw?: string): string {
+  if (!raw) return '';
+  return raw
+    .toLowerCase()
+    .replace(/\[.*?\]\s*/g, '')
+    .replace(/^(?:structure|compound|drug)\s+[a-z0-9ivxlcdm]+\s*[-:–]?\s*/i, '')
+    .replace(/[^a-z0-9_]/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+let entitySmilesRepairPromise: Promise<void> | null = null;
+
+/**
+ * Idempotent one-time repair for existing Dexie `entities` rows so browsers that
+ * cached stale antiplatelet or `KNOWN_DRUG_SMILES` strings are upgraded on load
+ * even before `seedDefaultKnowledgeGraph()` is invoked.
+ */
+export function ensureRemediatedGraphEntities(): Promise<void> {
+  if (!entitySmilesRepairPromise) {
+    entitySmilesRepairPromise = (async () => {
+      try {
+        const allEntities = await medChemGraphDb.entities.toArray();
+        if (allEntities.length === 0) return;
+
+        const updates: GraphEntity[] = [];
+        const now = new Date().toISOString();
+
+        for (const existing of allEntities) {
+          const typeUpper = (existing.type || '').toUpperCase();
+          if (typeUpper !== 'DRUG' && typeUpper !== 'METABOLITE') continue;
+
+          const idKey = normalizeEntityKey(existing.id);
+          const nameKey = normalizeEntityKey(existing.name);
+          const spec =
+            REMEDIATED_ENTITY_SMILES[existing.id] ||
+            REMEDIATED_ENTITY_SMILES[idKey] ||
+            REMEDIATED_ENTITY_SMILES[nameKey] ||
+            (KNOWN_DRUG_SMILES[idKey]
+              ? { canonicalSmiles: KNOWN_DRUG_SMILES[idKey] }
+              : KNOWN_DRUG_SMILES[nameKey]
+              ? { canonicalSmiles: KNOWN_DRUG_SMILES[nameKey] }
+              : undefined);
+
+          if (!spec) continue;
+
+          const targetIso = spec.isomericSmiles || spec.canonicalSmiles;
+          const needsUpdate =
+            existing.smiles !== spec.canonicalSmiles ||
+            existing.canonicalSmiles !== spec.canonicalSmiles ||
+            (existing.pubchemAudit && existing.pubchemAudit.canonicalSmiles !== spec.canonicalSmiles) ||
+            (existing.chemData &&
+              (existing.chemData.canonicalSmiles !== spec.canonicalSmiles ||
+                (existing.chemData.isomericSmiles !== undefined &&
+                  existing.chemData.isomericSmiles !== targetIso)));
+
+          if (needsUpdate) {
+            updates.push({
+              ...existing,
+              smiles: spec.canonicalSmiles,
+              canonicalSmiles: spec.canonicalSmiles,
+              pubchemAudit: existing.pubchemAudit
+                ? { ...existing.pubchemAudit, canonicalSmiles: spec.canonicalSmiles }
+                : existing.pubchemAudit,
+              chemData: existing.chemData
+                ? {
+                    ...existing.chemData,
+                    canonicalSmiles: spec.canonicalSmiles,
+                    ...(existing.chemData.isomericSmiles !== undefined || spec.isomericSmiles
+                      ? { isomericSmiles: targetIso }
+                      : {}),
+                  }
+                : existing.chemData,
+              updatedAt: now,
+            });
+          }
+        }
+
+        if (updates.length > 0) {
+          await medChemGraphDb.entities.bulkPut(updates);
+        }
+      } catch {
+        entitySmilesRepairPromise = null;
+      }
+    })();
+  }
+  return entitySmilesRepairPromise;
+}
+
 /**
  * Pre-seeds standard medicinal chemistry entities and relationships if database is empty or needs GDMT update.
  */
 export async function seedDefaultKnowledgeGraph(): Promise<void> {
   await ensureStoragePersistence();
-
-  const REMEDIATED_ENTITY_SMILES: Record<string, { canonicalSmiles: string; isomericSmiles?: string }> = {
-    clopidogrel: {
-      canonicalSmiles: 'COC(=O)C(C1=CC=CC=C1Cl)N2CCC3=C(C2)C=CS3',
-      isomericSmiles: 'COC(=O)[C@@H](C1=CC=CC=C1Cl)N2CCC3=C(C2)C=CS3',
-    },
-    prasugrel: {
-      canonicalSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
-      isomericSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)[C@@H](C(=O)C3CC3)C4=CC=CC=C4F',
-    },
-    ticagrelor: {
-      canonicalSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
-      isomericSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
-    },
-    ticlopidine: {
-      canonicalSmiles: 'C1CN(CC2=C1C=CS2)CC3=CC=CC=C3Cl',
-    },
-    cangrelor: {
-      canonicalSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
-      isomericSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
-    },
-    aspirin: {
-      canonicalSmiles: 'CC(=O)OC1=CC=CC=C1C(=O)O',
-    },
-    tirofiban: {
-      canonicalSmiles: 'CCCCCS(=O)(=O)NC(CC1=CC=C(C=C1)OCCCC2CCNCC2)C(=O)O',
-    },
-    eptifibatide: {
-      canonicalSmiles: 'CC1C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(CSSCCC(=O)N1)C(=O)NC(CC2=CNC3=CC=CC=C32)C(=O)N)CCCCN=C(N)N)CC(=O)O)C',
-    },
-    vorapaxar: {
-      canonicalSmiles: 'CCOC(=O)NC1CC2C(C1)C(C3=C2C=CC(=C3)C4=CN=CC=C4)(C)C5=CC=C(C=C5)F',
-    },
-    cilostazol: {
-      canonicalSmiles: 'C1CCC(CC1)N2C(=NN=N2)CCCCCOC3=CC4=C(C=C3)CCC(=O)N4',
-    },
-    dipyridamole: {
-      canonicalSmiles: 'C1CCN(CC1)C2=NC(=NC3=C2N=C(N=C3N4CCCCC4)N(CCO)CCO)N(CCO)CCO',
-    },
-  };
+  await ensureRemediatedGraphEntities();
 
   const count = await medChemGraphDb.entities.count();
-  if (count > 0) {
-    for (const [entityId, spec] of Object.entries(REMEDIATED_ENTITY_SMILES)) {
-      const existing = await medChemGraphDb.entities.get(entityId);
-      if (
-        existing &&
-        (existing.smiles !== spec.canonicalSmiles ||
-          existing.canonicalSmiles !== spec.canonicalSmiles ||
-          existing.pubchemAudit?.canonicalSmiles !== spec.canonicalSmiles ||
-          existing.chemData?.canonicalSmiles !== spec.canonicalSmiles)
-      ) {
-        await medChemGraphDb.entities.put({
-          ...existing,
-          smiles: spec.canonicalSmiles,
-          canonicalSmiles: spec.canonicalSmiles,
-          pubchemAudit: existing.pubchemAudit
-            ? { ...existing.pubchemAudit, canonicalSmiles: spec.canonicalSmiles }
-            : existing.pubchemAudit,
-          chemData: existing.chemData
-            ? {
-                ...existing.chemData,
-                canonicalSmiles: spec.canonicalSmiles,
-                ...(spec.isomericSmiles ? { isomericSmiles: spec.isomericSmiles } : {}),
-              }
-            : existing.chemData,
-          updatedAt: new Date().toISOString(),
-        });
-      }
-    }
-  }
-
   const existingVorapaxar = await medChemGraphDb.entities.get('vorapaxar');
   if (count > 0 && existingVorapaxar) return;
 
@@ -1597,6 +1656,8 @@ export interface HydratedDrug extends Omit<GraphEntity, 'target'> {
  */
 export async function getHydratedDrugs(): Promise<HydratedDrug[]> {
   try {
+    await ensureRemediatedGraphEntities();
+
     // 1. Query entities table for all nodes where type === 'DRUG'
     const allEntities = await medChemGraphDb.entities.toArray();
     const drugEntities = allEntities.filter(
