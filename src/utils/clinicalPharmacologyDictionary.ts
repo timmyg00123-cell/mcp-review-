@@ -9,6 +9,7 @@ export interface ClinicalPharmacologyProfile {
   pregnancyCategory?: string;
   pregnancySummary: string;
   clinicalPearls?: string;
+  indications?: string[];
 }
 
 /**

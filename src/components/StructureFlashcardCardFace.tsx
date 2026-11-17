@@ -35,7 +35,11 @@ import {
   Lightbulb,
   ArrowRight,
   ChevronDown,
+  Stethoscope,
 } from 'lucide-react';
+import { ClinicalReferenceToolbar } from './ClinicalReferenceToolbar';
+import { resolveClinicalIndications } from '../utils/clinicalIndications';
+import { resolveTopDrugClinicalMonograph } from '../data/topDrugsClinicalData';
 
 export interface FlashcardDisplaySettings {
   density: 'split' | 'structure-focus' | 'minimalist';
@@ -66,6 +70,7 @@ export interface StructureFlashcardCardFaceProps {
   onFlip: () => void;
   children?: React.ReactNode; // Rating buttons slot on back face
   displaySettings?: FlashcardDisplaySettings;
+  onSelectStructureFor3D?: (structure: ChemicalStructure) => void;
 }
 
 /**
@@ -89,6 +94,7 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
   onFlip,
   children,
   displaySettings = DEFAULT_FLASHCARD_DISPLAY_SETTINGS,
+  onSelectStructureFor3D,
 }) => {
   const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
 
@@ -259,6 +265,21 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
   const route = getRouteOfAdmin(structure);
   const chemicalClass = resolveChemicalClass(structure);
   const clinicalProfile: ClinicalPharmacologyProfile = resolveClinicalPharmacology(structure);
+
+  const clinicalIndications = useMemo(() => {
+    if (Array.isArray(structure.clinicalIndications) && structure.clinicalIndications.length > 0) {
+      return structure.clinicalIndications;
+    }
+    const monograph = resolveTopDrugClinicalMonograph(cleanName);
+    if (monograph) {
+      const extracted = resolveClinicalIndications(monograph);
+      if (extracted && extracted.length > 0) return extracted;
+    }
+    if (clinicalProfile.indications && Array.isArray(clinicalProfile.indications) && clinicalProfile.indications.length > 0) {
+      return clinicalProfile.indications;
+    }
+    return [];
+  }, [structure.clinicalIndications, cleanName, clinicalProfile.indications]);
 
   const sarText =
     structure.sarNotes ||
@@ -552,7 +573,6 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                 molBlock={structure.pubchemMolBlock}
                 fallbackImageUrl={structure.pngUrl}
                 cid={structure.cid}
-                compoundName={structure.name}
                 width={400}
                 height={260}
                 className="w-full h-full flex items-center justify-center pointer-events-none"
@@ -724,6 +744,34 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
 
               {/* Right Column: Clinical Pharmacology Callouts */}
               <div className="space-y-3.5">
+                <ClinicalReferenceToolbar
+                  drugName={cleanName}
+                  structure={structure}
+                  onSelectStructureFor3D={onSelectStructureFor3D}
+                  variant="full"
+                />
+
+                {clinicalIndications.length > 0 && (
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-2">
+                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                      <Stethoscope className="w-4 h-4 shrink-0" />
+                      <span className="text-xs font-bold uppercase tracking-wider">
+                        Approved Clinical Indications
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {clinicalIndications.map((indication, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-xs font-medium"
+                        >
+                          {indication}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {showClinicalPearls ? (
                   renderClinicalCallouts()
                 ) : (
@@ -742,6 +790,38 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
 
               {/* Compact Reference Property Grid */}
               {renderPropertyGrid()}
+
+              {/* Approved Clinical Indications Badges */}
+              {clinicalIndications.length > 0 && (
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-2">
+                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                    <Stethoscope className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-bold uppercase tracking-wider">
+                      Approved Clinical Indications
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {clinicalIndications.map((indication, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-xs font-medium"
+                      >
+                        {indication}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Compact Reference Toolbar */}
+              <div className="flex items-center justify-between gap-2">
+                <ClinicalReferenceToolbar
+                  drugName={cleanName}
+                  structure={structure}
+                  onSelectStructureFor3D={onSelectStructureFor3D}
+                  variant="compact"
+                />
+              </div>
 
               {/* Expandable Accordion for Clinical Pearls */}
               {showClinicalPearls && (
@@ -808,6 +888,30 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                   />
                 </div>
               )}
+
+              {/* Compact indication chips */}
+              {clinicalIndications.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-1.5 w-full">
+                  {clinicalIndications.map((indication, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-[11px] font-medium"
+                    >
+                      {indication}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Compact ClinicalReferenceToolbar */}
+              <div className="w-full flex justify-center">
+                <ClinicalReferenceToolbar
+                  drugName={cleanName}
+                  structure={structure}
+                  onSelectStructureFor3D={onSelectStructureFor3D}
+                  variant="compact"
+                />
+              </div>
             </div>
           )}
 
