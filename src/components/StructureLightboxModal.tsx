@@ -524,6 +524,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                       maxHeightClass={isPrimaryBiologic ? '' : 'max-h-52'}
                       altText={getDisplayTitle(primaryStructure)}
                       isExpanded={true}
+                      isBlinded={shouldMask}
                     />
                   </div>
 
@@ -637,6 +638,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                       maxHeightClass={isSecondaryBiologic ? '' : 'max-h-52'}
                       altText={getDisplayTitle(secondaryStructure)}
                       isExpanded={true}
+                      isBlinded={shouldMask}
                     />
                   </div>
 
@@ -765,6 +767,7 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
                   maxHeightClass={isPrimaryBiologic ? '' : 'max-h-96'}
                   altText={getDisplayTitle(primaryStructure)}
                   isExpanded={true}
+                  isBlinded={shouldMask}
                 />
               </div>
 

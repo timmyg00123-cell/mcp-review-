@@ -406,6 +406,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
             maxHeightClass={isBiologic ? '' : 'max-h-40'}
             altText={`${displayName} 2D chemical structure`}
             isExpanded={showDetails}
+            isBlinded={shouldMaskName}
           />
 
           {/* Zoom / Compare Floating Prompt */}
@@ -752,7 +753,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
             comparisonPool={comparisonPool}
             initialCompareMode={openInCompareMode}
             initialViewTab={initialLightboxTab}
-            hideDrugName={hideDrugName}
+            hideDrugName={Boolean(hideDrugName && !isNamePeeked)}
             examModeActive={examModeActive}
             onInspectPubChem={onInspect}
           />

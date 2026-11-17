@@ -5,7 +5,7 @@ import { Activity, Info } from 'lucide-react';
 
 export interface FibrinolysisCascadeViewerProps {
   structure: ChemicalStructure;
-  activePharmacophoreIds?: Record<string, ColorPaletteItem>;
+  activePharmacophoreIds?: Record<string, Partial<ColorPaletteItem> | { hex?: string; color?: string; [key: string]: any }>;
   hoveredPharmacophoreId?: string | null;
   className?: string;
   height?: number; // default e.g. 260
@@ -20,7 +20,15 @@ interface DomainMechanismConfig {
   targetId: string;
   title: string;
   defaultColor: string;
-  getExplanation: (drugName: string) => string;
+  getExplanation: (drugName: string, isBlinded?: boolean) => string;
+}
+
+const FIBRINOLYTIC_SPOILER_REGEX =
+  /\b(Alteplase|Reteplase|Tenecteplase|TNK-tPA|TNKase|Activase|Retavase|Streptokinase|Streptase|Urokinase|Kinlytic)\b/gi;
+
+export function scrubFibrinolyticSpoilers(text: string, isBlinded: boolean): string {
+  if (!isBlinded || !text) return text;
+  return text.replace(FIBRINOLYTIC_SPOILER_REGEX, 'this fibrinolytic agent');
 }
 
 const DOMAIN_MECHANISM_RULES: DomainMechanismConfig[] = [
@@ -80,8 +88,10 @@ const DOMAIN_MECHANISM_RULES: DomainMechanismConfig[] = [
     targetId: 'pai1_shield',
     title: 'PAI-1 Checkpoint Shield (KHRR296-299AAAA)',
     defaultColor: '#8B5CF6', // Violet
-    getExplanation: (_drug) =>
-      'Tetra-alanine substitution eliminates basic cleavage site, rendering Tenecteplase 80-fold more resistant to PAI-1 inhibition.',
+    getExplanation: (_drug, isBlinded) =>
+      isBlinded
+        ? 'Tetra-alanine substitution eliminates basic cleavage site, rendering this fibrinolytic agent 80-fold more resistant to PAI-1 inhibition.'
+        : 'Tetra-alanine substitution eliminates basic cleavage site, rendering Tenecteplase 80-fold more resistant to PAI-1 inhibition.',
   },
   {
     key: 'glycosylation',
@@ -119,9 +129,11 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
   className = '',
   height = 260,
   isBlinded = false,
-  onTogglePharmacophore,
-  onHoverPharmacophore,
+  onTogglePharmacophore: _onTogglePharmacophore,
+  onHoverPharmacophore: _onHoverPharmacophore,
 }) => {
+  const rawUid = React.useId();
+  const uid = rawUid.replace(/[^a-zA-Z0-9_-]/g, '');
   const [internalHoveredNode, setInternalHoveredNode] = useState<string | null>(null);
 
   // Available domain tags for this structure
@@ -151,7 +163,8 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
         const rule = DOMAIN_MECHANISM_RULES.find((r) => r.matches(p.id, p.name));
         if (rule) {
           const paletteItem = activePharmacophoreIds[p.id];
-          const color = paletteItem ? paletteItem.hex : rule.defaultColor;
+          const rawColor = paletteItem ? (paletteItem.hex || (paletteItem as { color?: string }).color) : undefined;
+          const color: string = rawColor || rule.defaultColor;
           activeMap[rule.targetId] = {
             rule,
             color,
@@ -176,9 +189,12 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
         if (rule) {
           const color = activePharmacophoreIds[p.id]?.hex || rule.defaultColor;
           return {
-            tagName: p.name,
-            title: rule.title,
-            explanation: rule.getExplanation(structure.name),
+            tagName: scrubFibrinolyticSpoilers(p.name, isBlinded),
+            title: scrubFibrinolyticSpoilers(rule.title, isBlinded),
+            explanation: scrubFibrinolyticSpoilers(
+              rule.getExplanation(structure.name, isBlinded),
+              isBlinded
+            ),
             color,
             isHovered: true,
           };
@@ -191,9 +207,12 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
       const rule = DOMAIN_MECHANISM_RULES.find((r) => r.targetId === internalHoveredNode);
       if (rule) {
         return {
-          tagName: rule.title,
-          title: rule.title,
-          explanation: rule.getExplanation(structure.name),
+          tagName: scrubFibrinolyticSpoilers(rule.title, isBlinded),
+          title: scrubFibrinolyticSpoilers(rule.title, isBlinded),
+          explanation: scrubFibrinolyticSpoilers(
+            rule.getExplanation(structure.name, isBlinded),
+            isBlinded
+          ),
           color: rule.defaultColor,
           isHovered: true,
         };
@@ -205,9 +224,12 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
     if (activeEntries.length > 0) {
       const top = activeEntries[0];
       return {
-        tagName: top.tagName,
-        title: top.rule.title,
-        explanation: top.rule.getExplanation(structure.name),
+        tagName: scrubFibrinolyticSpoilers(top.tagName, isBlinded),
+        title: scrubFibrinolyticSpoilers(top.rule.title, isBlinded),
+        explanation: scrubFibrinolyticSpoilers(
+          top.rule.getExplanation(structure.name, isBlinded),
+          isBlinded
+        ),
         color: top.color,
         isHovered: false,
       };
@@ -221,6 +243,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
     activeDomains,
     structure.name,
     activePharmacophoreIds,
+    isBlinded,
   ]);
 
   // Helper to check target state
@@ -231,13 +254,13 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
     activeDomains[targetId]?.color || fallback;
 
   // Drug-specific characteristics
-  const drugLower = structure.name.toLowerCase();
+  const drugLower = (structure.name || '').toLowerCase();
   const isStreptokinase = drugLower.includes('streptokinase');
   const isUrokinase = drugLower.includes('urokinase');
   const isTenecteplase = drugLower.includes('tenecteplase');
   const isReteplase = drugLower.includes('reteplase');
 
-  const displayDrugName = isBlinded ? '[Therapeutic Fibrinolytic (?)]' : structure.name;
+  const displayDrugName = isBlinded ? 'Blinded Biologic (?)' : structure.name;
 
   const drugSubLabel = useMemo(() => {
     if (isBlinded) {
@@ -254,28 +277,55 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
     return 'Recombinant Human t-PA (527 aa, 59 kDa)';
   }, [isBlinded, isTenecteplase, isReteplase, isStreptokinase, isUrokinase]);
 
+  const safeRouteText = scrubFibrinolyticSpoilers(structure.route || 'IV', isBlinded);
+  const safeHalfLifeText = scrubFibrinolyticSpoilers(
+    structure.pkPdHighlights?.halfLife || 'Short',
+    isBlinded
+  );
+
+  // Scoped SVG <defs> IDs to prevent collisions when multiple cascade diagrams mount simultaneously
+  const glowId = `${uid}-cascade-glow`;
+  const shieldGlowId = `${uid}-shield-glow`;
+  const arrowDownId = `${uid}-arrow-down`;
+  const arrowCatalyticId = `${uid}-arrow-catalytic`;
+  const arrowActivePulseId = `${uid}-arrow-active-pulse`;
+  const inhibitBarId = `${uid}-inhibit-bar`;
+  const zymogenGradId = `${uid}-zymogen-grad`;
+  const activeEnzymeGradId = `${uid}-active-enzyme-grad`;
+  const fibrinGradId = `${uid}-fibrin-grad`;
+
   return (
     <div
-      className={`relative w-full flex flex-col justify-between rounded-xl overflow-hidden bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 p-2.5 text-slate-100 shadow-xl transition-all ${className}`}
+      className={`bio-cascade-theme relative w-full flex flex-col justify-between rounded-xl overflow-hidden bg-white dark:bg-slate-900/95 border border-slate-200 dark:border-slate-700/80 p-2.5 text-slate-800 dark:text-slate-100 shadow-sm dark:shadow-xl transition-all ${className}`}
       style={{ minHeight: height }}
       role="region"
-      aria-label={`Fibrinolysis Cascade Mechanism for ${displayDrugName}`}
+      aria-label={
+        isBlinded
+          ? 'Blinded Fibrinolysis Cascade Mechanism'
+          : `Fibrinolysis Cascade Mechanism for ${structure.name}`
+      }
     >
       {/* Top Header / Drug Indicator */}
-      <div className="flex items-center justify-between px-1 pb-1 text-xs border-b border-slate-800">
+      <div className="flex items-center justify-between px-1 pb-1 text-xs border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-1.5">
-          <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-          <span className="font-semibold text-slate-200">Fibrinolytic Cascade</span>
-          <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
+          <Activity className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+          <span className="font-semibold text-slate-800 dark:text-slate-200">Fibrinolytic Cascade</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
             (Goodman & Gilman Ch. 32 / DiPiro)
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full">
+          <span
+            className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${
+              isBlinded
+                ? 'text-indigo-700 bg-indigo-50 border-indigo-200 dark:text-indigo-300 dark:bg-indigo-950/70 dark:border-indigo-700/60'
+                : 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/60 dark:border-emerald-800/60'
+            }`}
+          >
             {displayDrugName}
           </span>
           {Object.keys(activeDomains).length > 0 && (
-            <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/70 border border-cyan-800/60 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] font-mono text-cyan-700 bg-cyan-50 border border-cyan-200 dark:text-cyan-300 dark:bg-cyan-950/70 dark:border-cyan-800/60 px-1.5 py-0.5 rounded">
               {Object.keys(activeDomains).length} Domain{Object.keys(activeDomains).length > 1 ? 's' : ''} Active
             </span>
           )}
@@ -292,7 +342,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
         >
           <defs>
             {/* Glow Filter */}
-            <filter id="cascade-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <filter id={glowId} x="-30%" y="-30%" width="160%" height="160%">
               <feGaussianBlur stdDeviation="3.5" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
@@ -301,7 +351,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             </filter>
 
             {/* Shield Glow Filter */}
-            <filter id="shield-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <filter id={shieldGlowId} x="-40%" y="-40%" width="180%" height="180%">
               <feGaussianBlur stdDeviation="5" result="blur" />
               <feComponentTransfer>
                 <feFuncA type="linear" slope="1.5" />
@@ -314,7 +364,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
 
             {/* Standard Arrows */}
             <marker
-              id="arrow-down"
+              id={arrowDownId}
               viewBox="0 0 10 10"
               refX="6"
               refY="5"
@@ -326,7 +376,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             </marker>
 
             <marker
-              id="arrow-catalytic"
+              id={arrowCatalyticId}
               viewBox="0 0 10 10"
               refX="6"
               refY="5"
@@ -338,7 +388,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             </marker>
 
             <marker
-              id="arrow-active-pulse"
+              id={arrowActivePulseId}
               viewBox="0 0 10 10"
               refX="6"
               refY="5"
@@ -350,7 +400,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             </marker>
 
             <marker
-              id="inhibit-bar"
+              id={inhibitBarId}
               viewBox="0 0 10 10"
               refX="5"
               refY="5"
@@ -361,19 +411,19 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               <line x1="5" y1="0" x2="5" y2="10" stroke="#F43F5E" strokeWidth="2.5" />
             </marker>
 
-            <linearGradient id="zymogen-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1E293B" />
-              <stop offset="100%" stopColor="#0F172A" />
+            <linearGradient id={zymogenGradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" style={{ stopColor: 'var(--bio-node, #ffffff)' }} />
+              <stop offset="100%" style={{ stopColor: 'var(--bio-node-end, #f1f5f9)' }} />
             </linearGradient>
 
-            <linearGradient id="active-enzyme-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1E293B" />
-              <stop offset="100%" stopColor="#091E2E" />
+            <linearGradient id={activeEnzymeGradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" style={{ stopColor: 'var(--bio-node, #ffffff)' }} />
+              <stop offset="100%" style={{ stopColor: 'var(--bio-enzyme-end, #e0f2fe)' }} />
             </linearGradient>
 
-            <linearGradient id="fibrin-grad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#1E293B" />
-              <stop offset="100%" stopColor="#182234" />
+            <linearGradient id={fibrinGradId} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" style={{ stopColor: 'var(--bio-node, #ffffff)' }} />
+              <stop offset="100%" style={{ stopColor: 'var(--bio-fibrin-end, #e2e8f0)' }} />
             </linearGradient>
           </defs>
 
@@ -383,7 +433,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
 
           {/* Fibrin Clot Substrate Anchor (Lysine Residues) */}
           <g
-            id="node-fibrin-anchor"
+            id={`${uid}-node-fibrin-anchor`}
             className="cursor-pointer transition-all duration-300"
             onMouseEnter={() => setInternalHoveredNode('finger_binding')}
             onMouseLeave={() => setInternalHoveredNode(null)}
@@ -394,28 +444,28 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               width="215"
               height="62"
               rx="10"
-              fill="url(#fibrin-grad)"
+              fill={`url(#${fibrinGradId})`}
               stroke={
                 isTargetActive('finger_binding') || isTargetHovered('finger_binding')
                   ? getTargetColor('finger_binding', '#06B6D4')
-                  : '#334155'
+                  : 'var(--bio-border, #cbd5e1)'
               }
               strokeWidth={
                 isTargetActive('finger_binding') || isTargetHovered('finger_binding') ? '2.5' : '1.5'
               }
               filter={
                 isTargetActive('finger_binding') || isTargetHovered('finger_binding')
-                  ? 'url(#cascade-glow)'
+                  ? `url(#${glowId})`
                   : undefined
               }
             />
-            <text x="45" y="62" fill="#E2E8F0" fontSize="11" fontWeight="700">
+            <text x="45" y="62" fill="var(--bio-text, #0f172a)" fontSize="11" fontWeight="700">
               Fibrin Clot Surface
             </text>
-            <text x="45" y="78" fill="#94A3B8" fontSize="9.5">
+            <text x="45" y="78" fill="var(--bio-text-muted, #475569)" fontSize="9.5">
               Cross-linked lysine residues
             </text>
-            <text x="45" y="92" fill="#38BDF8" fontSize="8.5" fontFamily="monospace">
+            <text x="45" y="92" fill="var(--bio-cyan, #0284c7)" fontSize="8.5" fontFamily="monospace">
               High-affinity t-PA / zymogen locus
             </text>
           </g>
@@ -429,7 +479,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             stroke={
               isTargetActive('kringle_anchor') || isTargetHovered('kringle_anchor')
                 ? getTargetColor('kringle_anchor', '#10B981')
-                : '#475569'
+                : 'var(--bio-border-strong, #94a3b8)'
             }
             strokeWidth={
               isTargetActive('kringle_anchor') || isTargetHovered('kringle_anchor') ? '2.5' : '1.5'
@@ -438,28 +488,41 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
           />
 
           {/* Plasminogen Zymogen Node */}
-          <g id="node-plasminogen">
+          <g id={`${uid}-node-plasminogen`}>
             <rect
               x="280"
               y="35"
               width="340"
               height="72"
               rx="12"
-              fill="url(#zymogen-grad)"
-              stroke="#475569"
+              fill={`url(#${zymogenGradId})`}
+              stroke="var(--bio-border-strong, #94a3b8)"
               strokeWidth="1.5"
             />
-            <text x="450" y="55" fill="#F8FAFC" fontSize="12.5" fontWeight="800" textAnchor="middle">
+            <text
+              x="450"
+              y="55"
+              fill="var(--bio-text, #0f172a)"
+              fontSize="12.5"
+              fontWeight="800"
+              textAnchor="middle"
+            >
               PLASMINOGEN (Inactive Zymogen, 92 kDa)
             </text>
-            <text x="450" y="70" fill="#94A3B8" fontSize="9.5" textAnchor="middle">
+            <text
+              x="450"
+              y="70"
+              fill="var(--bio-text-muted, #475569)"
+              fontSize="9.5"
+              textAnchor="middle"
+            >
               Single-chain glycoprotein • Arg561–Val562 peptide bond intact
             </text>
 
             {/* Sub-pills: Clot-bound vs Circulating */}
             {/* Clot-Bound (Lysine site) */}
             <g
-              id="node-kringle-anchor"
+              id={`${uid}-node-kringle-anchor`}
               className="cursor-pointer"
               onMouseEnter={() => setInternalHoveredNode('kringle_anchor')}
               onMouseLeave={() => setInternalHoveredNode(null)}
@@ -472,20 +535,20 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                 rx="6"
                 fill={
                   isTargetActive('kringle_anchor') || isTargetHovered('kringle_anchor')
-                    ? '#064E3B'
-                    : '#1E293B'
+                    ? 'var(--bio-active-emerald-bg, #d1fae5)'
+                    : 'var(--bio-node-alt, #f1f5f9)'
                 }
                 stroke={
                   isTargetActive('kringle_anchor') || isTargetHovered('kringle_anchor')
                     ? getTargetColor('kringle_anchor', '#10B981')
-                    : '#334155'
+                    : 'var(--bio-border, #cbd5e1)'
                 }
                 strokeWidth={
                   isTargetActive('kringle_anchor') || isTargetHovered('kringle_anchor') ? '2' : '1'
                 }
                 filter={
                   isTargetActive('kringle_anchor') || isTargetHovered('kringle_anchor')
-                    ? 'url(#cascade-glow)'
+                    ? `url(#${glowId})`
                     : undefined
                 }
               />
@@ -494,8 +557,8 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                 y="91"
                 fill={
                   isTargetActive('kringle_anchor') || isTargetHovered('kringle_anchor')
-                    ? '#6EE7B7'
-                    : '#CBD5E1'
+                    ? 'var(--bio-active-emerald-text, #065f46)'
+                    : 'var(--bio-text-secondary, #334155)'
                 }
                 fontSize="9"
                 fontWeight="600"
@@ -512,11 +575,11 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               width="155"
               height="22"
               rx="6"
-              fill="#1E293B"
-              stroke="#334155"
+              fill="var(--bio-node-alt, #f1f5f9)"
+              stroke="var(--bio-border, #cbd5e1)"
               strokeWidth="1"
             />
-            <text x="532" y="91" fill="#94A3B8" fontSize="9" textAnchor="middle">
+            <text x="532" y="91" fill="var(--bio-text-muted, #475569)" fontSize="9" textAnchor="middle">
               Circulating (Glu-Plasminogen)
             </text>
           </g>
@@ -533,12 +596,12 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             y2="148"
             stroke="#64748B"
             strokeWidth="2"
-            markerEnd="url(#arrow-down)"
+            markerEnd={`url(#${arrowDownId})`}
           />
 
           {/* Cleavage Arrow / Site (Arg561-Val562) */}
           <g
-            id="node-cleavage-arrow"
+            id={`${uid}-node-cleavage-arrow`}
             className="cursor-pointer"
             onMouseEnter={() =>
               isUrokinase
@@ -555,17 +618,17 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               rx="8"
               fill={
                 isTargetActive('direct_cleavage') || isTargetHovered('direct_cleavage')
-                  ? '#431407'
+                  ? 'var(--bio-active-orange-bg, #ffedd5)'
                   : isTargetActive('cleavage_arrow') || isTargetHovered('cleavage_arrow')
-                  ? '#450A0A'
-                  : '#1E293B'
+                  ? 'var(--bio-active-red-bg, #fee2e2)'
+                  : 'var(--bio-node, #ffffff)'
               }
               stroke={
                 isTargetActive('direct_cleavage') || isTargetHovered('direct_cleavage')
                   ? getTargetColor('direct_cleavage', '#F97316')
                   : isTargetActive('cleavage_arrow') || isTargetHovered('cleavage_arrow')
                   ? getTargetColor('cleavage_arrow', '#EF4444')
-                  : '#475569'
+                  : 'var(--bio-border-strong, #94a3b8)'
               }
               strokeWidth={
                 isTargetActive('cleavage_arrow') ||
@@ -580,7 +643,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                 isTargetHovered('cleavage_arrow') ||
                 isTargetActive('direct_cleavage') ||
                 isTargetHovered('direct_cleavage')
-                  ? 'url(#cascade-glow)'
+                  ? `url(#${glowId})`
                   : undefined
               }
             />
@@ -589,10 +652,10 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               y="168"
               fill={
                 isTargetActive('direct_cleavage') || isTargetHovered('direct_cleavage')
-                  ? '#FDBA74'
+                  ? 'var(--bio-active-orange-title, #9a3412)'
                   : isTargetActive('cleavage_arrow') || isTargetHovered('cleavage_arrow')
-                  ? '#FCA5A5'
-                  : '#F1F5F9'
+                  ? 'var(--bio-active-red-title, #991b1b)'
+                  : 'var(--bio-text, #0f172a)'
               }
               fontSize="11"
               fontWeight="700"
@@ -607,10 +670,10 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               y="185"
               fill={
                 isTargetActive('direct_cleavage') || isTargetHovered('direct_cleavage')
-                  ? '#FED7AA'
+                  ? 'var(--bio-active-orange-sub, #c2410c)'
                   : isTargetActive('cleavage_arrow') || isTargetHovered('cleavage_arrow')
-                  ? '#FECACA'
-                  : '#94A3B8'
+                  ? 'var(--bio-active-red-sub, #b91c1c)'
+                  : 'var(--bio-text-muted, #475569)'
               }
               fontSize="9"
               textAnchor="middle"
@@ -634,12 +697,12 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                 : '#64748B'
             }
             strokeWidth="2.5"
-            markerEnd="url(#arrow-catalytic)"
+            markerEnd={`url(#${arrowCatalyticId})`}
           />
 
           {/* Left Catalyst Box: Fibrinolytic Activator Agent */}
           <g
-            id="node-activator-agent"
+            id={`${uid}-node-activator-agent`}
             className="cursor-pointer"
             onMouseEnter={() => {
               if (isStreptokinase) setInternalHoveredNode('allosteric_complex');
@@ -654,7 +717,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               width="270"
               height="88"
               rx="10"
-              fill="url(#zymogen-grad)"
+              fill={`url(#${zymogenGradId})`}
               stroke={
                 isTargetHovered('allosteric_complex') ||
                 isTargetHovered('direct_cleavage') ||
@@ -673,21 +736,47 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                   ? '3'
                   : '2'
               }
-              filter="url(#cascade-glow)"
+              filter={`url(#${glowId})`}
             />
             {/* Header pill */}
-            <rect x="42" y="138" width="130" height="18" rx="4" fill="#1E3A8A" />
-            <text x="107" y="151" fill="#93C5FD" fontSize="9" fontWeight="700" textAnchor="middle">
+            <rect
+              x="42"
+              y="138"
+              width="130"
+              height="18"
+              rx="4"
+              fill="var(--bio-cat-pill-bg, #dbeafe)"
+            />
+            <text
+              x="107"
+              y="151"
+              fill="var(--bio-cat-pill-text, #1d4ed8)"
+              fontSize="9"
+              fontWeight="700"
+              textAnchor="middle"
+            >
               CATALYTIC ACTIVATOR
             </text>
-            <text x="42" y="174" fill="#FFFFFF" fontSize={isBlinded ? '11' : '13'} fontWeight="800">
+            <text
+              x="42"
+              y="174"
+              fill="var(--bio-text, #0f172a)"
+              fontSize={isBlinded ? '11.5' : '13'}
+              fontWeight="800"
+            >
               {displayDrugName}
             </text>
-            <text x="42" y="190" fill="#94A3B8" fontSize="8.5" fontWeight="500">
+            <text
+              x="42"
+              y="190"
+              fill="var(--bio-text-muted, #475569)"
+              fontSize="8.5"
+              fontWeight="500"
+            >
               {drugSubLabel}
             </text>
-            <text x="42" y="205" fill="#38BDF8" fontSize="8.5" fontFamily="monospace">
-              Route: {structure.route || 'IV'} • t1/2: {structure.pkPdHighlights?.halfLife || 'Short'}
+            <text x="42" y="205" fill="var(--bio-cyan, #0284c7)" fontSize="8.5" fontFamily="monospace">
+              Route: {safeRouteText} • t1/2: {safeHalfLifeText}
             </text>
           </g>
 
@@ -704,7 +793,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                   isTargetActive('allosteric_complex') ||
                   isTargetActive('direct_cleavage')
                 ? '#10B981'
-                : '#38BDF8'
+                : 'var(--bio-cyan, #0284c7)'
             }
             strokeWidth={
               isTargetHovered('cleavage_arrow') ||
@@ -713,13 +802,13 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                 ? '3.5'
                 : '2.5'
             }
-            markerEnd="url(#arrow-active-pulse)"
+            markerEnd={`url(#${arrowActivePulseId})`}
           />
 
           {/* Right Regulators: PAI-1 and Hepatic Clearance */}
           {/* PAI-1 Inhibitor Node */}
           <g
-            id="node-pai1-shield"
+            id={`${uid}-node-pai1-shield`}
             className="cursor-pointer"
             onMouseEnter={() => setInternalHoveredNode('pai1_shield')}
             onMouseLeave={() => setInternalHoveredNode(null)}
@@ -732,20 +821,20 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               rx="8"
               fill={
                 isTargetActive('pai1_shield') || isTargetHovered('pai1_shield')
-                  ? '#2E1065'
-                  : '#1E293B'
+                  ? 'var(--bio-active-violet-bg, #ede9fe)'
+                  : 'var(--bio-node, #ffffff)'
               }
               stroke={
                 isTargetActive('pai1_shield') || isTargetHovered('pai1_shield')
                   ? getTargetColor('pai1_shield', '#8B5CF6')
-                  : '#475569'
+                  : 'var(--bio-border-strong, #94a3b8)'
               }
               strokeWidth={
                 isTargetActive('pai1_shield') || isTargetHovered('pai1_shield') ? '2.5' : '1.5'
               }
               filter={
                 isTargetActive('pai1_shield') || isTargetHovered('pai1_shield')
-                  ? 'url(#shield-glow)'
+                  ? `url(#${shieldGlowId})`
                   : undefined
               }
             />
@@ -754,8 +843,8 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               y="144"
               fill={
                 isTargetActive('pai1_shield') || isTargetHovered('pai1_shield')
-                  ? '#C4B5FD'
-                  : '#F1F5F9'
+                  ? 'var(--bio-active-violet-title, #5b21b6)'
+                  : 'var(--bio-text, #0f172a)'
               }
               fontSize="11"
               fontWeight="700"
@@ -767,8 +856,8 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               y="160"
               fill={
                 isTargetActive('pai1_shield') || isTargetHovered('pai1_shield')
-                  ? '#E9D5FF'
-                  : '#94A3B8'
+                  ? 'var(--bio-active-violet-sub, #6d28d9)'
+                  : 'var(--bio-text-muted, #475569)'
               }
               fontSize="8.5"
             >
@@ -789,12 +878,12 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             stroke="#F43F5E"
             strokeWidth="2"
             strokeDasharray="4 2"
-            markerEnd="url(#inhibit-bar)"
+            markerEnd={`url(#${inhibitBarId})`}
           />
 
           {/* Hepatic Clearance Node */}
           <g
-            id="node-hepatic-clearance"
+            id={`${uid}-node-hepatic-clearance`}
             className="cursor-pointer"
             onMouseEnter={() => setInternalHoveredNode('hepatic_clearance')}
             onMouseLeave={() => setInternalHoveredNode(null)}
@@ -810,15 +899,15 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                 isTargetActive('half_life_extension') ||
                 isTargetHovered('hepatic_clearance') ||
                 isTargetHovered('half_life_extension')
-                  ? '#451A03'
-                  : '#1E293B'
+                  ? 'var(--bio-active-amber-bg, #fef3c7)'
+                  : 'var(--bio-node, #ffffff)'
               }
               stroke={
                 isTargetActive('hepatic_clearance') || isTargetHovered('hepatic_clearance')
                   ? getTargetColor('hepatic_clearance', '#F59E0B')
                   : isTargetActive('half_life_extension') || isTargetHovered('half_life_extension')
                   ? getTargetColor('half_life_extension', '#3B82F6')
-                  : '#475569'
+                  : 'var(--bio-border-strong, #94a3b8)'
               }
               strokeWidth={
                 isTargetActive('hepatic_clearance') || isTargetActive('half_life_extension')
@@ -827,7 +916,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               }
               filter={
                 isTargetActive('hepatic_clearance') || isTargetActive('half_life_extension')
-                  ? 'url(#cascade-glow)'
+                  ? `url(#${glowId})`
                   : undefined
               }
             />
@@ -836,10 +925,10 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               y="204"
               fill={
                 isTargetActive('hepatic_clearance') || isTargetHovered('hepatic_clearance')
-                  ? '#FDE68A'
+                  ? 'var(--bio-active-amber-title, #92400e)'
                   : isTargetActive('half_life_extension')
-                  ? '#93C5FD'
-                  : '#F1F5F9'
+                  ? 'var(--bio-active-blue-title, #1e40af)'
+                  : 'var(--bio-text, #0f172a)'
               }
               fontSize="11"
               fontWeight="700"
@@ -851,10 +940,10 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               y="220"
               fill={
                 isTargetActive('half_life_extension')
-                  ? '#BFDBFE'
+                  ? 'var(--bio-active-blue-sub, #1d4ed8)'
                   : isTargetActive('hepatic_clearance')
-                  ? '#FED7AA'
-                  : '#94A3B8'
+                  ? 'var(--bio-active-amber-sub, #b45309)'
+                  : 'var(--bio-text-muted, #475569)'
               }
               fontSize="8.5"
             >
@@ -871,44 +960,70 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
           {/* ======================================================== */}
           {/* STEP 3: ACTIVE PLASMIN NODE                              */}
           {/* ======================================================== */}
-          <g id="node-plasmin">
+          <g id={`${uid}-node-plasmin`}>
             <rect
               x="280"
               y="240"
               width="340"
               height="68"
               rx="12"
-              fill="url(#active-enzyme-grad)"
+              fill={`url(#${activeEnzymeGradId})`}
               stroke="#0284C7"
               strokeWidth="2"
             />
-            <text x="450" y="262" fill="#E0F2FE" fontSize="13" fontWeight="800" textAnchor="middle">
+            <text
+              x="450"
+              y="262"
+              fill="var(--bio-plasmin-title, #0c4a6e)"
+              fontSize="13"
+              fontWeight="800"
+              textAnchor="middle"
+            >
               ⚡ PLASMIN (Active Serine Protease, 85 kDa)
             </text>
-            <text x="450" y="278" fill="#7DD3FC" fontSize="9.5" textAnchor="middle">
+            <text
+              x="450"
+              y="278"
+              fill="var(--bio-plasmin-sub, #0369a1)"
+              fontSize="9.5"
+              textAnchor="middle"
+            >
               Two chains linked by 2 disulfide bonds • Active catalytic triad exposed
             </text>
-            <text x="450" y="293" fill="#BAE6FD" fontSize="8.5" fontFamily="monospace" textAnchor="middle">
+            <text
+              x="450"
+              y="293"
+              fill="var(--bio-plasmin-triad, #075985)"
+              fontSize="8.5"
+              fontFamily="monospace"
+              textAnchor="middle"
+            >
               His603 • Asp646 • Ser741
             </text>
           </g>
 
           {/* Alpha-2 Antiplasmin Regulator */}
-          <g id="node-antiplasmin">
+          <g id={`${uid}-node-antiplasmin`}>
             <rect
               x="660"
               y="250"
               width="190"
               height="48"
               rx="8"
-              fill="#1E293B"
-              stroke="#475569"
+              fill="var(--bio-node, #ffffff)"
+              stroke="var(--bio-border-strong, #94a3b8)"
               strokeWidth="1.5"
             />
-            <text x="675" y="269" fill="#F87171" fontSize="10.5" fontWeight="700">
+            <text
+              x="675"
+              y="269"
+              fill="var(--bio-antiplasmin-title, #dc2626)"
+              fontSize="10.5"
+              fontWeight="700"
+            >
               α2-Antiplasmin
             </text>
-            <text x="675" y="284" fill="#94A3B8" fontSize="8">
+            <text x="675" y="284" fill="var(--bio-text-muted, #475569)" fontSize="8">
               Neutralizes free systemic plasmin
             </text>
           </g>
@@ -922,7 +1037,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             stroke="#F43F5E"
             strokeWidth="2"
             strokeDasharray="3 2"
-            markerEnd="url(#inhibit-bar)"
+            markerEnd={`url(#${inhibitBarId})`}
           />
 
           {/* ======================================================== */}
@@ -937,36 +1052,36 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             y2="345"
             stroke="#0284C7"
             strokeWidth="2"
-            markerEnd="url(#arrow-down)"
+            markerEnd={`url(#${arrowDownId})`}
           />
 
           {/* Substrate: Cross-Linked Fibrin Clot */}
-          <g id="node-fibrin-substrate">
+          <g id={`${uid}-node-fibrin-substrate`}>
             <rect
               x="50"
               y="345"
               width="260"
               height="64"
               rx="10"
-              fill="url(#fibrin-grad)"
+              fill={`url(#${fibrinGradId})`}
               stroke={
                 isTargetActive('direct_cleavage') || isTargetHovered('direct_cleavage')
                   ? getTargetColor('direct_cleavage', '#F97316')
-                  : '#475569'
+                  : 'var(--bio-border-strong, #94a3b8)'
               }
               strokeWidth={
                 isTargetActive('direct_cleavage') || isTargetHovered('direct_cleavage') ? '2.5' : '1.5'
               }
               filter={
                 isTargetActive('direct_cleavage') || isTargetHovered('direct_cleavage')
-                  ? 'url(#cascade-glow)'
+                  ? `url(#${glowId})`
                   : undefined
               }
             />
-            <text x="65" y="367" fill="#F1F5F9" fontSize="11.5" fontWeight="700">
+            <text x="65" y="367" fill="var(--bio-text, #0f172a)" fontSize="11.5" fontWeight="700">
               CROSS-LINKED FIBRIN CLOT
             </text>
-            <text x="65" y="383" fill="#94A3B8" fontSize="9">
+            <text x="65" y="383" fill="var(--bio-text-muted, #475569)" fontSize="9">
               Factor XIIIa stabilized meshwork
             </text>
             <text
@@ -974,8 +1089,8 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               y="397"
               fill={
                 isTargetActive('direct_cleavage') || isTargetHovered('direct_cleavage')
-                  ? '#FB923C'
-                  : '#CBD5E1'
+                  ? 'var(--bio-active-orange-sub, #c2410c)'
+                  : 'var(--bio-text-secondary, #334155)'
               }
               fontSize="8.5"
               fontWeight={
@@ -989,42 +1104,64 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
           </g>
 
           {/* Horizontal Digestion Transition Arrow */}
-          <g id="arrow-fibrinolysis">
+          <g id={`${uid}-arrow-fibrinolysis`}>
             <line
               x1="310"
               y1="377"
               x2="520"
               y2="377"
-              stroke="#38BDF8"
+              stroke="var(--bio-cyan, #0284c7)"
               strokeWidth="2.5"
-              markerEnd="url(#arrow-down)"
+              markerEnd={`url(#${arrowDownId})`}
             />
-            <rect x="360" y="365" width="115" height="24" rx="4" fill="#0B132B" stroke="#1E293B" />
-            <text x="417" y="381" fill="#7DD3FC" fontSize="9" fontWeight="700" textAnchor="middle">
+            <rect
+              x="360"
+              y="365"
+              width="115"
+              height="24"
+              rx="4"
+              fill="var(--bio-digestion-pill-bg, #e0f2fe)"
+              stroke="var(--bio-digestion-pill-border, #bae6fd)"
+            />
+            <text
+              x="417"
+              y="381"
+              fill="var(--bio-cyan-soft, #0369a1)"
+              fontSize="9"
+              fontWeight="700"
+              textAnchor="middle"
+            >
               Fibrinolysis (Digestion)
             </text>
           </g>
 
           {/* Product: Fibrin Degradation Products (D-Dimer) */}
-          <g id="node-fdp-products">
+          <g id={`${uid}-node-fdp-products`}>
             <rect
               x="530"
               y="345"
               width="310"
               height="64"
               rx="10"
-              fill="#064E3B"
-              stroke="#059669"
+              fill="var(--bio-fdp-bg, #ecfdf5)"
+              stroke="var(--bio-fdp-border, #10b981)"
               strokeWidth="2"
-              filter="url(#cascade-glow)"
+              filter={`url(#${glowId})`}
             />
-            <text x="548" y="367" fill="#D1FAE5" fontSize="11.5" fontWeight="800">
+            <text x="548" y="367" fill="var(--bio-fdp-title, #065f46)" fontSize="11.5" fontWeight="800">
               FIBRIN DEGRADATION PRODUCTS (FDPs)
             </text>
-            <text x="548" y="383" fill="#A7F3D0" fontSize="9">
+            <text x="548" y="383" fill="var(--bio-fdp-sub, #047857)" fontSize="9">
               Soluble split products: Fragment D, Fragment E
             </text>
-            <text x="548" y="398" fill="#34D399" fontSize="8.5" fontWeight="700" fontFamily="monospace">
+            <text
+              x="548"
+              y="398"
+              fill="var(--bio-fdp-badge, #059669)"
+              fontSize="8.5"
+              fontWeight="700"
+              fontFamily="monospace"
+            >
               ✓ D-DIMER POSITIVE (Specific Clot Dissolution)
             </text>
           </g>
@@ -1035,8 +1172,8 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
       <div
         className={`mt-1.5 px-3 py-2 rounded-lg border text-xs transition-all duration-300 ${
           priorityBannerInfo
-            ? 'bg-slate-800/90 border-slate-600 shadow-md'
-            : 'bg-slate-900/60 border-slate-800/80 text-slate-400'
+            ? 'bg-slate-50 dark:bg-slate-800/90 border-slate-300 dark:border-slate-600 shadow-sm dark:shadow-md'
+            : 'bg-slate-50/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/80 text-slate-600 dark:text-slate-400'
         }`}
       >
         {priorityBannerInfo ? (
@@ -1047,10 +1184,10 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
                 style={{ backgroundColor: priorityBannerInfo.color }}
               />
               <div>
-                <span className="font-bold text-slate-100 mr-1.5">
+                <span className="font-bold text-slate-900 dark:text-slate-100 mr-1.5">
                   {priorityBannerInfo.title}
                 </span>
-                <span className="text-slate-300 text-[11px] leading-relaxed">
+                <span className="text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
                   {priorityBannerInfo.explanation}
                 </span>
               </div>
@@ -1067,9 +1204,9 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             </span>
           </div>
         ) : (
-          <div className="flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <Info className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 shrink-0" />
               <span>
                 Click or hover any protein domain tag below to spotlight its molecular role in the
                 fibrinolytic cascade.

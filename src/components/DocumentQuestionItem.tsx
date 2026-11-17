@@ -835,14 +835,30 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                   {(() => {
                     const options = uniqueStructureOptions;
                     const uniqueOptions = options.filter((v, i, a) => a.findIndex((t) => t.name === v.name || t.id === v.id) === i);
-                    return uniqueOptions.map((structure, index) => (
+                    return uniqueOptions.map((structure, index) => {
+                      const isVignetteMasked =
+                        Boolean(examModeActive || hideDrugNames) &&
+                        !peekedStructureNames[structure.id];
+                      const cleanStructName = (structure.name || '').replace(/\[.*?\]\s*/g, '').trim();
+                      const rawVignetteLabel = structure.document_label || structure.id || String(index + 1);
+                      const safeVignetteLabel = isVignetteMasked
+                        ? rawVignetteLabel
+                            .replace(/\(.*?\)/g, '')
+                            .trim()
+                            .toLowerCase()
+                            .includes(cleanStructName.toLowerCase())
+                          ? String(index + 1)
+                          : rawVignetteLabel.replace(/\(.*?\)/g, '').trim() || String(index + 1)
+                        : rawVignetteLabel;
+
+                      return (
                       <div
                         key={`q${question.id || 'q'}-vignette-${structure.id || index}`}
                         onClick={() => setZoomedStructure(structure)}
                         className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-1 cursor-pointer hover:border-blue-400 transition-colors"
                       >
                         <div className="w-full flex items-center justify-between text-[10px] font-mono">
-                          <span className="font-bold">Structure {structure.document_label || structure.id}</span>
+                          <span className="font-bold">Structure {safeVignetteLabel}</span>
                           <ZoomIn className="w-3 h-3 text-slate-400" />
                         </div>
                         <div
@@ -854,7 +870,7 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                             <FibrinolysisCascadeViewer
                               structure={structure}
                               height={175}
-                              isBlinded={examModeActive}
+                              isBlinded={isVignetteMasked}
                               className="w-full pointer-events-none"
                             />
                           ) : (
@@ -869,16 +885,17 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                               fallbackImageUrl={structure.pngUrl || (structure as any).structure?.pngUrl}
                               width={64}
                               height={64}
-                              altText={`Structure ${structure.id}`}
+                              altText={`Structure ${safeVignetteLabel}`}
                               className="w-full h-full bg-transparent border-0 shadow-none pointer-events-none"
                             />
                           )}
                         </div>
                         <span className="text-[10px] font-medium truncate max-w-full text-slate-600 dark:text-slate-400">
-                          {examModeActive ? 'Structure ' + structure.id : structure.name}
+                          {isVignetteMasked ? `Structure ${safeVignetteLabel}` : structure.name}
                         </span>
                       </div>
-                    ));
+                      );
+                    });
                   })()}
                 </div>
               )}

@@ -7,6 +7,58 @@
   accent-color: #2563eb;
   --structure-canvas-bg: hsl(286, 55%, 94%);
   --structure-bond-stroke: #475569;
+
+  /* Biologic & Fibrinolysis Cascade Theme Tokens (Light Mode Default) */
+  --bio-panel: #f8fafc;
+  --bio-node: #ffffff;
+  --bio-node-end: #f1f5f9;
+  --bio-node-alt: #f1f5f9;
+  --bio-fibrin-end: #e2e8f0;
+  --bio-enzyme-end: #e0f2fe;
+  --bio-border: #cbd5e1;
+  --bio-border-strong: #94a3b8;
+  --bio-text: #0f172a;
+  --bio-text-secondary: #334155;
+  --bio-text-muted: #475569;
+  --bio-cyan: #0284c7;
+  --bio-cyan-soft: #0369a1;
+  --bio-cat-pill-bg: #dbeafe;
+  --bio-cat-pill-text: #1d4ed8;
+  --bio-plasmin-title: #0c4a6e;
+  --bio-plasmin-sub: #0369a1;
+  --bio-plasmin-triad: #075985;
+  --bio-fdp-bg: #ecfdf5;
+  --bio-fdp-border: #10b981;
+  --bio-fdp-title: #065f46;
+  --bio-fdp-sub: #047857;
+  --bio-fdp-badge: #059669;
+  --bio-active-emerald-bg: #d1fae5;
+  --bio-active-emerald-text: #065f46;
+  --bio-active-orange-bg: #ffedd5;
+  --bio-active-orange-title: #9a3412;
+  --bio-active-orange-sub: #c2410c;
+  --bio-active-red-bg: #fee2e2;
+  --bio-active-red-title: #991b1b;
+  --bio-active-red-sub: #b91c1c;
+  --bio-active-violet-bg: #ede9fe;
+  --bio-active-violet-title: #5b21b6;
+  --bio-active-violet-sub: #6d28d9;
+  --bio-active-amber-bg: #fef3c7;
+  --bio-active-amber-title: #92400e;
+  --bio-active-amber-sub: #b45309;
+  --bio-active-blue-title: #1e40af;
+  --bio-active-blue-sub: #1d4ed8;
+  --bio-antiplasmin-title: #dc2626;
+  --bio-digestion-pill-bg: #e0f2fe;
+  --bio-digestion-pill-border: #bae6fd;
+  --bio-stage2-indigo-bg: #eef2ff;
+  --bio-stage2-rose-bg: #fff1f2;
+  --bio-stage2-amber-bg: #fffbeb;
+  --bio-stage2-cyan-bg: #ecfeff;
+  --bio-stage2-pink-bg: #fdf2f8;
+  --bio-inhibit-label: #e11d48;
+  --bio-activate-label: #0284c7;
+  --bio-downstream-label: #059669;
 }
 
 :root:where(.dark),
@@ -14,6 +66,58 @@
   color-scheme: dark;
   --structure-canvas-bg: hsl(222, 47%, 14%);
   --structure-bond-stroke: #e2e8f0;
+
+  /* Biologic & Fibrinolysis Cascade Theme Tokens (Dark Mode Override) */
+  --bio-panel: #0f172a;
+  --bio-node: #1e293b;
+  --bio-node-end: #0f172a;
+  --bio-node-alt: #1e293b;
+  --bio-fibrin-end: #182234;
+  --bio-enzyme-end: #091e2e;
+  --bio-border: #334155;
+  --bio-border-strong: #475569;
+  --bio-text: #f8fafc;
+  --bio-text-secondary: #cbd5e1;
+  --bio-text-muted: #94a3b8;
+  --bio-cyan: #38bdf8;
+  --bio-cyan-soft: #7dd3fc;
+  --bio-cat-pill-bg: #1e3a8a;
+  --bio-cat-pill-text: #93c5fd;
+  --bio-plasmin-title: #e0f2fe;
+  --bio-plasmin-sub: #7dd3fc;
+  --bio-plasmin-triad: #bae6fd;
+  --bio-fdp-bg: #064e3b;
+  --bio-fdp-border: #059669;
+  --bio-fdp-title: #d1fae5;
+  --bio-fdp-sub: #a7f3d0;
+  --bio-fdp-badge: #34d399;
+  --bio-active-emerald-bg: #064e3b;
+  --bio-active-emerald-text: #6ee7b7;
+  --bio-active-orange-bg: #431407;
+  --bio-active-orange-title: #fdba74;
+  --bio-active-orange-sub: #fed7aa;
+  --bio-active-red-bg: #450a0a;
+  --bio-active-red-title: #fca5a5;
+  --bio-active-red-sub: #fecaca;
+  --bio-active-violet-bg: #2e1065;
+  --bio-active-violet-title: #c4b5fd;
+  --bio-active-violet-sub: #e9d5ff;
+  --bio-active-amber-bg: #451a03;
+  --bio-active-amber-title: #fde68a;
+  --bio-active-amber-sub: #fed7aa;
+  --bio-active-blue-title: #93c5fd;
+  --bio-active-blue-sub: #bfdbfe;
+  --bio-antiplasmin-title: #f87171;
+  --bio-digestion-pill-bg: #0b132b;
+  --bio-digestion-pill-border: #1e293b;
+  --bio-stage2-indigo-bg: #1e1b4b;
+  --bio-stage2-rose-bg: #1f1224;
+  --bio-stage2-amber-bg: #271a07;
+  --bio-stage2-cyan-bg: #082f49;
+  --bio-stage2-pink-bg: #2d0f28;
+  --bio-inhibit-label: #fda4af;
+  --bio-activate-label: #7dd3fc;
+  --bio-downstream-label: #6ee7b7;
 }
 
 dialog:modal {

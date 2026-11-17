@@ -1129,6 +1129,7 @@ export function getDefaultAntiarrhythmicModule(): ReviewModule {
     examId: 'exam_3',
     examTitle: 'Exam 3: Blood, Heart Failure & Antiarrhythmics',
     isBuiltIn: true,
+    version: '2.3.0',
     createdAt: '2026-11-05',
     pages: getAntiarrhythmicReviewPages(),
   };

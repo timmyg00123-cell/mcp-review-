@@ -1509,7 +1509,7 @@ export function getDefaultRenalReviewModule(): ReviewModule {
     examTitle: 'Exam 1: Renal & Respiratory Medicinal Chemistry',
     isBuiltIn: true,
     createdAt: '2026-11-06',
-    version: '1.0.0',
+    version: '2.3.0',
     chemicalStructures: [
       AMILORIDE_STRUCTURE,
       FUROSEMIDE_STRUCTURE,

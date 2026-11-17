@@ -21,6 +21,7 @@ interface InteractiveStructureViewerProps {
   className?: string;
   altText?: string;
   isExpanded?: boolean; // Only enable hover-highlighting directly on image zones when expanded!
+  isBlinded?: boolean;
 }
 
 export const InteractiveStructureViewer: React.FC<InteractiveStructureViewerProps> = ({
@@ -35,6 +36,7 @@ export const InteractiveStructureViewer: React.FC<InteractiveStructureViewerProp
   className = '',
   altText,
   isExpanded = false,
+  isBlinded = false,
 }) => {
   const isBiologic = isFibrinolyticBiologic(structure);
 
@@ -104,6 +106,7 @@ export const InteractiveStructureViewer: React.FC<InteractiveStructureViewerProp
             onTogglePharmacophore={onTogglePharmacophore}
             onHoverPharmacophore={onHoverPharmacophore}
             height={isExpanded ? 320 : 250}
+            isBlinded={isBlinded}
             className="w-full"
           />
         </div>

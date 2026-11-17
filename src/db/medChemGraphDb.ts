@@ -601,8 +601,79 @@ export async function ensureStoragePersistence(): Promise<boolean> {
  */
 export async function seedDefaultKnowledgeGraph(): Promise<void> {
   await ensureStoragePersistence();
-  const existingVorapaxar = await medChemGraphDb.entities.get('vorapaxar');
+
+  const REMEDIATED_ENTITY_SMILES: Record<string, { canonicalSmiles: string; isomericSmiles?: string }> = {
+    clopidogrel: {
+      canonicalSmiles: 'COC(=O)C(C1=CC=CC=C1Cl)N2CCC3=C(C2)C=CS3',
+      isomericSmiles: 'COC(=O)[C@@H](C1=CC=CC=C1Cl)N2CCC3=C(C2)C=CS3',
+    },
+    prasugrel: {
+      canonicalSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
+      isomericSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)[C@@H](C(=O)C3CC3)C4=CC=CC=C4F',
+    },
+    ticagrelor: {
+      canonicalSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
+      isomericSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
+    },
+    ticlopidine: {
+      canonicalSmiles: 'C1CN(CC2=C1C=CS2)CC3=CC=CC=C3Cl',
+    },
+    cangrelor: {
+      canonicalSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
+      isomericSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
+    },
+    aspirin: {
+      canonicalSmiles: 'CC(=O)OC1=CC=CC=C1C(=O)O',
+    },
+    tirofiban: {
+      canonicalSmiles: 'CCCCCS(=O)(=O)NC(CC1=CC=C(C=C1)OCCCC2CCNCC2)C(=O)O',
+    },
+    eptifibatide: {
+      canonicalSmiles: 'CC1C(=O)NC(C(=O)NC(C(=O)NC(C(=O)NC(CSSCCC(=O)N1)C(=O)NC(CC2=CNC3=CC=CC=C32)C(=O)N)CCCCN=C(N)N)CC(=O)O)C',
+    },
+    vorapaxar: {
+      canonicalSmiles: 'CCOC(=O)NC1CC2C(C1)C(C3=C2C=CC(=C3)C4=CN=CC=C4)(C)C5=CC=C(C=C5)F',
+    },
+    cilostazol: {
+      canonicalSmiles: 'C1CCC(CC1)N2C(=NN=N2)CCCCCOC3=CC4=C(C=C3)CCC(=O)N4',
+    },
+    dipyridamole: {
+      canonicalSmiles: 'C1CCN(CC1)C2=NC(=NC3=C2N=C(N=C3N4CCCCC4)N(CCO)CCO)N(CCO)CCO',
+    },
+  };
+
   const count = await medChemGraphDb.entities.count();
+  if (count > 0) {
+    for (const [entityId, spec] of Object.entries(REMEDIATED_ENTITY_SMILES)) {
+      const existing = await medChemGraphDb.entities.get(entityId);
+      if (
+        existing &&
+        (existing.smiles !== spec.canonicalSmiles ||
+          existing.canonicalSmiles !== spec.canonicalSmiles ||
+          existing.pubchemAudit?.canonicalSmiles !== spec.canonicalSmiles ||
+          existing.chemData?.canonicalSmiles !== spec.canonicalSmiles)
+      ) {
+        await medChemGraphDb.entities.put({
+          ...existing,
+          smiles: spec.canonicalSmiles,
+          canonicalSmiles: spec.canonicalSmiles,
+          pubchemAudit: existing.pubchemAudit
+            ? { ...existing.pubchemAudit, canonicalSmiles: spec.canonicalSmiles }
+            : existing.pubchemAudit,
+          chemData: existing.chemData
+            ? {
+                ...existing.chemData,
+                canonicalSmiles: spec.canonicalSmiles,
+                ...(spec.isomericSmiles ? { isomericSmiles: spec.isomericSmiles } : {}),
+              }
+            : existing.chemData,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
+  const existingVorapaxar = await medChemGraphDb.entities.get('vorapaxar');
   if (count > 0 && existingVorapaxar) return;
 
   const defaultEntities: GraphEntity[] = [
@@ -641,22 +712,22 @@ export async function seedDefaultKnowledgeGraph(): Promise<void> {
       clinical_and_sar_summary:
         'Third-generation thienopyridine prodrug. Possesses an ester moiety at position 2 of the thiophene ring. Undergoes rapid intestinal carboxylesterase (CES2) hydrolysis to a thiolactone intermediate (R-95913), followed by a single CYP oxidation (CYP3A4 / CYP2B6) to generate its active metabolite. Much more potent, rapid, and consistent than clopidogrel with minimal resistance.',
       cid: 6918456,
-      canonicalSmiles: 'CC(=O)OC1=CC2=C(C1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
-      smiles: 'CC(=O)OC1=CC2=C(C1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
+      canonicalSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
+      smiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
       pubchemMolBlock: antiplateletMolBlocks[6918456],
       pubchemAudit: {
         cid: 6918456,
         status: 'verified',
         verifiedAt: new Date().toISOString(),
         source: 'nih_pug_rest',
-        canonicalSmiles: 'CC(=O)OC1=CC2=C(C1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
+        canonicalSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
         pubChemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/6918456',
       },
       chemData: {
         cid: 6918456,
         iupacName: '[5-[(1R)-2-cyclopropyl-1-(2-fluorophenyl)-2-oxoethyl]-6,7-dihydro-4H-thieno[3,2-c]pyridin-2-yl] acetate',
-        canonicalSmiles: 'CC(=O)OC1=CC2=C(C1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
-        isomericSmiles: 'CC(=O)OC1=CC2=C(C1)CCN(C2)[C@@H](C(=O)C3CC3)C4=CC=CC=C4F',
+        canonicalSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)C(C(=O)C3CC3)C4=CC=CC=C4F',
+        isomericSmiles: 'CC(=O)OC1=CC2=C(S1)CCN(C2)[C@@H](C(=O)C3CC3)C4=CC=CC=C4F',
         molecularWeight: 373.44,
         xlogp: 3.4,
         pubchemMolBlock: antiplateletMolBlocks[6918456],
@@ -669,22 +740,22 @@ export async function seedDefaultKnowledgeGraph(): Promise<void> {
       clinical_and_sar_summary:
         'Cyclopentyltriazolopyrimidine (CPTP) class. Non-prodrug, directly active, allosteric reversible antagonist of the P2Y12 ADP receptor. Does not bind at the ADP catalytic pocket; binds allosterically to lock the receptor in an inactive conformation. In addition to P2Y12 blockade, inhibits ENT-1 (equilibrative nucleoside transporter 1), increasing circulating adenosine which causes dyspnea.',
       cid: 9871419,
-      canonicalSmiles: 'CCCSC1=NC2=C(N1C3CC(C(C3O)O)OCCO)N=C(N=C2)NC4CC4C5=CC(=C(C=C5)F)F',
-      smiles: 'CCCSC1=NC2=C(N1C3CC(C(C3O)O)OCCO)N=C(N=C2)NC4CC4C5=CC(=C(C=C5)F)F',
+      canonicalSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
+      smiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
       pubchemMolBlock: antiplateletMolBlocks[9871419],
       pubchemAudit: {
         cid: 9871419,
         status: 'verified',
         verifiedAt: new Date().toISOString(),
         source: 'nih_pug_rest',
-        canonicalSmiles: 'CCCSC1=NC2=C(N1C3CC(C(C3O)O)OCCO)N=C(N=C2)NC4CC4C5=CC(=C(C=C5)F)F',
+        canonicalSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
         pubChemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/9871419',
       },
       chemData: {
         cid: 9871419,
         iupacName: '(1S,2S,3R,5S)-3-[7-[[(1R,2S)-2-(3,4-difluorophenyl)cyclopropyl]amino]-5-propylsulfanyl-1,2,3-triazolo[4,5-d]pyrimidin-3-yl]-5-(2-hydroxyethoxy)cyclopentane-1,2-diol',
-        canonicalSmiles: 'CCCSC1=NC2=C(N1C3CC(C(C3O)O)OCCO)N=C(N=C2)NC4CC4C5=CC(=C(C=C5)F)F',
-        isomericSmiles: 'CCCSC1=NC2=C(N1[C@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N=C(N=C2)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
+        canonicalSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
+        isomericSmiles: 'CCCSC1=NC(=C2C(=N1)N(N=N2)[C@@H]3C[C@@H]([C@H]([C@H]3O)O)OCCO)N[C@@H]4C[C@H]4C5=CC(=C(C=C5)F)F',
         molecularWeight: 522.57,
         xlogp: 2.3,
         pubchemMolBlock: antiplateletMolBlocks[9871419],
@@ -724,21 +795,22 @@ export async function seedDefaultKnowledgeGraph(): Promise<void> {
       clinical_and_sar_summary:
         'Modified adenosine triphosphate (ATP) analogue. Directly active, competitive, reversible P2Y12 inhibitor. Contains a non-hydrolyzable dichloromethylene bisphosphonate bridge. Administered exclusively IV due to high negative charge and polar surface area. Ultra-short elimination half-life (~3-6 min).',
       cid: 9854012,
-      canonicalSmiles: 'CCCSC1=NC2=C(N1C3C(C(C(O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O)N=CN=C2NCC(F)(F)F',
-      smiles: 'CCCSC1=NC2=C(N1C3C(C(C(O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O)N=CN=C2NCC(F)(F)F',
+      canonicalSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
+      smiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
       pubchemMolBlock: antiplateletMolBlocks[9854012],
       pubchemAudit: {
         cid: 9854012,
         status: 'verified',
         verifiedAt: new Date().toISOString(),
         source: 'nih_pug_rest',
-        canonicalSmiles: 'CCCSC1=NC2=C(N1C3C(C(C(O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O)N=CN=C2NCC(F)(F)F',
+        canonicalSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
         pubChemUrl: 'https://pubchem.ncbi.nlm.nih.gov/compound/9854012',
       },
       chemData: {
         cid: 9854012,
-        iupacName: '[dichloro-[[[(2R,3S,4R,5R)-3,4-dihydroxy-5-[5-propylsulfanyl-7-(3,3,3-trifluoropropylamino)triazolo[4,5-d]pyrimidin-3-yl]oxolan-2-yl]methoxy-hydroxyphosphoryl]oxy-hydroxyphosphoryl]methyl]phosphonic acid',
-        canonicalSmiles: 'CCCSC1=NC2=C(N1C3C(C(C(O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O)N=CN=C2NCC(F)(F)F',
+        iupacName: '[dichloro-[[[(2R,3S,4R,5R)-3,4-dihydroxy-5-[6-(2-methylsulfanylethylamino)-2-(3,3,3-trifluoropropylsulfanyl)purin-9-yl]oxolan-2-yl]methoxy-hydroxyphosphoryl]oxy-hydroxyphosphoryl]methyl]phosphonic acid',
+        canonicalSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
+        isomericSmiles: 'CSCCNC1=C2C(=NC(=N1)SCCC(F)(F)F)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)C(P(=O)(O)O)(Cl)Cl)O)O',
         molecularWeight: 776.4,
         xlogp: 0.8,
         pubchemMolBlock: antiplateletMolBlocks[9854012],

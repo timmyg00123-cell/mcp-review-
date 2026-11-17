@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
-import { MultiSmilesCanvas } from './MultiSmilesCanvas';
+import { MultiSmilesCanvas, resolveStructureRenderMode } from './MultiSmilesCanvas';
+import { hasDedicatedBiologicModel } from './BiologicMechanismModel';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import {
   PharmacophoreTagList,
   ColorPaletteItem,
@@ -181,6 +183,11 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
   const canonicalSmiles =
     structure.canonical_smiles || structure.canonicalSmiles || structure.smiles || '';
 
+  const isBiologic =
+    isFibrinolyticBiologic(structure) ||
+    resolveStructureRenderMode(structure.structureRecord) === 'biologic' ||
+    hasDedicatedBiologicModel(structure.name || drugName);
+
   const cleanName = (structure.name || drugName || '').replace(/\[.*?\]\s*/g, '').trim();
 
   // Resolved brand names for display badge
@@ -299,8 +306,14 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
       <div
         onClick={() => setIsZoomModalOpen(true)}
         className={`w-full ${
-          isProminent ? 'h-72 max-w-xl mx-auto' : 'h-64'
-        } bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors`}
+          isBiologic
+            ? isProminent
+              ? 'min-h-[17rem] h-auto max-w-xl mx-auto p-2'
+              : 'min-h-[15rem] h-auto p-2'
+            : isProminent
+            ? 'h-72 max-w-xl mx-auto overflow-hidden'
+            : 'h-64 overflow-hidden'
+        } bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors`}
         title="Click to zoom chemical structure"
       >
         <MultiSmilesCanvas
@@ -527,7 +540,9 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
           <div className="p-6 flex flex-col items-center">
             <div
               onClick={() => setIsZoomModalOpen(true)}
-              className="w-full max-w-xl h-72 bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+              className={`w-full max-w-xl ${
+                isBiologic ? 'min-h-[15rem] h-auto p-2' : 'h-72 overflow-hidden'
+              } bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors`}
               title="Click to zoom chemical structure"
             >
               <MultiSmilesCanvas
@@ -537,6 +552,7 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
                 molBlock={structure.pubchemMolBlock}
                 fallbackImageUrl={structure.pngUrl}
                 cid={structure.cid}
+                compoundName={structure.name}
                 width={400}
                 height={260}
                 className="w-full h-full flex items-center justify-center pointer-events-none"
@@ -750,7 +766,9 @@ export const StructureFlashcardCardFace: React.FC<StructureFlashcardCardFaceProp
               {/* Ultra-compact Canvas View */}
               <div
                 onClick={() => setIsZoomModalOpen(true)}
-                className="w-full h-56 bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center overflow-hidden cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                className={`w-full ${
+                  isBiologic ? 'min-h-[15rem] h-auto p-2' : 'h-56 overflow-hidden'
+                } bg-[var(--structure-canvas-bg)] rounded-xl border border-slate-200/80 dark:border-slate-800 relative flex items-center justify-center cursor-zoom-in group shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors`}
                 title="Click to zoom chemical structure"
               >
                 <MultiSmilesCanvas

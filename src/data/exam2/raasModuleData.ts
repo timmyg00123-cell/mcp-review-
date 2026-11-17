@@ -888,7 +888,7 @@ export function getDefaultRaasModule(): ReviewModule {
     semester: 'Spring',
     code: 'MCP-2-06',
     isBuiltIn: true,
-    version: '2.1.0',
+    version: '2.3.0',
     createdAt: new Date().toISOString(),
     chemicalStructures: Object.values(RAAS_STRUCTURES),
     pages: raasPages,

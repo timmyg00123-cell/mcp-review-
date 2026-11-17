@@ -56,12 +56,6 @@ export const MinimizedStructureCard: React.FC<MinimizedStructureCardProps> = ({
   const canonicalSmiles =
     structure.canonical_smiles || structure.canonicalSmiles || structure.smiles || '';
 
-  const label =
-    structure.document_label ||
-    (structure.id && !structure.id.startsWith('struct_') && structure.id.length <= 6
-      ? structure.id
-      : null);
-
   const cleanName = (structure.name || '').replace(/\[.*?\]\s*/g, '').trim();
   const tradeSuffix =
     structure.tradeName && structure.tradeName.toLowerCase() !== cleanName.toLowerCase()
@@ -69,6 +63,22 @@ export const MinimizedStructureCard: React.FC<MinimizedStructureCardProps> = ({
       : '';
 
   const isBlinded = examModeActive && !isNamePeeked;
+
+  const rawLabel =
+    structure.document_label ||
+    (structure.id && !structure.id.startsWith('struct_') && structure.id.length <= 6
+      ? structure.id
+      : null);
+  const label = (() => {
+    if (!rawLabel) return null;
+    if (!isBlinded) return rawLabel;
+    const stripped = rawLabel.replace(/\(.*?\)/g, '').trim();
+    if (!stripped) return null;
+    if (cleanName && stripped.toLowerCase().includes(cleanName.toLowerCase())) {
+      return null;
+    }
+    return stripped;
+  })();
 
   const mw =
     structure.mw ?? structure.pubchemAudit?.molecularWeight

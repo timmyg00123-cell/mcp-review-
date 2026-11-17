@@ -116,6 +116,7 @@ export function getDefaultAntiplateletModule(): ReviewModule {
     examId: 'exam_3',
     examTitle: 'Exam 3: Blood, Heart Failure & Antiarrhythmics',
     isBuiltIn: true,
+    version: '2.3.0',
     createdAt: '2026-10-14',
     pages: pdfPages as any,
   };
@@ -144,70 +145,52 @@ export function loadAllReviewModules(): ReviewModule[] {
   const defaultRespReview = getDefaultRespiratoryReviewModule();
   const hiddenBuiltins = getHiddenBuiltins();
 
+  const defaultModulesById: Record<string, ReviewModule> = {
+    antiplatelets_mcp2: defaultAntiplatelet,
+    anticoagulants_mcp2: defaultAnticoagulant,
+    heart_failure_mcp2: defaultHeartFailure,
+    antiarrhythmics_mcp2: defaultAntiarrhythmic,
+    antihypertensives_1_mcp2: defaultDiuretics,
+    antihypertensives_2_mcp2: defaultSympatholytics,
+    antihypertensives_3_mcp2: defaultVasodilators,
+    antihypertensives_4_mcp2: defaultRaas,
+    antihyperlipidemics_mcp2: defaultAntihyperlipidemics,
+    renal_review_mcp2: defaultRenalReview,
+    respiratory_review_mcp2: defaultRespReview,
+  };
+
   let overrides: Record<string, ReviewModule> = {};
   if (typeof localStorage !== 'undefined') {
     try {
       const rawOverrides = localStorage.getItem(BUILTIN_OVERRIDES_KEY);
       if (rawOverrides) {
         overrides = JSON.parse(rawOverrides) || {};
-        if (overrides['vasodilators_mcp2']) {
-          delete overrides['vasodilators_mcp2'];
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        let overridesDirty = false;
+        for (const legacyId of [
+          'vasodilators_mcp2',
+          'renal_drugs_mcp2',
+          'respiratory_bronchodilators_mcp2',
+          'respiratory_antiinflammatories_mcp2',
+        ]) {
+          if (overrides[legacyId]) {
+            delete overrides[legacyId];
+            overridesDirty = true;
+          }
         }
-        if (
-          overrides['anticoagulants_mcp2'] &&
-          (overrides['anticoagulants_mcp2'].version !== '2.1.0' ||
-            (overrides['anticoagulants_mcp2'].pages || []).length < 8)
-        ) {
-          delete overrides['anticoagulants_mcp2'];
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
+        for (const id of ALL_BUILTIN_MODULE_IDS) {
+          const defaultMod = defaultModulesById[id];
+          const cachedOverride = overrides[id];
+          if (
+            cachedOverride &&
+            defaultMod &&
+            (cachedOverride.version !== defaultMod.version ||
+              (cachedOverride.pages || []).length < (defaultMod.pages || []).length)
+          ) {
+            delete overrides[id];
+            overridesDirty = true;
+          }
         }
-        if (
-          overrides['respiratory_review_mcp2'] &&
-          (overrides['respiratory_review_mcp2'].version !== '2.2.0' ||
-            (overrides['respiratory_review_mcp2'].pages || []).length < 9)
-        ) {
-          delete overrides['respiratory_review_mcp2'];
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        }
-        if (
-          overrides['antihypertensives_1_mcp2'] &&
-          (overrides['antihypertensives_1_mcp2'].version !== '2.1.0' ||
-            (overrides['antihypertensives_1_mcp2'].pages || []).length < 5)
-        ) {
-          delete overrides['antihypertensives_1_mcp2'];
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        }
-        if (
-          overrides['antihypertensives_2_mcp2'] &&
-          (overrides['antihypertensives_2_mcp2'].version !== '2.1.0' ||
-            (overrides['antihypertensives_2_mcp2'].pages || []).length < 7)
-        ) {
-          delete overrides['antihypertensives_2_mcp2'];
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        }
-        if (
-          overrides['antihypertensives_3_mcp2'] &&
-          (overrides['antihypertensives_3_mcp2'].version !== '2.1.0' ||
-            (overrides['antihypertensives_3_mcp2'].pages || []).length < 4)
-        ) {
-          delete overrides['antihypertensives_3_mcp2'];
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        }
-        if (
-          overrides['antihypertensives_4_mcp2'] &&
-          (overrides['antihypertensives_4_mcp2'].version !== '2.1.0' ||
-            (overrides['antihypertensives_4_mcp2'].pages || []).length < 4)
-        ) {
-          delete overrides['antihypertensives_4_mcp2'];
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        }
-        if (
-          overrides['antihyperlipidemics_mcp2'] &&
-          (overrides['antihyperlipidemics_mcp2'].version !== '2.1.0' ||
-            (overrides['antihyperlipidemics_mcp2'].pages || []).length < 5)
-        ) {
-          delete overrides['antihyperlipidemics_mcp2'];
+        if (overridesDirty) {
           localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
         }
       }
@@ -320,6 +303,20 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
       }
     });
 
+    const defaultModulesById: Record<string, ReviewModule> = {
+      antiplatelets_mcp2: defaultAntiplatelet,
+      anticoagulants_mcp2: defaultAnticoagulant,
+      heart_failure_mcp2: defaultHeartFailure,
+      antiarrhythmics_mcp2: defaultAntiarrhythmic,
+      antihypertensives_1_mcp2: defaultDiuretics,
+      antihypertensives_2_mcp2: defaultSympatholytics,
+      antihypertensives_3_mcp2: defaultVasodilators,
+      antihypertensives_4_mcp2: defaultRaas,
+      antihyperlipidemics_mcp2: defaultAntihyperlipidemics,
+      renal_review_mcp2: defaultRenalReview,
+      respiratory_review_mcp2: defaultRespReview,
+    };
+
     let overrides: Record<string, ReviewModule> = {};
     try {
       const rawOverrides = localStorage.getItem(BUILTIN_OVERRIDES_KEY);
@@ -328,214 +325,65 @@ export async function initModuleStorageFromDexie(): Promise<ReviewModule[]> {
       }
     } catch {}
 
-    // Check if Dexie has a newer or existing override for built-ins (excluding version-migrated modules)
-    ALL_BUILTIN_MODULE_IDS.forEach((id) => {
+    let overridesDirty = false;
+    for (const legacyId of [
+      'vasodilators_mcp2',
+      'renal_drugs_mcp2',
+      'respiratory_bronchodilators_mcp2',
+      'respiratory_antiinflammatories_mcp2',
+    ]) {
+      if (overrides[legacyId]) {
+        delete overrides[legacyId];
+        overridesDirty = true;
+      }
+    }
+
+    // Validate every built-in module against its current version and page count
+    for (const id of ALL_BUILTIN_MODULE_IDS) {
+      const defaultMod = defaultModulesById[id];
+      if (!defaultMod) continue;
+
+      const dexieMod = dexieModules.find((m) => m.id === id)?.module;
+      if (dexieMod) {
+        const isDexieCurrent =
+          dexieMod.version === defaultMod.version &&
+          (dexieMod.pages || []).length >= (defaultMod.pages || []).length;
+        if (isDexieCurrent) {
+          overrides[id] = dexieMod;
+        } else {
+          if (overrides[id]) {
+            delete overrides[id];
+            overridesDirty = true;
+          }
+          await medChemGraphDb.modules
+            .put({
+              id,
+              module: defaultMod,
+              updatedAt: new Date().toISOString(),
+            })
+            .catch((e) => console.warn(`Dexie put during ${id} migration warning:`, e));
+        }
+      }
+
+      const localOverride = overrides[id];
       if (
-        id === 'anticoagulants_mcp2' ||
-        id === 'respiratory_review_mcp2' ||
-        id === 'antihypertensives_1_mcp2' ||
-        id === 'antihypertensives_2_mcp2' ||
-        id === 'antihypertensives_3_mcp2' ||
-        id === 'antihypertensives_4_mcp2' ||
-        id === 'antihyperlipidemics_mcp2'
-      ) return;
-      const dm = dexieModules.find((m) => m.id === id)?.module;
-      if (dm) {
-        overrides[id] = dm;
-      }
-    });
-
-    const dexieAnticoagulant = dexieModules.find((m) => m.id === 'anticoagulants_mcp2')?.module;
-    if (dexieAnticoagulant) {
-      if (dexieAnticoagulant.version === '2.1.0' && (dexieAnticoagulant.pages || []).length >= 8) {
-        overrides['anticoagulants_mcp2'] = dexieAnticoagulant;
-      } else {
-        delete overrides['anticoagulants_mcp2'];
-        await medChemGraphDb.modules.put({
-          id: 'anticoagulants_mcp2',
-          module: defaultAnticoagulant,
-          updatedAt: new Date().toISOString(),
-        }).catch((e) => console.warn('Dexie put during anticoagulant migration warning:', e));
-        try {
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        } catch {}
+        localOverride &&
+        (localOverride.version !== defaultMod.version ||
+          (localOverride.pages || []).length < (defaultMod.pages || []).length)
+      ) {
+        delete overrides[id];
+        overridesDirty = true;
+        await medChemGraphDb.modules
+          .put({
+            id,
+            module: defaultMod,
+            updatedAt: new Date().toISOString(),
+          })
+          .catch((e) => console.warn(`Dexie put during ${id} override cleanup warning:`, e));
       }
     }
 
-    if (
-      overrides['anticoagulants_mcp2'] &&
-      (overrides['anticoagulants_mcp2'].version !== '2.1.0' ||
-        (overrides['anticoagulants_mcp2'].pages || []).length < 8)
-    ) {
-      delete overrides['anticoagulants_mcp2'];
-      try {
-        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-      } catch {}
-    }
-
-    const dexieRespReview = dexieModules.find((m) => m.id === 'respiratory_review_mcp2')?.module;
-    if (dexieRespReview) {
-      if (dexieRespReview.version === '2.2.0' && (dexieRespReview.pages || []).length >= 9) {
-        overrides['respiratory_review_mcp2'] = dexieRespReview;
-      } else {
-        delete overrides['respiratory_review_mcp2'];
-        await medChemGraphDb.modules.put({
-          id: 'respiratory_review_mcp2',
-          module: defaultRespReview,
-          updatedAt: new Date().toISOString(),
-        }).catch((e) => console.warn('Dexie put during respiratory review migration warning:', e));
-        try {
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        } catch {}
-      }
-    }
-
-    if (
-      overrides['respiratory_review_mcp2'] &&
-      (overrides['respiratory_review_mcp2'].version !== '2.2.0' ||
-        (overrides['respiratory_review_mcp2'].pages || []).length < 9)
-    ) {
-      delete overrides['respiratory_review_mcp2'];
-      try {
-        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-      } catch {}
-    }
-
-    const dexieDiuretics = dexieModules.find((m) => m.id === 'antihypertensives_1_mcp2')?.module;
-    if (dexieDiuretics) {
-      if (dexieDiuretics.version === '2.1.0' && (dexieDiuretics.pages || []).length >= 5) {
-        overrides['antihypertensives_1_mcp2'] = dexieDiuretics;
-      } else {
-        delete overrides['antihypertensives_1_mcp2'];
-        await medChemGraphDb.modules.put({
-          id: 'antihypertensives_1_mcp2',
-          module: defaultDiuretics,
-          updatedAt: new Date().toISOString(),
-        }).catch((e) => console.warn('Dexie put during diuretics migration warning:', e));
-        try {
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        } catch {}
-      }
-    }
-
-    if (
-      overrides['antihypertensives_1_mcp2'] &&
-      (overrides['antihypertensives_1_mcp2'].version !== '2.1.0' ||
-        (overrides['antihypertensives_1_mcp2'].pages || []).length < 5)
-    ) {
-      delete overrides['antihypertensives_1_mcp2'];
-      try {
-        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-      } catch {}
-    }
-
-    const dexieSympatholytics = dexieModules.find((m) => m.id === 'antihypertensives_2_mcp2')?.module;
-    if (dexieSympatholytics) {
-      if (dexieSympatholytics.version === '2.1.0' && (dexieSympatholytics.pages || []).length >= 7) {
-        overrides['antihypertensives_2_mcp2'] = dexieSympatholytics;
-      } else {
-        delete overrides['antihypertensives_2_mcp2'];
-        await medChemGraphDb.modules.put({
-          id: 'antihypertensives_2_mcp2',
-          module: defaultSympatholytics,
-          updatedAt: new Date().toISOString(),
-        }).catch((e) => console.warn('Dexie put during sympatholytics migration warning:', e));
-        try {
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        } catch {}
-      }
-    }
-
-    if (
-      overrides['antihypertensives_2_mcp2'] &&
-      (overrides['antihypertensives_2_mcp2'].version !== '2.1.0' ||
-        (overrides['antihypertensives_2_mcp2'].pages || []).length < 7)
-    ) {
-      delete overrides['antihypertensives_2_mcp2'];
-      try {
-        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-      } catch {}
-    }
-
-    const dexieVasodilators = dexieModules.find((m) => m.id === 'antihypertensives_3_mcp2')?.module;
-    if (dexieVasodilators) {
-      if (dexieVasodilators.version === '2.1.0' && (dexieVasodilators.pages || []).length >= 4) {
-        overrides['antihypertensives_3_mcp2'] = dexieVasodilators;
-      } else {
-        delete overrides['antihypertensives_3_mcp2'];
-        await medChemGraphDb.modules.put({
-          id: 'antihypertensives_3_mcp2',
-          module: defaultVasodilators,
-          updatedAt: new Date().toISOString(),
-        }).catch((e) => console.warn('Dexie put during vasodilators migration warning:', e));
-        try {
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        } catch {}
-      }
-    }
-
-    if (
-      overrides['antihypertensives_3_mcp2'] &&
-      (overrides['antihypertensives_3_mcp2'].version !== '2.1.0' ||
-        (overrides['antihypertensives_3_mcp2'].pages || []).length < 4)
-    ) {
-      delete overrides['antihypertensives_3_mcp2'];
-      try {
-        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-      } catch {}
-    }
-
-    const dexieRaas = dexieModules.find((m) => m.id === 'antihypertensives_4_mcp2')?.module;
-    if (dexieRaas) {
-      if (dexieRaas.version === '2.1.0' && (dexieRaas.pages || []).length >= 4) {
-        overrides['antihypertensives_4_mcp2'] = dexieRaas;
-      } else {
-        delete overrides['antihypertensives_4_mcp2'];
-        await medChemGraphDb.modules.put({
-          id: 'antihypertensives_4_mcp2',
-          module: defaultRaas,
-          updatedAt: new Date().toISOString(),
-        }).catch((e) => console.warn('Dexie put during RAAS migration warning:', e));
-        try {
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        } catch {}
-      }
-    }
-
-    if (
-      overrides['antihypertensives_4_mcp2'] &&
-      (overrides['antihypertensives_4_mcp2'].version !== '2.1.0' ||
-        (overrides['antihypertensives_4_mcp2'].pages || []).length < 4)
-    ) {
-      delete overrides['antihypertensives_4_mcp2'];
-      try {
-        localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-      } catch {}
-    }
-
-    const dexieLipids = dexieModules.find((m) => m.id === 'antihyperlipidemics_mcp2')?.module;
-    if (dexieLipids) {
-      if (dexieLipids.version === '2.1.0' && (dexieLipids.pages || []).length >= 5) {
-        overrides['antihyperlipidemics_mcp2'] = dexieLipids;
-      } else {
-        delete overrides['antihyperlipidemics_mcp2'];
-        await medChemGraphDb.modules.put({
-          id: 'antihyperlipidemics_mcp2',
-          module: defaultAntihyperlipidemics,
-          updatedAt: new Date().toISOString(),
-        }).catch((e) => console.warn('Dexie put during Antihyperlipidemics migration warning:', e));
-        try {
-          localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
-        } catch {}
-      }
-    }
-
-    if (
-      overrides['antihyperlipidemics_mcp2'] &&
-      (overrides['antihyperlipidemics_mcp2'].version !== '2.1.0' ||
-        (overrides['antihyperlipidemics_mcp2'].pages || []).length < 5)
-    ) {
-      delete overrides['antihyperlipidemics_mcp2'];
+    if (overridesDirty) {
       try {
         localStorage.setItem(BUILTIN_OVERRIDES_KEY, JSON.stringify(overrides));
       } catch {}

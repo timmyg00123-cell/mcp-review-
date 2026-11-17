@@ -133,6 +133,8 @@ export const MultiSmilesCanvas: React.FC<MultiSmilesCanvasProps> = ({
           isFlipped={isFlipped}
           height={effectiveHeight}
           className={className}
+          activePharmacophores={isFlipped ? activePharmacophores : undefined}
+          hoveredPharmacophore={isFlipped ? hoveredPharmacophore : undefined}
         />
       );
     }
@@ -177,6 +179,20 @@ export const MultiSmilesCanvas: React.FC<MultiSmilesCanvasProps> = ({
           </div>
         )}
       </div>
+    );
+  }
+
+  // Review-module biologics (e.g., fibrinolytics without a TopDrugStructureRecord)
+  if (!structureRecord && hasDedicatedBiologicModel(compoundName)) {
+    return (
+      <BiologicMechanismModel
+        compoundName={compoundName}
+        isFlipped={isFlipped}
+        height={effectiveHeight}
+        className={className}
+        activePharmacophores={isFlipped ? activePharmacophores : undefined}
+        hoveredPharmacophore={isFlipped ? hoveredPharmacophore : undefined}
+      />
     );
   }
 

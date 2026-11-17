@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import { InteractiveStructureViewer } from './InteractiveStructureViewer';
+import { FibrinolysisCascadeViewer } from './FibrinolysisCascadeViewer';
 import { PharmacophoreTagList } from './PharmacophoreTagList';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 
 const StructureLightboxModal = React.lazy(() =>
   import('./StructureLightboxModal').then((m) => ({ default: m.StructureLightboxModal }))
@@ -297,15 +299,28 @@ export const QuestionStructureSidePanel: React.FC<QuestionStructureSidePanelProp
                   <span>{getDisplayName(str)}</span>
                   <ZoomIn className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <div className="h-28 w-full flex items-center justify-center p-1 bg-white dark:bg-slate-900 rounded">
-                  <img
-                    src={str.pngUrl || str.croppedImageUrl}
-                    alt={str.name}
-                    width="320"
-                    height="320"
-                    loading="lazy"
-                    className="w-full h-full aspect-square object-contain"
-                  />
+                <div
+                  className={`${
+                    isFibrinolyticBiologic(str) ? 'min-h-[175px]' : 'h-28'
+                  } w-full flex items-center justify-center p-1 bg-white dark:bg-slate-900 rounded`}
+                >
+                  {isFibrinolyticBiologic(str) ? (
+                    <FibrinolysisCascadeViewer
+                      structure={str}
+                      height={170}
+                      isBlinded={isNameHidden(str)}
+                      className="w-full pointer-events-none"
+                    />
+                  ) : (
+                    <img
+                      src={str.pngUrl || str.croppedImageUrl}
+                      alt={getDisplayName(str)}
+                      width="320"
+                      height="320"
+                      loading="lazy"
+                      className="w-full h-full aspect-square object-contain"
+                    />
+                  )}
                 </div>
               </div>
             ))}
@@ -367,16 +382,23 @@ export const QuestionStructureSidePanel: React.FC<QuestionStructureSidePanelProp
             )}
 
             {/* Chemical Structure Image with Glowing Translucent Zones */}
-            <div className="relative group bg-[var(--structure-canvas-bg)] rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center min-h-[160px] max-h-[220px]">
+            <div
+              className={`relative group bg-[var(--structure-canvas-bg)] rounded-lg p-2.5 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center ${
+                isFibrinolyticBiologic(activeStructure)
+                  ? 'min-h-[250px]'
+                  : 'min-h-[160px] max-h-[220px]'
+              }`}
+            >
               <InteractiveStructureViewer
                 structure={activeStructure}
                 activePharmacophoreIds={mergedActive}
                 hoveredPharmacophoreId={mergedHovered}
                 onTogglePharmacophore={handleTogglePharmacophore}
                 onHoverPharmacophore={setHoveredPharmacophoreId}
-                maxHeightClass="max-h-36"
+                maxHeightClass={isFibrinolyticBiologic(activeStructure) ? '' : 'max-h-36'}
                 altText={getDisplayName(activeStructure)}
                 isExpanded={showFullDetails}
+                isBlinded={isNameHidden(activeStructure)}
               />
 
               {/* Zoom Hover Pill */}
