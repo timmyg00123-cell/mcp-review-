@@ -12,6 +12,14 @@ import {
   HeartPulse,
   Eye,
 } from 'lucide-react';
+import { ClinicalPreflipQuestionCard } from './ClinicalPreflipQuestionCard.js';
+import { ClassProfileAnchorDrawer } from './ClassProfileAnchorDrawer.js';
+import {
+  resolveClassProfileForDrug,
+  getDrugExceptions,
+  type TopDrugClassProfile,
+} from '../data/clinical/classProfiles.js';
+import type { ClinicalPreflipQuestion } from '../utils/clinicalQuestionGenerator.js';
 
 export type ClinicalTabId = 'pharmacology' | 'regimens' | 'patientCare';
 
@@ -23,6 +31,9 @@ export interface TopDrugClinicalCardProps {
   onFlip?: () => void;
   className?: string;
   children?: React.ReactNode;
+  preflipQuestion?: ClinicalPreflipQuestion | null;
+  onAnswerSubmitted?: (isFullyCorrect: boolean) => void;
+  classProfile?: TopDrugClassProfile | null;
 }
 
 /**
@@ -50,8 +61,52 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
   onFlip,
   className = '',
   children,
+  preflipQuestion,
+  onAnswerSubmitted,
+  classProfile,
 }) => {
   const [internalTab, setInternalTab] = useState<ClinicalTabId>('pharmacology');
+  const [isClassDrawerOpen, setIsClassDrawerOpen] = useState<boolean>(false);
+
+  const resolvedProfile: TopDrugClassProfile | null =
+    classProfile !== undefined
+      ? classProfile
+      : resolveClassProfileForDrug(monograph.genericName);
+
+  const drugExceptions: string[] = (() => {
+    if (classProfile !== undefined) {
+      if (!classProfile || !classProfile.exceptionsByDrug) {
+        return [];
+      }
+      const rawLower = monograph.genericName.toLowerCase().trim();
+      for (const [key, list] of Object.entries(classProfile.exceptionsByDrug)) {
+        const keyLower = key.toLowerCase().trim();
+        if (
+          keyLower === rawLower ||
+          rawLower.includes(keyLower) ||
+          keyLower.includes(rawLower)
+        ) {
+          return list;
+        }
+      }
+      return [];
+    }
+
+    if (resolvedProfile?.exceptionsByDrug) {
+      const rawLower = monograph.genericName.toLowerCase().trim();
+      for (const [key, list] of Object.entries(resolvedProfile.exceptionsByDrug)) {
+        const keyLower = key.toLowerCase().trim();
+        if (
+          keyLower === rawLower ||
+          rawLower.includes(keyLower) ||
+          keyLower.includes(rawLower)
+        ) {
+          return list;
+        }
+      }
+    }
+    return getDrugExceptions(monograph.genericName);
+  })();
 
   const currentTab: ClinicalTabId = activeTab ?? internalTab;
 
@@ -117,75 +172,99 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
   return (
     <div className={`w-full ${className}`}>
       {/* ========================================================= */}
-      {/* FRONT FACE (!isFlipped): HIGH-YIELD BADGES (ZERO LEAKS)   */}
+      {/* FRONT FACE (!isFlipped): PRE-FLIP DRILL OR BLINDED PROMPT */}
       {/* ========================================================= */}
       {!isFlipped && (
-        <div
-          onClick={onFlip}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onFlip?.();
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden flex flex-col min-h-[460px] justify-between p-6 sm:p-8 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-blue-500 hover:border-slate-700 transition-all select-none group"
-          title="Click to reveal clinical monograph"
-        >
-          {/* Top Identifier Badge */}
-          <div className="flex items-center justify-between gap-2">
-            <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              <span>Top 200 Clinical Monograph</span>
-            </span>
-            <span className="text-[11px] font-mono text-slate-500 px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/60">
-              Blinded Prompt
-            </span>
-          </div>
-
-          {/* Centered Primary Monograph Identity */}
-          <div className="flex flex-col items-center justify-center my-auto py-8 space-y-4 text-center">
-            {/* Prominent Clean Generic Name */}
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-wide text-center">
-              {monograph.genericName}
-            </h2>
-
-            {/* High-yield Taxonomy Class Badges */}
-            <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg">
-              <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wide shadow-2xs">
-                {monograph.pharmacologicClass}
+        preflipQuestion ? (
+          <ClinicalPreflipQuestionCard
+            question={preflipQuestion}
+            onFlipToMonograph={() => onFlip?.()}
+            onAnswerSubmitted={onAnswerSubmitted}
+            onOpenClassProfile={resolvedProfile ? () => setIsClassDrawerOpen(true) : undefined}
+            className="min-h-[460px] justify-between"
+          />
+        ) : (
+          <div
+            onClick={onFlip}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onFlip?.();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden flex flex-col min-h-[460px] justify-between p-6 sm:p-8 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-blue-500 hover:border-slate-700 transition-all select-none group"
+            title="Click to reveal clinical monograph"
+          >
+            {/* Top Identifier Badge */}
+            <div className="flex items-center justify-between gap-2">
+              <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                <span>Top 200 Clinical Monograph</span>
               </span>
-              <span className="bg-cyan-950/60 text-cyan-400 border border-cyan-500/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wide shadow-2xs">
-                {monograph.therapeuticClass}
-              </span>
-            </div>
-
-            {/* Boxed Warning Signal Pill (ONLY if present) */}
-            {hasBlackBoxWarning && (
-              <div className="pt-1">
-                <span className="bg-rose-950/60 text-rose-300 border border-rose-500/40 px-3.5 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs">
-                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                  <span>⚠️ FDA Boxed Warning Prescribed</span>
+              <div className="flex items-center gap-2">
+                {resolvedProfile && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsClassDrawerOpen(true);
+                    }}
+                    className="text-xs px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>📖 Class Profile</span>
+                  </button>
+                )}
+                <span className="text-[11px] font-mono text-slate-500 px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/60">
+                  Blinded Prompt
                 </span>
               </div>
-            )}
+            </div>
 
-            {/* Dosage Forms Summary Pill */}
-            <div className="pt-2">
-              <span className="bg-slate-800/80 text-slate-300 border border-slate-700/60 px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1.5">
-                <Pill className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span>Forms: {dosageFormsSummary}</span>
-              </span>
+            {/* Centered Primary Monograph Identity */}
+            <div className="flex flex-col items-center justify-center my-auto py-8 space-y-4 text-center">
+              {/* Prominent Clean Generic Name */}
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-wide text-center">
+                {monograph.genericName}
+              </h2>
+
+              {/* High-yield Taxonomy Class Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg">
+                <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wide shadow-2xs">
+                  {monograph.pharmacologicClass}
+                </span>
+                <span className="bg-cyan-950/60 text-cyan-400 border border-cyan-500/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wide shadow-2xs">
+                  {monograph.therapeuticClass}
+                </span>
+              </div>
+
+              {/* Boxed Warning Signal Pill (ONLY if present) */}
+              {hasBlackBoxWarning && (
+                <div className="pt-1">
+                  <span className="bg-rose-950/60 text-rose-300 border border-rose-500/40 px-3.5 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                    <span>⚠️ FDA Boxed Warning Prescribed</span>
+                  </span>
+                </div>
+              )}
+
+              {/* Dosage Forms Summary Pill */}
+              <div className="pt-2">
+                <span className="bg-slate-800/80 text-slate-300 border border-slate-700/60 px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1.5">
+                  <Pill className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Forms: {dosageFormsSummary}</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Subtle Flip Cue Footer */}
+            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-center gap-2 text-xs text-slate-400 group-hover:text-slate-200 transition-colors">
+              <span>Click card or press Space to reveal clinical monograph</span>
+              <ArrowRight className="w-4 h-4 text-blue-400 shrink-0 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
-
-          {/* Subtle Flip Cue Footer */}
-          <div className="pt-4 border-t border-slate-800/80 flex items-center justify-center gap-2 text-xs text-slate-400 group-hover:text-slate-200 transition-colors">
-            <span>Click card or press Space to reveal clinical monograph</span>
-            <ArrowRight className="w-4 h-4 text-blue-400 shrink-0 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </div>
+        )
       )}
 
       {/* ========================================================= */}
@@ -204,6 +283,19 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
 
               {/* Taxonomy Class Chips */}
               <div className="flex flex-wrap items-center gap-1.5">
+                {resolvedProfile && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsClassDrawerOpen(true);
+                    }}
+                    className="text-xs px-2.5 py-1 rounded-lg border border-indigo-500/40 bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    title={`Open ${resolvedProfile.className} anchor drawer`}
+                  >
+                    <span>📖 Class Profile: {resolvedProfile.className}</span>
+                  </button>
+                )}
                 <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-0.5 rounded-full font-medium">
                   {monograph.pharmacologicClass}
                 </span>
@@ -267,6 +359,32 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
                 </ul>
               </div>
             </div>
+
+            {/* High-Yield Subclass Exceptions Callout Banner (ONLY if present) */}
+            {drugExceptions.length > 0 && (
+              <div className="bg-amber-950/40 border border-amber-500/50 rounded-xl p-3 text-amber-200 text-xs sm:text-sm font-medium flex items-start gap-2.5 shadow-sm">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1.5 min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="font-bold text-amber-300 uppercase tracking-wider text-xs flex items-center gap-1.5">
+                      <span>🔥 High-Yield Subclass Exceptions</span>
+                    </div>
+                    {resolvedProfile && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-700/50">
+                        {resolvedProfile.className} Anchor
+                      </span>
+                    )}
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-amber-100/90 leading-relaxed text-xs sm:text-sm">
+                    {drugExceptions.map((exception, idx) => (
+                      <li key={idx} className="leading-snug">
+                        {exception}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 3. Segmented 3-Tab Switcher with Hotkeys */}
@@ -530,6 +648,14 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
           {children && <div className="mt-2 pt-2 border-t border-slate-800">{children}</div>}
         </div>
       )}
+
+      {/* Class Profile Anchor Drawer */}
+      <ClassProfileAnchorDrawer
+        isOpen={isClassDrawerOpen}
+        onClose={() => setIsClassDrawerOpen(false)}
+        profile={resolvedProfile}
+        currentDrugName={monograph.genericName}
+      />
     </div>
   );
 };

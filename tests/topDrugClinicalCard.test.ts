@@ -12,6 +12,12 @@ import {
   TOP_DRUGS_CLINICAL_CATALOG,
   type TopDrugClinicalMonograph,
 } from '../src/data/topDrugsClinicalData.js';
+import type { ClinicalPreflipQuestion } from '../src/utils/clinicalQuestionGenerator.js';
+import {
+  CLASS_PROFILES,
+  resolveClassProfileForDrug,
+  type TopDrugClassProfile,
+} from '../src/data/clinical/classProfiles.js';
 
 function decodeHtmlEntities(html: string): string {
   return html
@@ -53,6 +59,21 @@ assert.ok(
 assert.ok(
   fileContent.includes('onFlip?: () => void') || fileContent.includes('onFlip?: ()'),
   'Props must include optional onFlip'
+);
+assert.ok(
+  fileContent.includes('preflipQuestion?: ClinicalPreflipQuestion | null') ||
+    fileContent.includes('preflipQuestion?:'),
+  'Props must include optional preflipQuestion'
+);
+assert.ok(
+  fileContent.includes('onAnswerSubmitted?: (isFullyCorrect: boolean) => void') ||
+    fileContent.includes('onAnswerSubmitted?:'),
+  'Props must include optional onAnswerSubmitted callback'
+);
+assert.ok(
+  fileContent.includes('classProfile?: TopDrugClassProfile | null') ||
+    fileContent.includes('classProfile?:'),
+  'Props must include optional classProfile'
 );
 
 // Sample medications for testing
@@ -518,6 +539,204 @@ assert.ok(fileContent.includes('monograph.administrationAndCounseling'), 'Must r
   assert.ok(
     !frontHtmlWithChildren.includes('Rating Buttons Slot'),
     'Front face must not render back-face children slot'
+  );
+}
+
+// ============================================================================
+// Test 12: Front Face Pre-Flip Micro-Drill Rendering & Insulation
+// ============================================================================
+{
+  const sampleQuestion: ClinicalPreflipQuestion = {
+    id: 'test-q-1',
+    domain: 'contraindications',
+    type: 'mcq',
+    prompt: 'Which of the following is an absolute contraindication for Lisinopril?',
+    options: [
+      {
+        id: 'opt-1',
+        text: 'History of ACE inhibitor-induced angioedema',
+        isCorrect: true,
+      },
+      {
+        id: 'opt-2',
+        text: 'Essential hypertension',
+        isCorrect: false,
+      },
+    ],
+  };
+
+  const frontHtmlWithQuestion = renderToStaticMarkup(
+    React.createElement(TopDrugClinicalCard, {
+      monograph: lisinopril,
+      isFlipped: false,
+      preflipQuestion: sampleQuestion,
+    })
+  );
+
+  // Renders the question prompt and options
+  assert.ok(
+    frontHtmlWithQuestion.includes('Which of the following is an absolute contraindication for Lisinopril?'),
+    'Front face must render pre-flip question prompt when preflipQuestion is provided'
+  );
+  assert.ok(
+    frontHtmlWithQuestion.includes('History of ACE inhibitor-induced angioedema'),
+    'Front face must render question option text'
+  );
+
+  // Pre-flip active suppresses the standard blinded prompt click-to-flip text
+  assert.ok(
+    !frontHtmlWithQuestion.includes('Click card or press Space to reveal clinical monograph'),
+    'Pre-flip question mode must suppress the generic blinded prompt flip cue'
+  );
+
+  // Code inspection contract: Preflip area event insulation
+  assert.ok(
+    fileContent.includes('ClinicalPreflipQuestionCard'),
+    'TopDrugClinicalCard must incorporate ClinicalPreflipQuestionCard component'
+  );
+}
+
+// ============================================================================
+// Test 13: Front Face Neutral Drawer Trigger (Zero Class Leaks)
+// ============================================================================
+{
+  // 1. With pre-flip question
+  const sampleQuestion: ClinicalPreflipQuestion = {
+    id: 'test-q-2',
+    domain: 'adverse-effects',
+    type: 'mcq',
+    prompt: 'Identify the common toxicity',
+    options: [{ id: 'opt-1', text: 'Dry cough', isCorrect: true }],
+  };
+
+  const frontHtmlWithQuestion = renderToStaticMarkup(
+    React.createElement(TopDrugClinicalCard, {
+      monograph: lisinopril,
+      isFlipped: false,
+      preflipQuestion: sampleQuestion,
+    })
+  );
+
+  assert.ok(
+    frontHtmlWithQuestion.includes('📖 Class Profile'),
+    'Front face with preflip question must provide neutral 📖 Class Profile drawer trigger'
+  );
+  // Ensure the class name is NOT leaked inside the trigger label on front face
+  assert.ok(
+    !frontHtmlWithQuestion.includes('📖 Class Profile: ACE Inhibitors'),
+    'Front face must NOT leak the class name inside the drawer trigger label'
+  );
+
+  // 2. Without pre-flip question (blinded prompt mode)
+  const frontHtmlWithoutQuestion = renderToStaticMarkup(
+    React.createElement(TopDrugClinicalCard, {
+      monograph: lisinopril,
+      isFlipped: false,
+    })
+  );
+
+  assert.ok(
+    frontHtmlWithoutQuestion.includes('📖 Class Profile'),
+    'Front face in blinded prompt mode must render neutral 📖 Class Profile button when profile exists'
+  );
+  assert.ok(
+    !frontHtmlWithoutQuestion.includes('📖 Class Profile: ACE Inhibitors'),
+    'Blinded prompt front face must NEVER reveal class name in class profile button'
+  );
+}
+
+// ============================================================================
+// Test 14: Back Face High-Yield Subclass Exceptions Banner
+// ============================================================================
+{
+  // Lisinopril has exceptions in ACE Inhibitors profile
+  const backHtmlLisinopril = renderToStaticMarkup(
+    React.createElement(TopDrugClinicalCard, {
+      monograph: lisinopril,
+      isFlipped: true,
+    })
+  );
+
+  assert.ok(
+    backHtmlLisinopril.includes('🔥 High-Yield Subclass Exceptions'),
+    'Back face must render 🔥 High-Yield Subclass Exceptions banner when drug has exceptions'
+  );
+  assert.ok(
+    backHtmlLisinopril.includes('Hydrophilic lysine analog') ||
+      backHtmlLisinopril.includes('active drug (not a prodrug)') ||
+      backHtmlLisinopril.includes('renal impairment'),
+    'Back face must render subclass exception details for Lisinopril'
+  );
+
+  // When class profile has no exceptions for drug, cleanly suppress banner
+  const blankProfile: TopDrugClassProfile = {
+    className: 'Test Class',
+    therapeuticCategory: 'Test Category',
+    universalMoa: 'Test MOA',
+    classWideToxicities: ['Tox 1'],
+    baselineMonitoring: ['Mon 1'],
+    memberDrugNames: ['Lisinopril'],
+    exceptionsByDrug: {},
+  };
+
+  const backHtmlBlank = renderToStaticMarkup(
+    React.createElement(TopDrugClinicalCard, {
+      monograph: lisinopril,
+      isFlipped: true,
+      classProfile: blankProfile,
+    })
+  );
+
+  assert.ok(
+    !backHtmlBlank.includes('🔥 High-Yield Subclass Exceptions'),
+    'Back face must cleanly suppress exceptions banner when drug has no subclass exceptions'
+  );
+}
+
+// ============================================================================
+// Test 15: Back Face Class Profile Drawer Trigger
+// ============================================================================
+{
+  const backHtmlLisinopril = renderToStaticMarkup(
+    React.createElement(TopDrugClinicalCard, {
+      monograph: lisinopril,
+      isFlipped: true,
+    })
+  );
+
+  assert.ok(
+    backHtmlLisinopril.includes('📖 Class Profile: ACE Inhibitors'),
+    'Back face header must display class profile drawer trigger with class name "📖 Class Profile: ACE Inhibitors"'
+  );
+
+  const backHtmlAtorvastatin = renderToStaticMarkup(
+    React.createElement(TopDrugClinicalCard, {
+      monograph: atorvastatin,
+      isFlipped: true,
+    })
+  );
+
+  assert.ok(
+    backHtmlAtorvastatin.includes('📖 Class Profile: Statins'),
+    'Back face header must display class profile drawer trigger with class name "📖 Class Profile: Statins"'
+  );
+}
+
+// ============================================================================
+// Test 16: Drawer Integration & State Architecture Contract
+// ============================================================================
+{
+  assert.ok(
+    fileContent.includes('ClassProfileAnchorDrawer'),
+    'TopDrugClinicalCard must import and render ClassProfileAnchorDrawer'
+  );
+  assert.ok(
+    fileContent.includes('isClassDrawerOpen'),
+    'TopDrugClinicalCard must maintain isClassDrawerOpen state'
+  );
+  assert.ok(
+    fileContent.includes('setIsClassDrawerOpen'),
+    'TopDrugClinicalCard must maintain setIsClassDrawerOpen state setter'
   );
 }
 
