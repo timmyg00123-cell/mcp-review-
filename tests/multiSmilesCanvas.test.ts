@@ -216,4 +216,19 @@ assert.ok(
   'Must resolve smiles from structureRecord or fallback smiles prop'
 );
 
+// =========================================================
+// Test 7: Authoritative BiologicMechanismModel Pathway Coverage
+// =========================================================
+assert.ok(
+  fileContent.includes('<BiologicMechanismModel'),
+  'MultiSmilesCanvas must delegate supported biologics to BiologicMechanismModel'
+);
+const bioModelSource = fs.readFileSync(path.resolve('src/components/BiologicMechanismModel.tsx'), 'utf8');
+for (const family of ['fibrinolytic', 'insulin', 'incretin', 'pcsk9', 'tnf', 'rankl', 'ige', 'epo']) {
+  assert.ok(
+    bioModelSource.includes(`'${family}'`),
+    `BiologicMechanismModel must implement pathway family '${family}'`
+  );
+}
+
 console.log('All MultiSmilesCanvas component and rendering contract checks passed successfully!');

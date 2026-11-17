@@ -1,6 +1,8 @@
 import React from 'react';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import { SmilesCanvas } from './SmilesCanvas';
+import { FibrinolysisCascadeViewer } from './FibrinolysisCascadeViewer';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import { resolveChemicalClass } from '../utils/chemicalClassDictionary';
 import {
   getTargetReceptor,
@@ -199,19 +201,30 @@ export const MinimizedStructureCard: React.FC<MinimizedStructureCardProps> = ({
       {/* 2. High-Contrast Structure Canvas (4:3 Aspect Ratio) */}
       <div
         onClick={() => onZoom && onZoom(structure)}
-        className="w-full h-44 bg-[var(--structure-canvas-bg)] relative flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80 cursor-zoom-in group/canvas"
+        className={`w-full ${
+          isFibrinolyticBiologic(structure) ? 'min-h-[185px] p-1.5' : 'h-44'
+        } bg-[var(--structure-canvas-bg)] relative flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800/80 cursor-zoom-in group/canvas`}
         title="Click to zoom structure"
       >
-        <SmilesCanvas
-          smiles={canonicalSmiles}
-          molBlock={structure.pubchemMolBlock}
-          fallbackImageUrl={structure.pngUrl}
-          cid={structure.cid}
-          width={260}
-          height={175}
-          altText={`${cleanName || 'Chemical'} structure`}
-          className="w-full h-full flex items-center justify-center pointer-events-none"
-        />
+        {isFibrinolyticBiologic(structure) ? (
+          <FibrinolysisCascadeViewer
+            structure={structure}
+            height={175}
+            isBlinded={isBlinded}
+            className="w-full pointer-events-none"
+          />
+        ) : (
+          <SmilesCanvas
+            smiles={canonicalSmiles}
+            molBlock={structure.pubchemMolBlock}
+            fallbackImageUrl={structure.pngUrl}
+            cid={structure.cid}
+            width={260}
+            height={175}
+            altText={`${cleanName || 'Chemical'} structure`}
+            className="w-full h-full flex items-center justify-center pointer-events-none"
+          />
+        )}
 
         {/* Hover zoom indicator overlay */}
         <div className="absolute inset-0 bg-slate-900/10 dark:bg-slate-900/30 opacity-0 group-hover/canvas:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">

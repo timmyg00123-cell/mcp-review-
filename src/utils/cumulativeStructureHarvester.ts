@@ -5,6 +5,7 @@ import { getModuleExamId } from '../types/examTypes';
 import { getExam1Modules } from '../data/exam1';
 import { getExam2Modules } from '../data/exam2';
 import { enrichStructureWithTaxonomy } from './topDrugsTaxonomy.js';
+import { isFibrinolyticBiologic } from './smartsDictionary';
 
 /**
  * Normalizes SMILES strings for reliable deduplication comparison.
@@ -247,18 +248,35 @@ export function harvestCurriculumStructures(modules: ReviewModule[]): FlashcardI
 
   const creationTimestamp = Date.now();
 
-  return accumulatedCards.map((acc) => ({
-    structureId: acc.structureId,
-    drugName: acc.drugName,
-    moduleIds: Array.from(acc.moduleIds),
-    structure: enrichStructureWithTaxonomy(acc.structure),
-    intervalMinutes: 0,
-    dueTimestamp: creationTimestamp,
-    repetitionCount: 0,
-    state: 'new',
-    isSuspended: false,
-    struggleCount: 0,
-  }));
+  return accumulatedCards.map((acc) => {
+    const enriched = enrichStructureWithTaxonomy(acc.structure);
+    const finalStructure: ChemicalStructure = isFibrinolyticBiologic(enriched)
+      ? {
+          ...enriched,
+          isBiologic: true,
+          structureRecord: {
+            genericName: enriched.name,
+            structureType: 'biologic',
+            smiles: '',
+            biologicDescription: enriched.moa_summary || enriched.sarNotes || '',
+            molecularWeight: enriched.mw,
+          },
+        }
+      : enriched;
+
+    return {
+      structureId: acc.structureId,
+      drugName: acc.drugName,
+      moduleIds: Array.from(acc.moduleIds),
+      structure: finalStructure,
+      intervalMinutes: 0,
+      dueTimestamp: creationTimestamp,
+      repetitionCount: 0,
+      state: 'new',
+      isSuspended: false,
+      struggleCount: 0,
+    };
+  });
 }
 
 /**

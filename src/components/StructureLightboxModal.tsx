@@ -20,7 +20,7 @@ import {
   getMoaOrSar,
   resolveTargetAndReversibility,
 } from '../utils/structureDataUtils';
-import { isBiologicOrMacromolecule } from '../utils/smartsDictionary';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import {
   ZoomIn,
   ZoomOut,
@@ -189,12 +189,8 @@ export const StructureLightboxModal: React.FC<StructureLightboxModalProps> = ({
   const primaryStructure = pool[primaryIdx] || initialStructure;
   const secondaryStructure = pool[secondaryIdx] || pool[(primaryIdx + 1) % pool.length];
 
-  const isPrimaryBiologic = Boolean(
-    primaryStructure?.isBiologic || isBiologicOrMacromolecule(primaryStructure)
-  );
-  const isSecondaryBiologic = Boolean(
-    secondaryStructure?.isBiologic || isBiologicOrMacromolecule(secondaryStructure)
-  );
+  const isPrimaryBiologic = isFibrinolyticBiologic(primaryStructure);
+  const isSecondaryBiologic = isFibrinolyticBiologic(secondaryStructure);
 
   const shouldMask = (hideDrugName || examModeActive) && !peekNames;
   const getDisplayTitle = (s: ChemicalStructure) =>

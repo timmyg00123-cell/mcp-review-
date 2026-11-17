@@ -179,7 +179,7 @@ export const THIENOPYRIDINE_WORKBENCH_DATA: StructuralWorkbenchData = {
       {
         id: 'clopidogrel_thiolactone_intermediate',
         name: '2-Oxo-Clopidogrel (Thiolactone Intermediate)',
-        smiles: 'COC(=O)[C@@H](c1ccccc1Cl)N2CCc3sc(=O)cc3C2',
+        smiles: 'COC(=O)[C@@H](c1ccccc1Cl)N2CCC3=C(C2)CC(=O)S3',
         cid: 11957449,
         isCorrect: false,
         classification: 'intermediate',

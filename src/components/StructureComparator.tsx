@@ -3,13 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { db, getHydratedDrugs, HydratedDrug } from '../db/db';
 import { ChemicalStructure, PharmacophoreGroup } from '../types/reviewModule';
 import { SmilesCanvas } from './SmilesCanvas';
+import { FibrinolysisCascadeViewer } from './FibrinolysisCascadeViewer';
 import {
   ColorPaletteItem,
   PHARMACOPHORE_COLOR_PALETTE,
   getPharmacophoresForStructure,
   parsePharmacophoreName,
 } from '../utils/pharmacophoreData';
-import { getCorrectedSmarts } from '../utils/smartsDictionary';
+import { getCorrectedSmarts, isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import {
   getChemicalClass,
   getTargetReceptor,
@@ -1713,31 +1714,88 @@ export const StructureComparator: React.FC<StructureComparatorProps> = ({
             ) : null}
           </div>
 
-          {/* 1. HIGH-CONTRAST STRUCTURE CANVAS (Exclusively RDKit SmilesCanvas as Single Source of Truth) */}
-          <div className="w-full h-56 bg-[var(--structure-canvas-bg)] rounded-xl shadow-inner p-2 flex items-center justify-center overflow-hidden relative group border border-slate-200/80 dark:border-slate-800">
-            <SmilesCanvas
-              smiles={canonicalSmiles}
-              molBlock={structure.pubchemMolBlock}
-              fallbackImageUrl={structure.pngUrl}
-              width={280}
-              height={210}
-              altText={`${displayName} 2D chemical structure`}
-              activePharmacophores={activeHighlights}
-              className="w-full h-full flex items-center justify-center"
-            />
+          {/* 1. HIGH-CONTRAST STRUCTURE CANVAS OR FIBRINOLYSIS CASCADE MECHANISM */}
+          {isFibrinolyticBiologic(structure) ? (
+            <div className="w-full min-h-[250px] bg-[var(--structure-canvas-bg)] rounded-xl shadow-inner p-2 flex items-center justify-center overflow-hidden relative group border border-slate-200/80 dark:border-slate-800">
+              {(() => {
+                const cascadeActiveMap: Record<string, ColorPaletteItem> = {};
+                activeTags.forEach((tag) => {
+                  const matchedGroup = pharmacophores.find(
+                    (p) => p.id === tag.id || p.name.toLowerCase() === tag.name.toLowerCase()
+                  );
+                  const targetKey = matchedGroup?.id || tag.id;
+                  const paletteMatch =
+                    PHARMACOPHORE_COLOR_PALETTE.find(
+                      (c) => c.hex.toLowerCase() === (tag.color || '').toLowerCase()
+                    ) || {
+                      ...PHARMACOPHORE_COLOR_PALETTE[0],
+                      hex: tag.color || '#10B981',
+                      pinBg: tag.color || '#059669',
+                    };
+                  cascadeActiveMap[targetKey] = paletteMatch;
+                });
+                const cascadeHoveredId = hoveredTag
+                  ? pharmacophores.find(
+                      (p) =>
+                        p.id === hoveredTag.id ||
+                        p.name.toLowerCase() === hoveredTag.name.toLowerCase()
+                    )?.id ?? hoveredTag.id
+                  : null;
 
-            {onInspectStructure ? (
-              <button
-                type="button"
-                onClick={() => onInspectStructure(structure)}
-                className="absolute bottom-2 right-2 p-1.5 rounded-lg bg-slate-900/90 text-white opacity-0 group-hover:opacity-100 transition-opacity text-xs flex items-center gap-1 shadow-md cursor-pointer z-10"
-                title="Inspect in PubChem Inspector"
-              >
-                <Search className="w-3 h-3" />
-                <span>Inspect</span>
-              </button>
-            ) : null}
-          </div>
+                return (
+                  <FibrinolysisCascadeViewer
+                    structure={structure}
+                    activePharmacophoreIds={cascadeActiveMap}
+                    hoveredPharmacophoreId={cascadeHoveredId}
+                    onTogglePharmacophore={onToggleTag}
+                    onHoverPharmacophore={(id) =>
+                      onHoverTag(id ? pharmacophores.find((p) => p.id === id) || null : null)
+                    }
+                    isBlinded={shouldMask && !isPeeked}
+                    height={250}
+                    className="w-full"
+                  />
+                );
+              })()}
+
+              {onInspectStructure ? (
+                <button
+                  type="button"
+                  onClick={() => onInspectStructure(structure)}
+                  className="absolute bottom-2 right-2 p-1.5 rounded-lg bg-slate-900/90 text-white opacity-0 group-hover:opacity-100 transition-opacity text-xs flex items-center gap-1 shadow-md cursor-pointer z-10"
+                  title="Inspect in PubChem Inspector"
+                >
+                  <Search className="w-3 h-3" />
+                  <span>Inspect</span>
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            <div className="w-full h-56 bg-[var(--structure-canvas-bg)] rounded-xl shadow-inner p-2 flex items-center justify-center overflow-hidden relative group border border-slate-200/80 dark:border-slate-800">
+              <SmilesCanvas
+                smiles={canonicalSmiles}
+                molBlock={structure.pubchemMolBlock}
+                fallbackImageUrl={structure.pngUrl}
+                width={280}
+                height={210}
+                altText={`${displayName} 2D chemical structure`}
+                activePharmacophores={activeHighlights}
+                className="w-full h-full flex items-center justify-center"
+              />
+
+              {onInspectStructure ? (
+                <button
+                  type="button"
+                  onClick={() => onInspectStructure(structure)}
+                  className="absolute bottom-2 right-2 p-1.5 rounded-lg bg-slate-900/90 text-white opacity-0 group-hover:opacity-100 transition-opacity text-xs flex items-center gap-1 shadow-md cursor-pointer z-10"
+                  title="Inspect in PubChem Inspector"
+                >
+                  <Search className="w-3 h-3" />
+                  <span>Inspect</span>
+                </button>
+              ) : null}
+            </div>
+          )}
 
           {/* Pharmacophore Pill / Badge Strip */}
           <div className="space-y-2">

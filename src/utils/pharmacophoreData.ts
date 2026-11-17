@@ -149,7 +149,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Replaces the labile ribose ring; provides metabolic stability against glycosidic cleavage without requiring bioactivation or phosphorylation for activity.',
       category: 'pk',
-      smarts: 'C1CC(O)C(O)C1',
+      smarts: 'C1CC(O)C(O)C1O',
       region: { x: 50, y: 8, width: 34, height: 32, isRing: true, label: 'Cyclopentan-triol (Metabolic Shield)' },
     },
     {
@@ -238,7 +238,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Tertiary amine conferring adequate aqueous solubility and proper geometry for the opened active thiol metabolite.',
       category: 'solubility',
-      smarts: 'C1NCCc2sccc12',
+      smarts: '[#6;R]1-[#7;R]-[#6;R]-[#6;R]-[#6;R]~[#6;R]1',
       region: { x: 42, y: 44, width: 28, height: 32, isRing: true, label: 'Tetrahydropyridine (Basic Nitrogen)' },
     },
     {
@@ -247,7 +247,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Obligate site of 2-step hepatic CYP450 bioactivation (CYP2C19/CYP1A2) via 2-oxo-clopidogrel to generate the reactive thiol metabolite that covalently binds P2Y12 Cys residues.',
       category: 'prodrug',
-      smarts: 'c1sccc1',
+      smarts: '[#6;R]1~[#6;R]~[#6;R]~[#6;R]~[#16;R]1',
       region: { x: 66, y: 50, width: 28, height: 34, isRing: true, label: 'Thiophene Ring (CYP2C19 Bioactivation Lock)' },
     },
   ],
@@ -287,7 +287,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Core pharmacophore that positions the reactive thiophene ring for single-step CYP3A4 bioactivation into the active platelet-inhibiting thiol.',
       category: 'prodrug',
-      smarts: 'C1NCCc2sccc12',
+      smarts: '[#6;R]1-[#7;R]-[#6;R]-[#6;R]-[#6;R]2~[#6;R]1~[#6,#16;R]~[#6;R]~[#16,#6;R]2',
       region: { x: 46, y: 36, width: 36, height: 42, isRing: true, label: 'Thienopyridine Scaffold (CYP3A4 Warhead)' },
     },
   ],
@@ -309,7 +309,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'First-generation thienopyridine scaffold requiring multi-step hepatic CYP activation to generate an active thiol, resulting in a delayed onset (~6 hours).',
       category: 'prodrug',
-      smarts: 'C1NCCc2sccc12',
+      smarts: '[#6;R]1-[#7;R]-[#6;R]-[#6;R]-[#6;R]2~[#6;R]1~[#6,#16;R]~[#6;R]~[#16,#6;R]2',
       region: { x: 46, y: 28, width: 38, height: 44, isRing: true, label: 'Thienopyridine Core (CYP Activation Scaffold)' },
     },
   ],
@@ -322,7 +322,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Bulky fluorinated thioether that fits into a hydrophobic accessory pocket of P2Y12, increasing affinity >1000-fold over endogenous ATP.',
       category: 'binding',
-      smarts: 'CCCS',
+      smarts: 'SCCC(F)(F)F',
       region: { x: 6, y: 12, width: 28, height: 32, isRing: false, label: 'Trifluoroethylthio (Lipophilic Grip)' },
     },
     {
@@ -331,7 +331,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Direct competitive antagonist motif that docks in the primary orthosteric ADP binding site of the P2Y12 receptor.',
       category: 'binding',
-      smarts: 'c1ncnc2nnnc12',
+      smarts: 'c1ncnc2ncnc12',
       region: { x: 32, y: 22, width: 34, height: 36, isRing: true, label: 'Adenine Core (Orthosteric Purine)' },
     },
     {
@@ -513,7 +513,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
     },
   ],
 
-  // Sodium Nitroprusside (CID 11963579) - Inorganic complex
+  // Sodium Nitroprusside (CID 11953895) - Inorganic complex
   nitroprusside: [
     {
       id: 'snp_nitrosyl',
@@ -521,6 +521,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Releases vasoactive nitric oxide (NO) directly and non-enzymatically in the vascular lumen upon single-electron reduction by oxyhemoglobin, bypassing ALDH2.',
       category: 'binding',
+      smarts: '[#7+]=O',
       region: { x: 36, y: 10, width: 28, height: 28, isRing: false, label: 'Nitrosyl Ligand (Direct NO+ Releaser)' },
     },
     {
@@ -529,6 +530,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Coordinates the five cyanide ligands and one nitrosyl group in a rigid octahedral coordination sphere with d2sp3 hybridization.',
       category: 'stability',
+      smarts: '[#26]',
       region: { x: 36, y: 36, width: 26, height: 26, isRing: false, label: 'Octahedral Fe Center (Metal Coordination Hub)' },
     },
     {
@@ -537,6 +539,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Coordinate the iron core; released in vivo upon photolysis/reduction. Requires hepatic rhodanese and sodium thiosulfate to form non-toxic thiocyanate.',
       category: 'pk',
+      smarts: '[#6]#[#7]',
       region: { x: 12, y: 32, width: 74, height: 46, isRing: false, label: 'Cyanide Ligands (Coordination Cage)' },
     },
   ],
@@ -580,7 +583,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Electron-rich aromatic ring engaging in multiple hydrogen bonds that hold the channel complex open, causing vascular hyperpolarization.',
       category: 'binding',
-      smarts: 'c1c(N)nc(N)nc1',
+      smarts: '[#6]1~[#6](~[#7])~[#7]~[#6](~[#7])~[#7]~[#6]1',
       region: { x: 36, y: 22, width: 36, height: 46, isRing: true, label: '2,4-Diaminopyrimidine (K-ATP Channel Opener)' },
     },
     {
@@ -589,7 +592,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Prodrug site sulfated by hepatic SULT1A1 sulfotransferase to form Minoxidil N-O-sulfate, the active metabolite that opens K_ATP channels.',
       category: 'prodrug',
-      smarts: '[N+][O-]',
+      smarts: '[#7;R]-[OX2,OX1-]',
       region: { x: 68, y: 32, width: 26, height: 28, isRing: false, label: 'N-Oxide Moiety (SULT1A1 Activation Target)' },
     },
   ],
@@ -745,7 +748,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
     },
   ],
 
-  // Hydrochlorothiazide (CID 7239) - Thiazide diuretic
+  // Hydrochlorothiazide (CID 3639) - Thiazide diuretic
   hydrochlorothiazide: [
     {
       id: 'hctz_benzothiadiazine',
@@ -753,7 +756,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Fused bicyclic ring system that competitively inhibits the Na+/Cl- cotransporter (NCC) in the luminal membrane of the distal convoluted tubule.',
       category: 'binding',
-      smarts: 'c1ccc2NS(=O)(=O)NCc2c1',
+      smarts: 'c1ccc2c(c1)[SX4](=[OX1])(=[OX1])[#7]~[#6]~[#7]2',
       region: { x: 22, y: 24, width: 44, height: 48, isRing: true, label: 'Benzothiadiazine Core (NCC Transporter Blocker)' },
     },
     {
@@ -895,7 +898,7 @@ const CURATED_PHARMACOPHORES: Record<string, PharmacophoreGroup[]> = {
       purpose:
         'Five-membered heteroaromatic core projecting four diverse pharmacophoric arms into distinct enzyme subpockets.',
       category: 'binding',
-      smarts: 'c1cc[nH]c1',
+      smarts: 'n1cccc1',
       region: { x: 30, y: 30, width: 36, height: 36, isRing: true, label: 'Pyrrole Central Scaffold (Four-Arm Hub)' },
     },
     {
@@ -1206,7 +1209,7 @@ export const getPharmacophoresForStructure = (
   if (CURATED_PHARMACOPHORES[key]) {
     return CURATED_PHARMACOPHORES[key].map((p) => ({
       ...p,
-      smarts: getCorrectedSmarts(p.name, p.smarts || '') || undefined,
+      smarts: p.smarts || getCorrectedSmarts(p.name, '') || undefined,
     }));
   }
 
@@ -1223,7 +1226,7 @@ export const getPharmacophoresForStructure = (
           : resolvePharmacophoreRegion(p, idx, total);
       return {
         ...p,
-        smarts: getCorrectedSmarts(p.name, p.smarts || '') || undefined,
+        smarts: p.smarts || getCorrectedSmarts(p.name, '') || undefined,
         region: validRegion,
       };
     });
@@ -1278,6 +1281,7 @@ export const getPharmacophoresForStructure = (
       name: `${structure.chemicalClass || 'Chemical Scaffold'} Core`,
       purpose: `Essential molecular framework anchoring ${structure.name} to its pharmacological target (${structure.target}).`,
       category: 'binding',
+      smarts: '[*;R]',
       region: { x: 25, y: 25, width: 50, height: 50, label: 'Pharmacophoric Core' },
     },
   ];

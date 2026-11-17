@@ -211,7 +211,7 @@ export const DABIGATRAN_WORKBENCH_DATA: StructuralWorkbenchData = {
         id: 'cand_b',
         name: 'Mono-prodrug Intermediate BDPN',
         smiles:
-          'CCCCCCNC(=O)NC1=CC=C(C=C1)C2=NC3=C(N2C)C=C(C=C3)C(=O)N(CCC(=O)O)C4=CC=CC=N4',
+          'CCCCCCOC(=O)NC(=N)C1=CC=C(C=C1)NCC2=NC3=C(N2C)C=CC(=C3)C(=O)N(CCC(=O)O)C4=CC=CC=N4',
         isCorrect: false,
         classification: 'intermediate',
         rationale:

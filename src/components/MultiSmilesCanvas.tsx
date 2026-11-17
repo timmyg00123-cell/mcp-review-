@@ -2,6 +2,7 @@ import React from 'react';
 import { Dna, Layers } from 'lucide-react';
 import type { TopDrugStructureRecord, MultiComponentPart } from '../data/topDrugsSmilesData.js';
 import { SmilesCanvas } from './SmilesCanvas.js';
+import { BiologicMechanismModel, hasDedicatedBiologicModel } from './BiologicMechanismModel.js';
 import {
   getBlindedComponentLabel,
   resolveStructureRenderMode,
@@ -123,6 +124,19 @@ export const MultiSmilesCanvas: React.FC<MultiSmilesCanvasProps> = ({
 
   // Modality 2: Biologic / Macromolecule
   if (renderMode === 'biologic' && structureRecord) {
+    const resolvedBioName = structureRecord.genericName || compoundName || '';
+    if (hasDedicatedBiologicModel(resolvedBioName)) {
+      return (
+        <BiologicMechanismModel
+          structureRecord={structureRecord}
+          compoundName={compoundName}
+          isFlipped={isFlipped}
+          height={effectiveHeight}
+          className={className}
+        />
+      );
+    }
+
     return (
       <div
         className={`bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-500/30 rounded-xl p-4 sm:p-6 text-center flex flex-col items-center justify-center w-full shadow-md ${className}`}

@@ -61,6 +61,110 @@ const getRDKitInstance = async (): Promise<MainModule> => {
   return rdkitModulePromise;
 };
 
+const SIMPLE_SPECTATOR_ION_RE =
+  /^(\[Na\+\]|\[K\+\]|\[Li\+\]|\[Ca\+2\]|\[Mg\+2\]|\[Cl-\]|Cl|\[Br-\]|Br|\[I-\]|O|\[NH4\+\])$/;
+
+const COORDINATION_METAL_RE = /\[(Fe|Co|Pt|Zn|Cu|Mn|Gd|Bi|Ru|Au|Ag)[^\]]*\]/;
+
+/**
+ * Strips simple spectator counterions and water of hydration from disconnected SMILES
+ * without destroying multi-ligand inorganic coordination complexes (e.g. Sodium nitroprusside).
+ */
+export function stripSimpleCounterions(smiles: string): string {
+  const trimmed = (smiles || '').trim();
+  if (!trimmed.includes('.')) return trimmed;
+
+  const parts = trimmed
+    .split('.')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const remaining = parts.filter((p) => !SIMPLE_SPECTATOR_ION_RE.test(p));
+
+  if (remaining.length === 0) return trimmed;
+  if (remaining.length === 1) return remaining[0];
+
+  if (remaining.some((p) => COORDINATION_METAL_RE.test(p))) {
+    return remaining.join('.');
+  }
+
+  return remaining.reduce((a, b) => (a.length >= b.length ? a : b));
+}
+
+function findSubstructMatchesForSmarts(
+  rdkit: MainModule,
+  mol: Mol,
+  rawQuery: string
+): Array<{ atoms?: number[]; bonds?: number[] }> {
+  const query = (rawQuery || '').trim();
+  if (!query) return [];
+
+  const runSingleQuery = (smartsStr: string): Array<{ atoms?: number[]; bonds?: number[] }> => {
+    let qmol: Mol | null = null;
+    try {
+      qmol = rdkit.get_qmol(smartsStr);
+      if ((!qmol || !qmol.is_valid()) && smartsStr.includes(':')) {
+        qmol?.delete();
+        qmol = rdkit.get_qmol(smartsStr.replace(/:/g, '~'));
+      }
+      if (!qmol || !qmol.is_valid()) return [];
+
+      let found: Array<{ atoms?: number[]; bonds?: number[] }> = [];
+      if (typeof (mol as any).get_substruct_matches === 'function') {
+        try {
+          const multiStr = (mol as any).get_substruct_matches(qmol);
+          const parsed = JSON.parse(multiStr || '[]');
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            found = parsed.filter((m) => (m.atoms && m.atoms.length > 0) || (m.bonds && m.bonds.length > 0));
+          }
+        } catch {}
+      }
+
+      if (found.length === 0) {
+        const singleStr = mol.get_substruct_match(qmol);
+        const singleObj = JSON.parse(singleStr || '{}');
+        if ((singleObj.atoms && singleObj.atoms.length > 0) || (singleObj.bonds && singleObj.bonds.length > 0)) {
+          found = [singleObj];
+        }
+      }
+
+      if (found.length === 0 && (smartsStr.includes('=') || smartsStr.includes(':'))) {
+        let relaxedQmol: Mol | null = null;
+        try {
+          const relaxedSmarts = smartsStr.replace(/[:=]/g, '~');
+          relaxedQmol = rdkit.get_qmol(relaxedSmarts);
+          if (relaxedQmol && relaxedQmol.is_valid()) {
+            const relaxedStr = mol.get_substruct_match(relaxedQmol);
+            const relaxedObj = JSON.parse(relaxedStr || '{}');
+            if ((relaxedObj.atoms && relaxedObj.atoms.length > 0) || (relaxedObj.bonds && relaxedObj.bonds.length > 0)) {
+              found = [relaxedObj];
+            }
+          }
+        } catch {} finally {
+          relaxedQmol?.delete();
+        }
+      }
+
+      return found;
+    } catch {
+      return [];
+    } finally {
+      try {
+        qmol?.delete();
+      } catch {}
+    }
+  };
+
+  const direct = runSingleQuery(query);
+  if (direct.length > 0) return direct;
+
+  // Acyclic molecule fallback when ring-scaffold wildcard '[*;R]' finds 0 ring atoms
+  if (query === '[*;R]') {
+    return runSingleQuery('[*]');
+  }
+
+  return [];
+}
+
 /**
  * Converts a hex color (#2563eb) to a normalized [r, g, b, a] array for RDKit highlights.
  * Default alpha of 0.35 creates a soft translucent pastel halo that preserves bond lines.
@@ -235,9 +339,12 @@ export const SmilesCanvas: React.FC<SmilesCanvasProps> = ({
         try {
           mol = rdkit.get_mol(molBlock.trim());
           if (mol && mol.is_valid()) {
-            mol.remove_hs(); // Strips the explicit hydrogens to clean up the UI
+            const strippedMolBlock = mol.remove_hs(); // Strips explicit hydrogens to clean up the UI
             if (typeof (mol as any).remove_hs_in_place === 'function') {
               (mol as any).remove_hs_in_place();
+            } else if (typeof strippedMolBlock === 'string' && strippedMolBlock.trim()) {
+              mol.delete();
+              mol = rdkit.get_mol(strippedMolBlock);
             }
           }
         } catch (molErr) {
@@ -252,9 +359,7 @@ export const SmilesCanvas: React.FC<SmilesCanvasProps> = ({
           throw new Error('No valid molBlock or SMILES provided');
         }
 
-        const cleanSmiles = smiles.includes('.')
-          ? smiles.split('.').reduce((a, b) => (a.length > b.length ? a : b)).trim()
-          : smiles.trim();
+        const cleanSmiles = stripSimpleCounterions(smiles);
 
         if (!cleanSmiles) {
           throw new Error('Empty SMILES string');
@@ -278,93 +383,34 @@ export const SmilesCanvas: React.FC<SmilesCanvasProps> = ({
       // Composite Reducer: Iterate and merge highlights across all active groups
       activePharmacophores.forEach((pharma) => {
         if (!mol) return;
-        const candidateSmarts =
-          getCorrectedSmarts(pharma.name || pharma.id, pharma.smarts || '') ||
-          pharma.smarts ||
-          '';
+        const rawFallbackSmarts = (pharma.smarts || '').trim();
+        const correctedSmarts = getCorrectedSmarts(pharma.name || pharma.id, rawFallbackSmarts).trim();
+        const primarySmarts = correctedSmarts || rawFallbackSmarts;
 
-        if (!candidateSmarts.trim()) return;
+        if (!primarySmarts) return;
 
-        let qmol: Mol | null = null;
-        try {
-          qmol = rdkit.get_qmol(candidateSmarts.trim());
+        let matches = findSubstructMatchesForSmarts(rdkit, mol, primarySmarts);
+        if (matches.length === 0 && rawFallbackSmarts && rawFallbackSmarts !== primarySmarts) {
+          matches = findSubstructMatchesForSmarts(rdkit, mol, rawFallbackSmarts);
+        }
 
-          // Fallback: if exact SMARTS parsing failed, attempt relaxed query
-          if (!qmol || !qmol.is_valid()) {
-            if (candidateSmarts.includes(':')) {
-              try {
-                qmol?.delete();
-                qmol = rdkit.get_qmol(candidateSmarts.replace(/:/g, '~'));
-              } catch {}
+        if (matches.length > 0) {
+          const rgba = hexToRgba(pharma.color || '#2563eb', 0.35);
+
+          matches.forEach((matchObj) => {
+            if (matchObj.atoms) {
+              matchObj.atoms.forEach((idx: number) => {
+                allAtoms.add(idx);
+                atomColors[idx] = rgba;
+              });
             }
-          }
-
-          if (qmol && qmol.is_valid()) {
-            let matches: Array<{ atoms?: number[]; bonds?: number[] }> = [];
-
-            // 1. Try multi-substructure matches to capture all instances (e.g. symmetrical rings or multiple fluorines)
-            if (typeof (mol as any).get_substruct_matches === 'function') {
-              try {
-                const multiStr = (mol as any).get_substruct_matches(qmol);
-                const parsed = JSON.parse(multiStr || '[]');
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                  matches = parsed;
-                }
-              } catch {}
+            if (matchObj.bonds) {
+              matchObj.bonds.forEach((idx: number) => {
+                allBonds.add(idx);
+                bondColors[idx] = rgba;
+              });
             }
-
-            // 2. Fallback to single substructure match if multi-match was empty
-            if (matches.length === 0) {
-              const singleStr = mol.get_substruct_match(qmol);
-              const singleObj = JSON.parse(singleStr || '{}');
-              if (singleObj.atoms || singleObj.bonds) {
-                matches = [singleObj];
-              }
-            }
-
-            // 3. Fallback: if matches is still empty, attempt relaxed bond/topology query
-            if (matches.length === 0 && (candidateSmarts.includes('=') || candidateSmarts.includes(':'))) {
-              let relaxedQmol: Mol | null = null;
-              try {
-                const relaxedSmarts = candidateSmarts.replace(/[:=]/g, '~');
-                relaxedQmol = rdkit.get_qmol(relaxedSmarts);
-                if (relaxedQmol && relaxedQmol.is_valid()) {
-                  const relaxedStr = mol.get_substruct_match(relaxedQmol);
-                  const relaxedObj = JSON.parse(relaxedStr || '{}');
-                  if (relaxedObj.atoms || relaxedObj.bonds) {
-                    matches = [relaxedObj];
-                  }
-                }
-              } catch {} finally {
-                relaxedQmol?.delete();
-              }
-            }
-
-            const rgba = hexToRgba(pharma.color || '#2563eb', 0.35);
-
-            matches.forEach((matchObj) => {
-              if (matchObj.atoms) {
-                matchObj.atoms.forEach((idx: number) => {
-                  allAtoms.add(idx);
-                  atomColors[idx] = rgba;
-                });
-              }
-              if (matchObj.bonds) {
-                matchObj.bonds.forEach((idx: number) => {
-                  allBonds.add(idx);
-                  bondColors[idx] = rgba;
-                });
-              }
-            });
-          }
-        } catch (smartsErr) {
-          console.warn(`[SmilesCanvas] Substructure matching issue with pattern "${candidateSmarts}":`, smartsErr);
-        } finally {
-          if (qmol) {
-            try {
-              qmol.delete();
-            } catch {}
-          }
+          });
         }
       });
 

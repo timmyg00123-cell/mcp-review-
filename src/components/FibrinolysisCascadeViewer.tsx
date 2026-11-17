@@ -9,6 +9,7 @@ export interface FibrinolysisCascadeViewerProps {
   hoveredPharmacophoreId?: string | null;
   className?: string;
   height?: number; // default e.g. 260
+  isBlinded?: boolean;
   onTogglePharmacophore?: (group: PharmacophoreGroup) => void;
   onHoverPharmacophore?: (id: string | null) => void;
 }
@@ -117,6 +118,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
   hoveredPharmacophoreId = null,
   className = '',
   height = 260,
+  isBlinded = false,
   onTogglePharmacophore,
   onHoverPharmacophore,
 }) => {
@@ -235,20 +237,29 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
   const isTenecteplase = drugLower.includes('tenecteplase');
   const isReteplase = drugLower.includes('reteplase');
 
+  const displayDrugName = isBlinded ? '[Therapeutic Fibrinolytic (?)]' : structure.name;
+
   const drugSubLabel = useMemo(() => {
+    if (isBlinded) {
+      if (isStreptokinase) return 'Non-Enzymatic 1:1 Stoichiometric Activator (47 kDa)';
+      if (isUrokinase) return 'Direct Two-Chain Serine Protease (~32–54 kDa)';
+      if (isTenecteplase) return 'Bioengineered Triple-Mutant Plasminogen Activator';
+      if (isReteplase) return 'Non-Glycosylated Deletion-Mutant Activator (39 kDa)';
+      return 'Recombinant Fibrin-Selective Serine Protease (59 kDa)';
+    }
     if (isTenecteplase) return 'TNK-tPA (T103N, N117Q, KHRR296-299AAAA)';
     if (isReteplase) return 'r-PA Deletion Mutant (K2 + Protease only)';
     if (isStreptokinase) return 'Bacterial Non-Enzymatic Activator (47 kDa)';
     if (isUrokinase) return 'u-PA Two-Chain Serine Protease (32 kDa)';
     return 'Recombinant Human t-PA (527 aa, 59 kDa)';
-  }, [isTenecteplase, isReteplase, isStreptokinase, isUrokinase]);
+  }, [isBlinded, isTenecteplase, isReteplase, isStreptokinase, isUrokinase]);
 
   return (
     <div
       className={`relative w-full flex flex-col justify-between rounded-xl overflow-hidden bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 p-2.5 text-slate-100 shadow-xl transition-all ${className}`}
       style={{ minHeight: height }}
       role="region"
-      aria-label={`Fibrinolysis Cascade Mechanism for ${structure.name}`}
+      aria-label={`Fibrinolysis Cascade Mechanism for ${displayDrugName}`}
     >
       {/* Top Header / Drug Indicator */}
       <div className="flex items-center justify-between px-1 pb-1 text-xs border-b border-slate-800">
@@ -261,7 +272,7 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full">
-            {structure.name}
+            {displayDrugName}
           </span>
           {Object.keys(activeDomains).length > 0 && (
             <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/70 border border-cyan-800/60 px-1.5 py-0.5 rounded">
@@ -669,8 +680,8 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
             <text x="107" y="151" fill="#93C5FD" fontSize="9" fontWeight="700" textAnchor="middle">
               CATALYTIC ACTIVATOR
             </text>
-            <text x="42" y="174" fill="#FFFFFF" fontSize="13" fontWeight="800">
-              {structure.name}
+            <text x="42" y="174" fill="#FFFFFF" fontSize={isBlinded ? '11' : '13'} fontWeight="800">
+              {displayDrugName}
             </text>
             <text x="42" y="190" fill="#94A3B8" fontSize="8.5" fontWeight="500">
               {drugSubLabel}
@@ -762,7 +773,9 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               fontSize="8.5"
             >
               {isTenecteplase
-                ? '🛡️ SHIELDED: 80× Resistance via AAAA mutation'
+                ? isBlinded
+                  ? '🛡️ SHIELDED: 80× Serpin Resistance Mutant'
+                  : '🛡️ SHIELDED: 80× Resistance via AAAA mutation'
                 : 'Rapidly neutralizes native t-PA (1:1 complex)'}
             </text>
           </g>
@@ -846,7 +859,9 @@ export const FibrinolysisCascadeViewer: React.FC<FibrinolysisCascadeViewerProps>
               fontSize="8.5"
             >
               {isTenecteplase
-                ? 'T103N/N117Q: Slower clearance → t1/2 20-24 min'
+                ? isBlinded
+                  ? 'Glyco-engineered: Slower clearance → t1/2 20-24 min'
+                  : 'T103N/N117Q: Slower clearance → t1/2 20-24 min'
                 : isReteplase
                 ? 'No EGF/Finger: t1/2 14-18 min (double bolus)'
                 : 'EGF / heavy chain binding → t1/2 3-5 min'}

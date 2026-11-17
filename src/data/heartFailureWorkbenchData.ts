@@ -388,7 +388,7 @@ export const ACE_INHIBITOR_WORKBENCH_DATA: StructuralWorkbenchData = {
         id: 'enalaprilat_active',
         name: 'Enalaprilat: Active Dicarboxylate Diacid',
         label: 'Enalaprilat: Active Dicarboxylate Diacid',
-        smiles: 'CCC(C(=O)O)NC(C)C(=O)N1CCCC1C(=O)O',
+        smiles: 'OC(=O)[C@H](CCc1ccccc1)N[C@@H](C)C(=O)N2CCC[C@H]2C(=O)O',
         isCorrect: true,
         classification: 'active',
         rationale:

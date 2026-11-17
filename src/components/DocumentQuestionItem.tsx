@@ -9,6 +9,8 @@ import {
 import { StructureDragDropMatch } from './StructureDragDropMatch';
 import { StructureLightboxModal } from './StructureLightboxModal';
 import { SmilesCanvas } from './SmilesCanvas';
+import { FibrinolysisCascadeViewer } from './FibrinolysisCascadeViewer';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import { StructuralWorkbenchQuestion } from './StructuralWorkbenchQuestion';
 import { MinimizedStructureCard } from './MinimizedStructureCard';
 import {
@@ -843,21 +845,34 @@ const DocumentQuestionItemComponent: React.FC<DocumentQuestionItemProps> = ({
                           <span className="font-bold">Structure {structure.document_label || structure.id}</span>
                           <ZoomIn className="w-3 h-3 text-slate-400" />
                         </div>
-                        <div className="w-16 h-16 bg-[var(--structure-canvas-bg)] rounded p-1 flex items-center justify-center overflow-hidden">
-                          <SmilesCanvas
-                            smiles={
-                              structure.canonicalSmiles ||
-                              structure.smiles ||
-                              (structure as any).structure?.canonicalSmiles ||
-                              (structure as any).structure?.smiles
-                            }
-                            molBlock={structure.pubchemMolBlock || (structure as any).structure?.pubchemMolBlock}
-                            fallbackImageUrl={structure.pngUrl || (structure as any).structure?.pngUrl}
-                            width={64}
-                            height={64}
-                            altText={`Structure ${structure.id}`}
-                            className="w-full h-full bg-transparent border-0 shadow-none pointer-events-none"
-                          />
+                        <div
+                          className={`${
+                            isFibrinolyticBiologic(structure) ? 'w-full min-h-[175px]' : 'w-16 h-16'
+                          } bg-[var(--structure-canvas-bg)] rounded p-1 flex items-center justify-center overflow-hidden`}
+                        >
+                          {isFibrinolyticBiologic(structure) ? (
+                            <FibrinolysisCascadeViewer
+                              structure={structure}
+                              height={175}
+                              isBlinded={examModeActive}
+                              className="w-full pointer-events-none"
+                            />
+                          ) : (
+                            <SmilesCanvas
+                              smiles={
+                                structure.canonicalSmiles ||
+                                structure.smiles ||
+                                (structure as any).structure?.canonicalSmiles ||
+                                (structure as any).structure?.smiles
+                              }
+                              molBlock={structure.pubchemMolBlock || (structure as any).structure?.pubchemMolBlock}
+                              fallbackImageUrl={structure.pngUrl || (structure as any).structure?.pngUrl}
+                              width={64}
+                              height={64}
+                              altText={`Structure ${structure.id}`}
+                              className="w-full h-full bg-transparent border-0 shadow-none pointer-events-none"
+                            />
+                          )}
                         </div>
                         <span className="text-[10px] font-medium truncate max-w-full text-slate-600 dark:text-slate-400">
                           {examModeActive ? 'Structure ' + structure.id : structure.name}

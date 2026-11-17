@@ -24,7 +24,7 @@ import {
 } from '../utils/pharmacophoreData';
 import { resolveActivePharmacophoresForStructure } from '../utils/globalPharmacophores';
 import { resolveChemicalClass } from '../utils/chemicalClassDictionary';
-import { isBiologicOrMacromolecule } from '../utils/smartsDictionary';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import {
   ExternalLink,
   ZoomIn,
@@ -233,7 +233,7 @@ const ChemicalStructureCardComponent: React.FC<ChemicalStructureCardProps> = ({
   };
 
   const isCardHighlighted = highlight || matchedGlobalPharmacophores.length > 0;
-  const isBiologic = Boolean(structure.isBiologic || isBiologicOrMacromolecule(structure));
+  const isBiologic = isFibrinolyticBiologic(structure);
 
   return (
     <>

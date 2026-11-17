@@ -5,7 +5,7 @@ import {
   resolvePharmacophoreRegion,
   ColorPaletteItem,
 } from '../utils/pharmacophoreData';
-import { isBiologicOrMacromolecule } from '../utils/smartsDictionary';
+import { isFibrinolyticBiologic } from '../utils/smartsDictionary';
 import { FibrinolysisCascadeViewer } from './FibrinolysisCascadeViewer';
 import { SmilesCanvas } from './SmilesCanvas';
 
@@ -36,7 +36,7 @@ export const InteractiveStructureViewer: React.FC<InteractiveStructureViewerProp
   altText,
   isExpanded = false,
 }) => {
-  const isBiologic = Boolean(structure.isBiologic || isBiologicOrMacromolecule(structure));
+  const isBiologic = isFibrinolyticBiologic(structure);
 
   const pharmacophores = useMemo(
     () => getPharmacophoresForStructure(structure),
