@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { TopDrugClinicalMonograph } from '../data/topDrugsClinicalData.js';
 import {
   AlertTriangle,
@@ -11,9 +11,13 @@ import {
   Pill,
   HeartPulse,
   Eye,
+  Stethoscope,
 } from 'lucide-react';
 import { ClinicalPreflipQuestionCard } from './ClinicalPreflipQuestionCard.js';
 import { ClassProfileAnchorDrawer } from './ClassProfileAnchorDrawer.js';
+import { ClinicalReferenceToolbar } from './ClinicalReferenceToolbar.js';
+import { resolveClinicalIndications } from '../utils/clinicalIndications.js';
+import type { ChemicalStructure } from '../types/reviewModule.js';
 import {
   resolveClassProfileForDrug,
   getDrugExceptions,
@@ -34,6 +38,8 @@ export interface TopDrugClinicalCardProps {
   preflipQuestion?: ClinicalPreflipQuestion | null;
   onAnswerSubmitted?: (isFullyCorrect: boolean) => void;
   classProfile?: TopDrugClassProfile | null;
+  structure?: ChemicalStructure | null;
+  onSelectStructureFor3D?: (structure: ChemicalStructure) => void;
 }
 
 /**
@@ -64,9 +70,16 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
   preflipQuestion,
   onAnswerSubmitted,
   classProfile,
+  structure,
+  onSelectStructureFor3D,
 }) => {
   const [internalTab, setInternalTab] = useState<ClinicalTabId>('pharmacology');
   const [isClassDrawerOpen, setIsClassDrawerOpen] = useState<boolean>(false);
+
+  const indications = useMemo(
+    () => resolveClinicalIndications(monograph),
+    [monograph]
+  );
 
   const resolvedProfile: TopDrugClassProfile | null =
     classProfile !== undefined
@@ -326,6 +339,14 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
             </div>
           </div>
 
+          {/* Clinical Reference Toolbar (Launchpad, 3D Lab, Clinical Dossier) */}
+          <ClinicalReferenceToolbar
+            drugName={monograph.genericName}
+            structure={structure}
+            onSelectStructureFor3D={onSelectStructureFor3D}
+            variant="full"
+          />
+
           {/* 2. Top Callout Banners: FDA Black Box Warning & Contraindications */}
           <div className="space-y-2.5">
             {/* FDA Black Box Warning (ONLY if present, cleanly suppressed if absent) */}
@@ -445,6 +466,28 @@ export const TopDrugClinicalCard: React.FC<TopDrugClinicalCardProps> = ({
             {/* ---------------------------------------------------- */}
             {currentTab === 'pharmacology' && (
               <div className="space-y-3">
+                {/* Approved Clinical Indications */}
+                {indications.length > 0 && (
+                  <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+                    <div className="flex items-center gap-1.5 text-emerald-400">
+                      <Stethoscope className="w-4 h-4 shrink-0" />
+                      <span className="text-xs font-bold uppercase tracking-wider">
+                        Approved Clinical Indications
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {indications.map((indication, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-md bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 text-xs font-medium"
+                        >
+                          {indication}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Mechanism of Action Card */}
                 <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-1.5">
                   <div className="flex items-center gap-1.5 text-blue-400">
