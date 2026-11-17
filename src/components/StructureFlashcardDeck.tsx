@@ -16,6 +16,15 @@ import {
 import { TopDrugClinicalCard } from './TopDrugClinicalCard';
 import { resolveTopDrugClinicalMonograph } from '../data/topDrugsClinicalData';
 import {
+  generateClinicalPreflipQuestion,
+  type ClinicalQuestionDomain,
+  type ClinicalPreflipQuestion,
+} from '../utils/clinicalQuestionGenerator';
+import {
+  resolveClassProfileForDrug,
+  type TopDrugClassProfile,
+} from '../data/clinical/classProfiles';
+import {
   THERAPEUTIC_CATEGORIES,
   type TherapeuticClassCategory,
 } from '../data/topDrugsTaxonomyData';
@@ -62,6 +71,60 @@ export type DeckFilterMode = 'curriculum' | 'taxonomy';
 export type FlashcardSortMode = 'class-number' | 'subclass' | 'due-date' | 'alphabetical';
 
 export const DISPLAY_SETTINGS_STORAGE_KEY = 'medchem_flashcard_display_settings';
+
+export const DRILL_DOMAINS_STORAGE_KEY = 'mcp_top200_drill_domains';
+
+export const DEFAULT_DRILL_DOMAINS: ClinicalQuestionDomain[] = [
+  'brand-names',
+  'contraindications',
+  'adverse-effects',
+  'subclass-exceptions',
+  'dosing-pearls',
+];
+
+export interface ClinicalDomainConfig {
+  domain: ClinicalQuestionDomain;
+  label: string;
+  icon: string;
+  shortLabel: string;
+}
+
+export const CLINICAL_DOMAIN_CONFIG: ClinicalDomainConfig[] = [
+  { domain: 'brand-names', label: 'Brand Names', icon: '🏷️', shortLabel: '🏷️ Brands' },
+  { domain: 'contraindications', label: 'Contraindications', icon: '🚫', shortLabel: '🚫 Contraindications' },
+  { domain: 'adverse-effects', label: 'Adverse Effects', icon: '⚠️', shortLabel: '⚠️ Adverse Effects' },
+  { domain: 'subclass-exceptions', label: 'Subclass Exceptions', icon: '⚡', shortLabel: '⚡ Subclass Exceptions' },
+  { domain: 'dosing-pearls', label: 'Clinical Pearls', icon: '💡', shortLabel: '💡 Pearls' },
+];
+
+export function loadActiveDrillDomains(): ClinicalQuestionDomain[] {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return [...DEFAULT_DRILL_DOMAINS];
+    }
+    const raw = window.localStorage.getItem(DRILL_DOMAINS_STORAGE_KEY);
+    if (!raw) return [...DEFAULT_DRILL_DOMAINS];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [...DEFAULT_DRILL_DOMAINS];
+    if (parsed.length === 0) return [];
+    const valid = parsed.filter((d: any): d is ClinicalQuestionDomain =>
+      DEFAULT_DRILL_DOMAINS.includes(d)
+    );
+    return valid.length > 0 ? valid : [...DEFAULT_DRILL_DOMAINS];
+  } catch {
+    return [...DEFAULT_DRILL_DOMAINS];
+  }
+}
+
+export function saveActiveDrillDomains(domains: ClinicalQuestionDomain[]): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(DRILL_DOMAINS_STORAGE_KEY, JSON.stringify(domains));
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
+}
 
 export const KNOWN_MODULE_CATEGORIES: ModuleCategory[] = [
   { key: 'renal', label: 'Renal', matchPattern: /renal/i },
@@ -392,8 +455,48 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
 
+  // Pre-flip drill domain selection & gentle confirmation popover state
+  const [activeDrillDomains, setActiveDrillDomains] = useState<ClinicalQuestionDomain[]>(() =>
+    loadActiveDrillDomains()
+  );
+  const [showDisableDrillsPopover, setShowDisableDrillsPopover] = useState<boolean>(false);
+
+  // In-session attempt count per card (drugName or structure name) to rotate drill domains on re-queue
+  const [cardAttemptCounts, setCardAttemptCounts] = useState<Record<string, number>>({});
+
+  const handleToggleDomain = useCallback(
+    (domain: ClinicalQuestionDomain) => {
+      if (activeDrillDomains.includes(domain)) {
+        if (activeDrillDomains.length === 1) {
+          // Unchecking the last active domain -> gentle confirmation popover
+          setShowDisableDrillsPopover(true);
+          return;
+        }
+        const updated = activeDrillDomains.filter((d) => d !== domain);
+        setActiveDrillDomains(updated);
+        saveActiveDrillDomains(updated);
+      } else {
+        const updated = [...activeDrillDomains, domain];
+        setActiveDrillDomains(updated);
+        saveActiveDrillDomains(updated);
+      }
+    },
+    [activeDrillDomains]
+  );
+
+  const handleConfirmDisableDrills = useCallback(() => {
+    setActiveDrillDomains([]);
+    saveActiveDrillDomains([]);
+    setShowDisableDrillsPopover(false);
+  }, []);
+
+  const handleCancelDisableDrills = useCallback(() => {
+    setShowDisableDrillsPopover(false);
+  }, []);
+
   // Restart deck handler (resets active queue to full filtered deck, currentIndex to 0, isFlipped to false)
   const handleRestartDeck = useCallback(() => {
+    setCardAttemptCounts({});
     const initialized = applyProgressToCards(cards, undefined, storageKey);
     setDeck(initialized);
     const filtered = buildCandidateQueue(
@@ -643,6 +746,31 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
 
   const currentCard = activeQueue[currentIndex] as FlashcardItem | undefined;
 
+  const currentDrugName = currentCard
+    ? currentCard.drugName || currentCard.structure?.name || ''
+    : '';
+  const currentAttemptCount = currentDrugName
+    ? cardAttemptCounts[currentDrugName] || 0
+    : 0;
+
+  const currentPreflipQuestion: ClinicalPreflipQuestion | null = useMemo(() => {
+    if (renderMode !== 'clinical' || !currentDrugName || activeDrillDomains.length === 0) {
+      return null;
+    }
+    return generateClinicalPreflipQuestion(
+      currentDrugName,
+      activeDrillDomains,
+      currentAttemptCount
+    );
+  }, [renderMode, currentDrugName, activeDrillDomains, currentAttemptCount]);
+
+  const currentClassProfile: TopDrugClassProfile | null = useMemo(() => {
+    if (renderMode !== 'clinical' || !currentDrugName) {
+      return null;
+    }
+    return resolveClassProfileForDrug(currentDrugName);
+  }, [renderMode, currentDrugName]);
+
   // Active session queue counters
   const remainingCount = Math.max(0, activeQueue.length - currentIndex);
   const inSessionCount = activeQueue.length;
@@ -659,6 +787,17 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
   const handleGrade = useCallback(
     (rating: SpacedRepetitionRating) => {
       if (!currentCard) return;
+
+      // In-session attempt count tracking for re-queued cards
+      if (rating === 'again' || rating === 'hard') {
+        const drug = currentCard.drugName || currentCard.structure?.name;
+        if (drug) {
+          setCardAttemptCounts((prev) => ({
+            ...prev,
+            [drug]: (prev[drug] || 0) + 1,
+          }));
+        }
+      }
 
       const result = applySpacedRepetitionGrade(currentCard, rating);
       const nextCard = result.nextCardState;
@@ -1305,14 +1444,52 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Pre-Flip Drills Domain Filter Bar (Clinical Mode Only) */}
+        {renderMode === 'clinical' && (
+          <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs">
+            <span className="font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              🎯 Pre-Flip Drills:
+            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {CLINICAL_DOMAIN_CONFIG.map(({ domain, shortLabel }) => {
+                const isActive = activeDrillDomains.includes(domain);
+                return (
+                  <button
+                    key={domain}
+                    type="button"
+                    onClick={() => handleToggleDomain(domain)}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors cursor-pointer flex items-center gap-1 ${
+                      isActive
+                        ? 'bg-blue-50 dark:bg-blue-950/60 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 shadow-2xs font-semibold'
+                        : 'bg-slate-100 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 opacity-60'
+                    }`}
+                    title={`Toggle ${shortLabel} pre-flip drills`}
+                  >
+                    <span>{shortLabel}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {activeDrillDomains.length === 0 && (
+              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium ml-1">
+                (Direct Flip Mode - Drills Disabled)
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Card Body: Clinical Monograph or Chemical Structure Card Face */}
       {renderMode === 'clinical' ? (
         <TopDrugClinicalCard
-          monograph={resolveTopDrugClinicalMonograph(currentCard.drugName || currentCard.structure.name)}
+          monograph={resolveTopDrugClinicalMonograph(
+            currentCard ? currentCard.drugName || currentCard.structure.name : ''
+          )}
           isFlipped={isFlipped}
           onFlip={() => setIsFlipped(true)}
+          preflipQuestion={currentPreflipQuestion}
+          classProfile={currentClassProfile}
         >
           {/* 4-Interval Rating Bar for Clinical Mode */}
           <div className="grid grid-cols-4 gap-2">
@@ -1415,6 +1592,46 @@ export const StructureFlashcardDeck: React.FC<StructureFlashcardDeckProps> = ({
         categories={availableCategories}
         cards={cards}
       />
+
+      {/* Gentle Confirmation Popover for Disabling Pre-Flip Drills */}
+      {showDisableDrillsPopover && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4 text-slate-900 dark:text-slate-100 animate-in fade-in zoom-in-95">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                <SlidersHorizontal className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  Disable Pre-Flip Drills?
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Disable pre-flip drills and switch to direct flip mode?
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              In direct flip mode, flashcards will display the blinded drug prompt directly without requiring an answer before revealing the monograph.
+            </p>
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={handleCancelDisableDrills}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                Keep Drills Enabled
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDisableDrills}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
+              >
+                Disable Pre-Flip Drills
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
