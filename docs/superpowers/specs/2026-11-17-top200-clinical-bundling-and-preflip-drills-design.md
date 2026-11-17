@@ -97,25 +97,29 @@ This feature transforms Top 200 Clinical Flashcards into a high-yield, pattern-r
   ```
 - **Distractor Sourcing**: Distractors are harvested dynamically from sibling drugs within the same therapeutic class or catalog to ensure authentic, realistic pharmacology challenges.
 
-### 4.3 Component Integration
+### 4.3 Component Integration & User Rulings
 - **`TopDrugClinicalCard.tsx`**:
-  - Front Face: Renders `ClinicalPreflipQuestionCard` when `renderMode === 'clinical'` and active drill mode is enabled.
+  - Front Face: Renders `ClinicalPreflipQuestionCard` when `renderMode === 'clinical'` and pre-flip drill mode is enabled (enabled by default).
   - Front Face: Includes "Check Answer" and "Skip / Flip to Monograph" actions.
+  - Front Face Click & Keyboard Safety: Stops click event bubbling on all interactive choices so clicking options does not inadvertently trigger card flips. Guards spacebar so `Space` toggles checkboxes and button focus without triggering premature card flips.
   - Back Face: Renders the **🔥 High-Yield Subclass Exceptions** alert callout above the 12-domain tabbed monograph.
-  - Header: Includes a quick-access modal or drawer toggle to view the full **Class Profile Anchor Card**.
+  - Subclass Anchor Drawer: Slide-out drawer (`ClassProfileAnchorDrawer`, matching `TherapeuticClassFilterDrawer`) accessible from both front and back faces via a neutral button (e.g. "📖 Class Profile") that does not reveal the class name in the button label on the front face until slid open.
 - **`StructureFlashcardDeck.tsx`**:
   - Adds toolbar pills for active question domains when studying in Top 200 Clinical mode.
-  - Rotates question domain per card based on active selections.
+  - Pre-flip drill domain selections are persisted in `localStorage` (`mcp_top200_drill_domains`).
+  - If a student unchecks all domains, displays a gentle confirmation popover asking if they wish to disable pre-flip drills and switch to direct flip mode.
+  - Distractor Sourcing: Uses sibling drugs within the same class; if a class has fewer than 3 siblings, falls back to clinically adjacent categories/catalog to guarantee 4 plausible options.
+  - Re-Queued ("Again" / "Hard") Cards: Rotates to a different active domain for fresh practice rather than repeating the exact same question.
 
 ---
 
 ## 5. Verification Plan
 
 1. **Unit Tests**:
-   - `tests/clinicalQuestionGenerator.test.ts`: Verify question generation across all 5 domains, distractor plausibility, correct answer flags, and edge cases for drugs without class siblings.
-   - `tests/classProfiles.test.ts`: Verify profile integrity for landmark drug classes and accurate member resolution.
+   - `tests/clinicalQuestionGenerator.test.ts`: Verify question generation across all 5 domains, distractor plausibility, correct answer flags, distractor fallback for isolated classes, and domain rotation on re-queued cards.
+   - `tests/classProfiles.test.ts`: Verify profile integrity for landmark drug classes, accurate member resolution, and lowercase normalized key resolution.
 2. **Contract & Integration Tests**:
-   - `tests/topDrugClinicalPreflip.test.ts`: Verify front-face question rendering, SATA multi-select behavior, submit verification, and exceptions banner rendering.
+   - `tests/topDrugClinicalPreflip.test.ts`: Verify front-face question rendering, SATA multi-select behavior, submit verification, exceptions banner rendering, drawer trigger neutrality, and keyboard/click event guards.
 3. **Full Suite**:
    - `npm run lint` (`tsc --noEmit`)
    - `npm run build` (`vite build`)
